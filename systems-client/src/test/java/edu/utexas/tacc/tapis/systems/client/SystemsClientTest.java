@@ -68,8 +68,11 @@ public class SystemsClientTest
     // Basic check of JWT
     if (StringUtils.isBlank(svcJWT)) throw new Exception("Token service returned invalid JWT");
     // Create the client
+    // Check for URL set as env var
+    String sysURL = System.getenv("TAPIS_SVC_SYSTEMS_URL");
+    if (StringUtils.isBlank(sysURL)) sysURL ="http://localhost:8080";
 //    sysClient = new SystemsClient("https://dev.develop.tapis.io/v3/systems", svcJWT);
-    sysClient = new SystemsClient("http://localhost:8080", svcJWT);
+    sysClient = new SystemsClient(sysURL, svcJWT);
   }
 
   @Test
