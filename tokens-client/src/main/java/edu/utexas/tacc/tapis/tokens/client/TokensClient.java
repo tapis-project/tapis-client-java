@@ -67,30 +67,45 @@ public class TokensClient
     /**
      * Get a JWT token for a service call
      */
-    public String getSvcToken(String tenant, String username) throws Exception
+    public String getSvcToken(String tenant, String serviceName) throws Exception
     {
-      String retTok = null;
-      var tokApi = new TokensApi();
-      // Build the request
-      var req = new InlineObject1();
-      req.accountType(InlineObject1.AccountTypeEnum.SERVICE);
-      req.tokenTenantId(tenant);
-      req.tokenUsername(username);
-      // Make the call and return the result
-      Map resp = null;
-      // TODO exception handling
-      try { resp = (Map) tokApi.createToken(req); }
-      catch (ApiException e) {System.out.println("" + e); throw e;}
-      // Generated code returns response as a map of maps
-      if (resp != null)
-      {
-        Map resp2 = (Map) resp.get("result");
-        if (resp2 != null)
-        {
-          Map resp3 = (Map) resp2.get("access_token");
-          if (resp3 != null) retTok = (String) resp3.get("access_token");
-        }
-      }
-      return retTok;
+      return getToken(tenant, serviceName, InlineObject1.AccountTypeEnum.SERVICE);
     }
+
+  /**
+   * Get a JWT token for a user
+   */
+  public String getUsrToken(String tenant, String userName) throws Exception
+  {
+    return getToken(tenant, userName, InlineObject1.AccountTypeEnum.USER);
+  }
+  /**
+   * Get a JWT token of USER or SERVICE type
+   */
+  private static String getToken(String tenant, String name, InlineObject1.AccountTypeEnum tokType) throws Exception
+  {
+    String retTok = null;
+    var tokApi = new TokensApi();
+    // Build the request
+    var req = new InlineObject1();
+    req.accountType(tokType);
+    req.tokenTenantId(tenant);
+    req.tokenUsername(name);
+    // Make the call and return the result
+    Map resp = null;
+    // TODO exception handling
+    try { resp = (Map) tokApi.createToken(req); }
+    catch (ApiException e) {System.out.println("" + e); throw e;}
+    // Generated code returns response as a map of maps
+    if (resp != null)
+    {
+      Map resp2 = (Map) resp.get("result");
+      if (resp2 != null)
+      {
+        Map resp3 = (Map) resp2.get("access_token");
+        if (resp3 != null) retTok = (String) resp3.get("access_token");
+      }
+    }
+    return retTok;
+  }
 }
