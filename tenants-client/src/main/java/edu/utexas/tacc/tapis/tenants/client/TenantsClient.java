@@ -36,7 +36,7 @@ public class TenantsClient
    * constructor is typically used in production.
    * <p>
    * The path includes the URL prefix up to and including the service root.  By
-   * default this value is http://localhost:8080/security.  In production environments
+   * default this value is http://localhost:8080.  In production environments
    * the protocol is https and the host/port will be specific to that environment.
    *
    * @param path the base path
@@ -72,14 +72,8 @@ public class TenantsClient
       String retUrl = null;
       var tenantsApi = new TenantsApi();
       // Build the request
-//      var req = new InlineObject1();
-//      req.accountType(InlineObject1.AccountTypeEnum.SERVICE);
-//      req.tokenTenantId(tenant);
-//      req.tokenUsername(username);
-//      // Make the call and return the result
       Map resp = null;
       // TODO exception handling
-      // TODO determine what api is returning and unpack it
       try { resp = (Map) tenantsApi.getTenant(tenant); }
       catch (ApiException e) {System.out.println("" + e); throw e;}
       // Generated code returns response as a map of maps
@@ -90,4 +84,41 @@ public class TenantsClient
       }
       return retUrl;
     }
+
+  /**
+   * Get all Tenant info given tenant name
+   */
+  public Tenant getTenant(String tenantName) throws Exception
+  {
+    String tenantId = null;
+    String skUrl = null;
+    String tokUrl = null;
+    String authUrl = null;
+    String pubKey = null;
+    Tenant tenant = new Tenant();
+    var tenantsApi = new TenantsApi();
+    Map resp = null;
+    // TODO exception handling
+    try { resp = (Map) tenantsApi.getTenant(tenantName); }
+    catch (ApiException e) {System.out.println("" + e); throw e;}
+    // Generated code returns response as a map of maps
+    if (resp != null)
+    {
+      Map resp2 = (Map) resp.get("result");
+      if (resp2 != null)
+      {
+        tenantId = (String) resp2.get("tenant_id");
+        pubKey = (String) resp2.get("public_key");
+        authUrl = (String) resp2.get("authenticator");
+        tokUrl = (String) resp2.get("token_service");
+        skUrl = (String) resp2.get("security_kernel");
+      }
+    }
+    tenant.setPublicKey(pubKey);
+    tenant.setTokenService(tokUrl);
+    tenant.setSecurityKernel(skUrl);
+    tenant.setAuthenticator(authUrl);
+    tenant.setTenantId(tenantId);
+    return tenant;
+  }
 }
