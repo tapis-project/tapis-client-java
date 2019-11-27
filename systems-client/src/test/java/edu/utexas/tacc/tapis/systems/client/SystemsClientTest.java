@@ -63,8 +63,10 @@ public class SystemsClientTest
     "jobInputDir6", "jobOutputDir6", "workDir6", "scratchDir6", "effUser6", tags, notes, "fakePassword6"};
   private static final String[] sys7 = {tenantName, "Csys7", "description 7", "owner7", "host7", "bucket7", "/root7",
           "jobInputDir7", "jobOutputDir7", "workDir7", "scratchDir7", "effUser7", tags, notes, "fakePassword7"};
-  private static final String[] sys8 = {tenantName, "Csys8", "description 8", "owner8", "host8", "bucket8", "/root8",
+  private static final String[] sys8 = {tenantName, "Csys8", "description 8", "owner8", "host8", "", "/root8",
           "jobInputDir8", "jobOutputDir8", "workDir8", "scratchDir8", "effUser8", tags, notes, "fakePassword8"};
+  private static final String[] sys9 = {tenantName, "Csys9", "description 9", "owner9", "host9", "bucket9", "/root9",
+          "jobInputDir9", "jobOutputDir9", "workDir9", "scratchDir9", "effUser9", tags, notes, "fakePassword9"};
 
   private SystemsClient sysClient;
 
@@ -98,7 +100,7 @@ public class SystemsClientTest
     System.out.println("Creating system with name: " + sys1[1]);
     try
     {
-      String respUrl = createSystem(sys1);
+      String respUrl = createSystem(sys1, prot1AccessMechanism, prot1TxfrMechs);
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
@@ -114,7 +116,7 @@ public class SystemsClientTest
     System.out.println("Creating system with name: " + sys7[1]);
     try
     {
-      String respUrl = createSystem(sys7);
+      String respUrl = createSystem(sys7, prot1AccessMechanism, prot1TxfrMechs);
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
@@ -123,7 +125,27 @@ public class SystemsClientTest
     }
     // Now attempt to create it again, should throw exception
     System.out.println("Creating system with name: " + sys7[1]);
-    createSystem(sys7);
+    createSystem(sys7, prot1AccessMechanism, prot1TxfrMechs);
+    Assert.fail("Exception should have been thrown");
+  }
+
+  // Test that bucketName is required if transfer mechanisms include S3
+  @Test(expectedExceptions = {TapisClientException.class}, expectedExceptionsMessageRegExp = "^SYSAPI_S3_NOBUCKET_INPUT.*")
+  public void testCreateSystemS3NoBucketName() throws Exception
+  {
+    // Create a system
+    System.out.println("Creating system with name: " + sys8[1]);
+    createSystem(sys8, prot1AccessMechanism, prot1TxfrMechs);
+    Assert.fail("Exception should have been thrown");
+  }
+
+  // Test that access mechanism of SSH_CERT and static owner is not allowed
+  @Test(expectedExceptions = {TapisClientException.class}, expectedExceptionsMessageRegExp = "^SYSAPI_INVALID_EFFECTIVEUSERID_INPUT.*")
+  public void testCreateSystemInvalidEffUserId() throws Exception
+  {
+    // Create a system
+    System.out.println("Creating system with name: " + sys9[1]);
+    createSystem(sys9, AccessMechanismEnum.SSH_CERT, prot1TxfrMechs);
     Assert.fail("Exception should have been thrown");
   }
 
@@ -131,7 +153,7 @@ public class SystemsClientTest
   public void testGetSystemByName() throws Exception
   {
     String[] sys0 = sys2;
-    String respUrl = createSystem(sys0);
+    String respUrl = createSystem(sys0, prot1AccessMechanism, prot1TxfrMechs);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     TSystem tmpSys = sysClient.getSystemByName(sys0[1], false);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
@@ -165,10 +187,10 @@ public class SystemsClientTest
   {
     // Create 2 systems
     String[] sys0 = sys3;
-    String respUrl = createSystem(sys0);
+    String respUrl = createSystem(sys0, prot1AccessMechanism, prot1TxfrMechs);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     sys0 = sys4;
-    respUrl = createSystem(sys0);
+    respUrl = createSystem(sys0, prot1AccessMechanism, prot1TxfrMechs);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Get list of all system names
@@ -196,7 +218,7 @@ public class SystemsClientTest
   {
     // Create the system
     String[] sys0 = sys6;
-    String respUrl = createSystem(sys0);
+    String respUrl = createSystem(sys0, prot1AccessMechanism, prot1TxfrMechs);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Delete the system
@@ -223,16 +245,18 @@ public class SystemsClientTest
     try { sysClient.deleteSystemByName(sys5[1]); } catch (Exception e) {}
     try { sysClient.deleteSystemByName(sys6[1]); } catch (Exception e) {}
     try { sysClient.deleteSystemByName(sys7[1]); } catch (Exception e) {}
+    try { sysClient.deleteSystemByName(sys8[1]); } catch (Exception e) {}
+    try { sysClient.deleteSystemByName(sys9[1]); } catch (Exception e) {}
   }
 
-  private String createSystem(String[] sys) throws TapisClientException
+  private String createSystem(String[] sys, AccessMechanismEnum accessMech, TransferMechanismsEnum[] txfrMechs) throws TapisClientException
   {
     // Convert list of TransferMechanism enums to list of strings
-    List<String> transferMechs = Stream.of(prot1TxfrMechs).map(TransferMechanismsEnum::name).collect(Collectors.toList());
+    List<String> transferMechs = Stream.of(txfrMechs).map(TransferMechanismsEnum::name).collect(Collectors.toList());
     // Create the system
     return sysClient.createSystem(sys[1], sys[2], sys[3], sys[4], true, sys[5], sys[6],
                             sys[7], sys[8], sys[9], sys[10], sys[11], sys[12], sys[13],
-                            sys[14], prot1AccessMechanism.name(), transferMechs,
+                            sys[14], accessMech.name(), transferMechs,
                             prot1Port, prot1UseProxy, prot1ProxyHost, prot1ProxyPort);
   }
 }
