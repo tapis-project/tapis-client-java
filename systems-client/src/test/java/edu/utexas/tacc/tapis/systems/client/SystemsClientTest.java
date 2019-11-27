@@ -61,6 +61,10 @@ public class SystemsClientTest
     "jobInputDir5", "jobOutputDir5", "workDir5", "scratchDir5", "effUser5", tags, notes, "fakePassword5"};
   private static final String[] sys6 = {tenantName, "Csys6", "description 6", "owner6", "host6", "bucket6", "/root6",
     "jobInputDir6", "jobOutputDir6", "workDir6", "scratchDir6", "effUser6", tags, notes, "fakePassword6"};
+  private static final String[] sys7 = {tenantName, "Csys7", "description 7", "owner7", "host7", "bucket7", "/root7",
+          "jobInputDir7", "jobOutputDir7", "workDir7", "scratchDir7", "effUser7", tags, notes, "fakePassword7"};
+  private static final String[] sys8 = {tenantName, "Csys8", "description 8", "owner8", "host8", "bucket8", "/root8",
+          "jobInputDir8", "jobOutputDir8", "workDir8", "scratchDir8", "effUser8", tags, notes, "fakePassword8"};
 
   private SystemsClient sysClient;
 
@@ -101,6 +105,26 @@ public class SystemsClientTest
       System.out.println("Caught exception: " + e.getMessage() + "\n Stack trace: " + e.getStackTrace());
       Assert.fail();
     }
+  }
+
+  @Test(expectedExceptions = {TapisClientException.class}, expectedExceptionsMessageRegExp = "^SYSAPI_SYS_EXISTS.*")
+  public void testCreateSystemAlreadyExists() throws Exception
+  {
+    // Create a system
+    System.out.println("Creating system with name: " + sys7[1]);
+    try
+    {
+      String respUrl = createSystem(sys7);
+      System.out.println("Created system: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e.getMessage() + "\n Stack trace: " + e.getStackTrace());
+      Assert.fail();
+    }
+    // Now attempt to create it again, should throw exception
+    System.out.println("Creating system with name: " + sys7[1]);
+    createSystem(sys7);
+    Assert.fail("Exception should have been thrown");
   }
 
   @Test
@@ -198,9 +222,10 @@ public class SystemsClientTest
     try { sysClient.deleteSystemByName(sys4[1]); } catch (Exception e) {}
     try { sysClient.deleteSystemByName(sys5[1]); } catch (Exception e) {}
     try { sysClient.deleteSystemByName(sys6[1]); } catch (Exception e) {}
+    try { sysClient.deleteSystemByName(sys7[1]); } catch (Exception e) {}
   }
 
-  private String createSystem(String[] sys) throws Exception
+  private String createSystem(String[] sys) throws TapisClientException
   {
     // Convert list of TransferMechanism enums to list of strings
     List<String> transferMechs = Stream.of(prot1TxfrMechs).map(TransferMechanismsEnum::name).collect(Collectors.toList());

@@ -27,7 +27,7 @@ public class TenantsClientTest
     System.out.println("Executing BeforeSuite setup method");
     // Create the client
     // Check for URL set as env var
-    String tenantsURL = System.getenv("TAPIS_SVC_TENANTS_URL");
+    String tenantsURL = System.getenv("TAPIS_SVC_URL_TENANTS");
     if (StringUtils.isBlank(tenantsURL)) tenantsURL ="https://dev.develop.tapis.io";
     tenantsClient = new TenantsClient(tenantsURL);
   }
