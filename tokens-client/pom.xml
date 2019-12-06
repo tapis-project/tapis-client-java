@@ -66,8 +66,6 @@
               <output>${project.build.directory}/generated-sources/openapi</output>
               <generatorName>java</generatorName>
               <groupId>edu.utexas.tacc.tapis</groupId>
-              <artifactId>tokens-client</artifactId>
-              <artifactVersion>0.0.1</artifactVersion>
               <invokerPackage>edu.utexas.tacc.tapis.tokens.client.gen</invokerPackage>
               <apiPackage>edu.utexas.tacc.tapis.tokens.client.gen.api</apiPackage>
               <modelPackage>edu.utexas.tacc.tapis.tokens.client.gen.model</modelPackage>

@@ -66,8 +66,6 @@
               <output>${project.build.directory}/generated-sources/openapi</output>
               <generatorName>java</generatorName>
               <groupId>edu.utexas.tacc.tapis</groupId>
-              <artifactId>tenants-client</artifactId>
-              <artifactVersion>0.0.1</artifactVersion>
               <invokerPackage>edu.utexas.tacc.tapis.tenants.client.gen</invokerPackage>
               <apiPackage>edu.utexas.tacc.tapis.tenants.client.gen.api</apiPackage>
               <modelPackage>edu.utexas.tacc.tapis.tenants.client.gen.model</modelPackage>

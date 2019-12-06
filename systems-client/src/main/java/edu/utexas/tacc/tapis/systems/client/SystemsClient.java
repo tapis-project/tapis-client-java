@@ -22,9 +22,9 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.*;
  */
 public class SystemsClient
 {
-  /* **************************************************************************** */
-  /*                                   Constants                                  */
-  /* **************************************************************************** */
+  // ************************************************************************
+  // *********************** Constants **************************************
+  // ************************************************************************
 
   // Header key for JWT
   public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
@@ -33,16 +33,16 @@ public class SystemsClient
   private static final String ERR_MSG = SystemsClient.class.getSimpleName() +
               ": Exception encountered but unable extract message from response or underlying exception";
 
-  /* **************************************************************************** */
-  /*                                    Fields                                    */
-  /* **************************************************************************** */
-  // Response bosdy serializer
+  // ************************************************************************
+  // *********************** Fields *****************************************
+  // ************************************************************************
+  // Response body serializer
   private static final Gson gson = TapisGsonUtils.getGson();
   private SystemsApi sysApi;
 
-  /* **************************************************************************** */
-  /*                                 Constructors                                 */
-  /* **************************************************************************** */
+  // ************************************************************************
+  // *********************** Constructors ***********************************
+  // ************************************************************************
 
   public SystemsClient() { sysApi = new SystemsApi(); }
 
@@ -65,9 +65,9 @@ public class SystemsClient
     sysApi = new SystemsApi();
   }
 
-  /* **************************************************************************** */
-  /*                              Public Methods                                  */
-  /* **************************************************************************** */
+  // ************************************************************************
+  // *********************** Public Methods *********************************
+  // ************************************************************************
 
   /**
    * getApiClient: Return underlying ApiClient
@@ -182,11 +182,52 @@ public class SystemsClient
     return resp.getResult().getChanges();
   }
 
+  /**
+   * Grant permissions for given system and user.
+   *
+   * @throws TapisClientException
+   */
+  public void grantUserPermissions(String systemName, String userName, List<String> permissions)
+          throws TapisClientException
+  {
+    // Build the request
+/*
+    var req = new ReqCreateSystem();
+    req.setName(name);
+    req.setDescription(description);
+    req.setOwner(owner);
+    req.setHost(host);
+    req.setAvailable(available);
+    req.setBucketName(bucketName);
+    req.setRootDir(rootDir);
+    req.setJobInputDir(jobInputDir);
+    req.setJobOutputDir(jobOutputDir);
+    req.setWorkDir(workDir);
+    req.setScratchDir(scratchDir);
+    req.setEffectiveUserId(effectiveUserId);
+    req.setTags(tags);
+    req.setNotes(notes);
+    req.setAccessCredential(accessCredential);
+    req.setAccessMechanism(accessMechanism);
+    req.setTransferMechanisms(transferMechanisms);
+    req.setPort(port);
+    req.setUseProxy(useProxy);
+    req.setProxyHost(proxyHost);
+    req.setProxyPort(proxyPort);
+    // Submit the request and return the response
+    RespResourceUrl resp = null;
+    try { resp = sysApi.createSystem(req, false); }
+    catch (Exception e) { throwTapisClientException(e); }
+    return resp.getResult().getUrl();
+
+ */
+  }
 
 
-  /* **************************************************************************** */
-  /*                               Private Methods                                */
-  /* **************************************************************************** */
+
+  // ************************************************************************
+  // *********************** Private Methods ********************************
+  // ************************************************************************
 
   /**
    * throwTapisClientException
