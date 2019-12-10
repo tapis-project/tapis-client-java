@@ -1,5 +1,6 @@
 package edu.utexas.tacc.tapis.systems.client;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,6 +41,7 @@ public class SystemsClientTest
 
   // Test data
   private static final String tenantName = "dev";
+  private static final String testUser2 = "testuser2";
   private static final int prot1Port = -1;
   private static final boolean prot1UseProxy = false;
   private static final String prot1ProxyHost = "";
@@ -48,6 +50,10 @@ public class SystemsClientTest
   private static final AccessMechanismEnum prot1AccessMechanism = AccessMechanismEnum.NONE;
   private static final String tags = "{\"key1\":\"a\", \"key2\":\"b\"}";
   private static final String notes = "{\"project\":\"myproj1\", \"testdata\":\"abc\"}";
+// TODO/TBD: No perms enum in auto-generated model class?
+//  private static final List<String> testPerms = new ArrayList<>(List.of(TSystem.Permissions.READ.name(),TSystem.Permissions.MODIFY.name(),
+//          TSystem.Permissions.DELETE.name()));
+  private static final List<String> testPerms = new ArrayList<>(List.of("READ", "MODIFY","DELETE"));
 
   private static final String[] sys1 = {tenantName, "Csys1", "description 1", "owner1", "host1", "bucket1", "/root1",
     "jobInputDir1", "jobOutputDir1", "workDir1", "scratchDir1", "effUser1", tags, notes, "fakePassword1"};
@@ -67,6 +73,8 @@ public class SystemsClientTest
           "jobInputDir8", "jobOutputDir8", "workDir8", "scratchDir8", "effUser8", tags, notes, "fakePassword8"};
   private static final String[] sys9 = {tenantName, "Csys9", "description 9", "owner9", "host9", "bucket9", "/root9",
           "jobInputDir9", "jobOutputDir9", "workDir9", "scratchDir9", "effUser9", tags, notes, "fakePassword9"};
+  private static final String[] sysA = {tenantName, "CsysA", "description A", "ownerA", "hostA", "bucketA", "/rootA",
+          "jobInputDirA", "jobOutputDirA", "workDirA", "scratchDirA", "effUserA", tags, notes, "fakePasswordA"};
 
   private SystemsClient sysClient;
 
@@ -233,6 +241,37 @@ public class SystemsClientTest
     }
   }
 
+  // Test creating, reading and deleting user permissions for a system
+  @Test
+  public void testUserPerms()
+  {
+    String[] sys0 = sysA;
+    // Create a system
+    System.out.println("Creating system with name: " + sys0[1]);
+    try
+    {
+      String respUrl = createSystem(sys0, prot1AccessMechanism, prot1TxfrMechs);
+      System.out.println("Created system: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+      // Create user perms for the system
+      sysClient.grantUserPermissions(sys0[1], testUser2, testPerms);
+      // Get the system perms for the user and make sure permissions are there
+      List<String> userPerms = sysClient.getSystemPermissions(sys0[1], testUser2);
+      Assert.assertNotNull(userPerms, "Null returned when retrieving perms.");
+      Assert.assertEquals(userPerms.size(), testPerms.size(), "Incorrect number of perms returned.");
+      for (String perm: testPerms) { if (!userPerms.contains(perm)) Assert.fail("User perms should contain permission: " + perm); }
+      // Remove perms for the user
+      sysClient.revokeUserPermissions(sys0[1], testUser2, testPerms);
+      // Get the system perms for the user and make sure permissions are gone.
+      userPerms = sysClient.getSystemPermissions(sys0[1], testUser2);
+      for (String perm: testPerms) { if (userPerms.contains(perm)) Assert.fail("User perms should not contain permission: " + perm); }
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e.getMessage() + "\n Stack trace: " + e.getStackTrace());
+      Assert.fail();
+    }
+
+  }
+
   @AfterSuite
   public void tearDown()
   {
@@ -247,6 +286,7 @@ public class SystemsClientTest
     try { sysClient.deleteSystemByName(sys7[1]); } catch (Exception e) {}
     try { sysClient.deleteSystemByName(sys8[1]); } catch (Exception e) {}
     try { sysClient.deleteSystemByName(sys9[1]); } catch (Exception e) {}
+    try { sysClient.deleteSystemByName(sysA[1]); } catch (Exception e) {}
   }
 
   private String createSystem(String[] sys, AccessMechanismEnum accessMech, TransferMechanismsEnum[] txfrMechs) throws TapisClientException

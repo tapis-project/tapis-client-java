@@ -2,6 +2,8 @@ package edu.utexas.tacc.tapis.systems.client;
 
 import java.util.List;
 
+import edu.utexas.tacc.tapis.systems.client.gen.api.PermissionsApi;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespBasic;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.Gson;
@@ -12,7 +14,13 @@ import edu.utexas.tacc.tapis.systems.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.systems.client.gen.ApiException;
 import edu.utexas.tacc.tapis.systems.client.gen.Configuration;
 import edu.utexas.tacc.tapis.systems.client.gen.api.SystemsApi;
-import edu.utexas.tacc.tapis.systems.client.gen.model.*;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespChangeCount;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespNameArray;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespResourceUrl;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
 
 /**
  * Class providing a convenient front-end to the automatically generated client code
@@ -22,9 +30,9 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.*;
  */
 public class SystemsClient
 {
-  /* **************************************************************************** */
-  /*                                   Constants                                  */
-  /* **************************************************************************** */
+  // ************************************************************************
+  // *********************** Constants **************************************
+  // ************************************************************************
 
   // Header key for JWT
   public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
@@ -33,18 +41,19 @@ public class SystemsClient
   private static final String ERR_MSG = SystemsClient.class.getSimpleName() +
               ": Exception encountered but unable extract message from response or underlying exception";
 
-  /* **************************************************************************** */
-  /*                                    Fields                                    */
-  /* **************************************************************************** */
-  // Response bosdy serializer
+  // ************************************************************************
+  // *********************** Fields *****************************************
+  // ************************************************************************
+  // Response body serializer
   private static final Gson gson = TapisGsonUtils.getGson();
   private SystemsApi sysApi;
+  private PermissionsApi permsApi;
 
-  /* **************************************************************************** */
-  /*                                 Constructors                                 */
-  /* **************************************************************************** */
+  // ************************************************************************
+  // *********************** Constructors ***********************************
+  // ************************************************************************
 
-  public SystemsClient() { sysApi = new SystemsApi(); }
+  public SystemsClient() { sysApi = new SystemsApi(); permsApi = new PermissionsApi(); }
 
   /**
    * Constructor that overrides the compiled-in basePath value in ApiClient.  This
@@ -63,11 +72,12 @@ public class SystemsClient
     if (!StringUtils.isBlank(path)) apiClient.setBasePath(path);
     if (!StringUtils.isBlank(jwt)) apiClient.addDefaultHeader(TAPIS_JWT_HEADER, jwt);
     sysApi = new SystemsApi();
+    permsApi = new PermissionsApi();
   }
 
-  /* **************************************************************************** */
-  /*                              Public Methods                                  */
-  /* **************************************************************************** */
+  // ************************************************************************
+  // *********************** Public Methods *********************************
+  // ************************************************************************
 
   /**
    * getApiClient: Return underlying ApiClient
@@ -182,11 +192,72 @@ public class SystemsClient
     return resp.getResult().getChanges();
   }
 
+  /**
+   * Grant permissions for given system and user.
+   *
+   * @throws TapisClientException
+   */
+  public void grantUserPermissions(String systemName, String userName, List<String> permissions)
+          throws TapisClientException
+  {
+    // Build the request
+    var req = new ReqPerms();
+    req.setPermissions(permissions);
+    // Submit the request and return the response
+    RespBasic resp = null;
+    try { resp = permsApi.grantUserPerms(systemName, userName, req, false); }
+    catch (Exception e) { throwTapisClientException(e); }
+    // TODO: Check return status and throw exception on error
+  }
+
+  /**
+   * Get list of permissions for given system and user.
+   */
+  public List<String> getSystemPermissions(String systemName, String userName) throws TapisClientException
+  {
+    RespNameArray resp = null;
+    try { resp = permsApi.getUserPerms(systemName, userName, false); }
+    catch (Exception e) { throwTapisClientException(e); }
+    return resp.getResult().getNames();
+  }
+
+  /**
+   * Revoke permissions for given system and user.
+   *
+   * @throws TapisClientException
+   */
+  public void revokeUserPermissions(String systemName, String userName, List<String> permissions)
+          throws TapisClientException
+  {
+    // Build the request
+    var req = new ReqPerms();
+    req.setPermissions(permissions);
+    // Submit the request and return the response
+    RespBasic resp = null;
+    try { resp = permsApi.revokeUserPerms(systemName, userName, req, false); }
+    catch (Exception e) { throwTapisClientException(e); }
+    // TODO: Check return status and throw exception on error
+  }
+
+  /**
+   * Revoke single permission for given system and user.
+   *
+   * @throws TapisClientException
+   */
+  public void revokeUserPermission(String systemName, String userName, String permission)
+          throws TapisClientException
+  {
+    // Submit the request and return the response
+    RespBasic resp = null;
+    try { resp = permsApi.revokeUserPerm(systemName, userName, permission, false); }
+    catch (Exception e) { throwTapisClientException(e); }
+    // TODO: Check return status and throw exception on error
+  }
 
 
-  /* **************************************************************************** */
-  /*                               Private Methods                                */
-  /* **************************************************************************** */
+  // ************************************************************************
+  // *********************** Private Methods ********************************
+  // ************************************************************************
 
   /**
    * throwTapisClientException
