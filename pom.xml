@@ -67,12 +67,10 @@
     </dependencies>
 
     <modules>
+        <module>security-client</module>
         <module>tokens-client</module>
         <module>tenants-client</module>
         <module>systems-client</module>
-<!--
-        <module>security-client</module>
--->
     </modules>
 
 </project>
