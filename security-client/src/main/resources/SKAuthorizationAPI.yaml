@@ -732,49 +732,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  /security/user/removeRole:
-    post:
-      tags:
-        - user
-      description: Remove a previously granted role from a user.
-      operationId: removeRole
-      parameters:
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/ReqRemoveUserRole'
-        required: true
-      responses:
-        '200':
-          description: Role removed from user.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespChangeCount'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
   /security/user:
     get:
       tags:
@@ -945,6 +902,97 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+  /security/user/revokeRole:
+    post:
+      tags:
+        - user
+      description: Revoke a previously granted role from a user.
+      operationId: revokeRole
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/ReqRemoveUserRole'
+        required: true
+      responses:
+        '200':
+          description: Role removed from user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  /security/user/grantUserPermission:
+    post:
+      tags:
+        - user
+      description: |-
+        Grant a user the specified permission by assigning that permission to to the user's default role.  If the user's default role does not exist,this request will create that role and grant it to the user before assigning the permission to the role.
+
+        A user's default role is constructed by prepending '^^' to the user's name. This implies the maximum length of a user name is 58 since role names are limited to 60 characters.
+
+        The change count returned can range from zero to three depending on how many insertions and updates were actually required.
+      operationId: grantUserPermission
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/ReqGrantUserPermission'
+        required: true
+      responses:
+        '200':
+          description: Permission assigned to user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
   /security/user/grantRoleWithPerm:
     post:
       tags:
@@ -994,17 +1042,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  /security/user/grantUserPermission:
+  /security/user/revokeUserPermission:
     post:
       tags:
         - user
       description: |-
-        Grant a user the specified permission by assigning that permission to to the user's default role.  If the user's default role does not exist,this request will create that role and grant it to the user before assigning the permission to the role.
+        Revoke the specified permission from the user's default role. A user's default role is constructed by prepending '^^' to the user's name. Default roles are created on demand. If the role does not exist when this method is called no error is reported and no changes occur.
 
-        A user's default role is constructed by prepending '^^' to the user's name. This implies the maximum length of a user name is 58 since role names are limited to 60 characters.
-
-        The change count returned can range from zero to three depending on how many insertions and updates were actually required.
-      operationId: grantUserPermission
+        The change count returned can be zero or one depending on how many permissions were revoked.
+      operationId: revokeUserPermission
       parameters:
         - name: pretty
           in: query
@@ -1015,7 +1061,7 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/ReqGrantUserPermission'
+              $ref: '#/components/schemas/ReqRemoveUserPermission'
         required: true
       responses:
         '200':
@@ -1590,6 +1636,13 @@ components:
           type: string
         roleName:
           type: string
+    ReqGrantUserRole:
+      type: object
+      properties:
+        user:
+          type: string
+        roleName:
+          type: string
     ReqRemoveUserRole:
       type: object
       properties:
@@ -1597,12 +1650,12 @@ components:
           type: string
         roleName:
           type: string
-    ReqGrantUserRole:
+    ReqGrantUserPermission:
       type: object
       properties:
         user:
           type: string
-        roleName:
+        permSpec:
           type: string
     ReqGrantUserRoleWithPermission:
       type: object
@@ -1613,7 +1666,7 @@ components:
           type: string
         permSpec:
           type: string
-    ReqGrantUserPermission:
+    ReqRemoveUserPermission:
       type: object
       properties:
         user:

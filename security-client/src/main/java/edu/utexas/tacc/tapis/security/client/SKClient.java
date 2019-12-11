@@ -22,6 +22,7 @@ import edu.utexas.tacc.tapis.security.client.gen.model.ReqGrantUserRoleWithPermi
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqPreviewPathPrefix;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqRemoveChildRole;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqRemoveRolePermission;
+import edu.utexas.tacc.tapis.security.client.gen.model.ReqRemoveUserPermission;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqRemoveUserRole;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqReplacePathPrefix;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqUpdateRoleDescription;
@@ -571,9 +572,9 @@ public class SKClient
     }
     
     /* ---------------------------------------------------------------------------- */
-    /* removeUserRole:                                                              */
+    /* revokeUserRole:                                                              */
     /* ---------------------------------------------------------------------------- */
-    public ResultChangeCount removeUserRole(String user, String roleName)
+    public ResultChangeCount revokeUserRole(String user, String roleName)
      throws TapisClientException
     {
         // Assign input body.
@@ -586,7 +587,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi();
-            resp = userApi.removeRole(body, false);
+            resp = userApi.revokeRole(body, false);
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -637,6 +638,30 @@ public class SKClient
             // Get the API object using default networking.
             var userApi = new UserApi();
             resp = userApi.grantUserPermission(body, false);
+        }
+        catch (Exception e) {throwTapisClientException(e);}
+        
+        // Return result value.
+        return resp.getResult();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* revokeRoleWithPermission:                                                    */
+    /* ---------------------------------------------------------------------------- */
+    public ResultChangeCount revokeUserPermission(String user, String permSpec)
+     throws TapisClientException
+    {
+        // Assign input body.
+        var body = new ReqRemoveUserPermission();
+        body.setUser(user);
+        body.setPermSpec(permSpec);
+        
+        // Make the REST call.
+        RespChangeCount resp = null;
+        try {
+            // Get the API object using default networking.
+            var userApi = new UserApi();
+            resp = userApi.revokeUserPermission(body, false);
         }
         catch (Exception e) {throwTapisClientException(e);}
         
