@@ -22,9 +22,9 @@ import edu.utexas.tacc.tapis.security.client.gen.model.ReqGrantUserRoleWithPermi
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqPreviewPathPrefix;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqRemoveChildRole;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqRemoveRolePermission;
-import edu.utexas.tacc.tapis.security.client.gen.model.ReqRemoveUserPermission;
-import edu.utexas.tacc.tapis.security.client.gen.model.ReqRemoveUserRole;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqReplacePathPrefix;
+import edu.utexas.tacc.tapis.security.client.gen.model.ReqRevokeUserPermission;
+import edu.utexas.tacc.tapis.security.client.gen.model.ReqRevokeUserRole;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqUpdateRoleDescription;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqUpdateRoleName;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqUserHasRole;
@@ -578,7 +578,7 @@ public class SKClient
      throws TapisClientException
     {
         // Assign input body.
-        var body = new ReqRemoveUserRole();
+        var body = new ReqRevokeUserRole();
         body.setUser(user);
         body.setRoleName(roleName);
         
@@ -587,7 +587,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi();
-            resp = userApi.revokeRole(body, false);
+            resp = userApi.revokeUserRole(body, false);
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -652,7 +652,7 @@ public class SKClient
      throws TapisClientException
     {
         // Assign input body.
-        var body = new ReqRemoveUserPermission();
+        var body = new ReqRevokeUserPermission();
         body.setUser(user);
         body.setPermSpec(permSpec);
         
