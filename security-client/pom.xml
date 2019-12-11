@@ -15,18 +15,6 @@
 	<description>Java client for tapis-securityapi web application</description>
 
 	<dependencies>
-		<dependency>
-			<groupId>io.swagger.core.v3</groupId>
-			<artifactId>swagger-annotations</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.squareup.okhttp</groupId>
-			<artifactId>okhttp</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.squareup.okhttp</groupId>
-			<artifactId>logging-interceptor</artifactId>
-		</dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -55,31 +43,46 @@
 			</configuration>
 		</plugin>
 
-		<plugin>
-            <groupId>io.swagger.codegen.v3</groupId>
-            <artifactId>swagger-codegen-maven-plugin</artifactId>
-            <version>3.0.13</version>
-			<executions>
-				<execution>
-					<goals>
-						<goal>generate</goal>
-					</goals>
-					<configuration>
-						<inputSpec>${project.basedir}/src/main/resources/SKAuthorizationAPI.yaml</inputSpec>
-						<language>java</language>
-						<configOptions>
-							<sourceFolder>src/main/java</sourceFolder>
-							<apiPackage>edu.utexas.tacc.tapis.security.client.gen.api</apiPackage>
-							<modelPackage>edu.utexas.tacc.tapis.security.client.gen.model</modelPackage>
-							<invokerPackage>edu.utexas.tacc.tapis.security.client.gen</invokerPackage>
-						</configOptions>
-					</configuration>
-				</execution>
-			</executions>
-		</plugin>
+        <!-- Build generated client code using openapi-generator -->
+        <plugin>
+            <groupId>org.openapitools</groupId>
+            <artifactId>openapi-generator-maven-plugin</artifactId>
+            <version>${openapi-generator-maven-plugin.version}</version>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>generate</goal>
+                    </goals>
+                    <configuration>
+                        <inputSpec>${project.basedir}/src/main/resources/SKAuthorizationAPI.yaml</inputSpec>
+                        <enablePostProcessFile>true</enablePostProcessFile>
+                        <output>${project.build.directory}/generated-sources/openapi</output>
+                        <generatorName>java</generatorName>
+                        <groupId>edu.utexas.tacc.tapis</groupId>
+                        <invokerPackage>edu.utexas.tacc.tapis.security.client.gen</invokerPackage>
+                        <apiPackage>edu.utexas.tacc.tapis.security.client.gen.api</apiPackage>
+                        <modelPackage>edu.utexas.tacc.tapis.security.client.gen.model</modelPackage>
+                        <!-- Turn off generation of stuff we do not need -->
+                        <generateApiTests>false</generateApiTests>
+                        <generateApiDocumentation>false</generateApiDocumentation>
+                        <generateModelTests>false</generateModelTests>
+                        <generateModelDocumentation>false</generateModelDocumentation>
+                        <configOptions>
+                            <sourceFolder>src/gen/java/main</sourceFolder>
+                            <!-- Use java 8 libraries instead of 3rd party libraries -->
+                            <java8>true</java8>
+                            <dateLibrary>java8</dateLibrary>
+                        </configOptions>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-shade-plugin</artifactId>
+            <configuration>
+                <createDependencyReducedPom>false</createDependencyReducedPom>
+            </configuration>
             <executions>
                 <execution>
                     <phase>package</phase>
@@ -89,8 +92,7 @@
                 </execution>
             </executions>
         </plugin>
-	</plugins>
-
+    </plugins>
 		<finalName>security-client</finalName>
 	</build>
 

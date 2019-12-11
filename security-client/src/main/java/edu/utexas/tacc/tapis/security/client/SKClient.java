@@ -305,7 +305,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             RoleApi roleApi = new RoleApi();
-            resp = roleApi.updateRoleName(body, roleName, false);
+            resp = roleApi.updateRoleName(roleName, body,false);
         }
         catch (Exception e) {throwTapisClientException(e);}
     }
@@ -325,7 +325,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             RoleApi roleApi = new RoleApi();
-            resp = roleApi.updateRoleDescription(body, roleName, false);
+            resp = roleApi.updateRoleDescription(roleName, body, false);
         }
         catch (Exception e) {throwTapisClientException(e);}
     }
