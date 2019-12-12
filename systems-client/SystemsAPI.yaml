@@ -593,7 +593,9 @@ components:
         scratchDir:
           type: string
         accessCredential:
-          type: string
+          type: array
+          items:
+            type: string
         effectiveUserId:
           type: string
         tags:
