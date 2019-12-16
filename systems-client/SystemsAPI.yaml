@@ -320,7 +320,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/v3/systems/system/{name}':
+  '/v3/systems/system/{sysName}':
     get:
       tags:
         - systems
@@ -328,7 +328,7 @@ paths:
       description: Retrieve information for a system given the system name. Use query parameter returnCredentials = true to have the user access credentials included in the response.
       operationId: getSystemByName
       parameters:
-        - name: name
+        - name: sysName
           in: path
           required: true
           schema:
@@ -381,7 +381,7 @@ paths:
       description: 'Delete a system given the system name. '
       operationId: deleteSystemByName
       parameters:
-        - name: name
+        - name: sysName
           in: path
           required: true
           schema:

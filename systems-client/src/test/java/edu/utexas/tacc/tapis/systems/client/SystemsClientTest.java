@@ -42,6 +42,7 @@ public class SystemsClientTest
   // Test data
   private static final String tenantName = "dev";
   private static final String testUser2 = "testuser2";
+  private static final String sysOwner = "sysOwner";
   private static final int prot1Port = -1;
   private static final boolean prot1UseProxy = false;
   private static final String prot1ProxyHost = "";
@@ -55,25 +56,25 @@ public class SystemsClientTest
 //          TSystem.Permissions.DELETE.name()));
   private static final List<String> testPerms = new ArrayList<>(List.of("READ", "MODIFY","DELETE"));
 
-  private static final String[] sys1 = {tenantName, "Csys1", "description 1", "owner1", "host1", "bucket1", "/root1",
+  private static final String[] sys1 = {tenantName, "Csys1", "description 1", sysOwner, "host1", "bucket1", "/root1",
     "jobInputDir1", "jobOutputDir1", "workDir1", "scratchDir1", "effUser1", tags, notes, "fakePassword1"};
-  private static final String[] sys2 = {tenantName, "Csys2", "description 2", "owner2", "host2", "bucket2", "/root2",
+  private static final String[] sys2 = {tenantName, "Csys2", "description 2", sysOwner, "host2", "bucket2", "/root2",
     "jobInputDir2", "jobOutputDir2", "workDir2", "scratchDir2", "effUser2", tags, notes, "fakePassword2"};
-  private static final String[] sys3 = {tenantName, "Csys3", "description 3", "owner3", "host3", "bucket3", "/root3",
+  private static final String[] sys3 = {tenantName, "Csys3", "description 3", sysOwner, "host3", "bucket3", "/root3",
     "jobInputDir3", "jobOutputDir3", "workDir3", "scratchDir3", "effUser3", tags, notes, "fakePassword3"};
-  private static final String[] sys4 = {tenantName, "Csys4", "description 4", "owner4", "host4", "bucket4", "/root4",
+  private static final String[] sys4 = {tenantName, "Csys4", "description 4", sysOwner, "host4", "bucket4", "/root4",
     "jobInputDir4", "jobOutputDir4", "workDir4", "scratchDir4", "effUser4", tags, notes, "fakePassword4"};
-  private static final String[] sys5 = {tenantName, "Csys5", "description 5", "owner5", "host5", "bucket5", "/root5",
+  private static final String[] sys5 = {tenantName, "Csys5", "description 5", sysOwner, "host5", "bucket5", "/root5",
     "jobInputDir5", "jobOutputDir5", "workDir5", "scratchDir5", "effUser5", tags, notes, "fakePassword5"};
-  private static final String[] sys6 = {tenantName, "Csys6", "description 6", "owner6", "host6", "bucket6", "/root6",
+  private static final String[] sys6 = {tenantName, "Csys6", "description 6", sysOwner, "host6", "bucket6", "/root6",
     "jobInputDir6", "jobOutputDir6", "workDir6", "scratchDir6", "effUser6", tags, notes, "fakePassword6"};
-  private static final String[] sys7 = {tenantName, "Csys7", "description 7", "owner7", "host7", "bucket7", "/root7",
+  private static final String[] sys7 = {tenantName, "Csys7", "description 7", sysOwner, "host7", "bucket7", "/root7",
           "jobInputDir7", "jobOutputDir7", "workDir7", "scratchDir7", "effUser7", tags, notes, "fakePassword7"};
-  private static final String[] sys8 = {tenantName, "Csys8", "description 8", "owner8", "host8", "", "/root8",
+  private static final String[] sys8 = {tenantName, "Csys8", "description 8", sysOwner, "host8", "", "/root8",
           "jobInputDir8", "jobOutputDir8", "workDir8", "scratchDir8", "effUser8", tags, notes, "fakePassword8"};
-  private static final String[] sys9 = {tenantName, "Csys9", "description 9", "owner9", "host9", "bucket9", "/root9",
+  private static final String[] sys9 = {tenantName, "Csys9", "description 9", sysOwner, "host9", "bucket9", "/root9",
           "jobInputDir9", "jobOutputDir9", "workDir9", "scratchDir9", "effUser9", tags, notes, "fakePassword9"};
-  private static final String[] sysA = {tenantName, "CsysA", "description A", "ownerA", "hostA", "bucketA", "/rootA",
+  private static final String[] sysA = {tenantName, "CsysA", "description A", sysOwner, "hostA", "bucketA", "/rootA",
           "jobInputDirA", "jobOutputDirA", "workDirA", "scratchDirA", "effUserA", tags, notes, "fakePasswordA"};
 
   private SystemsClient sysClient;
@@ -88,17 +89,18 @@ public class SystemsClientTest
     if (StringUtils.isBlank(tokensURL)) tokensURL = DEFAULT_BASE_URL_TOKENS;
     // Get short term JWT from tokens service
     var tokClient = new TokensClient(tokensURL);
-    String svcJWT;
-    try {svcJWT = tokClient.getSvcToken(tenantName, SERVICE_NAME_SYSTEMS);}
+    String usrJWT;
+//    try {usrJWT = tokClient.getSvcToken(tenantName, SERVICE_NAME_SYSTEMS);}
+    try {usrJWT = tokClient.getUsrToken(tenantName, sysOwner);}
     catch (Exception e) {throw new Exception("Exception from Tokens service", e);}
-    System.out.println("Got svcJWT: " + svcJWT);
+    System.out.println("Got usrJWT: " + usrJWT);
     // Basic check of JWT
-    if (StringUtils.isBlank(svcJWT)) throw new Exception("Token service returned invalid JWT");
+    if (StringUtils.isBlank(usrJWT)) throw new Exception("Token service returned invalid JWT");
     // Create the client
     // Check for URL set as env var
     String systemsURL = System.getenv(TAPIS_ENV_SVC_URL_SYSTEMS);
     if (StringUtils.isBlank(systemsURL)) systemsURL = DEFAULT_BASE_URL_SYSTEMS;
-    sysClient = new SystemsClient(systemsURL, svcJWT);
+    sysClient = new SystemsClient(systemsURL, usrJWT);
   }
 
   @Test
@@ -242,8 +244,7 @@ public class SystemsClientTest
   }
 
   // Test creating, reading and deleting user permissions for a system
-// TODO Only owner can grant/revoke perms and currently system owner is hard coded to something other than requester. Need to resolve this.
-  @Test(enabled = false)
+  @Test(enabled = true)
   public void testUserPerms()
   {
     String[] sys0 = sysA;
@@ -253,18 +254,22 @@ public class SystemsClientTest
     {
       String respUrl = createSystem(sys0, prot1AccessMechanism, prot1TxfrMechs);
       System.out.println("Created system: " + respUrl);
+      System.out.println("Testing perms for user: " + testUser2);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
       // Create user perms for the system
       sysClient.grantUserPermissions(sys0[1], testUser2, testPerms);
       // Get the system perms for the user and make sure permissions are there
       List<String> userPerms = sysClient.getSystemPermissions(sys0[1], testUser2);
       Assert.assertNotNull(userPerms, "Null returned when retrieving perms.");
+      for (String perm: userPerms) { System.out.println("After grant found user perm: " + perm); }
       Assert.assertEquals(userPerms.size(), testPerms.size(), "Incorrect number of perms returned.");
       for (String perm: testPerms) { if (!userPerms.contains(perm)) Assert.fail("User perms should contain permission: " + perm); }
       // Remove perms for the user
       sysClient.revokeUserPermissions(sys0[1], testUser2, testPerms);
       // Get the system perms for the user and make sure permissions are gone.
       userPerms = sysClient.getSystemPermissions(sys0[1], testUser2);
+      Assert.assertNotNull(userPerms, "Null returned when retrieving perms.");
+      for (String perm: userPerms) { System.out.println("After revoke found user perm: " + perm); }
       for (String perm: testPerms) { if (userPerms.contains(perm)) Assert.fail("User perms should not contain permission: " + perm); }
     } catch (Exception e) {
       System.out.println("Caught exception: " + e.getMessage() + "\n Stack trace: " + e.getStackTrace());
