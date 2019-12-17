@@ -232,7 +232,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  /v3/systems/system:
+  /v3/systems:
     get:
       tags:
         - systems
@@ -320,7 +320,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/v3/systems/system/{sysName}':
+  '/v3/systems/{sysName}':
     get:
       tags:
         - systems
@@ -416,23 +416,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  /v3/systems/hello:
-    get:
-      tags:
-        - general
-      description: Connectivity test.
-      operationId: getHello
-      responses:
-        '200':
-          description: Message received.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespName'
-        '401':
-          description: Not authorized.
-        '500':
-          description: Server error.
   /v3/systems/healthcheck:
     get:
       tags:
@@ -649,22 +632,6 @@ components:
         changes:
           type: integer
           format: int32
-    RespName:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          $ref: '#/components/schemas/ResultName'
-    ResultName:
-      type: object
-      properties:
-        name:
-          type: string
   securitySchemes:
     TapisJWT:
       type: apiKey
