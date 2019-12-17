@@ -111,72 +111,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  /security/role/replacePathPrefix:
-    post:
-      tags:
-        - role
-      description: |-
-        Replace the text in a permission specification when its last component defines an *extended path attribute*.  Extended path attributes enhance the standard Shiro matching algorithm with one that treats designated components in a permission specification as a path name, such as a posix file or directory path name.  This request is useful when files or directories have been renamed or moved and their authorizations need to be adjusted.  Consider, for example, permissions that conform to the following specification:
-
-              files:tenantId:op:systemId:path
-
-        By definition, the last component is an extended path attribute whose content can be changed by replacePathPrefix requests.  Specifically, paths that begin with the oldPrefix will have that prefix replaced with the newPrefix value.  Replacement only occurs on permissions that also match the schema and oldSystemId parameter values.  The systemId attribute is required to immediately precede the path attribute, which must be the last attribute.
-
-        Additionally, the oldSystemId is replaced with the newSystemId when a match is found.  If a roleName is provided, then replacement is limited to permissions defined only in that role.  Otherwise, permissions in all roles that meet the other matching criteria will be considered.
-
-        The optional parameters are roleName, oldPrefix and newPrefix. No wildcards are defined for the path prefix parameters.  When roleName is specified then only permissions assigned to that role are considered.
-
-        When the oldPrefix parameter is provided, it's used to filter out permissions whose paths do not begin with the specified string; when not provided, no path prefix filtering occurs.
-
-        When the newPrefix parameter is not provided no new characters are prepended to the new path, effectively just removing the oldPrefix from the new path. When neither oldPrefix nor newPrefix are provided, no path transformation occurs, though system IDs can still be transformed.
-
-        The previewPathPrefix request provides a way to do a dry run using the same input as this request. The preview call calculates the permissions that would change and what their new values would be, but it does not actually change those permissions as replacePathPrefix does.
-
-        The input parameters are passed in the payload of this request.  The response indicates the number of changed permission specifications.
-      operationId: replacePathPrefix
-      parameters:
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/ReqReplacePathPrefix'
-        required: true
-      responses:
-        '200':
-          description: Path prefixes replaced.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespChangeCount'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '404':
-          description: Named role not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespName'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
   '/security/role/{roleName}':
     get:
       tags:
@@ -260,6 +194,59 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  '/security/role/{roleName}/perms':
+    get:
+      tags:
+        - role
+      description: 'Get the named role''s permissions.  By default, all permissions assigned to the role, whether directly and transitively through child roles, are returned.  Set the immediate query parameter to only retrieve permissions directly assigned to the role.'
+      operationId: getRolePermissions
+      parameters:
+        - name: roleName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: immediate
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Named role returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespRole'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Named role not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
         '500':
           description: Server error.
           content:
@@ -636,6 +623,72 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+  /security/role/replacePathPrefix:
+    post:
+      tags:
+        - role
+      description: |-
+        Replace the text in a permission specification when its last component defines an *extended path attribute*.  Extended path attributes enhance the standard Shiro matching algorithm with one that treats designated components in a permission specification as a path name, such as a posix file or directory path name.  This request is useful when files or directories have been renamed or moved and their authorizations need to be adjusted.  Consider, for example, permissions that conform to the following specification:
+
+              files:tenantId:op:systemId:path
+
+        By definition, the last component is an extended path attribute whose content can be changed by replacePathPrefix requests.  Specifically, paths that begin with the oldPrefix will have that prefix replaced with the newPrefix value.  Replacement only occurs on permissions that also match the schema and oldSystemId parameter values.  The systemId attribute is required to immediately precede the path attribute, which must be the last attribute.
+
+        Additionally, the oldSystemId is replaced with the newSystemId when a match is found.  If a roleName is provided, then replacement is limited to permissions defined only in that role.  Otherwise, permissions in all roles that meet the other matching criteria will be considered.
+
+        The optional parameters are roleName, oldPrefix and newPrefix. No wildcards are defined for the path prefix parameters.  When roleName is specified then only permissions assigned to that role are considered.
+
+        When the oldPrefix parameter is provided, it's used to filter out permissions whose paths do not begin with the specified string; when not provided, no path prefix filtering occurs.
+
+        When the newPrefix parameter is not provided no new characters are prepended to the new path, effectively just removing the oldPrefix from the new path. When neither oldPrefix nor newPrefix are provided, no path transformation occurs, though system IDs can still be transformed.
+
+        The previewPathPrefix request provides a way to do a dry run using the same input as this request. The preview call calculates the permissions that would change and what their new values would be, but it does not actually change those permissions as replacePathPrefix does.
+
+        The input parameters are passed in the payload of this request.  The response indicates the number of changed permission specifications.
+      operationId: replacePathPrefix
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/ReqReplacePathPrefix'
+        required: true
+      responses:
+        '200':
+          description: Path prefixes replaced.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Named role not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
   /security/ready:
     get:
       tags:
@@ -945,6 +998,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+  /security/user/grantUserPermission:
+    post:
+      tags:
+        - user
+      description: |-
+        Grant a user the specified permission by assigning that permission to to the user's default role.  If the user's default role does not exist,this request will create that role and grant it to the user before assigning the permission to the role.
+
+        A user's default role is constructed by prepending '$$' to the user's name. This implies the maximum length of a user name is 58 since role names are limited to 60 characters.
+
+        The change count returned can range from zero to three depending on how many insertions and updates were actually required.
+      operationId: grantUserPermission
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/ReqGrantUserPermission'
+        required: true
+      responses:
+        '200':
+          description: Permission assigned to user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
   /security/user/grantRoleWithPerm:
     post:
       tags:
@@ -994,60 +1095,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  /security/user/grantUserPermission:
-    post:
-      tags:
-        - user
-      description: |-
-        Grant a user the specified permission by assigning that permission to to the user's default role.  If the user's default role does not exist,this request will create that role and grant it to the user before assigning the permission to the role.
-
-        A user's default role is constructed by prepending '^^' to the user's name. This implies the maximum length of a user name is 58 since role names are limited to 60 characters.
-
-        The change count returned can range from zero to three depending on how many insertions and updates were actually required.
-      operationId: grantUserPermission
-      parameters:
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/ReqGrantUserPermission'
-        required: true
-      responses:
-        '200':
-          description: Permission assigned to user.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespChangeCount'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
   /security/user/revokeUserPermission:
     post:
       tags:
         - user
       description: |-
-        Revoke the specified permission from the user's default role. A user's default role is constructed by prepending '^^' to the user's name. Default roles are created on demand. If the role does not exist when this method is called no error is reported and no changes occur.
+        Revoke the specified permission from the user's default role. A user's default role is constructed by prepending '$$' to the user's name. Default roles are created on demand. If the role does not exist when this method is called no error is reported and no changes occur.
 
         The change count returned can be zero or one depending on how many permissions were revoked.
       operationId: revokeUserPermission
@@ -1457,55 +1510,6 @@ components:
         changes:
           type: integer
           format: int32
-    RespName:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          $ref: '#/components/schemas/ResultName'
-    ResultName:
-      type: object
-      properties:
-        name:
-          type: string
-    ReqReplacePathPrefix:
-      type: object
-      properties:
-        schema:
-          type: string
-        roleName:
-          type: string
-        oldSystemId:
-          type: string
-        newSystemId:
-          type: string
-        oldPrefix:
-          type: string
-        newPrefix:
-          type: string
-    RespNameArray:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          $ref: '#/components/schemas/ResultNameArray'
-    ResultNameArray:
-      type: object
-      properties:
-        names:
-          type: array
-          items:
-            type: string
     RespRole:
       type: object
       properties:
@@ -1536,6 +1540,22 @@ components:
         updated:
           type: string
         updatedby:
+          type: string
+    RespName:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultName'
+    ResultName:
+      type: object
+      properties:
+        name:
           type: string
     ReqUpdateRoleName:
       type: object
@@ -1613,6 +1633,39 @@ components:
           type: string
         newPrefix:
           type: string
+    RespNameArray:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultNameArray'
+    ResultNameArray:
+      type: object
+      properties:
+        names:
+          type: array
+          items:
+            type: string
+    ReqReplacePathPrefix:
+      type: object
+      properties:
+        schema:
+          type: string
+        roleName:
+          type: string
+        oldSystemId:
+          type: string
+        newSystemId:
+          type: string
+        oldPrefix:
+          type: string
+        newPrefix:
+          type: string
     RespAuthorized:
       type: object
       properties:
@@ -1650,19 +1703,19 @@ components:
           type: string
         roleName:
           type: string
+    ReqGrantUserPermission:
+      type: object
+      properties:
+        user:
+          type: string
+        permSpec:
+          type: string
     ReqGrantUserRoleWithPermission:
       type: object
       properties:
         user:
           type: string
         roleName:
-          type: string
-        permSpec:
-          type: string
-    ReqGrantUserPermission:
-      type: object
-      properties:
-        user:
           type: string
         permSpec:
           type: string
