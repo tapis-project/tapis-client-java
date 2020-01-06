@@ -23,6 +23,8 @@ tags:
     description: manage roles and permissions
   - name: user
     description: assign roles and permissions to users
+  - name: secret
+    description: manage application and user secrets
   - name: general
     description: informational endpoints
 paths:
@@ -683,6 +685,137 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespName'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  '/security/secret/{secretName}':
+    get:
+      tags:
+        - secret
+      description: |-
+        Read a versioned secret. A secret is read from a path name constructed using the secretName URL path parameter. The path name also includes the tenant and user who owns the secret.
+
+        By default, the latest version of the secret is read. If the 'version' query parameter is specified then that version of the secret is read if it exists. The 'version' parameter should be passed as an integer. Zero indicates that the latest version of the secret should be returned. A NOT FOUND status code is returned if the secret does not exist.
+
+        The response object includes the map of zero or more key/value pairs and metadata that describes the secret, including which version of the secret was returned.
+      operationId: readSecret
+      parameters:
+        - name: secretName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: version
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Secret written.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSecret'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    post:
+      tags:
+        - secret
+      description: |-
+        Create or update a secret. A secret is assigned a path name constructed using the secretName URL path parameter. The path name also includes the tenant and user on behalf of whom the the secret is being saved. At the top-level, the JSON payload may contain an optional 'options' object and a required 'data' object.
+
+        The 'data' object is a JSON object that contains one or more key/value pairs in which both the key and value are strings. These are the individual secrets that are saved under the path name. The secrets are automatically versioned, which allows a pre-configured number of past secret values to be accessible even after new values are assigned. See the various read operations for details on how to access different versions of a secret.
+
+        NOTE: The 'cas' option is currently ignored but documented here for future reference.
+
+        The options object can contains a 'cas' key and with an integer value that represents as secret version.  CAS stands for check-and-set and will check an existing secret's version before updating.  If cas is not set the write will be always be allowed. If set to 0, a write will only be allowed if the key doesn’t exist. If the index is greater than zero the write will only be allowed if the key’s current version matches the version specified in the cas parameter.
+      operationId: writeSecret
+      parameters:
+        - name: secretName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/ReqWriteSecret'
+        required: true
+      responses:
+        '200':
+          description: Secret written.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '204':
+          description: No content.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
         '500':
           description: Server error.
           content:
@@ -1666,6 +1799,48 @@ components:
           type: string
         newPrefix:
           type: string
+    RespSecret:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        secretMap:
+          type: object
+          additionalProperties:
+            type: string
+        metadata:
+          $ref: '#/components/schemas/SecretMetadata'
+    SecretMetadata:
+      type: object
+      properties:
+        created_time:
+          type: string
+        deletion_time:
+          type: string
+        destroyed:
+          type: boolean
+        version:
+          type: integer
+          format: int32
+    Options:
+      type: object
+      properties:
+        cas:
+          type: integer
+          format: int32
+    ReqWriteSecret:
+      type: object
+      properties:
+        options:
+          $ref: '#/components/schemas/Options'
+        data:
+          type: object
+          additionalProperties:
+            type: string
     RespAuthorized:
       type: object
       properties:
