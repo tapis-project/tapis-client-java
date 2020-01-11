@@ -531,7 +531,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* getUserNames:                                                                */
     /* ---------------------------------------------------------------------------- */
-    public ResultNameArray getUserPerms(String user)
+    public ResultNameArray getUserPerms(String user, String match)
      throws TapisClientException
     {
         // Make the REST call.
@@ -539,7 +539,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi();
-            resp = userApi.getUserPerms(user, false);
+            resp = userApi.getUserPerms(user, match, false);
         }
         catch (Exception e) {throwTapisClientException(e);}
         

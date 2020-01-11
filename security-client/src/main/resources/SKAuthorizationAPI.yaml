@@ -1001,7 +1001,7 @@ paths:
     get:
       tags:
         - user
-      description: 'Get the permissions assigned to a user, including those assigned transively.'
+      description: 'Get the permissions assigned to a user, including those assigned transively. The optional match query parameter is used as a filter on the result list of permissions: Only those permissions that are implied by the match permission are returned.'
       operationId: getUserPerms
       parameters:
         - name: user
@@ -1009,6 +1009,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: match
+          in: query
+          schema:
+            type: string
+            default: ''
         - name: pretty
           in: query
           schema:
