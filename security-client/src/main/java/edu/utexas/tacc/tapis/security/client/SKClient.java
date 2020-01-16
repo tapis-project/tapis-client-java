@@ -34,6 +34,7 @@ import edu.utexas.tacc.tapis.security.client.gen.model.ReqUserIsPermittedMulti;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespAuthorized;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespBasic;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespChangeCount;
+import edu.utexas.tacc.tapis.security.client.gen.model.RespName;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespNameArray;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespPathPrefixes;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespResourceUrl;
@@ -531,7 +532,8 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* getUserNames:                                                                */
     /* ---------------------------------------------------------------------------- */
-    public ResultNameArray getUserPerms(String user, String match)
+    public ResultNameArray getUserPerms(String user, String implies, 
+                                        String impliedBy)
      throws TapisClientException
     {
         // Make the REST call.
@@ -539,7 +541,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi();
-            resp = userApi.getUserPerms(user, match, false);
+            resp = userApi.getUserPerms(user, implies, impliedBy, false);
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -849,6 +851,25 @@ public class SKClient
         
         // Return result value.
         return resp.getResult();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* getDefaultUserRole:                                                          */
+    /* ---------------------------------------------------------------------------- */
+    public String getDefaultUserRole(String user)
+     throws TapisClientException
+    {
+        // Make the REST call.
+        RespName resp = null;
+        try {
+            // Get the API object using default networking.
+            var userApi = new UserApi();
+            resp = userApi.getDefaultUserRole1(user, false);
+        }
+        catch (Exception e) {throwTapisClientException(e);}
+        
+        // Return result value.
+        return resp.getResult().getName();
     }
     
     /* **************************************************************************** */
