@@ -530,7 +530,16 @@ public class SKClient
     }
     
     /* ---------------------------------------------------------------------------- */
-    /* getUserNames:                                                                */
+    /* getUserPerms:                                                                */
+    /* ---------------------------------------------------------------------------- */
+    public ResultNameArray getUserPerms(String user)
+     throws TapisClientException
+    {
+        return getUserPerms(user, null, null);
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* getUserPerms:                                                                */
     /* ---------------------------------------------------------------------------- */
     public ResultNameArray getUserPerms(String user, String implies, 
                                         String impliedBy)
