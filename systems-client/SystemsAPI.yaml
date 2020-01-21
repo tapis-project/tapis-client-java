@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
   title: Tapis Systems API
-  description: The Tapis Systems API provides for management of Tapis Systems including access and transfer protocols and credentials.
+  description: The Tapis Systems API provides for management of Tapis Systems including access and transfer methods, permissions and credentials.
   contact:
     name: CICSupport
     email: cicsupport@tacc.utexas.edu
@@ -22,6 +22,161 @@ tags:
   - name: systems
     description: manage systems
 paths:
+  '/v3/systems/credential/{systemName}/user/{userName}':
+    get:
+      tags:
+        - credentials
+      summary: Retrieve credential for given system and user
+      description: Retrieve credential for given system and user. Requester must be owner of the system.
+      operationId: getUserCredential
+      parameters:
+        - name: systemName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespNameArray'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: System not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    post:
+      tags:
+        - credentials
+      summary: Create or update access credential in the Security Kernel for given system and user
+      description: Create or update access credential in the Security Kernel for given system and user using a request body.  Requester must be owner of the system.
+      operationId: createUserCredential
+      parameters:
+        - name: systemName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        description: A JSON object specifying a credential.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqCreateCredential'
+        required: true
+      responses:
+        '200':
+          description: Credential updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    delete:
+      tags:
+        - credentials
+      summary: Remove credential in the Security Kernel for given system and user
+      description: Remove credential from the Security Kernel for given system and user. Requester must be owner of the system.
+      operationId: removeUserCredential
+      parameters:
+        - name: systemName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Permission revoked.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
   '/v3/systems/perms/{systemName}/user/{userName}':
     get:
       tags:
@@ -232,7 +387,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  /v3/systems:
+  '/v3/systems':
     get:
       tags:
         - systems
@@ -416,7 +571,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  /v3/systems/healthcheck:
+  '/v3/systems/healthcheck':
     get:
       tags:
         - general
@@ -444,13 +599,25 @@ components:
           type: string
         result:
           type: object
-    ReqPerms:
+    ReqCreateCredential:
       type: object
       properties:
-        permissions:
-          type: array
-          items:
-            type: string
+        system:
+          type: string
+        user:
+          type: string
+        password:
+          type: string
+        privateKey:
+          type: string
+        publicKey:
+          type: string
+        certificate:
+          type: string
+        accessKey:
+          type: string
+        accessSecret:
+          type: string
     RespNameArray:
       type: object
       properties:
@@ -466,6 +633,13 @@ components:
       type: object
       properties:
         names:
+          type: array
+          items:
+            type: string
+    ReqPerms:
+      type: object
+      properties:
+        permissions:
           type: array
           items:
             type: string
@@ -492,35 +666,25 @@ components:
           type: string
         description:
           type: string
+        systemType:
+          type: string
         owner:
           type: string
         host:
           type: string
         available:
           type: boolean
+        effectiveUserId:
+          type: string
+        accessMethod:
+          type: string
+        accessCredential:
+          type: string
         bucketName:
           type: string
         rootDir:
           type: string
-        jobInputDir:
-          type: string
-        jobOutputDir:
-          type: string
-        scratchDir:
-          type: string
-        workDir:
-          type: string
-        effectiveUserId:
-          type: string
-        accessCredential:
-          type: string
-        tags:
-          type: string
-        notes:
-          type: string
-        accessMechanism:
-          type: string
-        transferMechanisms:
+        transferMethods:
           type: array
           items:
             type: string
@@ -534,6 +698,91 @@ components:
         proxyPort:
           type: integer
           format: int32
+        jobCanExec:
+          type: boolean
+        jobLocalWorkingDir:
+          type: string
+        jobLocalArchiveDir:
+          type: string
+        jobRemoteArchiveSystem:
+          type: string
+        jobRemoteArchiveDir:
+          type: string
+        jobCapabilities:
+          type: array
+          items:
+            type: string
+        tags:
+          type: string
+        notes:
+          type: string
+    Capability:
+      type: object
+      properties:
+        tenant:
+          type: string
+        system:
+          type: string
+        capType:
+          type: string
+          enum:
+            - SCHEDULER
+            - OS
+            - HARDWARE
+            - SOFTWARE
+            - COMPILER
+            - MODULES
+            - JOB
+            - CONTAINER
+        name:
+          type: string
+        value:
+          type: string
+    Credential:
+      type: object
+      properties:
+        tenant:
+          type: string
+        system:
+          type: string
+        user:
+          type: string
+        systemType:
+          type: string
+          enum:
+            - LINUX
+            - OBJECT_STORE
+        accessMethod:
+          type: string
+          enum:
+            - PASSWORD
+            - PKI_KEYS
+            - CERT
+            - ACCESS_KEY
+        password:
+          type: array
+          items:
+            type: string
+        privateKey:
+          type: array
+          items:
+            type: string
+        publicKey:
+          type: array
+          items:
+            type: string
+        cert:
+          type: array
+          items:
+            type: string
+        accessKey:
+          type: array
+          items:
+            type: string
+        accessSecret:
+          type: array
+          items:
+            type: string
     RespSystem:
       type: object
       properties:
@@ -551,56 +800,49 @@ components:
         id:
           type: integer
           format: int64
+        created:
+          type: string
+        updated:
+          type: string
         tenant:
           type: string
         name:
           type: string
         description:
           type: string
+        systemType:
+          type: string
+          enum:
+            - LINUX
+            - OBJECT_STORE
         owner:
           type: string
         host:
           type: string
         available:
           type: boolean
+        effectiveUserId:
+          type: string
+        accessMethod:
+          type: string
+          enum:
+            - PASSWORD
+            - PKI_KEYS
+            - CERT
+            - ACCESS_KEY
+        accessCredential:
+          $ref: '#/components/schemas/Credential'
         bucketName:
           type: string
         rootDir:
           type: string
-        jobInputDir:
-          type: string
-        jobOutputDir:
-          type: string
-        workDir:
-          type: string
-        scratchDir:
-          type: string
-        accessCredential:
-          type: array
-          items:
-            type: string
-        effectiveUserId:
-          type: string
-        tags:
-          type: string
-        notes:
-          type: string
-        accessMechanism:
-          type: string
-          enum:
-            - NONE
-            - ANONYMOUS
-            - SSH_PASSWORD
-            - SSH_KEYS
-            - SSH_CERT
-        transferMechanisms:
+        transferMethods:
           type: array
           items:
             type: string
             enum:
               - SFTP
               - S3
-              - LOCAL
         port:
           type: integer
           format: int32
@@ -611,9 +853,23 @@ components:
         proxyPort:
           type: integer
           format: int32
-        created:
+        jobCanExec:
+          type: boolean
+        jobLocalWorkingDir:
           type: string
-        updated:
+        jobLocalArchiveDir:
+          type: string
+        jobRemoteArchiveSystem:
+          type: string
+        jobRemoteArchiveDir:
+          type: string
+        jobCapabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Capability'
+        tags:
+          type: string
+        notes:
           type: string
     RespChangeCount:
       type: object
