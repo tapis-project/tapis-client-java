@@ -1,11 +1,7 @@
 package edu.utexas.tacc.tapis.systems.client;
 
 import java.util.List;
-
-import edu.utexas.tacc.tapis.systems.client.gen.api.PermissionsApi;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespBasic;
 import org.apache.commons.lang3.StringUtils;
-
 import com.google.gson.Gson;
 
 import edu.utexas.tacc.tapis.shared.exceptions.TapisClientException;
@@ -13,9 +9,12 @@ import edu.utexas.tacc.tapis.shared.utils.TapisGsonUtils;
 import edu.utexas.tacc.tapis.systems.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.systems.client.gen.ApiException;
 import edu.utexas.tacc.tapis.systems.client.gen.Configuration;
+import edu.utexas.tacc.tapis.systems.client.gen.api.CredentialsApi;
+import edu.utexas.tacc.tapis.systems.client.gen.api.PermissionsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.SystemsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespBasic;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespChangeCount;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespNameArray;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespResourceUrl;
@@ -48,12 +47,13 @@ public class SystemsClient
   private static final Gson gson = TapisGsonUtils.getGson();
   private SystemsApi sysApi;
   private PermissionsApi permsApi;
+  private CredentialsApi credsApi;
 
   // ************************************************************************
   // *********************** Constructors ***********************************
   // ************************************************************************
 
-  public SystemsClient() { sysApi = new SystemsApi(); permsApi = new PermissionsApi(); }
+  public SystemsClient() { sysApi = new SystemsApi(); permsApi = new PermissionsApi(); credsApi = new CredentialsApi(); }
 
   /**
    * Constructor that overrides the compiled-in basePath value in ApiClient.  This
@@ -73,6 +73,7 @@ public class SystemsClient
     if (!StringUtils.isBlank(jwt)) apiClient.addDefaultHeader(TAPIS_JWT_HEADER, jwt);
     sysApi = new SystemsApi();
     permsApi = new PermissionsApi();
+    credsApi = new CredentialsApi();
   }
 
   // ************************************************************************
@@ -99,38 +100,43 @@ public class SystemsClient
    * Create a system
    *
    * @return url pointing to created resource
-   * @throws TapisClientException
+   * @throws TapisClientException - If create call throws an exception
    */
-  public String createSystem(String name, String description, String owner, String host, boolean available,
-                             String bucketName, String rootDir, String jobInputDir, String jobOutputDir,
-                             String workDir, String scratchDir, String effectiveUserId, String tags, String notes,
-                             String accessCredential, String accessMechanism, List<String> transferMechanisms,
-                             int port, boolean useProxy, String proxyHost, int proxyPort)
+  public String createSystem(String name, String description, String systemType, String owner, String host, boolean available,
+                             String effectiveUserId, String accessMethod, String accessCredential,
+                             String bucketName, String rootDir, List<String> transferMethods,
+                             int port, boolean useProxy, String proxyHost, int proxyPort,
+                             boolean jobCanExec, String jobLocalWorkingDir, String jobLocalArchiveDir,
+                             String jobRemoteArchiveSystem, String jobRemoteArchiveDir, List<String> jobCapabilities,
+                             String tags, String notes)
     throws TapisClientException
   {
     // Build the request
     var req = new ReqCreateSystem();
     req.setName(name);
     req.setDescription(description);
+    req.setSystemType(systemType);
     req.setOwner(owner);
     req.setHost(host);
     req.setAvailable(available);
+    req.setEffectiveUserId(effectiveUserId);
+    req.setAccessMethod(accessMethod);
+    req.setAccessCredential(accessCredential);
     req.setBucketName(bucketName);
     req.setRootDir(rootDir);
-    req.setJobInputDir(jobInputDir);
-    req.setJobOutputDir(jobOutputDir);
-    req.setWorkDir(workDir);
-    req.setScratchDir(scratchDir);
-    req.setEffectiveUserId(effectiveUserId);
-    req.setTags(tags);
-    req.setNotes(notes);
-    req.setAccessCredential(accessCredential);
-    req.setAccessMechanism(accessMechanism);
-    req.setTransferMechanisms(transferMechanisms);
+    req.setTransferMethods(transferMethods);
     req.setPort(port);
     req.setUseProxy(useProxy);
     req.setProxyHost(proxyHost);
     req.setProxyPort(proxyPort);
+    req.setJobCanExec(jobCanExec);
+    req.setJobLocalWorkingDir(jobLocalWorkingDir);
+    req.setJobLocalArchiveDir(jobLocalArchiveDir);
+    req.setJobRemoteArchiveSystem(jobRemoteArchiveSystem);
+    req.setJobRemoteArchiveDir(jobRemoteArchiveDir);
+    req.setJobCapabilities(jobCapabilities);
+    req.setTags(tags);
+    req.setNotes(notes);
     // Submit the request and return the response
     RespResourceUrl resp = null;
     try { resp = sysApi.createSystem(req, false); }
@@ -144,7 +150,7 @@ public class SystemsClient
    * @param name
    * @param returnCredentials - Flag indicating if credentials should be included in result
    * @return The system or null if system not found
-   * @throws TapisClientException
+   * @throws TapisClientException - If get call throws an exception
    */
   public TSystem getSystemByName(String name, boolean returnCredentials) throws TapisClientException
   {
@@ -195,7 +201,7 @@ public class SystemsClient
   /**
    * Grant permissions for given system and user.
    *
-   * @throws TapisClientException
+   * @throws TapisClientException - If grant call throws an exception
    */
   public void grantUserPermissions(String systemName, String userName, List<String> permissions)
           throws TapisClientException

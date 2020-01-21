@@ -13,11 +13,10 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem.AccessMechanismEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem.TransferMechanismsEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem.AccessMethodEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem.TransferMethodsEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem.SystemTypeEnum;
 import edu.utexas.tacc.tapis.tokens.client.TokensClient;
-
-import static edu.utexas.tacc.tapis.shared.TapisConstants.SERVICE_NAME_SYSTEMS;
 
 // TODO Update tests to check "tags" value
 // TODO Update tests to check "notes" value
@@ -29,8 +28,7 @@ import static edu.utexas.tacc.tapis.shared.TapisConstants.SERVICE_NAME_SYSTEMS;
  * Tokens service URL comes from the env or the default hard coded URL.
  */
 @Test(groups={"integration"})
-public class SystemsClientTest
-{
+public class SystemsClientTest {
   // Default URLs. These can be overridden by env variables
   private static final String DEFAULT_BASE_URL_SYSTEMS = "https://dev.develop.tapis.io";
   private static final String DEFAULT_BASE_URL_TOKENS = "https://dev.develop.tapis.io";
@@ -42,46 +40,46 @@ public class SystemsClientTest
   // Test data
   private static final String tenantName = "dev";
   private static final String testUser2 = "testuser2";
+  private static final String sysType = SystemTypeEnum.LINUX.name();
   private static final String sysOwner = "sysOwner";
   private static final int prot1Port = -1;
   private static final boolean prot1UseProxy = false;
-  private static final String prot1ProxyHost = "";
+  private static final String prot1ProxyHost = "a";
   private static final int prot1ProxyPort = -1;
-  private static final TransferMechanismsEnum[] prot1TxfrMechs = {TransferMechanismsEnum.SFTP, TransferMechanismsEnum.S3};
-  private static final AccessMechanismEnum prot1AccessMechanism = AccessMechanismEnum.NONE;
+  private static final TransferMethodsEnum[] prot1TxfrMethods = {TransferMethodsEnum.SFTP, TransferMethodsEnum.S3};
+  private static final AccessMethodEnum prot1AccessMethod = AccessMethodEnum.PASSWORD;
   private static final String tags = "{\"key1\":\"a\", \"key2\":\"b\"}";
   private static final String notes = "{\"project\":\"myproj1\", \"testdata\":\"abc\"}";
-// TODO/TBD: No perms enum in auto-generated model class?
+  // TODO/TBD: No perms enum in auto-generated model class?
 //  private static final List<String> testPerms = new ArrayList<>(List.of(TSystem.Permissions.READ.name(),TSystem.Permissions.MODIFY.name(),
 //          TSystem.Permissions.DELETE.name()));
-  private static final List<String> testPerms = new ArrayList<>(List.of("READ", "MODIFY","DELETE"));
+  private static final List<String> testPerms = new ArrayList<>(List.of("READ", "MODIFY", "DELETE"));
 
-  private static final String[] sys1 = {tenantName, "Csys1", "description 1", sysOwner, "host1", "bucket1", "/root1",
-    "jobInputDir1", "jobOutputDir1", "workDir1", "scratchDir1", "effUser1", tags, notes, "fakePassword1"};
-  private static final String[] sys2 = {tenantName, "Csys2", "description 2", sysOwner, "host2", "bucket2", "/root2",
-    "jobInputDir2", "jobOutputDir2", "workDir2", "scratchDir2", "effUser2", tags, notes, "fakePassword2"};
-  private static final String[] sys3 = {tenantName, "Csys3", "description 3", sysOwner, "host3", "bucket3", "/root3",
-    "jobInputDir3", "jobOutputDir3", "workDir3", "scratchDir3", "effUser3", tags, notes, "fakePassword3"};
-  private static final String[] sys4 = {tenantName, "Csys4", "description 4", sysOwner, "host4", "bucket4", "/root4",
-    "jobInputDir4", "jobOutputDir4", "workDir4", "scratchDir4", "effUser4", tags, notes, "fakePassword4"};
-  private static final String[] sys5 = {tenantName, "Csys5", "description 5", sysOwner, "host5", "bucket5", "/root5",
-    "jobInputDir5", "jobOutputDir5", "workDir5", "scratchDir5", "effUser5", tags, notes, "fakePassword5"};
-  private static final String[] sys6 = {tenantName, "Csys6", "description 6", sysOwner, "host6", "bucket6", "/root6",
-    "jobInputDir6", "jobOutputDir6", "workDir6", "scratchDir6", "effUser6", tags, notes, "fakePassword6"};
-  private static final String[] sys7 = {tenantName, "Csys7", "description 7", sysOwner, "host7", "bucket7", "/root7",
-          "jobInputDir7", "jobOutputDir7", "workDir7", "scratchDir7", "effUser7", tags, notes, "fakePassword7"};
-  private static final String[] sys8 = {tenantName, "Csys8", "description 8", sysOwner, "host8", "", "/root8",
-          "jobInputDir8", "jobOutputDir8", "workDir8", "scratchDir8", "effUser8", tags, notes, "fakePassword8"};
-  private static final String[] sys9 = {tenantName, "Csys9", "description 9", sysOwner, "host9", "bucket9", "/root9",
-          "jobInputDir9", "jobOutputDir9", "workDir9", "scratchDir9", "effUser9", tags, notes, "fakePassword9"};
-  private static final String[] sysA = {tenantName, "CsysA", "description A", sysOwner, "hostA", "bucketA", "/rootA",
-          "jobInputDirA", "jobOutputDirA", "workDirA", "scratchDirA", "effUserA", tags, notes, "fakePasswordA"};
+  private static final String[] sys1 = {tenantName, "Csys1", "description 1", sysType, sysOwner, "host1", "effUser1", "{\"password\": \"fakePassword\"}",
+          "bucket1", "/root1", "jobLocalWorkDir1", "jobLocalArchDir1", "jobRemoteArchSystem1", "jobRemoteArchDir1", tags, notes};
+  private static final String[] sys2 = {tenantName, "Csys2", "description 2", sysType, sysOwner, "host2", "effUser2", "fakePassword2",
+          "bucket2", "/root2", "jobLocalWorkDir2", "jobLocalArchDir2", "jobRemoteArchSystem2", "jobRemoteArchDir2", tags, notes};
+  private static final String[] sys3 = {tenantName, "Csys3", "description 3", sysType, sysOwner, "host3", "effUser3", "fakePassword3",
+          "bucket3", "/root3", "jobLocalWorkDir3", "jobLocalArchDir3", "jobRemoteArchSystem3", "jobRemoteArchDir3", tags, notes};
+  private static final String[] sys4 = {tenantName, "Csys4", "description 4", sysType, sysOwner, "host4", "effUser4", "fakePassword4",
+          "bucket4", "/root4", "jobLocalWorkDir4", "jobLocalArchDir4", "jobRemoteArchSystem4", "jobRemoteArchDir4", tags, notes};
+  private static final String[] sys5 = {tenantName, "Csys5", "description 5", sysType, sysOwner, "host5", "effUser5", "fakePassword5",
+          "bucket5", "/root5", "jobLocalWorkDir5", "jobLocalArchDir5", "jobRemoteArchSystem5", "jobRemoteArchDir5", tags, notes};
+  private static final String[] sys6 = {tenantName, "Csys6", "description 6", sysType, sysOwner, "host6", "effUser6", "fakePassword6",
+          "bucket6", "/root6", "jobLocalWorkDir6", "jobLocalArchDir6", "jobRemoteArchSystem6", "jobRemoteArchDir6", tags, notes};
+  private static final String[] sys7 = {tenantName, "Csys7", "description 7", sysType, sysOwner, "host7", "effUser7", "fakePassword7",
+          "bucket7", "/root7", "jobLocalWorkDir7", "jobLocalArchDir7", "jobRemoteArchSystem7", "jobRemoteArchDir7", tags, notes};
+  private static final String[] sys8 = {tenantName, "Csys8", "description 8", sysType, sysOwner, "host8", "effUser8", "fakePassword8",
+          "", "/root8", "jobLocalWorkDir8", "jobLocalArchDir8", "jobRemoteArchSystem8", "jobRemoteArchDir8", tags, notes};
+  private static final String[] sys9 = {tenantName, "Csys9", "description 9", sysType, sysOwner, "host9", "effUser9", "fakePassword9",
+          "bucket9", "/root9", "jobLocalWorkDir9", "jobLocalArchDir9", "jobRemoteArchSystem9", "jobRemoteArchDir9", tags, notes};
+  private static final String[] sysA = {tenantName, "CsysA", "description A", sysType, sysOwner, "hostA", "effUserA", "fakePasswordA",
+          "bucketA", "/rootA", "jobLocalWorkDirA", "jobLocalArchDirA", "jobRemoteArchSystemA", "jobRemoteArchDirA", tags, notes};
 
   private SystemsClient sysClient;
 
   @BeforeSuite
-  public void setUp() throws Exception
-  {
+  public void setUp() throws Exception {
     // Get the base URLs from the environment so the test can be used in environments other than dev
     System.out.println("Executing BeforeSuite setup method");
     // Get token using URL from env or from default
@@ -91,8 +89,11 @@ public class SystemsClientTest
     var tokClient = new TokensClient(tokensURL);
     String usrJWT;
 //    try {usrJWT = tokClient.getSvcToken(tenantName, SERVICE_NAME_SYSTEMS);}
-    try {usrJWT = tokClient.getUsrToken(tenantName, sysOwner);}
-    catch (Exception e) {throw new Exception("Exception from Tokens service", e);}
+    try {
+      usrJWT = tokClient.getUsrToken(tenantName, sysOwner);
+    } catch (Exception e) {
+      throw new Exception("Exception from Tokens service", e);
+    }
     System.out.println("Got usrJWT: " + usrJWT);
     // Basic check of JWT
     if (StringUtils.isBlank(usrJWT)) throw new Exception("Token service returned invalid JWT");
@@ -104,13 +105,12 @@ public class SystemsClientTest
   }
 
   @Test
-  public void testCreateSystem()
-  {
+  public void testCreateSystem() {
     // Create a system
-    System.out.println("Creating system with name: " + sys1[1]);
-    try
-    {
-      String respUrl = createSystem(sys1, prot1AccessMechanism, prot1TxfrMechs);
+    String[] sys0 = sys1;
+    System.out.println("Creating system with name: " + sys0[1]);
+    try {
+      String respUrl = createSystem(sys0, prot1AccessMethod, prot1TxfrMethods);
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
@@ -120,13 +120,12 @@ public class SystemsClientTest
   }
 
   @Test(expectedExceptions = {TapisClientException.class}, expectedExceptionsMessageRegExp = "^SYSAPI_SYS_EXISTS.*")
-  public void testCreateSystemAlreadyExists() throws Exception
-  {
+  public void testCreateSystemAlreadyExists() throws Exception {
     // Create a system
-    System.out.println("Creating system with name: " + sys7[1]);
-    try
-    {
-      String respUrl = createSystem(sys7, prot1AccessMechanism, prot1TxfrMechs);
+    String[] sys0 = sys7;
+    System.out.println("Creating system with name: " + sys0[1]);
+    try {
+      String respUrl = createSystem(sys0, prot1AccessMethod, prot1TxfrMethods);
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
@@ -135,72 +134,73 @@ public class SystemsClientTest
     }
     // Now attempt to create it again, should throw exception
     System.out.println("Creating system with name: " + sys7[1]);
-    createSystem(sys7, prot1AccessMechanism, prot1TxfrMechs);
+    createSystem(sys7, prot1AccessMethod, prot1TxfrMethods);
     Assert.fail("Exception should have been thrown");
   }
 
   // Test that bucketName is required if transfer mechanisms include S3
   @Test(expectedExceptions = {TapisClientException.class}, expectedExceptionsMessageRegExp = "^SYSAPI_S3_NOBUCKET_INPUT.*")
-  public void testCreateSystemS3NoBucketName() throws Exception
-  {
+  public void testCreateSystemS3NoBucketName() throws Exception {
     // Create a system
-    System.out.println("Creating system with name: " + sys8[1]);
-    createSystem(sys8, prot1AccessMechanism, prot1TxfrMechs);
+    String[] sys0 = sys8;
+    System.out.println("Creating system with name: " + sys0[1]);
+    createSystem(sys0, prot1AccessMethod, prot1TxfrMethods);
     Assert.fail("Exception should have been thrown");
   }
 
   // Test that access mechanism of SSH_CERT and static owner is not allowed
   @Test(expectedExceptions = {TapisClientException.class}, expectedExceptionsMessageRegExp = "^SYSAPI_INVALID_EFFECTIVEUSERID_INPUT.*")
-  public void testCreateSystemInvalidEffUserId() throws Exception
-  {
+  public void testCreateSystemInvalidEffUserId() throws Exception {
     // Create a system
-    System.out.println("Creating system with name: " + sys9[1]);
-    createSystem(sys9, AccessMechanismEnum.SSH_CERT, prot1TxfrMechs);
+    String[] sys0 = sys9;
+    System.out.println("Creating system with name: " + sys0[1]);
+    createSystem(sys0, AccessMethodEnum.CERT, prot1TxfrMethods);
     Assert.fail("Exception should have been thrown");
   }
 
   @Test
-  public void testGetSystemByName() throws Exception
-  {
+  public void testGetSystemByName() throws Exception {
     String[] sys0 = sys2;
-    String respUrl = createSystem(sys0, prot1AccessMechanism, prot1TxfrMechs);
+    String respUrl = createSystem(sys0, prot1AccessMethod, prot1TxfrMethods);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     TSystem tmpSys = sysClient.getSystemByName(sys0[1], false);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
     System.out.println("Found item: " + sys0[1]);
+//    sys2 = {tenantName, "Csys2", "description 2", sysType, sysOwner, "host2", "effUser2", "fakePassword2",
+//            "bucket2", "/root2", "jobLocalWorkDir2", "jobLocalArchDir2", "jobRemoteArchSystem2", "jobRemoteArchDir2", tags, notes};
     Assert.assertEquals(tmpSys.getName(), sys0[1]);
     Assert.assertEquals(tmpSys.getDescription(), sys0[2]);
-    Assert.assertEquals(tmpSys.getOwner(), sys0[3]);
-    Assert.assertEquals(tmpSys.getHost(), sys0[4]);
-    Assert.assertEquals(tmpSys.getBucketName(), sys0[5]);
-    Assert.assertEquals(tmpSys.getRootDir(), sys0[6]);
-    Assert.assertEquals(tmpSys.getJobInputDir(), sys0[7]);
-    Assert.assertEquals(tmpSys.getJobOutputDir(), sys0[8]);
-    Assert.assertEquals(tmpSys.getWorkDir(), sys0[9]);
-    Assert.assertEquals(tmpSys.getScratchDir(), sys0[10]);
-    Assert.assertEquals(tmpSys.getEffectiveUserId(), sys0[11]);
+    Assert.assertEquals(tmpSys.getSystemType().name(), sys0[3]);
+    Assert.assertEquals(tmpSys.getOwner(), sys0[4]);
+    Assert.assertEquals(tmpSys.getHost(), sys0[5]);
+    Assert.assertEquals(tmpSys.getEffectiveUserId(), sys0[6]);
+    Assert.assertEquals(tmpSys.getBucketName(), sys0[8]);
+    Assert.assertEquals(tmpSys.getRootDir(), sys0[9]);
+    Assert.assertEquals(tmpSys.getJobLocalWorkingDir(), sys0[10]);
+    Assert.assertEquals(tmpSys.getJobLocalArchiveDir(), sys0[11]);
+    Assert.assertEquals(tmpSys.getJobRemoteArchiveSystem(), sys0[12]);
+    Assert.assertEquals(tmpSys.getJobRemoteArchiveDir(), sys0[13]);
     System.out.println("Found tags: " + tmpSys.getTags());
     System.out.println("Found notes: " + tmpSys.getNotes());
-    Assert.assertEquals(tmpSys.getAccessMechanism(), prot1AccessMechanism);
+    Assert.assertEquals(tmpSys.getAccessMethod(), prot1AccessMethod);
     Assert.assertEquals(tmpSys.getPort().intValue(), prot1Port);
     Assert.assertEquals(tmpSys.getUseProxy().booleanValue(), prot1UseProxy);
     Assert.assertEquals(tmpSys.getProxyHost(), prot1ProxyHost);
     Assert.assertEquals(tmpSys.getProxyPort().intValue(), prot1ProxyPort);
-    List<TransferMechanismsEnum> tmechsList = tmpSys.getTransferMechanisms();
-    Assert.assertNotNull(tmechsList);
-    Assert.assertTrue(tmechsList.contains(TransferMechanismsEnum.S3), "List of transfer mechanisms did not contain: " + TransferMechanismsEnum.S3.name());
-    Assert.assertTrue(tmechsList.contains(TransferMechanismsEnum.SFTP), "List of transfer mechanisms did not contain: " + TransferMechanismsEnum.SFTP.name());
+    List<TransferMethodsEnum> tMethodsList = tmpSys.getTransferMethods();
+    Assert.assertNotNull(tMethodsList);
+    Assert.assertTrue(tMethodsList.contains(TransferMethodsEnum.S3), "List of transfer mechanisms did not contain: " + TransferMethodsEnum.S3.name());
+    Assert.assertTrue(tMethodsList.contains(TransferMethodsEnum.SFTP), "List of transfer mechanisms did not contain: " + TransferMethodsEnum.SFTP.name());
   }
 
   @Test
-  public void testGetSystemNames() throws Exception
-  {
+  public void testGetSystemNames() throws Exception {
     // Create 2 systems
     String[] sys0 = sys3;
-    String respUrl = createSystem(sys0, prot1AccessMechanism, prot1TxfrMechs);
+    String respUrl = createSystem(sys0, prot1AccessMethod, prot1TxfrMethods);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     sys0 = sys4;
-    respUrl = createSystem(sys0, prot1AccessMechanism, prot1TxfrMechs);
+    respUrl = createSystem(sys0, prot1AccessMethod, prot1TxfrMethods);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Get list of all system names
@@ -224,35 +224,30 @@ public class SystemsClientTest
 //  }
 
   @Test
-  public void testDelete() throws Exception
-  {
+  public void testDelete() throws Exception {
     // Create the system
     String[] sys0 = sys6;
-    String respUrl = createSystem(sys0, prot1AccessMechanism, prot1TxfrMechs);
+    String respUrl = createSystem(sys0, prot1AccessMethod, prot1TxfrMethods);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Delete the system
     sysClient.deleteSystemByName(sys0[1]);
-    try
-    {
+    try {
       TSystem tmpSys2 = sysClient.getSystemByName(sys0[1], false);
       Assert.fail("System not deleted. System name: " + sys0[1]);
-    } catch (TapisClientException e)
-    {
+    } catch (TapisClientException e) {
       Assert.assertEquals(e.getCode(), 404);
     }
   }
 
   // Test creating, reading and deleting user permissions for a system
   @Test(enabled = true)
-  public void testUserPerms()
-  {
+  public void testUserPerms() {
     String[] sys0 = sysA;
     // Create a system
     System.out.println("Creating system with name: " + sys0[1]);
-    try
-    {
-      String respUrl = createSystem(sys0, prot1AccessMechanism, prot1TxfrMechs);
+    try {
+      String respUrl = createSystem(sys0, prot1AccessMethod, prot1TxfrMethods);
       System.out.println("Created system: " + respUrl);
       System.out.println("Testing perms for user: " + testUser2);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
@@ -261,16 +256,24 @@ public class SystemsClientTest
       // Get the system perms for the user and make sure permissions are there
       List<String> userPerms = sysClient.getSystemPermissions(sys0[1], testUser2);
       Assert.assertNotNull(userPerms, "Null returned when retrieving perms.");
-      for (String perm: userPerms) { System.out.println("After grant found user perm: " + perm); }
+      for (String perm : userPerms) {
+        System.out.println("After grant found user perm: " + perm);
+      }
       Assert.assertEquals(userPerms.size(), testPerms.size(), "Incorrect number of perms returned.");
-      for (String perm: testPerms) { if (!userPerms.contains(perm)) Assert.fail("User perms should contain permission: " + perm); }
+      for (String perm : testPerms) {
+        if (!userPerms.contains(perm)) Assert.fail("User perms should contain permission: " + perm);
+      }
       // Remove perms for the user
       sysClient.revokeUserPermissions(sys0[1], testUser2, testPerms);
       // Get the system perms for the user and make sure permissions are gone.
       userPerms = sysClient.getSystemPermissions(sys0[1], testUser2);
       Assert.assertNotNull(userPerms, "Null returned when retrieving perms.");
-      for (String perm: userPerms) { System.out.println("After revoke found user perm: " + perm); }
-      for (String perm: testPerms) { if (userPerms.contains(perm)) Assert.fail("User perms should not contain permission: " + perm); }
+      for (String perm : userPerms) {
+        System.out.println("After revoke found user perm: " + perm);
+      }
+      for (String perm : testPerms) {
+        if (userPerms.contains(perm)) Assert.fail("User perms should not contain permission: " + perm);
+      }
     } catch (Exception e) {
       System.out.println("Caught exception: " + e.getMessage() + "\n Stack trace: " + e.getStackTrace());
       Assert.fail();
@@ -279,30 +282,58 @@ public class SystemsClientTest
   }
 
   @AfterSuite
-  public void tearDown()
-  {
+  public void tearDown() {
     System.out.println("Executing AfterSuite teardown method");
     //Remove all objects created by tests, ignore any exceptions
-    try { sysClient.deleteSystemByName(sys1[1]); } catch (Exception e) {}
-    try { sysClient.deleteSystemByName(sys2[1]); } catch (Exception e) {}
-    try { sysClient.deleteSystemByName(sys3[1]); } catch (Exception e) {}
-    try { sysClient.deleteSystemByName(sys4[1]); } catch (Exception e) {}
-    try { sysClient.deleteSystemByName(sys5[1]); } catch (Exception e) {}
-    try { sysClient.deleteSystemByName(sys6[1]); } catch (Exception e) {}
-    try { sysClient.deleteSystemByName(sys7[1]); } catch (Exception e) {}
-    try { sysClient.deleteSystemByName(sys8[1]); } catch (Exception e) {}
-    try { sysClient.deleteSystemByName(sys9[1]); } catch (Exception e) {}
-    try { sysClient.deleteSystemByName(sysA[1]); } catch (Exception e) {}
+    try {
+      sysClient.deleteSystemByName(sys1[1]);
+    } catch (Exception e) {
+    }
+    try {
+      sysClient.deleteSystemByName(sys2[1]);
+    } catch (Exception e) {
+    }
+    try {
+      sysClient.deleteSystemByName(sys3[1]);
+    } catch (Exception e) {
+    }
+    try {
+      sysClient.deleteSystemByName(sys4[1]);
+    } catch (Exception e) {
+    }
+    try {
+      sysClient.deleteSystemByName(sys5[1]);
+    } catch (Exception e) {
+    }
+    try {
+      sysClient.deleteSystemByName(sys6[1]);
+    } catch (Exception e) {
+    }
+    try {
+      sysClient.deleteSystemByName(sys7[1]);
+    } catch (Exception e) {
+    }
+    try {
+      sysClient.deleteSystemByName(sys8[1]);
+    } catch (Exception e) {
+    }
+    try {
+      sysClient.deleteSystemByName(sys9[1]);
+    } catch (Exception e) {
+    }
+    try {
+      sysClient.deleteSystemByName(sysA[1]);
+    } catch (Exception e) {
+    }
   }
 
-  private String createSystem(String[] sys, AccessMechanismEnum accessMech, TransferMechanismsEnum[] txfrMechs) throws TapisClientException
-  {
-    // Convert list of TransferMechanism enums to list of strings
-    List<String> transferMechs = Stream.of(txfrMechs).map(TransferMechanismsEnum::name).collect(Collectors.toList());
+  private String createSystem(String[] sys, AccessMethodEnum accessMethod, TransferMethodsEnum[] txfrMethods) throws TapisClientException {
+    // Convert list of TransferMethod enums to list of strings
+    List<String> transferMethods = Stream.of(txfrMethods).map(TransferMethodsEnum::name).collect(Collectors.toList());
     // Create the system
-    return sysClient.createSystem(sys[1], sys[2], sys[3], sys[4], true, sys[5], sys[6],
-                            sys[7], sys[8], sys[9], sys[10], sys[11], sys[12], sys[13],
-                            sys[14], accessMech.name(), transferMechs,
-                            prot1Port, prot1UseProxy, prot1ProxyHost, prot1ProxyPort);
+    return sysClient.createSystem(sys[1], sys[2], sys[3], sys[4], sys[5], true,
+                                  sys[6], accessMethod.name(), null, sys[8], sys[9], transferMethods,
+                                  prot1Port, prot1UseProxy, prot1ProxyHost, prot1ProxyPort,
+                                  true, sys[10], sys[11], sys[12], sys[13],null, sys[14], sys[15]);
   }
 }
