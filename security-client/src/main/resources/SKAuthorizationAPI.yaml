@@ -78,7 +78,7 @@ paths:
             default: false
       requestBody:
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: '#/components/schemas/ReqCreateRole'
         required: true
@@ -107,376 +107,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-  '/security/role/updateName/{roleName}':
-    post:
-      tags:
-        - role
-      description: 'Update an existing role using a request body.  Role names are case sensitive, alphanumeric strings that can contain underscores but must begin with an alphabetic character.  The limit on role name is 58 characters.'
-      operationId: updateRoleName
-      parameters:
-        - name: roleName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/ReqUpdateRoleName'
-        required: true
-      responses:
-        '200':
-          description: Role name updated.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '404':
-          description: Named role not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespName'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-  '/security/role/updateDesc/{roleName}':
-    post:
-      tags:
-        - role
-      description: Update an existing role using a request body.  The size limit on a description is 2048 characters.
-      operationId: updateRoleDescription
-      parameters:
-        - name: roleName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/ReqUpdateRoleDescription'
-        required: true
-      responses:
-        '200':
-          description: Role description updated.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '404':
-          description: Named role not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespName'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-  /security/role/addPerm:
-    post:
-      tags:
-        - role
-      description: |-
-        Add a permission to an existing role using a request body.  If the permission already exists, then the request has no effect and the change count returned is zero. Otherwise, the permission is added and the change count is one.  Permissions are case-sensitive strings that follow the format defined by Apache Shiro (https://shiro.apache.org/permissions.html).  This format defines any number of colon-separated (:) parts, with the possible use of asterisks (*) as wildcards and commas (,) as aggregators.  Here are two example permission strings:
-
-            system:MyTenant:read,write:system1
-            system:MyTenant:create,read,write,delete:*
-
-        See the Shiro documentation for further details.  Note that the three reserved characters, [: * ,], cannot appear in the text of any part.  It's the application's responsibility to escape those characters in a manner that is safe in the application's domain.
-      operationId: addRolePermission
-      parameters:
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/ReqAddRolePermission'
-        required: true
-      responses:
-        '200':
-          description: Permission assigned to role.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespChangeCount'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '404':
-          description: Named role not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespName'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-  /security/role/removePerm:
-    post:
-      tags:
-        - role
-      description: Remove a permission from a role using a request body.
-      operationId: removeRolePermission
-      parameters:
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/ReqRemoveRolePermission'
-        required: true
-      responses:
-        '200':
-          description: Permission removed from role.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespChangeCount'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '404':
-          description: Named role not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespName'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-  /security/role/addChild:
-    post:
-      tags:
-        - role
-      description: 'Add a child role to another role using a request body.  If the child already exists, then the request has no effect and the change count returned is zero. Otherwise, the child is added and the change count is one.'
-      operationId: addChildRole
-      parameters:
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/ReqAddChildRole'
-        required: true
-      responses:
-        '200':
-          description: Child assigned to parent role.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespChangeCount'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '404':
-          description: Named role not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespName'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-  /security/role/removeChild:
-    post:
-      tags:
-        - role
-      description: Remove a child role from a parent role using a request body.
-      operationId: removeChildRole
-      parameters:
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/ReqRemoveChildRole'
-        required: true
-      responses:
-        '200':
-          description: Child removed from parent role.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespChangeCount'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '404':
-          description: Named role not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespName'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-  /security/role/previewPathPrefix:
-    post:
-      tags:
-        - role
-      description: |-
-        This read-only endpoint previews the transformations that would take place if the same input was used on a replacePathPrefix POST call. This call is also implemented as a POST so that the same input as used on replacePathPrefix can be used here, but this call changes nothing.
-
-        This endpoint can be used to get an accounting of existing system/path combinations that match the input specification. Such information is useful when trying to duplicate a set of permissions. For example, one may want to copy a file subtree to another location and assign the same permissions to the new subtree as currently exist on the original subtree. One could use  this call to calculate the users that should be granted permission on the new subtree.
-
-        The optional parameters are roleName, oldPrefix and newPrefix. No wildcards are defined for the path prefix parameters.  When roleName is specified then only permissions assigned to that role are considered.
-
-        When the oldPrefix parameter is provided, it's used to filter out permissions whose paths do not begin with the specified string; when not provided, no path prefix filtering occurs.
-
-        When the newPrefix parameter is not provided no new characters are prepended to the new path, effectively just removing the oldPrefix from the new path. When neither oldPrefix nor newPrefix are provided, no path transformation occurs, though system IDs can still be transformed.
-
-        The result object contains an array of transformation objects, each of which contains the unique permission sequence number, the existing permission that matched the search criteria and the new permission if the specified transformations were applied.
-      operationId: previewPathPrefix
-      parameters:
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/ReqPreviewPathPrefix'
-        required: true
-      responses:
-        '200':
-          description: Path prefixes previewed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespPathPrefixes'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '404':
-          description: Named role not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespName'
         '500':
           description: Server error.
           content:
@@ -625,6 +255,376 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+  '/security/role/updateName/{roleName}':
+    post:
+      tags:
+        - role
+      description: 'Update an existing role using a request body.  Role names are case sensitive, alphanumeric strings that can contain underscores but must begin with an alphabetic character.  The limit on role name is 58 characters.'
+      operationId: updateRoleName
+      parameters:
+        - name: roleName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqUpdateRoleName'
+        required: true
+      responses:
+        '200':
+          description: Role name updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Named role not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  '/security/role/updateDesc/{roleName}':
+    post:
+      tags:
+        - role
+      description: Update an existing role using a request body.  The size limit on a description is 2048 characters.
+      operationId: updateRoleDescription
+      parameters:
+        - name: roleName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqUpdateRoleDescription'
+        required: true
+      responses:
+        '200':
+          description: Role description updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Named role not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  /security/role/addPerm:
+    post:
+      tags:
+        - role
+      description: |-
+        Add a permission to an existing role using a request body.  If the permission already exists, then the request has no effect and the change count returned is zero. Otherwise, the permission is added and the change count is one.  Permissions are case-sensitive strings that follow the format defined by Apache Shiro (https://shiro.apache.org/permissions.html).  This format defines any number of colon-separated (:) parts, with the possible use of asterisks (*) as wildcards and commas (,) as aggregators.  Here are two example permission strings:
+
+            system:MyTenant:read,write:system1
+            system:MyTenant:create,read,write,delete:*
+
+        See the Shiro documentation for further details.  Note that the three reserved characters, [: * ,], cannot appear in the text of any part.  It's the application's responsibility to escape those characters in a manner that is safe in the application's domain.
+      operationId: addRolePermission
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqAddRolePermission'
+        required: true
+      responses:
+        '200':
+          description: Permission assigned to role.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Named role not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  /security/role/removePerm:
+    post:
+      tags:
+        - role
+      description: Remove a permission from a role using a request body.
+      operationId: removeRolePermission
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqRemoveRolePermission'
+        required: true
+      responses:
+        '200':
+          description: Permission removed from role.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Named role not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  /security/role/addChild:
+    post:
+      tags:
+        - role
+      description: 'Add a child role to another role using a request body.  If the child already exists, then the request has no effect and the change count returned is zero. Otherwise, the child is added and the change count is one.'
+      operationId: addChildRole
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqAddChildRole'
+        required: true
+      responses:
+        '200':
+          description: Child assigned to parent role.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Named role not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  /security/role/removeChild:
+    post:
+      tags:
+        - role
+      description: Remove a child role from a parent role using a request body.
+      operationId: removeChildRole
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqRemoveChildRole'
+        required: true
+      responses:
+        '200':
+          description: Child removed from parent role.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Named role not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  /security/role/previewPathPrefix:
+    post:
+      tags:
+        - role
+      description: |-
+        This read-only endpoint previews the transformations that would take place if the same input was used on a replacePathPrefix POST call. This call is also implemented as a POST so that the same input as used on replacePathPrefix can be used here, but this call changes nothing.
+
+        This endpoint can be used to get an accounting of existing system/path combinations that match the input specification. Such information is useful when trying to duplicate a set of permissions. For example, one may want to copy a file subtree to another location and assign the same permissions to the new subtree as currently exist on the original subtree. One could use  this call to calculate the users that should be granted permission on the new subtree.
+
+        The optional parameters are roleName, oldPrefix and newPrefix. No wildcards are defined for the path prefix parameters.  When roleName is specified then only permissions assigned to that role are considered.
+
+        When the oldPrefix parameter is provided, it's used to filter out permissions whose paths do not begin with the specified string; when not provided, no path prefix filtering occurs.
+
+        When the newPrefix parameter is not provided no new characters are prepended to the new path, effectively just removing the oldPrefix from the new path. When neither oldPrefix nor newPrefix are provided, no path transformation occurs, though system IDs can still be transformed.
+
+        The result object contains an array of transformation objects, each of which contains the unique permission sequence number, the existing permission that matched the search criteria and the new permission if the specified transformations were applied.
+      operationId: previewPathPrefix
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqPreviewPathPrefix'
+        required: true
+      responses:
+        '200':
+          description: Path prefixes previewed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespPathPrefixes'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Named role not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
   /security/role/replacePathPrefix:
     post:
       tags:
@@ -656,7 +656,7 @@ paths:
             default: false
       requestBody:
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: '#/components/schemas/ReqReplacePathPrefix'
         required: true
@@ -803,7 +803,7 @@ paths:
             default: false
       requestBody:
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: '#/components/schemas/ReqUserHasRole'
         required: true
@@ -814,6 +814,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespAuthorized'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  /security/user:
+    get:
+      tags:
+        - user
+      description: Get the names of all users in the tenant that have been granted a role or permission.
+      operationId: getUserNames
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Sorted list of user names.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespNameArray'
         '400':
           description: Input error.
           content:
@@ -859,43 +896,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespName'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-  /security/user:
-    get:
-      tags:
-        - user
-      description: Get the names of all users in the tenant that have been granted a role or permission.
-      operationId: getUserNames
-      parameters:
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      responses:
-        '200':
-          description: Sorted list of user names.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespNameArray'
         '400':
           description: Input error.
           content:
@@ -1049,7 +1049,7 @@ paths:
             default: false
       requestBody:
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: '#/components/schemas/ReqGrantUserRole'
         required: true
@@ -1098,7 +1098,7 @@ paths:
             default: false
       requestBody:
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: '#/components/schemas/ReqRevokeUserRole'
         required: true
@@ -1146,7 +1146,7 @@ paths:
             default: false
       requestBody:
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: '#/components/schemas/ReqGrantUserPermission'
         required: true
@@ -1189,7 +1189,7 @@ paths:
             default: false
       requestBody:
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: '#/components/schemas/ReqGrantUserRoleWithPermission'
         required: true
@@ -1241,7 +1241,7 @@ paths:
             default: false
       requestBody:
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: '#/components/schemas/ReqRevokeUserPermission'
         required: true
@@ -1284,7 +1284,7 @@ paths:
             default: false
       requestBody:
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: '#/components/schemas/ReqUserHasRoleMulti'
         required: true
@@ -1327,7 +1327,7 @@ paths:
             default: false
       requestBody:
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: '#/components/schemas/ReqUserHasRoleMulti'
         required: true
@@ -1370,7 +1370,7 @@ paths:
             default: false
       requestBody:
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: '#/components/schemas/ReqUserIsPermitted'
         required: true
@@ -1413,7 +1413,7 @@ paths:
             default: false
       requestBody:
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: '#/components/schemas/ReqUserIsPermittedMulti'
         required: true
@@ -1456,7 +1456,7 @@ paths:
             default: false
       requestBody:
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: '#/components/schemas/ReqUserIsPermittedMulti'
         required: true
@@ -1591,11 +1591,11 @@ paths:
       tags:
         - vault
       description: |-
-        Read a versioned secret. A secret is read from a path name constructed using the secretName URL path parameter. The path name also includes the tenant and user who owns the secret.
+        Read a versioned secret. A secret is read from a path name constructed from the *secretName* parameter. The constructed path name always includes the tenant and user who owns the secret.
 
-        By default, the latest version of the secret is read. If the 'version' query parameter is specified then that version of the secret is read if it exists. The 'version' parameter should be passed as an integer. Zero indicates that the latest version of the secret should be returned. A NOT FOUND status code is returned if the secret does not exist.
+        By default, the latest version of the secret is read. If the *version* query parameter is specified then that version of the secret is read. The *version* parameter should be passed as an integer. Zero indicates that the latest version of the secret should be returned. A NOT FOUND status code is returned if the secret version does not exist or if it's deleted or destroyed.
 
-        The response object includes the map of zero or more key/value pairs and metadata that describes the secret, including which version of the secret was returned.
+        The response object includes the map of zero or more key/value pairs and metadata that describes the secret. The metadata includes which version of the secret was returned.
       operationId: readSecret
       parameters:
         - name: secretName
@@ -1655,13 +1655,13 @@ paths:
       tags:
         - vault
       description: |-
-        Create or update a secret. A secret is assigned a path name constructed using the secretName URL path parameter. The path name also includes the tenant and user on behalf of whom the the secret is being saved. At the top-level, the JSON payload may contain an optional 'options' object and a required 'data' object.
+        Create or update a secret. A secret is assigned a path name constructed from the *secretName* parameter. The path name also includes the tenant and user on behalf of whom the the secret is being saved. At the top-level, the JSON payload contains an optional *options* object and a required *data* object.
 
-        The 'data' object is a JSON object that contains one or more key/value pairs in which both the key and value are strings. These are the individual secrets that are saved under the path name. The secrets are automatically versioned, which allows a pre-configured number of past secret values to be accessible even after new values are assigned. See the various read operations for details on how to access different versions of a secret.
+        The *data* object is a JSON object that contains one or more key/value pairs in which both the key and value are strings. These are the individual secrets that are saved under the path name. The secrets are automatically versioned, which allows a pre-configured number of past secret values to be accessible even after new values are assigned. See the various GET operations for details on how to access different aspects of secrets.
 
-        NOTE: The 'cas' option is currently ignored but documented here for future reference.
+        NOTE: The *cas* option is currently ignored but documented here for future reference.
 
-        The options object can contains a 'cas' key and with an integer value that represents as secret version.  CAS stands for check-and-set and will check an existing secret's version before updating.  If cas is not set the write will be always be allowed. If set to 0, a write will only be allowed if the key doesn’t exist. If the index is greater than zero the write will only be allowed if the key’s current version matches the version specified in the cas parameter.
+        The *options* object can contain a *cas* key and with an integer value that represents a secret version.  CAS stands for check-and-set and will check an existing secret's version before updating.  If cas is not set the write will be always be allowed. If set to 0, a write will only be allowed if the key doesn’t exist. If the index is greater than zero, then the write will only be allowed if the key’s current version matches the version specified in the cas parameter.
       operationId: writeSecret
       parameters:
         - name: secretName
@@ -1676,7 +1676,7 @@ paths:
             default: false
       requestBody:
         content:
-          '*/*':
+          application/json:
             schema:
               $ref: '#/components/schemas/ReqWriteSecret'
         required: true
@@ -1686,9 +1686,354 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RespBasic'
+                $ref: '#/components/schemas/RespSecretMeta'
         '204':
           description: No content.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  '/security/vault/secret/delete/{secretName}':
+    post:
+      tags:
+        - vault
+      description: |
+        Soft delete one or more versions of a secret. Each version can be deleted individually or as part of a group specified in the input array. Deletion can be reversed using the *secret/undelete/{secretName}* endpoint, which make this a _soft_ deletion operation.
+
+        The input versions array is interpreted as follows:
+
+           * [ ] - empty = delete all versions
+           * [0] - zero = delete only the latest version
+           * [1, 3, ...] - list = delete the specified versions
+      operationId: deleteSecret
+      parameters:
+        - name: secretName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqVersions'
+        required: true
+      responses:
+        '200':
+          description: Secret deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespVersions'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Secret not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  '/security/vault/secret/undelete/{secretName}':
+    post:
+      tags:
+        - vault
+      description: |
+        Restore one or more versions of a secret that have previously been deleted. This endpoint undoes soft deletions performed using the *secret/delete/{secretName}* endpoint.
+
+        The input versions array is interpreted as follows:
+
+           * [ ] - empty = undelete all versions
+           * [0] - zero = undelete only the latest version
+           * [1, 3, ...] - list = undelete the specified versions
+      operationId: undeleteSecret
+      parameters:
+        - name: secretName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqVersions'
+        required: true
+      responses:
+        '200':
+          description: Secret written.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespVersions'
+        '204':
+          description: No content.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  '/security/vault/secret/destroy/{secretName}':
+    post:
+      tags:
+        - vault
+      description: |
+        Destroy one or more versions of a secret. Destroy implements a hard delete which delete that cannot be undone. It does not, however, remove any metadata associated with the secret.
+
+        The input versions array is interpreted as follows:
+
+           * [ ] - empty = destroy all versions
+           * [0] - zero = destroy only the latest version
+           * [1, 3, ...] - list = destroy the specified versions
+      operationId: destroySecret
+      parameters:
+        - name: secretName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqVersions'
+        required: true
+      responses:
+        '200':
+          description: Secret written.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespVersions'
+        '204':
+          description: No content.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  '/security/vault/secret/read/meta/{secretName}':
+    get:
+      tags:
+        - vault
+      description: 'List a secret''s metadata including its version information. The input parameter must be a secret name, not a folder. The result includes which version of the secret is the latest.'
+      operationId: readSecretMeta
+      parameters:
+        - name: secretName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Secret read.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSecretVersionMetadata'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  /security/vault/secret/list/meta:
+    get:
+      tags:
+        - vault
+      description: 'List the secret names at the specified path. The path must represent a folder, not an actual secret name. If the path does not have a trailing slash one will be inserted. Secret names should not encode private information.'
+      operationId: listSecretMeta
+      parameters:
+        - name: secretName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Secrets listed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSecretList'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  '/security/vault/secret/destroy/meta/{secretName}':
+    delete:
+      tags:
+        - vault
+      description: 'Erase all traces of a secret: its key, all versions of its value and all its metadata. Specifying a folder erases all secrets in that folder.'
+      operationId: destroySecretMeta
+      parameters:
+        - name: secretName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Secret completely removed.
           content:
             application/json:
               schema:
@@ -1771,6 +2116,37 @@ components:
           type: array
           items:
             type: string
+    RespRole:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/SkRole'
+    SkRole:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        tenant:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        created:
+          type: string
+        createdby:
+          type: string
+        updated:
+          type: string
+        updatedby:
+          type: string
     RespName:
       type: object
       properties:
@@ -1786,16 +2162,6 @@ components:
       type: object
       properties:
         name:
-          type: string
-    ReqUpdateRoleName:
-      type: object
-      properties:
-        newRoleName:
-          type: string
-    ReqUpdateRoleDescription:
-      type: object
-      properties:
-        description:
           type: string
     RespChangeCount:
       type: object
@@ -1814,6 +2180,16 @@ components:
         changes:
           type: integer
           format: int32
+    ReqUpdateRoleName:
+      type: object
+      properties:
+        newRoleName:
+          type: string
+    ReqUpdateRoleDescription:
+      type: object
+      properties:
+        description:
+          type: string
     ReqAddRolePermission:
       type: object
       properties:
@@ -1879,37 +2255,6 @@ components:
         oldPrefix:
           type: string
         newPrefix:
-          type: string
-    RespRole:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          $ref: '#/components/schemas/SkRole'
-    SkRole:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int32
-        tenant:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        created:
-          type: string
-        createdby:
-          type: string
-        updated:
-          type: string
-        updatedby:
           type: string
     ReqReplacePathPrefix:
       type: object
@@ -2011,6 +2356,29 @@ components:
           type: array
           items:
             type: string
+    RespSecretMeta:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/SkSecretMetadata'
+    SkSecretMetadata:
+      type: object
+      properties:
+        created_time:
+          type: string
+        deletion_time:
+          type: string
+        destroyed:
+          type: boolean
+        version:
+          type: integer
+          format: int32
     Options:
       type: object
       properties:
@@ -2026,6 +2394,91 @@ components:
           type: object
           additionalProperties:
             type: string
+    RespVersions:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          type: array
+          items:
+            type: integer
+            format: int32
+    ReqVersions:
+      type: object
+      properties:
+        versions:
+          type: array
+          items:
+            type: integer
+            format: int32
+    RespSecretVersionMetadata:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/SkSecretVersionMetadata'
+    SkSecretVersion:
+      type: object
+      properties:
+        version:
+          type: integer
+          format: int32
+        created_time:
+          type: string
+        deletion_time:
+          type: string
+        destroyed:
+          type: boolean
+    SkSecretVersionMetadata:
+      type: object
+      properties:
+        created_time:
+          type: string
+        current_version:
+          type: integer
+          format: int32
+        max_versions:
+          type: integer
+          format: int32
+        oldest_version:
+          type: integer
+          format: int32
+        updated_time:
+          type: string
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkSecretVersion'
+    RespSecretList:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/SkSecretList'
+    SkSecretList:
+      type: object
+      properties:
+        secretPath:
+          type: string
+        keys:
+          type: array
+          items:
+            type: string
     RespSecret:
       type: object
       properties:
@@ -2035,24 +2488,17 @@ components:
           type: string
         version:
           type: string
+        result:
+          $ref: '#/components/schemas/SkSecret'
+    SkSecret:
+      type: object
+      properties:
         secretMap:
           type: object
           additionalProperties:
             type: string
         metadata:
-          $ref: '#/components/schemas/SecretMetadata'
-    SecretMetadata:
-      type: object
-      properties:
-        created_time:
-          type: string
-        deletion_time:
-          type: string
-        destroyed:
-          type: boolean
-        version:
-          type: integer
-          format: int32
+          $ref: '#/components/schemas/SkSecretMetadata'
   securitySchemes:
     TapisJWT:
       type: apiKey
