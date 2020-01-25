@@ -5,21 +5,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.gson.JsonObject;
 import edu.utexas.tacc.tapis.shared.exceptions.TapisClientException;
+import edu.utexas.tacc.tapis.shared.utils.TapisGsonUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
+import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem.AccessMethodEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem.TransferMethodsEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem.SystemTypeEnum;
 import edu.utexas.tacc.tapis.tokens.client.TokensClient;
-
-// TODO Update tests to check "tags" value
-// TODO Update tests to check "notes" value
 
 /**
  * Test the Systems API client against the systems service.
@@ -50,12 +50,12 @@ public class SystemsClientTest {
   private static final AccessMethodEnum prot1AccessMethod = AccessMethodEnum.PASSWORD;
   private static final String tags = "{\"key1\":\"a\", \"key2\":\"b\"}";
   private static final String notes = "{\"project\":\"myproj1\", \"testdata\":\"abc\"}";
-  // TODO/TBD: No perms enum in auto-generated model class?
+  // TODO/TBD: No perms enum in auto-generated model class. Why not?
 //  private static final List<String> testPerms = new ArrayList<>(List.of(TSystem.Permissions.READ.name(),TSystem.Permissions.MODIFY.name(),
 //          TSystem.Permissions.DELETE.name()));
   private static final List<String> testPerms = new ArrayList<>(List.of("READ", "MODIFY", "DELETE"));
 
-  private static final String[] sys1 = {tenantName, "Csys1", "description 1", sysType, sysOwner, "host1", "effUser1", "{\"password\": \"fakePassword\"}",
+  private static final String[] sys1 = {tenantName, "Csys1", "description 1", sysType, sysOwner, "host1", "effUser1", "fakePassword1",
           "bucket1", "/root1", "jobLocalWorkDir1", "jobLocalArchDir1", "jobRemoteArchSystem1", "jobRemoteArchDir1", tags, notes};
   private static final String[] sys2 = {tenantName, "Csys2", "description 2", sysType, sysOwner, "host2", "effUser2", "fakePassword2",
           "bucket2", "/root2", "jobLocalWorkDir2", "jobLocalArchDir2", "jobRemoteArchSystem2", "jobRemoteArchDir2", tags, notes};
@@ -75,6 +75,8 @@ public class SystemsClientTest {
           "bucket9", "/root9", "jobLocalWorkDir9", "jobLocalArchDir9", "jobRemoteArchSystem9", "jobRemoteArchDir9", tags, notes};
   private static final String[] sysA = {tenantName, "CsysA", "description A", sysType, sysOwner, "hostA", "effUserA", "fakePasswordA",
           "bucketA", "/rootA", "jobLocalWorkDirA", "jobLocalArchDirA", "jobRemoteArchSystemA", "jobRemoteArchDirA", tags, notes};
+  private static final String[] sysB = {tenantName, "CsysB", "description B", sysType, sysOwner, "hostB", "${apiUserId}", "fakePasswordB",
+          "bucketB", "/rootB", "jobLocalWorkDirB", "jobLocalArchDirB", "jobRemoteArchSystemB", "jobRemoteArchDirB", tags, notes};
 
   private SystemsClient sysClient;
 
@@ -85,7 +87,7 @@ public class SystemsClientTest {
     // Get token using URL from env or from default
     String tokensURL = System.getenv(TAPIS_ENV_SVC_URL_TOKENS);
     if (StringUtils.isBlank(tokensURL)) tokensURL = DEFAULT_BASE_URL_TOKENS;
-    // Get short term JWT from tokens service
+    // Get short term user JWT from tokens service
     var tokClient = new TokensClient(tokensURL);
     String usrJWT;
 //    try {usrJWT = tokClient.getSvcToken(tenantName, SERVICE_NAME_SYSTEMS);}
@@ -114,7 +116,7 @@ public class SystemsClientTest {
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
-      System.out.println("Caught exception: " + e.getMessage() + "\n Stack trace: " + e.getStackTrace());
+      System.out.println("Caught exception: " + e);
       Assert.fail();
     }
   }
@@ -139,7 +141,7 @@ public class SystemsClientTest {
   }
 
   // Test that bucketName is required if transfer mechanisms include S3
-  @Test(expectedExceptions = {TapisClientException.class}, expectedExceptionsMessageRegExp = "^SYSAPI_S3_NOBUCKET_INPUT.*")
+  @Test(expectedExceptions = {TapisClientException.class}, expectedExceptionsMessageRegExp = ".*SYSAPI_S3_NOBUCKET_INPUT.*")
   public void testCreateSystemS3NoBucketName() throws Exception {
     // Create a system
     String[] sys0 = sys8;
@@ -148,13 +150,23 @@ public class SystemsClientTest {
     Assert.fail("Exception should have been thrown");
   }
 
-  // Test that access mechanism of SSH_CERT and static owner is not allowed
-  @Test(expectedExceptions = {TapisClientException.class}, expectedExceptionsMessageRegExp = "^SYSAPI_INVALID_EFFECTIVEUSERID_INPUT.*")
+  // Test that access mechanism of CERT and static owner is not allowed
+  @Test(expectedExceptions = {TapisClientException.class}, expectedExceptionsMessageRegExp = ".*SYSAPI_INVALID_EFFECTIVEUSERID_INPUT.*")
   public void testCreateSystemInvalidEffUserId() throws Exception {
     // Create a system
     String[] sys0 = sys9;
     System.out.println("Creating system with name: " + sys0[1]);
     createSystem(sys0, AccessMethodEnum.CERT, prot1TxfrMethods);
+    Assert.fail("Exception should have been thrown");
+  }
+
+  // Test that providing credentials for dynamic effective user is not allowed
+  @Test(expectedExceptions = {TapisClientException.class}, expectedExceptionsMessageRegExp = ".*SYSAPI_CRED_DISALLOWED_INPUT.*")
+  public void testCreateSystemCredDisallowed() throws Exception {
+    // Create a system
+    String[] sys0 = sysB;
+    System.out.println("Creating system with name: " + sys0[1]);
+    createSystem(sys0, prot1AccessMethod, prot1TxfrMethods);
     Assert.fail("Exception should have been thrown");
   }
 
@@ -180,8 +192,6 @@ public class SystemsClientTest {
     Assert.assertEquals(tmpSys.getJobLocalArchiveDir(), sys0[11]);
     Assert.assertEquals(tmpSys.getJobRemoteArchiveSystem(), sys0[12]);
     Assert.assertEquals(tmpSys.getJobRemoteArchiveDir(), sys0[13]);
-    System.out.println("Found tags: " + tmpSys.getTags());
-    System.out.println("Found notes: " + tmpSys.getNotes());
     Assert.assertEquals(tmpSys.getAccessMethod(), prot1AccessMethod);
     Assert.assertEquals(tmpSys.getPort().intValue(), prot1Port);
     Assert.assertEquals(tmpSys.getUseProxy().booleanValue(), prot1UseProxy);
@@ -191,6 +201,23 @@ public class SystemsClientTest {
     Assert.assertNotNull(tMethodsList);
     Assert.assertTrue(tMethodsList.contains(TransferMethodsEnum.S3), "List of transfer mechanisms did not contain: " + TransferMethodsEnum.S3.name());
     Assert.assertTrue(tMethodsList.contains(TransferMethodsEnum.SFTP), "List of transfer mechanisms did not contain: " + TransferMethodsEnum.SFTP.name());
+    // Retrieve tags, convert to json, verify keys and values
+    String tags = tmpSys.getTags();
+    System.out.println("Found tags: " + tags);
+    // Get the Json object and prepare to extract info from it
+    JsonObject obj = TapisGsonUtils.getGson().fromJson(tags, JsonObject.class);
+    Assert.assertTrue(obj.has("key1"));
+    Assert.assertEquals(obj.get("key1").getAsString(), "a");
+    Assert.assertTrue(obj.has("key2"));
+    Assert.assertEquals(obj.get("key2").getAsString(), "b");
+    // Retrieve notes, convert to json, verify elements
+    String notes = tmpSys.getNotes();
+    System.out.println("Found notes: " + notes);
+    obj = TapisGsonUtils.getGson().fromJson(notes, JsonObject.class);
+    Assert.assertTrue(obj.has("project"));
+    Assert.assertEquals(obj.get("project").getAsString(), "myproj1");
+    Assert.assertTrue(obj.has("testdata"));
+    Assert.assertEquals(obj.get("testdata").getAsString(), "abc");
   }
 
   @Test
@@ -330,9 +357,16 @@ public class SystemsClientTest {
   private String createSystem(String[] sys, AccessMethodEnum accessMethod, TransferMethodsEnum[] txfrMethods) throws TapisClientException {
     // Convert list of TransferMethod enums to list of strings
     List<String> transferMethods = Stream.of(txfrMethods).map(TransferMethodsEnum::name).collect(Collectors.toList());
+    // If password is set then create a credential
+    Credential credential = null;
+    String password = sys[7];
+    if (!StringUtils.isBlank(password))
+    {
+      credential = sysClient.buildCredential(password, null, null, null, null, null);
+    }
     // Create the system
     return sysClient.createSystem(sys[1], sys[2], sys[3], sys[4], sys[5], true,
-                                  sys[6], accessMethod.name(), null, sys[8], sys[9], transferMethods,
+                                  sys[6], accessMethod.name(), credential, sys[8], sys[9], transferMethods,
                                   prot1Port, prot1UseProxy, prot1ProxyHost, prot1ProxyPort,
                                   true, sys[10], sys[11], sys[12], sys[13],null, sys[14], sys[15]);
   }

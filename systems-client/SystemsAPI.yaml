@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
   title: Tapis Systems API
-  description: The Tapis Systems API provides for management of Tapis Systems including access and transfer methods, permissions and credentials.
+  description: 'The Tapis Systems API provides for management of Tapis Systems including access and transfer methods, permissions and credentials.'
   contact:
     name: CICSupport
     email: cicsupport@tacc.utexas.edu
@@ -51,7 +51,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RespNameArray'
+                $ref: '#/components/schemas/RespCredential'
         '400':
           description: Input error.
           content:
@@ -154,7 +154,7 @@ paths:
             default: false
       responses:
         '200':
-          description: Permission revoked.
+          description: Credential removed.
           content:
             application/json:
               schema:
@@ -602,10 +602,6 @@ components:
     ReqCreateCredential:
       type: object
       properties:
-        system:
-          type: string
-        user:
-          type: string
         password:
           type: string
         privateKey:
@@ -618,6 +614,32 @@ components:
           type: string
         accessSecret:
           type: string
+    Credential:
+      type: object
+      properties:
+        password:
+          type: string
+        privateKey:
+          type: string
+        publicKey:
+          type: string
+        certificate:
+          type: string
+        accessKey:
+          type: string
+        accessSecret:
+          type: string
+    RespCredential:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/Credential'
     RespNameArray:
       type: object
       properties:
@@ -679,7 +701,7 @@ components:
         accessMethod:
           type: string
         accessCredential:
-          type: string
+          $ref: '#/components/schemas/Credential'
         bucketName:
           type: string
         rootDir:
@@ -738,51 +760,6 @@ components:
           type: string
         value:
           type: string
-    Credential:
-      type: object
-      properties:
-        tenant:
-          type: string
-        system:
-          type: string
-        user:
-          type: string
-        systemType:
-          type: string
-          enum:
-            - LINUX
-            - OBJECT_STORE
-        accessMethod:
-          type: string
-          enum:
-            - PASSWORD
-            - PKI_KEYS
-            - CERT
-            - ACCESS_KEY
-        password:
-          type: array
-          items:
-            type: string
-        privateKey:
-          type: array
-          items:
-            type: string
-        publicKey:
-          type: array
-          items:
-            type: string
-        cert:
-          type: array
-          items:
-            type: string
-        accessKey:
-          type: array
-          items:
-            type: string
-        accessSecret:
-          type: array
-          items:
-            type: string
     RespSystem:
       type: object
       properties:

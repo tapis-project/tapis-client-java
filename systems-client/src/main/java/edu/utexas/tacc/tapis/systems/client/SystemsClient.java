@@ -1,6 +1,8 @@
 package edu.utexas.tacc.tapis.systems.client;
 
 import java.util.List;
+
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateCredential;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.Gson;
 
@@ -16,10 +18,12 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespBasic;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespChangeCount;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespNameArray;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespResourceUrl;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 
 /**
  * Class providing a convenient front-end to the automatically generated client code
@@ -96,6 +100,10 @@ public class SystemsClient
     return Configuration.getDefaultApiClient().addDefaultHeader(key, val);
   }
 
+  // -----------------------------------------------------------------------
+  // ------------------------- Systems -------------------------------------
+  // -----------------------------------------------------------------------
+
   /**
    * Create a system
    *
@@ -103,7 +111,7 @@ public class SystemsClient
    * @throws TapisClientException - If create call throws an exception
    */
   public String createSystem(String name, String description, String systemType, String owner, String host, boolean available,
-                             String effectiveUserId, String accessMethod, String accessCredential,
+                             String effectiveUserId, String accessMethod, Credential accessCredential,
                              String bucketName, String rootDir, List<String> transferMethods,
                              int port, boolean useProxy, String proxyHost, int proxyPort,
                              boolean jobCanExec, String jobLocalWorkingDir, String jobLocalArchiveDir,
@@ -198,6 +206,10 @@ public class SystemsClient
     return resp.getResult().getChanges();
   }
 
+  // -----------------------------------------------------------------------
+  // --------------------------- Permissions -------------------------------
+  // -----------------------------------------------------------------------
+
   /**
    * Grant permissions for given system and user.
    *
@@ -258,6 +270,79 @@ public class SystemsClient
     try { resp = permsApi.revokeUserPerm(systemName, userName, permission, false); }
     catch (Exception e) { throwTapisClientException(e); }
     // TODO: Check return status and throw exception on error
+  }
+
+  // -----------------------------------------------------------------------
+  // ---------------------------- Credentials ------------------------------
+  // -----------------------------------------------------------------------
+
+  /**
+   * Create or update credential for given system and user.
+   *
+   * @throws TapisClientException - If grant call throws an exception
+   */
+  public void updateUserCredential(String systemName, String userName, String password, String privateKey, String publicKey,
+                                   String  certificate, String accessKey, String accessSecret)
+          throws TapisClientException
+  {
+    // Build the request
+    var req = new ReqCreateCredential();
+    req.setPassword(password);
+    req.setPrivateKey(privateKey);
+    req.setPublicKey(publicKey);
+    req.setCertificate(certificate);
+    req.setAccessKey(accessKey);
+    req.setAccessSecret(accessSecret);
+    // Submit the request and return the response
+    RespBasic resp = null;
+    try { resp = credsApi.createUserCredential(systemName, userName, req, false); }
+    catch (Exception e) { throwTapisClientException(e); }
+    // TODO: Check return status and throw exception on error
+  }
+
+  /**
+   * Retrieve a credential for given system and user.
+   *
+   * @throws TapisClientException - If get call throws an exception
+   */
+  public Credential getUserCredential(String systemName, String userName) throws TapisClientException
+  {
+    RespCredential resp = null;
+    try {resp = credsApi.getUserCredential(systemName, userName, false); }
+    catch (Exception e) { throwTapisClientException(e); }
+    return resp.getResult();
+  }
+
+  /**
+   * Delete credential for given system and user.
+   *
+   * @throws TapisClientException
+   */
+  public void deleteUserCredential(String systemName, String userName)
+          throws TapisClientException
+  {
+    // Submit the request and return the response
+    RespBasic resp = null;
+    try { resp = credsApi.removeUserCredential(systemName, userName, false); }
+    catch (Exception e) { throwTapisClientException(e); }
+    // TODO: Check return status and throw exception on error
+  }
+
+  /**
+   * Utility method to build a credential object given secrets.
+   *
+   */
+  public Credential buildCredential(String password, String privateKey, String publicKey, String certificate,
+                                    String accessKey, String accessSecret)
+  {
+    var cred = new Credential();
+    cred.setPassword(password);
+    cred.setPrivateKey(privateKey);
+    cred.setPublicKey(publicKey);
+    cred.setCertificate(certificate);
+    cred.setAccessKey(accessKey);
+    cred.setAccessSecret(accessSecret);
+    return cred;
   }
 
 
