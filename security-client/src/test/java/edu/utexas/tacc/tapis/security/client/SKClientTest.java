@@ -1,10 +1,9 @@
 package edu.utexas.tacc.tapis.security.client;
 
+import java.util.List;
+
 import org.testng.annotations.Test;
 
-import edu.utexas.tacc.tapis.security.client.gen.model.ResultChangeCount;
-import edu.utexas.tacc.tapis.security.client.gen.model.ResultNameArray;
-import edu.utexas.tacc.tapis.security.client.gen.model.ResultResourceUrl;
 import edu.utexas.tacc.tapis.shared.exceptions.TapisException;
 
 @Test(groups={"integration"})
@@ -30,7 +29,7 @@ public class SKClientTest
         SKClient skClient = new SKClient(null, JWT);
         
         // Create a role.
-        ResultResourceUrl resp1;
+        String resp1;
         try {resp1 = skClient.createRole("peachy", "This is a peachy description.");}
             catch (Exception e) {
                 System.out.println(e.toString());
@@ -39,7 +38,7 @@ public class SKClientTest
         System.out.println("createRole: " + resp1 + "\n");
         
         // Delete a role.
-        ResultChangeCount resp2;
+        Integer resp2;
         try {resp2 = skClient.deleteRoleByName("peachy");}
         catch (Exception e) {
             System.out.println(e.toString());
@@ -58,7 +57,7 @@ public class SKClientTest
         String roleName = "piggy";
         
         // Create a role.
-        ResultResourceUrl resp1;
+        String resp1;
         try {resp1 = skClient.createRole(roleName, "you little piggy.");}
             catch (Exception e) {
                 System.out.println(e.toString());
@@ -67,7 +66,7 @@ public class SKClientTest
         System.out.println("createRole: " + resp1 + "\n");
         
         // Assign a user the role.
-        ResultChangeCount resp2;
+        int resp2;
         try {resp2 = skClient.grantUserRole("bud", roleName);}
         catch (Exception e) {
             System.out.println(e.toString());
@@ -76,7 +75,7 @@ public class SKClientTest
         System.out.println("grantUserRole: " + resp2 + "\n");
         
         // Assign a user the role.
-        ResultChangeCount resp3;
+        int resp3;
         try {resp3 = skClient.grantUserRole("jane", roleName);}
         catch (Exception e) {
             System.out.println(e.toString());
@@ -85,7 +84,7 @@ public class SKClientTest
         System.out.println("grantUserRole: " + resp3 + "\n");
         
         // Get users with role.
-        ResultNameArray resp4;
+        List<String> resp4;
         try {resp4 = skClient.getUsersWithRole(roleName);}
         catch (Exception e) {
             System.out.println(e.toString());
@@ -94,7 +93,7 @@ public class SKClientTest
         System.out.println("grantUserRole: " + resp4 + "\n");
         
         // Delete a role.
-        ResultChangeCount resp5;
+        Integer resp5;
         try {resp5 = skClient.deleteRoleByName(roleName);}
         catch (Exception e) {
             System.out.println(e.toString());
