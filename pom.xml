@@ -82,6 +82,7 @@
         <module>tokens-client</module>
         <module>tenants-client</module>
         <module>systems-client</module>
+        <module>files-client</module>
     </modules>
 
 </project>
