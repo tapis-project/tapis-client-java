@@ -14,6 +14,8 @@ import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
+import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
+import edu.utexas.tacc.tapis.systems.client.gen.model.Capability.CategoryEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem.AccessMethodEnum;
@@ -78,6 +80,16 @@ public class SystemsClientTest {
   private static final String[] sysB = {tenantName, "CsysB", "description B", sysType, sysOwner, "hostB", "${apiUserId}", "fakePasswordB",
           "bucketB", "/rootB", "jobLocalWorkDirB", "jobLocalArchDirB", "jobRemoteArchSystemB", "jobRemoteArchDirB", tags, notes};
 
+  private static final Capability capA1 = SystemsClient.buildCapability(CategoryEnum.SCHEDULER, "Type", "Slurm");
+  private static final Capability capB1 = SystemsClient.buildCapability(CategoryEnum.HARDWARE, "CoresPerNode", "4");
+  private static final Capability capC1 = SystemsClient.buildCapability(CategoryEnum.SOFTWARE, "OpenMP", "4.5");
+  private static final Capability capA2 = SystemsClient.buildCapability(CategoryEnum.SCHEDULER, "Type", "Slurm");
+  private static final Capability capB2 = SystemsClient.buildCapability(CategoryEnum.HARDWARE, "CoresPerNode", "4");
+  private static final Capability capC2 = SystemsClient.buildCapability(CategoryEnum.SOFTWARE, "OpenMP", "4.5");
+  private static final Capability capD2 = SystemsClient.buildCapability(CategoryEnum.CONTAINER, "Singularity", null);
+  private static final List<Capability> cap1List = new ArrayList<>(List.of(capA1, capB1, capC1));
+  private static final List<Capability> cap2List = new ArrayList<>(List.of(capA2, capB2, capC2, capD2));
+
   private SystemsClient sysClient;
 
   @BeforeSuite
@@ -112,7 +124,7 @@ public class SystemsClientTest {
     String[] sys0 = sys1;
     System.out.println("Creating system with name: " + sys0[1]);
     try {
-      String respUrl = createSystem(sys0, prot1AccessMethod, prot1TxfrMethods);
+      String respUrl = createSystem(sys0, prot1AccessMethod, prot1TxfrMethods, cap1List);
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
@@ -127,7 +139,7 @@ public class SystemsClientTest {
     String[] sys0 = sys7;
     System.out.println("Creating system with name: " + sys0[1]);
     try {
-      String respUrl = createSystem(sys0, prot1AccessMethod, prot1TxfrMethods);
+      String respUrl = createSystem(sys0, prot1AccessMethod, prot1TxfrMethods, null);
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
@@ -136,7 +148,7 @@ public class SystemsClientTest {
     }
     // Now attempt to create it again, should throw exception
     System.out.println("Creating system with name: " + sys7[1]);
-    createSystem(sys7, prot1AccessMethod, prot1TxfrMethods);
+    createSystem(sys7, prot1AccessMethod, prot1TxfrMethods, null);
     Assert.fail("Exception should have been thrown");
   }
 
@@ -146,7 +158,7 @@ public class SystemsClientTest {
     // Create a system
     String[] sys0 = sys8;
     System.out.println("Creating system with name: " + sys0[1]);
-    createSystem(sys0, prot1AccessMethod, prot1TxfrMethods);
+    createSystem(sys0, prot1AccessMethod, prot1TxfrMethods, cap2List);
     Assert.fail("Exception should have been thrown");
   }
 
@@ -156,7 +168,7 @@ public class SystemsClientTest {
     // Create a system
     String[] sys0 = sys9;
     System.out.println("Creating system with name: " + sys0[1]);
-    createSystem(sys0, AccessMethodEnum.CERT, prot1TxfrMethods);
+    createSystem(sys0, AccessMethodEnum.CERT, prot1TxfrMethods, null);
     Assert.fail("Exception should have been thrown");
   }
 
@@ -166,14 +178,14 @@ public class SystemsClientTest {
     // Create a system
     String[] sys0 = sysB;
     System.out.println("Creating system with name: " + sys0[1]);
-    createSystem(sys0, prot1AccessMethod, prot1TxfrMethods);
+    createSystem(sys0, prot1AccessMethod, prot1TxfrMethods, null);
     Assert.fail("Exception should have been thrown");
   }
 
   @Test
   public void testGetSystemByName() throws Exception {
     String[] sys0 = sys2;
-    String respUrl = createSystem(sys0, prot1AccessMethod, prot1TxfrMethods);
+    String respUrl = createSystem(sys0, prot1AccessMethod, prot1TxfrMethods, cap2List);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     TSystem tmpSys = sysClient.getSystemByName(sys0[1], false);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
@@ -201,6 +213,16 @@ public class SystemsClientTest {
     Assert.assertNotNull(tMethodsList);
     Assert.assertTrue(tMethodsList.contains(TransferMethodsEnum.S3), "List of transfer mechanisms did not contain: " + TransferMethodsEnum.S3.name());
     Assert.assertTrue(tMethodsList.contains(TransferMethodsEnum.SFTP), "List of transfer mechanisms did not contain: " + TransferMethodsEnum.SFTP.name());
+    // Verify capabilities
+    List<Capability> jobCaps = tmpSys.getJobCapabilities();
+    Assert.assertNotNull(jobCaps);
+    Assert.assertEquals(jobCaps.size(), cap2List.size());
+    var capNamesFound = new ArrayList<String>();
+    for (Capability capFound : jobCaps) {capNamesFound.add(capFound.getName());}
+    for (Capability capSeed : cap2List)
+    {
+      Assert.assertTrue(capNamesFound.contains(capSeed.getName()), "List of capabilities did not contain a capability named: " + capSeed.getName());
+    }
     // Retrieve tags, convert to json, verify keys and values
     String tags = tmpSys.getTags();
     System.out.println("Found tags: " + tags);
@@ -224,10 +246,10 @@ public class SystemsClientTest {
   public void testGetSystemNames() throws Exception {
     // Create 2 systems
     String[] sys0 = sys3;
-    String respUrl = createSystem(sys0, prot1AccessMethod, prot1TxfrMethods);
+    String respUrl = createSystem(sys0, prot1AccessMethod, prot1TxfrMethods, cap1List);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     sys0 = sys4;
-    respUrl = createSystem(sys0, prot1AccessMethod, prot1TxfrMethods);
+    respUrl = createSystem(sys0, prot1AccessMethod, prot1TxfrMethods, cap2List);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Get list of all system names
@@ -254,7 +276,7 @@ public class SystemsClientTest {
   public void testDelete() throws Exception {
     // Create the system
     String[] sys0 = sys6;
-    String respUrl = createSystem(sys0, prot1AccessMethod, prot1TxfrMethods);
+    String respUrl = createSystem(sys0, prot1AccessMethod, prot1TxfrMethods, cap2List);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Delete the system
@@ -274,7 +296,7 @@ public class SystemsClientTest {
     // Create a system
     System.out.println("Creating system with name: " + sys0[1]);
     try {
-      String respUrl = createSystem(sys0, prot1AccessMethod, prot1TxfrMethods);
+      String respUrl = createSystem(sys0, prot1AccessMethod, prot1TxfrMethods, null);
       System.out.println("Created system: " + respUrl);
       System.out.println("Testing perms for user: " + testUser2);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
@@ -354,7 +376,8 @@ public class SystemsClientTest {
     }
   }
 
-  private String createSystem(String[] sys, AccessMethodEnum accessMethod, TransferMethodsEnum[] txfrMethods) throws TapisClientException {
+  private String createSystem(String[] sys, AccessMethodEnum accessMethod, TransferMethodsEnum[] txfrMethods,
+                              List<Capability> jobCaps) throws TapisClientException {
     // Convert list of TransferMethod enums to list of strings
     List<String> transferMethods = Stream.of(txfrMethods).map(TransferMethodsEnum::name).collect(Collectors.toList());
     // If password is set then create a credential
@@ -362,12 +385,12 @@ public class SystemsClientTest {
     String password = sys[7];
     if (!StringUtils.isBlank(password))
     {
-      credential = sysClient.buildCredential(password, null, null, null, null, null);
+      credential = SystemsClient.buildCredential(password, null, null, null, null, null);
     }
     // Create the system
     return sysClient.createSystem(sys[1], sys[2], sys[3], sys[4], sys[5], true,
                                   sys[6], accessMethod.name(), credential, sys[8], sys[9], transferMethods,
                                   prot1Port, prot1UseProxy, prot1ProxyHost, prot1ProxyPort,
-                                  true, sys[10], sys[11], sys[12], sys[13],null, sys[14], sys[15]);
+                                  true, sys[10], sys[11], sys[12], sys[13], jobCaps, sys[14], sys[15]);
   }
 }

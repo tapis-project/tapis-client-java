@@ -588,32 +588,6 @@ paths:
           description: Server error.
 components:
   schemas:
-    RespBasic:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          type: object
-    ReqCreateCredential:
-      type: object
-      properties:
-        password:
-          type: string
-        privateKey:
-          type: string
-        publicKey:
-          type: string
-        certificate:
-          type: string
-        accessKey:
-          type: string
-        accessSecret:
-          type: string
     Credential:
       type: object
       properties:
@@ -640,6 +614,39 @@ components:
           type: string
         result:
           $ref: '#/components/schemas/Credential'
+    RespBasic:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          type: object
+    ReqCreateCredential:
+      type: object
+      properties:
+        password:
+          type: string
+        privateKey:
+          type: string
+        publicKey:
+          type: string
+        certificate:
+          type: string
+        accessKey:
+          type: string
+        accessSecret:
+          type: string
+    ReqPerms:
+      type: object
+      properties:
+        permissions:
+          type: array
+          items:
+            type: string
     RespNameArray:
       type: object
       properties:
@@ -658,13 +665,6 @@ components:
           type: array
           items:
             type: string
-    ReqPerms:
-      type: object
-      properties:
-        permissions:
-          type: array
-          items:
-            type: string
     RespResourceUrl:
       type: object
       properties:
@@ -680,6 +680,24 @@ components:
       type: object
       properties:
         url:
+          type: string
+    Capability:
+      type: object
+      properties:
+        category:
+          type: string
+          enum:
+            - SCHEDULER
+            - OS
+            - HARDWARE
+            - SOFTWARE
+            - JOB
+            - CONTAINER
+            - MISC
+            - CUSTOM
+        name:
+          type: string
+        value:
           type: string
     ReqCreateSystem:
       type: object
@@ -733,32 +751,10 @@ components:
         jobCapabilities:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/Capability'
         tags:
           type: string
         notes:
-          type: string
-    Capability:
-      type: object
-      properties:
-        tenant:
-          type: string
-        system:
-          type: string
-        capType:
-          type: string
-          enum:
-            - SCHEDULER
-            - OS
-            - HARDWARE
-            - SOFTWARE
-            - COMPILER
-            - MODULES
-            - JOB
-            - CONTAINER
-        name:
-          type: string
-        value:
           type: string
     RespSystem:
       type: object

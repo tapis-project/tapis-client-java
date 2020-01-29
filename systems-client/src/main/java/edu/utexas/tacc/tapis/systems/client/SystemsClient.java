@@ -23,6 +23,8 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.RespNameArray;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespResourceUrl;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
+import edu.utexas.tacc.tapis.systems.client.gen.model.Capability.CategoryEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 
 /**
@@ -115,7 +117,7 @@ public class SystemsClient
                              String bucketName, String rootDir, List<String> transferMethods,
                              int port, boolean useProxy, String proxyHost, int proxyPort,
                              boolean jobCanExec, String jobLocalWorkingDir, String jobLocalArchiveDir,
-                             String jobRemoteArchiveSystem, String jobRemoteArchiveDir, List<String> jobCapabilities,
+                             String jobRemoteArchiveSystem, String jobRemoteArchiveDir, List<Capability> jobCapabilities,
                              String tags, String notes)
     throws TapisClientException
   {
@@ -332,7 +334,7 @@ public class SystemsClient
    * Utility method to build a credential object given secrets.
    *
    */
-  public Credential buildCredential(String password, String privateKey, String publicKey, String certificate,
+  public static Credential buildCredential(String password, String privateKey, String publicKey, String certificate,
                                     String accessKey, String accessSecret)
   {
     var cred = new Credential();
@@ -345,6 +347,18 @@ public class SystemsClient
     return cred;
   }
 
+  /**
+   * Utility method to build a Capability object given category, name and value
+   *
+   */
+  public static Capability buildCapability(CategoryEnum category, String name, String value)
+  {
+    var cap = new Capability();
+    cap.setCategory(category);
+    cap.setName(name);
+    cap.setValue(value);
+    return cap;
+  }
 
   // ************************************************************************
   // *********************** Private Methods ********************************
