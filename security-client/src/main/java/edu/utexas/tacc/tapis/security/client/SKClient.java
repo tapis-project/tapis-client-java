@@ -55,6 +55,10 @@ import edu.utexas.tacc.tapis.security.client.gen.model.SkSecretList;
 import edu.utexas.tacc.tapis.security.client.gen.model.SkSecretMetadata;
 import edu.utexas.tacc.tapis.security.client.gen.model.SkSecretVersionMetadata;
 import edu.utexas.tacc.tapis.security.client.gen.model.Transformation;
+import edu.utexas.tacc.tapis.security.client.model.SKSecretDeleteParms;
+import edu.utexas.tacc.tapis.security.client.model.SKSecretMetaParms;
+import edu.utexas.tacc.tapis.security.client.model.SKSecretReadParms;
+import edu.utexas.tacc.tapis.security.client.model.SKSecretWriteParms;
 import edu.utexas.tacc.tapis.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.shared.utils.TapisGsonUtils;
 
@@ -915,7 +919,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* readSecret:                                                                  */
     /* ---------------------------------------------------------------------------- */
-    public SkSecret readSecret(String secretName, Integer version)
+    public SkSecret readSecret(SKSecretReadParms parms)
      throws TapisClientException
     {
         // Make the REST call.
@@ -923,7 +927,17 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var vaultApi = new VaultApi();
-            resp = vaultApi.readSecret(secretName, version, false);
+            resp = vaultApi.readSecret(parms.getSecretType().getUrlText(),
+                                       parms.getSecretName(),
+                                       parms.getVersion(),
+                                       false, // pretty
+                                       parms.getSysId(),
+                                       parms.getSysOwner(),
+                                       parms.isDynamicKey(),
+                                       parms.getKeyType().name(),
+                                       parms.getDbHost(),
+                                       parms.getDbName(),
+                                       parms.getService());
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -934,22 +948,32 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* writeSecret:                                                                  */
     /* ---------------------------------------------------------------------------- */
-    public SkSecretMetadata writeSecret(String secretName, Map<String,String> secrets,
-                                        Options options)
+    public SkSecretMetadata writeSecret(SKSecretWriteParms parms)
      throws TapisClientException
     {
         // Package the input.
         ReqWriteSecret reqWriteSecret = new ReqWriteSecret();
-        reqWriteSecret.setData(secrets);
-        if (options == null) options = new Options();
-        reqWriteSecret.setOptions(options);
-        
+        reqWriteSecret.setData(parms.getData());
+        if (parms.getOptions() == null) reqWriteSecret.setOptions(new Options());
+         else reqWriteSecret.setOptions(parms.getOptions());
+
         // Make the REST call.
         RespSecretMeta resp = null;
         try {
             // Get the API object using default networking.
             var vaultApi = new VaultApi();
-            resp = vaultApi.writeSecret(secretName, reqWriteSecret, false);
+            resp = vaultApi.writeSecret(parms.getSecretType().getUrlText(),
+                                        parms.getSecretName(),
+                                        reqWriteSecret,
+                                        false, // pretty
+                                        parms.getSysId(),
+                                        parms.getSysOwner(),
+                                        parms.isDynamicKey(),
+                                        parms.getKeyType().name(),
+                                        parms.getDbHost(),
+                                        parms.getDbName(),
+                                        parms.getService());
+
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -960,19 +984,29 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* deleteSecret:                                                                */
     /* ---------------------------------------------------------------------------- */
-    public List<Integer> deleteSecret(String secretName, List<Integer> versions)
+    public List<Integer> deleteSecret(SKSecretDeleteParms parms)
      throws TapisClientException
     {
         // Package the input.
         ReqVersions reqVersions = new ReqVersions();
-        reqVersions.setVersions(versions);
-        
+        reqVersions.setVersions(parms.getVersions());
+
         // Make the REST call.
         RespVersions resp = null;
         try {
             // Get the API object using default networking.
             var vaultApi = new VaultApi();
-            resp = vaultApi.deleteSecret(secretName, reqVersions, false);
+            resp = vaultApi.deleteSecret(parms.getSecretType().getUrlText(),
+                                         parms.getSecretName(),
+                                         reqVersions,
+                                         false, // pretty
+                                         parms.getSysId(),
+                                         parms.getSysOwner(),
+                                         parms.isDynamicKey(),
+                                         parms.getKeyType().name(),
+                                         parms.getDbHost(),
+                                         parms.getDbName(),
+                                         parms.getService());
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -983,19 +1017,29 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* undeleteSecret:                                                              */
     /* ---------------------------------------------------------------------------- */
-    public List<Integer> undeleteSecret(String secretName, List<Integer> versions)
+    public List<Integer> undeleteSecret(SKSecretDeleteParms parms)
      throws TapisClientException
     {
         // Package the input.
         ReqVersions reqVersions = new ReqVersions();
-        reqVersions.setVersions(versions);
+        reqVersions.setVersions(parms.getVersions());
         
         // Make the REST call.
         RespVersions resp = null;
         try {
             // Get the API object using default networking.
             var vaultApi = new VaultApi();
-            resp = vaultApi.undeleteSecret(secretName, reqVersions, false);
+            resp = vaultApi.undeleteSecret(parms.getSecretType().getUrlText(),
+                                           parms.getSecretName(),
+                                           reqVersions,
+                                           false, // pretty
+                                           parms.getSysId(),
+                                           parms.getSysOwner(),
+                                           parms.isDynamicKey(),
+                                           parms.getKeyType().name(),
+                                           parms.getDbHost(),
+                                           parms.getDbName(),
+                                           parms.getService());
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -1006,19 +1050,29 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* destroySecret:                                                               */
     /* ---------------------------------------------------------------------------- */
-    public List<Integer> destroySecret(String secretName, List<Integer> versions)
+    public List<Integer> destroySecret(SKSecretDeleteParms parms)
      throws TapisClientException
     {
         // Package the input.
         ReqVersions reqVersions = new ReqVersions();
-        reqVersions.setVersions(versions);
+        reqVersions.setVersions(parms.getVersions());
         
         // Make the REST call.
         RespVersions resp = null;
         try {
             // Get the API object using default networking.
             var vaultApi = new VaultApi();
-            resp = vaultApi.destroySecret(secretName, reqVersions, false);
+            resp = vaultApi.destroySecret(parms.getSecretType().getUrlText(),
+                                          parms.getSecretName(),
+                                          reqVersions,
+                                          false, // pretty
+                                          parms.getSysId(),
+                                          parms.getSysOwner(),
+                                          parms.isDynamicKey(),
+                                          parms.getKeyType().name(),
+                                          parms.getDbHost(),
+                                          parms.getDbName(),
+                                          parms.getService());
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -1029,7 +1083,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* readSecretMeta:                                                              */
     /* ---------------------------------------------------------------------------- */
-    public SkSecretVersionMetadata readSecretMeta(String secretName)
+    public SkSecretVersionMetadata readSecretMeta(SKSecretMetaParms parms)
      throws TapisClientException
     {
         // Make the REST call.
@@ -1037,7 +1091,16 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var vaultApi = new VaultApi();
-            resp = vaultApi.readSecretMeta(secretName, false);
+            resp = vaultApi.readSecretMeta(parms.getSecretType().getUrlText(),
+                                           parms.getSecretName(),
+                                           false, // pretty
+                                           parms.getSysId(),
+                                           parms.getSysOwner(),
+                                           parms.isDynamicKey(),
+                                           parms.getKeyType().name(),
+                                           parms.getDbHost(),
+                                           parms.getDbName(),
+                                           parms.getService());
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -1048,7 +1111,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* listSecretMeta:                                                              */
     /* ---------------------------------------------------------------------------- */
-    public SkSecretList listSecretMeta(String secretName)
+    public SkSecretList listSecretMeta(SKSecretMetaParms parms)
      throws TapisClientException
     {
         // Make the REST call.
@@ -1056,7 +1119,15 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var vaultApi = new VaultApi();
-            resp = vaultApi.listSecretMeta(secretName, false);
+            resp = vaultApi.listSecretMeta(parms.getSecretType().getUrlText(),
+                                           false, // pretty
+                                           parms.getSysId(),
+                                           parms.getSysOwner(),
+                                           parms.isDynamicKey(),
+                                           parms.getKeyType().name(),
+                                           parms.getDbHost(),
+                                           parms.getDbName(),
+                                           parms.getService());
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -1067,7 +1138,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* destroySecretMeta:                                                           */
     /* ---------------------------------------------------------------------------- */
-    public void destroySecretMeta(String secretName)
+    public void destroySecretMeta(SKSecretMetaParms parms)
      throws TapisClientException
     {
         // Make the REST call.
@@ -1076,7 +1147,16 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var vaultApi = new VaultApi();
-            resp = vaultApi.destroySecretMeta(secretName, false);
+            resp = vaultApi.destroySecretMeta(parms.getSecretType().getUrlText(),
+                                              parms.getSecretName(),
+                                              false, // pretty
+                                              parms.getSysId(),
+                                              parms.getSysOwner(),
+                                              parms.isDynamicKey(),
+                                              parms.getKeyType().name(),
+                                              parms.getDbHost(),
+                                              parms.getDbName(),
+                                              parms.getService());
         }
         catch (Exception e) {throwTapisClientException(e);}
     }

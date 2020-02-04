@@ -736,21 +736,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  /security/ready:
-    get:
-      tags:
-        - general
-      description: Lightwieght readiness check.
-      operationId: ready
-      responses:
-        '200':
-          description: Service ready.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '503':
-          description: Service unavailable.
   /security/hello:
     get:
       tags:
@@ -783,6 +768,21 @@ paths:
       responses:
         '200':
           description: Message received.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '503':
+          description: Service unavailable.
+  /security/ready:
+    get:
+      tags:
+        - general
+      description: Lightwieght readiness check.
+      operationId: ready
+      responses:
+        '200':
+          description: Service ready.
           content:
             application/json:
               schema:
@@ -832,43 +832,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  /security/user:
-    get:
-      tags:
-        - user
-      description: Get the names of all users in the tenant that have been granted a role or permission.
-      operationId: getUserNames
-      parameters:
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      responses:
-        '200':
-          description: Sorted list of user names.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespNameArray'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
   '/security/user/defaultRole/{user}':
     get:
       tags:
@@ -896,6 +859,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespName'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  /security/user:
+    get:
+      tags:
+        - user
+      description: Get the names of all users in the tenant that have been granted a role or permission.
+      operationId: getUserNames
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Sorted list of user names.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespNameArray'
         '400':
           description: Input error.
           content:
@@ -1586,138 +1586,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/security/vault/secret/{secretName}':
-    get:
-      tags:
-        - vault
-      description: |-
-        Read a versioned secret. A secret is read from a path name constructed from the *secretName* parameter. The constructed path name always includes the tenant and user who owns the secret.
-
-        By default, the latest version of the secret is read. If the *version* query parameter is specified then that version of the secret is read. The *version* parameter should be passed as an integer. Zero indicates that the latest version of the secret should be returned. A NOT FOUND status code is returned if the secret version does not exist or if it's deleted or destroyed.
-
-        The response object includes the map of zero or more key/value pairs and metadata that describes the secret. The metadata includes which version of the secret was returned.
-      operationId: readSecret
-      parameters:
-        - name: secretName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: version
-          in: query
-          schema:
-            type: integer
-            format: int32
-            default: 0
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      responses:
-        '200':
-          description: Secret written.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespSecret'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '403':
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '404':
-          description: Not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-    post:
-      tags:
-        - vault
-      description: |-
-        Create or update a secret. A secret is assigned a path name constructed from the *secretName* parameter. The path name also includes the tenant and user on behalf of whom the the secret is being saved. At the top-level, the JSON payload contains an optional *options* object and a required *data* object.
-
-        The *data* object is a JSON object that contains one or more key/value pairs in which both the key and value are strings. These are the individual secrets that are saved under the path name. The secrets are automatically versioned, which allows a pre-configured number of past secret values to be accessible even after new values are assigned. See the various GET operations for details on how to access different aspects of secrets.
-
-        NOTE: The *cas* option is currently ignored but documented here for future reference.
-
-        The *options* object can contain a *cas* key and with an integer value that represents a secret version.  CAS stands for check-and-set and will check an existing secret's version before updating.  If cas is not set the write will be always be allowed. If set to 0, a write will only be allowed if the key doesn’t exist. If the index is greater than zero, then the write will only be allowed if the key’s current version matches the version specified in the cas parameter.
-      operationId: writeSecret
-      parameters:
-        - name: secretName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqWriteSecret'
-        required: true
-      responses:
-        '200':
-          description: Secret written.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespSecretMeta'
-        '204':
-          description: No content.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '403':
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-  '/security/vault/secret/delete/{secretName}':
+  '/security/vault/secret/delete/{secretType}/{secretName}':
     post:
       tags:
         - vault
@@ -1729,8 +1598,31 @@ paths:
            * [ ] - empty = delete all versions
            * [0] - zero = delete only the latest version
            * [1, 3, ...] - list = delete the specified versions
+        ### Naming Secrets
+        Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
+
+        A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+        ### Secret Types
+        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
+
+          - **system**
+            - *sysid*: the unique system id
+            - sysowner: the system owner (required when !dynamickey)
+            - dynamickey: *false* | true
+            - keytype: *sshkey* | password
+          - **dbcred**
+            - *dbhost*:  the DBMS hostname, IP address or alias
+            - *dbname*:  the database name or alias
+            - *service*: service name
+          - **jwtsigning** *no query parameters*
+          - **user** *no query parameters*
       operationId: deleteSecret
       parameters:
+        - name: secretType
+          in: path
+          required: true
+          schema:
+            type: string
         - name: secretName
           in: path
           required: true
@@ -1741,6 +1633,36 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: sysid
+          in: query
+          schema:
+            type: string
+        - name: sysowner
+          in: query
+          schema:
+            type: string
+        - name: dynamickey
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: keytype
+          in: query
+          schema:
+            type: string
+            default: sshkey
+        - name: dbhost
+          in: query
+          schema:
+            type: string
+        - name: dbname
+          in: query
+          schema:
+            type: string
+        - name: service
+          in: query
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -1784,20 +1706,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/security/vault/secret/undelete/{secretName}':
+  '/security/vault/secret/undelete/{secretType}/{secretName}':
     post:
       tags:
         - vault
       description: |
-        Restore one or more versions of a secret that have previously been deleted. This endpoint undoes soft deletions performed using the *secret/delete/{secretName}* endpoint.
+        Restore one or more versions of a secret that have previously been deleted. This endpoint undoes soft deletions performed using the *secret/delete/{secretType}/{secretName}* endpoint.
 
         The input versions array is interpreted as follows:
 
            * [ ] - empty = undelete all versions
            * [0] - zero = undelete only the latest version
            * [1, 3, ...] - list = undelete the specified versions
+        ### Naming Secrets
+        Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
+
+        A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+        ### Secret Types
+        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
+
+          - **system**
+            - *sysid*: the unique system id
+            - sysowner: the system owner (required when !dynamickey)
+            - dynamickey: *false* | true
+            - keytype: *sshkey* | password
+          - **dbcred**
+            - *dbhost*:  the DBMS hostname, IP address or alias
+            - *dbname*:  the database name or alias
+            - *service*: service name
+          - **jwtsigning** *no query parameters*
+          - **user** *no query parameters*
       operationId: undeleteSecret
       parameters:
+        - name: secretType
+          in: path
+          required: true
+          schema:
+            type: string
         - name: secretName
           in: path
           required: true
@@ -1808,6 +1753,36 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: sysid
+          in: query
+          schema:
+            type: string
+        - name: sysowner
+          in: query
+          schema:
+            type: string
+        - name: dynamickey
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: keytype
+          in: query
+          schema:
+            type: string
+            default: sshkey
+        - name: dbhost
+          in: query
+          schema:
+            type: string
+        - name: dbname
+          in: query
+          schema:
+            type: string
+        - name: service
+          in: query
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -1851,7 +1826,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/security/vault/secret/destroy/{secretName}':
+  '/security/vault/secret/destroy/{secretType}/{secretName}':
     post:
       tags:
         - vault
@@ -1863,8 +1838,31 @@ paths:
            * [ ] - empty = destroy all versions
            * [0] - zero = destroy only the latest version
            * [1, 3, ...] - list = destroy the specified versions
+        ### Naming Secrets
+        Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
+
+        A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+        ### Secret Types
+        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
+
+          - **system**
+            - *sysid*: the unique system id
+            - sysowner: the system owner (required when !dynamickey)
+            - dynamickey: *false* | true
+            - keytype: *sshkey* | password
+          - **dbcred**
+            - *dbhost*:  the DBMS hostname, IP address or alias
+            - *dbname*:  the database name or alias
+            - *service*: service name
+          - **jwtsigning** *no query parameters*
+          - **user** *no query parameters*
       operationId: destroySecret
       parameters:
+        - name: secretType
+          in: path
+          required: true
+          schema:
+            type: string
         - name: secretName
           in: path
           required: true
@@ -1875,6 +1873,36 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: sysid
+          in: query
+          schema:
+            type: string
+        - name: sysowner
+          in: query
+          schema:
+            type: string
+        - name: dynamickey
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: keytype
+          in: query
+          schema:
+            type: string
+            default: sshkey
+        - name: dbhost
+          in: query
+          schema:
+            type: string
+        - name: dbname
+          in: query
+          schema:
+            type: string
+        - name: service
+          in: query
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -1918,13 +1946,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/security/vault/secret/read/meta/{secretName}':
+  '/security/vault/secret/read/meta/{secretType}/{secretName}':
     get:
       tags:
         - vault
-      description: 'List a secret''s metadata including its version information. The input parameter must be a secret name, not a folder. The result includes which version of the secret is the latest.'
+      description: |
+        List a secret's metadata including its version information. The input parameter must be a secret name, not a folder. The result includes which version of the secret is the latest.
+        ### Naming Secrets
+        Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
+
+        A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+        ### Secret Types
+        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
+
+          - **system**
+            - *sysid*: the unique system id
+            - sysowner: the system owner (required when !dynamickey)
+            - dynamickey: *false* | true
+            - keytype: *sshkey* | password
+          - **dbcred**
+            - *dbhost*:  the DBMS hostname, IP address or alias
+            - *dbname*:  the database name or alias
+            - *service*: service name
+          - **jwtsigning** *no query parameters*
+          - **user** *no query parameters*
       operationId: readSecretMeta
       parameters:
+        - name: secretType
+          in: path
+          required: true
+          schema:
+            type: string
         - name: secretName
           in: path
           required: true
@@ -1935,6 +1987,36 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: sysid
+          in: query
+          schema:
+            type: string
+        - name: sysowner
+          in: query
+          schema:
+            type: string
+        - name: dynamickey
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: keytype
+          in: query
+          schema:
+            type: string
+            default: sshkey
+        - name: dbhost
+          in: query
+          schema:
+            type: string
+        - name: dbname
+          in: query
+          schema:
+            type: string
+        - name: service
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: Secret read.
@@ -1966,13 +2048,158 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  /security/vault/secret/list/meta:
+  '/security/vault/secret/{secretType}/{secretName}':
     get:
       tags:
         - vault
-      description: 'List the secret names at the specified path. The path must represent a folder, not an actual secret name. If the path does not have a trailing slash one will be inserted. Secret names should not encode private information.'
-      operationId: listSecretMeta
+      description: |
+        Read a versioned secret. By default, the latest version of the secret is read. If the *version* query parameter is specified then that version of the secret is read.  The *version* parameter should be passed as an integer with zero indicating the latest version of the secret. A NOT FOUND status code is returned if the secret version does not exist or if it's deleted or destroyed.
+
+        The response object includes the map of zero or more key/value pairs and metadata that describes the secret. The metadata includes which version of the secret was returned.
+        ### Naming Secrets
+        Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
+
+        A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+        ### Secret Types
+        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
+
+          - **system**
+            - *sysid*: the unique system id
+            - sysowner: the system owner (required when !dynamickey)
+            - dynamickey: *false* | true
+            - keytype: *sshkey* | password
+          - **dbcred**
+            - *dbhost*:  the DBMS hostname, IP address or alias
+            - *dbname*:  the database name or alias
+            - *service*: service name
+          - **jwtsigning** *no query parameters*
+          - **user** *no query parameters*
+      operationId: readSecret
       parameters:
+        - name: secretType
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: secretName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: version
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: sysid
+          in: query
+          schema:
+            type: string
+        - name: sysowner
+          in: query
+          schema:
+            type: string
+        - name: dynamickey
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: keytype
+          in: query
+          schema:
+            type: string
+            default: sshkey
+        - name: dbhost
+          in: query
+          schema:
+            type: string
+        - name: dbname
+          in: query
+          schema:
+            type: string
+        - name: service
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Secret written.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSecret'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    post:
+      tags:
+        - vault
+      description: |
+        Create or update a secret. The JSON payload contains a required *data* object and an optional *options* object.
+
+        The *data* object is a JSON object that contains one or more key/value pairs in which both the key and value are strings. These are the individual secrets that are saved under the path name. The secrets are automatically versioned, which allows a pre-configured number of past secret values to be accessible even after new values are assigned. See the various GET operations for details on how to access different aspects of secrets.
+
+        NOTE: The *cas* option is currently ignored but documented here for future reference.
+
+        The *options* object can contain a *cas* key and with an integer value that represents a secret version.  CAS stands for check-and-set and will check an existing secret's version before updating.  If cas is not set the write will be always be allowed. If set to 0, a write will only be allowed if the key doesn’t exist. If the index is greater than zero, then the write will only be allowed if the key’s current version matches the version specified in the cas parameter.
+        ### Naming Secrets
+        Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
+
+        A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+        ### Secret Types
+        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
+
+          - **system**
+            - *sysid*: the unique system id
+            - sysowner: the system owner (required when !dynamickey)
+            - dynamickey: *false* | true
+            - keytype: *sshkey* | password
+          - **dbcred**
+            - *dbhost*:  the DBMS hostname, IP address or alias
+            - *dbname*:  the database name or alias
+            - *service*: service name
+          - **jwtsigning** *no query parameters*
+          - **user** *no query parameters*
+      operationId: writeSecret
+      parameters:
+        - name: secretType
+          in: path
+          required: true
+          schema:
+            type: string
         - name: secretName
           in: path
           required: true
@@ -1983,6 +2210,145 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: sysid
+          in: query
+          schema:
+            type: string
+        - name: sysowner
+          in: query
+          schema:
+            type: string
+        - name: dynamickey
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: keytype
+          in: query
+          schema:
+            type: string
+            default: sshkey
+        - name: dbhost
+          in: query
+          schema:
+            type: string
+        - name: dbname
+          in: query
+          schema:
+            type: string
+        - name: service
+          in: query
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqWriteSecret'
+        required: true
+      responses:
+        '200':
+          description: Secret written.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSecretMeta'
+        '204':
+          description: No content.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  '/security/vault/secret/list/meta/{secretType}':
+    get:
+      tags:
+        - vault
+      description: |
+        List the secret names at the specified path. The path must represent a folder, not an actual secret name. If the path does not have a trailing slash one will be inserted. Secret names should not encode private information.
+        ### Naming Secrets
+        Secrets can be arranged hierarchically by using the "+" characters in the secret name.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
+
+        A secret is assigned a path name constructed from the *secretType* path parameter and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+        ### Secret Types
+        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
+
+          - **system**
+            - *sysid*: the unique system id
+            - sysowner: the system owner (required when !dynamickey)
+            - dynamickey: *false* | true
+            - keytype: *sshkey* | password
+          - **dbcred**
+            - *dbhost*:  the DBMS hostname, IP address or alias
+            - *dbname*:  the database name or alias
+            - *service*: service name
+          - **jwtsigning** *no query parameters*
+          - **user** *no query parameters*
+      operationId: listSecretMeta
+      parameters:
+        - name: secretType
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: sysid
+          in: query
+          schema:
+            type: string
+        - name: sysowner
+          in: query
+          schema:
+            type: string
+        - name: dynamickey
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: keytype
+          in: query
+          schema:
+            type: string
+            default: sshkey
+        - name: dbhost
+          in: query
+          schema:
+            type: string
+        - name: dbname
+          in: query
+          schema:
+            type: string
+        - name: service
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: Secrets listed.
@@ -2014,13 +2380,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/security/vault/secret/destroy/meta/{secretName}':
+  '/security/vault/secret/destroy/meta/{secretType}/{secretName}':
     delete:
       tags:
         - vault
-      description: 'Erase all traces of a secret: its key, all versions of its value and all its metadata. Specifying a folder erases all secrets in that folder.'
+      description: |
+        Erase all traces of a secret: its key, all versions of its value and all its metadata. Specifying a folder erases all secrets in that folder.
+        ### Naming Secrets
+        Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
+
+        A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+        ### Secret Types
+        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
+
+          - **system**
+            - *sysid*: the unique system id
+            - sysowner: the system owner (required when !dynamickey)
+            - dynamickey: *false* | true
+            - keytype: *sshkey* | password
+          - **dbcred**
+            - *dbhost*:  the DBMS hostname, IP address or alias
+            - *dbname*:  the database name or alias
+            - *service*: service name
+          - **jwtsigning** *no query parameters*
+          - **user** *no query parameters*
       operationId: destroySecretMeta
       parameters:
+        - name: secretType
+          in: path
+          required: true
+          schema:
+            type: string
         - name: secretName
           in: path
           required: true
@@ -2031,6 +2421,36 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: sysid
+          in: query
+          schema:
+            type: string
+        - name: sysowner
+          in: query
+          schema:
+            type: string
+        - name: dynamickey
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: keytype
+          in: query
+          schema:
+            type: string
+            default: sshkey
+        - name: dbhost
+          in: query
+          schema:
+            type: string
+        - name: dbname
+          in: query
+          schema:
+            type: string
+        - name: service
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: Secret completely removed.
@@ -2356,44 +2776,6 @@ components:
           type: array
           items:
             type: string
-    RespSecretMeta:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          $ref: '#/components/schemas/SkSecretMetadata'
-    SkSecretMetadata:
-      type: object
-      properties:
-        created_time:
-          type: string
-        deletion_time:
-          type: string
-        destroyed:
-          type: boolean
-        version:
-          type: integer
-          format: int32
-    Options:
-      type: object
-      properties:
-        cas:
-          type: integer
-          format: int32
-    ReqWriteSecret:
-      type: object
-      properties:
-        options:
-          $ref: '#/components/schemas/Options'
-        data:
-          type: object
-          additionalProperties:
-            type: string
     RespVersions:
       type: object
       properties:
@@ -2459,26 +2841,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SkSecretVersion'
-    RespSecretList:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          $ref: '#/components/schemas/SkSecretList'
-    SkSecretList:
-      type: object
-      properties:
-        secretPath:
-          type: string
-        keys:
-          type: array
-          items:
-            type: string
     RespSecret:
       type: object
       properties:
@@ -2499,6 +2861,64 @@ components:
             type: string
         metadata:
           $ref: '#/components/schemas/SkSecretMetadata'
+    SkSecretMetadata:
+      type: object
+      properties:
+        created_time:
+          type: string
+        deletion_time:
+          type: string
+        destroyed:
+          type: boolean
+        version:
+          type: integer
+          format: int32
+    RespSecretMeta:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/SkSecretMetadata'
+    Options:
+      type: object
+      properties:
+        cas:
+          type: integer
+          format: int32
+    ReqWriteSecret:
+      type: object
+      properties:
+        options:
+          $ref: '#/components/schemas/Options'
+        data:
+          type: object
+          additionalProperties:
+            type: string
+    RespSecretList:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/SkSecretList'
+    SkSecretList:
+      type: object
+      properties:
+        secretPath:
+          type: string
+        keys:
+          type: array
+          items:
+            type: string
   securitySchemes:
     TapisJWT:
       type: apiKey
