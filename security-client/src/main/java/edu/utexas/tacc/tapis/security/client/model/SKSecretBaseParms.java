@@ -20,7 +20,7 @@ public abstract class SKSecretBaseParms<T extends SKSecretBaseParms<T>>
     private String           sysId;
     private String           sysOwner;
     private boolean          dynamicKey;
-    private KeyType          keyType;
+    private KeyType          keyType = KeyType.sshkey;
     private String           dbHost;
     private String           dbName;
     private String           service;

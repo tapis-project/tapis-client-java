@@ -2,7 +2,6 @@ package edu.utexas.tacc.tapis.security.client;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -71,8 +70,11 @@ public class SKClient
     // Response status.
     public static final String STATUS_SUCCESS = "success";
     
-    // Header key for jwts.
-    public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
+    // Header keys for tapis.
+    public static final String TAPIS_JWT_HEADER  = "X-Tapis-Token";
+    public static final String TAPIS_JWT_TENANT  = "X-Tapis-Tenant";
+    public static final String TAPIS_JWT_USER    = "X-Tapis-User";
+    public static final String TAPIS_HASH_HEADER = "X-Tapis-User-Token-Hash";
     
     // Configuration defaults.
     private static final String SKCLIENT_USER_AGENT = "SKClient";
