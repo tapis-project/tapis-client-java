@@ -20,7 +20,7 @@ public abstract class SKSecretBaseParms<T extends SKSecretBaseParms<T>>
     private String           sysId;
     private String           sysOwner;
     private boolean          dynamicKey;
-    private KeyType          keyType = KeyType.sshkey;
+    private KeyType          keyType = KeyType.sshkey; // never null
     private String           dbHost;
     private String           dbName;
     private String           service;
@@ -54,7 +54,7 @@ public abstract class SKSecretBaseParms<T extends SKSecretBaseParms<T>>
         {this.dynamicKey = dynamicKey; return (T) this;}
     public KeyType getKeyType() {return keyType;}
     public T setKeyType(KeyType keyType) 
-        {this.keyType = keyType; return (T) this;}
+        {if (keyType != null) this.keyType = keyType; return (T) this;}
     public String getDbHost() {return dbHost;}
     public T setDbHost(String dbHost) 
         {this.dbHost = dbHost; return (T) this;}

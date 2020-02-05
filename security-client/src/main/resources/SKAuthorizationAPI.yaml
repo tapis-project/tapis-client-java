@@ -1595,13 +1595,14 @@ paths:
 
         The input versions array is interpreted as follows:
 
-           * [ ] - empty = delete all versions
+           * [-] - empty = delete all versions
            * [0] - zero = delete only the latest version
            * [1, 3, ...] - list = delete the specified versions
         ### Naming Secrets
         Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
 
         A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+
         ### Secret Types
         The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
 
@@ -1715,13 +1716,14 @@ paths:
 
         The input versions array is interpreted as follows:
 
-           * [ ] - empty = undelete all versions
+           * [-] - empty = undelete all versions
            * [0] - zero = undelete only the latest version
            * [1, 3, ...] - list = undelete the specified versions
         ### Naming Secrets
         Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
 
         A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+
         ### Secret Types
         The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
 
@@ -1835,13 +1837,14 @@ paths:
 
         The input versions array is interpreted as follows:
 
-           * [ ] - empty = destroy all versions
+           * [-] - empty = destroy all versions
            * [0] - zero = destroy only the latest version
            * [1, 3, ...] - list = destroy the specified versions
         ### Naming Secrets
         Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
 
         A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+
         ### Secret Types
         The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
 
@@ -1946,108 +1949,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/security/vault/secret/read/meta/{secretType}/{secretName}':
-    get:
-      tags:
-        - vault
-      description: |
-        List a secret's metadata including its version information. The input parameter must be a secret name, not a folder. The result includes which version of the secret is the latest.
-        ### Naming Secrets
-        Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
-
-        A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
-        ### Secret Types
-        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
-
-          - **system**
-            - *sysid*: the unique system id
-            - sysowner: the system owner (required when !dynamickey)
-            - dynamickey: *false* | true
-            - keytype: *sshkey* | password
-          - **dbcred**
-            - *dbhost*:  the DBMS hostname, IP address or alias
-            - *dbname*:  the database name or alias
-            - *service*: service name
-          - **jwtsigning** *no query parameters*
-          - **user** *no query parameters*
-      operationId: readSecretMeta
-      parameters:
-        - name: secretType
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: secretName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-        - name: sysid
-          in: query
-          schema:
-            type: string
-        - name: sysowner
-          in: query
-          schema:
-            type: string
-        - name: dynamickey
-          in: query
-          schema:
-            type: boolean
-            default: false
-        - name: keytype
-          in: query
-          schema:
-            type: string
-            default: sshkey
-        - name: dbhost
-          in: query
-          schema:
-            type: string
-        - name: dbname
-          in: query
-          schema:
-            type: string
-        - name: service
-          in: query
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Secret read.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespSecretVersionMetadata'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '403':
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
   '/security/vault/secret/{secretType}/{secretName}':
     get:
       tags:
@@ -2060,6 +1961,7 @@ paths:
         Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
 
         A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+
         ### Secret Types
         The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
 
@@ -2175,10 +2077,12 @@ paths:
         NOTE: The *cas* option is currently ignored but documented here for future reference.
 
         The *options* object can contain a *cas* key and with an integer value that represents a secret version.  CAS stands for check-and-set and will check an existing secret's version before updating.  If cas is not set the write will be always be allowed. If set to 0, a write will only be allowed if the key doesn’t exist. If the index is greater than zero, then the write will only be allowed if the key’s current version matches the version specified in the cas parameter.
+
         ### Naming Secrets
         Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
 
         A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+
         ### Secret Types
         The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
 
@@ -2283,6 +2187,109 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+  '/security/vault/secret/read/meta/{secretType}/{secretName}':
+    get:
+      tags:
+        - vault
+      description: |
+        List a secret's metadata including its version information. The input parameter must be a secret name, not a folder. The result includes which version of the secret is the latest.
+        ### Naming Secrets
+        Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
+
+        A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+
+        ### Secret Types
+        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
+
+          - **system**
+            - *sysid*: the unique system id
+            - sysowner: the system owner (required when !dynamickey)
+            - dynamickey: *false* | true
+            - keytype: *sshkey* | password
+          - **dbcred**
+            - *dbhost*:  the DBMS hostname, IP address or alias
+            - *dbname*:  the database name or alias
+            - *service*: service name
+          - **jwtsigning** *no query parameters*
+          - **user** *no query parameters*
+      operationId: readSecretMeta
+      parameters:
+        - name: secretType
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: secretName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: sysid
+          in: query
+          schema:
+            type: string
+        - name: sysowner
+          in: query
+          schema:
+            type: string
+        - name: dynamickey
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: keytype
+          in: query
+          schema:
+            type: string
+            default: sshkey
+        - name: dbhost
+          in: query
+          schema:
+            type: string
+        - name: dbname
+          in: query
+          schema:
+            type: string
+        - name: service
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Secret read.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSecretVersionMetadata'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
   '/security/vault/secret/list/meta/{secretType}':
     get:
       tags:
@@ -2293,6 +2300,7 @@ paths:
         Secrets can be arranged hierarchically by using the "+" characters in the secret name.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
 
         A secret is assigned a path name constructed from the *secretType* path parameter and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+
         ### Secret Types
         The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
 
@@ -2390,6 +2398,7 @@ paths:
         Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
 
         A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+
         ### Secret Types
         The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
 
@@ -2798,6 +2807,64 @@ components:
           items:
             type: integer
             format: int32
+    RespSecretMeta:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/SkSecretMetadata'
+    SkSecretMetadata:
+      type: object
+      properties:
+        created_time:
+          type: string
+        deletion_time:
+          type: string
+        destroyed:
+          type: boolean
+        version:
+          type: integer
+          format: int32
+    Options:
+      type: object
+      properties:
+        cas:
+          type: integer
+          format: int32
+    ReqWriteSecret:
+      type: object
+      properties:
+        options:
+          $ref: '#/components/schemas/Options'
+        data:
+          type: object
+          additionalProperties:
+            type: string
+    RespSecret:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/SkSecret'
+    SkSecret:
+      type: object
+      properties:
+        secretMap:
+          type: object
+          additionalProperties:
+            type: string
+        metadata:
+          $ref: '#/components/schemas/SkSecretMetadata'
     RespSecretVersionMetadata:
       type: object
       properties:
@@ -2841,64 +2908,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SkSecretVersion'
-    RespSecret:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          $ref: '#/components/schemas/SkSecret'
-    SkSecret:
-      type: object
-      properties:
-        secretMap:
-          type: object
-          additionalProperties:
-            type: string
-        metadata:
-          $ref: '#/components/schemas/SkSecretMetadata'
-    SkSecretMetadata:
-      type: object
-      properties:
-        created_time:
-          type: string
-        deletion_time:
-          type: string
-        destroyed:
-          type: boolean
-        version:
-          type: integer
-          format: int32
-    RespSecretMeta:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          $ref: '#/components/schemas/SkSecretMetadata'
-    Options:
-      type: object
-      properties:
-        cas:
-          type: integer
-          format: int32
-    ReqWriteSecret:
-      type: object
-      properties:
-        options:
-          $ref: '#/components/schemas/Options'
-        data:
-          type: object
-          additionalProperties:
-            type: string
     RespSecretList:
       type: object
       properties:
