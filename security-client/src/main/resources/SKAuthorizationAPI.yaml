@@ -832,6 +832,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+  /security/user:
+    get:
+      tags:
+        - user
+      description: Get the names of all users in the tenant that have been granted a role or permission.
+      operationId: getUserNames
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Sorted list of user names.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespNameArray'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
   '/security/user/defaultRole/{user}':
     get:
       tags:
@@ -859,43 +896,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespName'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-  /security/user:
-    get:
-      tags:
-        - user
-      description: Get the names of all users in the tenant that have been granted a role or permission.
-      operationId: getUserNames
-      parameters:
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      responses:
-        '200':
-          description: Sorted list of user names.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespNameArray'
         '400':
           description: Input error.
           content:
@@ -1616,8 +1616,9 @@ paths:
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
             - *service*: service name
-          - **jwtsigning** *no query parameters*
-          - **user** *no query parameters*
+          - **jwtsigning** - *no query parameters*
+          - **user** - *no query parameters*
+          - **service** - *no query parameters*
       operationId: deleteSecret
       parameters:
         - name: secretType
@@ -1738,8 +1739,9 @@ paths:
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
             - *service*: service name
-          - **jwtsigning** *no query parameters*
-          - **user** *no query parameters*
+          - **jwtsigning** - *no query parameters*
+          - **user** - *no query parameters*
+          - **service** - *no query parameters*
       operationId: undeleteSecret
       parameters:
         - name: secretType
@@ -1860,8 +1862,9 @@ paths:
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
             - *service*: service name
-          - **jwtsigning** *no query parameters*
-          - **user** *no query parameters*
+          - **jwtsigning** - *no query parameters*
+          - **user** - *no query parameters*
+          - **service** - *no query parameters*
       operationId: destroySecret
       parameters:
         - name: secretType
@@ -1978,8 +1981,9 @@ paths:
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
             - *service*: service name
-          - **jwtsigning** *no query parameters*
-          - **user** *no query parameters*
+          - **jwtsigning** - *no query parameters*
+          - **user** - *no query parameters*
+          - **service** - *no query parameters*
       operationId: readSecret
       parameters:
         - name: secretType
@@ -2099,8 +2103,9 @@ paths:
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
             - *service*: service name
-          - **jwtsigning** *no query parameters*
-          - **user** *no query parameters*
+          - **jwtsigning** - *no query parameters*
+          - **user** - *no query parameters*
+          - **service** - *no query parameters*
       operationId: writeSecret
       parameters:
         - name: secretType
@@ -2215,8 +2220,9 @@ paths:
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
             - *service*: service name
-          - **jwtsigning** *no query parameters*
-          - **user** *no query parameters*
+          - **jwtsigning** - *no query parameters*
+          - **user** - *no query parameters*
+          - **service** - *no query parameters*
       operationId: readSecretMeta
       parameters:
         - name: secretType
@@ -2319,8 +2325,9 @@ paths:
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
             - *service*: service name
-          - **jwtsigning** *no query parameters*
-          - **user** *no query parameters*
+          - **jwtsigning** - *no query parameters*
+          - **user** - *no query parameters*
+          - **service** - *no query parameters*
       operationId: listSecretMeta
       parameters:
         - name: secretType
@@ -2418,8 +2425,9 @@ paths:
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
             - *service*: service name
-          - **jwtsigning** *no query parameters*
-          - **user** *no query parameters*
+          - **jwtsigning** - *no query parameters*
+          - **user** - *no query parameters*
+          - **service** - *no query parameters*
       operationId: destroySecretMeta
       parameters:
         - name: secretType
