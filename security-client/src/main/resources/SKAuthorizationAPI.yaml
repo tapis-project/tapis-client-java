@@ -736,6 +736,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+  /security/ready:
+    get:
+      tags:
+        - general
+      description: Lightwieght readiness check.
+      operationId: ready
+      responses:
+        '200':
+          description: Service ready.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '503':
+          description: Service unavailable.
   /security/hello:
     get:
       tags:
@@ -768,21 +783,6 @@ paths:
       responses:
         '200':
           description: Message received.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '503':
-          description: Service unavailable.
-  /security/ready:
-    get:
-      tags:
-        - general
-      description: Lightwieght readiness check.
-      operationId: ready
-      responses:
-        '200':
-          description: Service ready.
           content:
             application/json:
               schema:
@@ -1598,6 +1598,7 @@ paths:
            * [-] - empty = delete all versions
            * [0] - zero = delete only the latest version
            * [1, 3, ...] - list = delete the specified versions
+
         ### Naming Secrets
         Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
 
@@ -1719,6 +1720,7 @@ paths:
            * [-] - empty = undelete all versions
            * [0] - zero = undelete only the latest version
            * [1, 3, ...] - list = undelete the specified versions
+
         ### Naming Secrets
         Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
 
@@ -1840,6 +1842,7 @@ paths:
            * [-] - empty = destroy all versions
            * [0] - zero = destroy only the latest version
            * [1, 3, ...] - list = destroy the specified versions
+
         ### Naming Secrets
         Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
 
@@ -1957,6 +1960,7 @@ paths:
         Read a versioned secret. By default, the latest version of the secret is read. If the *version* query parameter is specified then that version of the secret is read.  The *version* parameter should be passed as an integer with zero indicating the latest version of the secret. A NOT FOUND status code is returned if the secret version does not exist or if it's deleted or destroyed.
 
         The response object includes the map of zero or more key/value pairs and metadata that describes the secret. The metadata includes which version of the secret was returned.
+
         ### Naming Secrets
         Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
 
@@ -2193,6 +2197,7 @@ paths:
         - vault
       description: |
         List a secret's metadata including its version information. The input parameter must be a secret name, not a folder. The result includes which version of the secret is the latest.
+
         ### Naming Secrets
         Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
 
@@ -2296,6 +2301,7 @@ paths:
         - vault
       description: |
         List the secret names at the specified path. The path must represent a folder, not an actual secret name. If the path does not have a trailing slash one will be inserted. Secret names should not encode private information.
+
         ### Naming Secrets
         Secrets can be arranged hierarchically by using the "+" characters in the secret name.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
 
@@ -2394,6 +2400,7 @@ paths:
         - vault
       description: |
         Erase all traces of a secret: its key, all versions of its value and all its metadata. Specifying a folder erases all secrets in that folder.
+
         ### Naming Secrets
         Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
 
@@ -2807,44 +2814,6 @@ components:
           items:
             type: integer
             format: int32
-    RespSecretMeta:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          $ref: '#/components/schemas/SkSecretMetadata'
-    SkSecretMetadata:
-      type: object
-      properties:
-        created_time:
-          type: string
-        deletion_time:
-          type: string
-        destroyed:
-          type: boolean
-        version:
-          type: integer
-          format: int32
-    Options:
-      type: object
-      properties:
-        cas:
-          type: integer
-          format: int32
-    ReqWriteSecret:
-      type: object
-      properties:
-        options:
-          $ref: '#/components/schemas/Options'
-        data:
-          type: object
-          additionalProperties:
-            type: string
     RespSecret:
       type: object
       properties:
@@ -2865,6 +2834,44 @@ components:
             type: string
         metadata:
           $ref: '#/components/schemas/SkSecretMetadata'
+    SkSecretMetadata:
+      type: object
+      properties:
+        created_time:
+          type: string
+        deletion_time:
+          type: string
+        destroyed:
+          type: boolean
+        version:
+          type: integer
+          format: int32
+    RespSecretMeta:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/SkSecretMetadata'
+    Options:
+      type: object
+      properties:
+        cas:
+          type: integer
+          format: int32
+    ReqWriteSecret:
+      type: object
+      properties:
+        options:
+          $ref: '#/components/schemas/Options'
+        data:
+          type: object
+          additionalProperties:
+            type: string
     RespSecretVersionMetadata:
       type: object
       properties:
