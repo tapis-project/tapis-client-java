@@ -1609,9 +1609,8 @@ paths:
 
           - **system**
             - *sysid*: the unique system id
-            - sysowner: the system owner (required when !dynamickey)
-            - dynamickey: *false* | true
-            - keytype: *sshkey* | password
+            - *sysuser*: the accessing user (except when keytype=cert)
+            - keytype: *sshkey* | password | accesskey | cert
           - **dbcred**
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
@@ -1640,15 +1639,10 @@ paths:
           in: query
           schema:
             type: string
-        - name: sysowner
+        - name: sysuser
           in: query
           schema:
             type: string
-        - name: dynamickey
-          in: query
-          schema:
-            type: boolean
-            default: false
         - name: keytype
           in: query
           schema:
@@ -1732,9 +1726,8 @@ paths:
 
           - **system**
             - *sysid*: the unique system id
-            - sysowner: the system owner (required when !dynamickey)
-            - dynamickey: *false* | true
-            - keytype: *sshkey* | password
+            - *sysuser*: the accessing user (except when keytype=cert)
+            - keytype: *sshkey* | password | accesskey | cert
           - **dbcred**
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
@@ -1763,15 +1756,10 @@ paths:
           in: query
           schema:
             type: string
-        - name: sysowner
+        - name: sysuser
           in: query
           schema:
             type: string
-        - name: dynamickey
-          in: query
-          schema:
-            type: boolean
-            default: false
         - name: keytype
           in: query
           schema:
@@ -1855,9 +1843,8 @@ paths:
 
           - **system**
             - *sysid*: the unique system id
-            - sysowner: the system owner (required when !dynamickey)
-            - dynamickey: *false* | true
-            - keytype: *sshkey* | password
+            - *sysuser*: the accessing user (except when keytype=cert)
+            - keytype: *sshkey* | password | accesskey | cert
           - **dbcred**
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
@@ -1886,15 +1873,10 @@ paths:
           in: query
           schema:
             type: string
-        - name: sysowner
+        - name: sysuser
           in: query
           schema:
             type: string
-        - name: dynamickey
-          in: query
-          schema:
-            type: boolean
-            default: false
         - name: keytype
           in: query
           schema:
@@ -1955,6 +1937,105 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+  '/security/vault/secret/read/meta/{secretType}/{secretName}':
+    get:
+      tags:
+        - vault
+      description: |
+        List a secret's metadata including its version information. The input parameter must be a secret name, not a folder. The result includes which version of the secret is the latest.
+
+        ### Naming Secrets
+        Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
+
+        A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+
+        ### Secret Types
+        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
+
+          - **system**
+            - *sysid*: the unique system id
+            - *sysuser*: the accessing user (except when keytype=cert)
+            - keytype: *sshkey* | password | accesskey | cert
+          - **dbcred**
+            - *dbhost*:  the DBMS hostname, IP address or alias
+            - *dbname*:  the database name or alias
+            - *service*: service name
+          - **jwtsigning** - *no query parameters*
+          - **user** - *no query parameters*
+          - **service** - *no query parameters*
+      operationId: readSecretMeta
+      parameters:
+        - name: secretType
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: secretName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: sysid
+          in: query
+          schema:
+            type: string
+        - name: sysuser
+          in: query
+          schema:
+            type: string
+        - name: keytype
+          in: query
+          schema:
+            type: string
+            default: sshkey
+        - name: dbhost
+          in: query
+          schema:
+            type: string
+        - name: dbname
+          in: query
+          schema:
+            type: string
+        - name: service
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Secret read.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSecretVersionMetadata'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
   '/security/vault/secret/{secretType}/{secretName}':
     get:
       tags:
@@ -1974,9 +2055,8 @@ paths:
 
           - **system**
             - *sysid*: the unique system id
-            - sysowner: the system owner (required when !dynamickey)
-            - dynamickey: *false* | true
-            - keytype: *sshkey* | password
+            - *sysuser*: the accessing user (except when keytype=cert)
+            - keytype: *sshkey* | password | accesskey | cert
           - **dbcred**
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
@@ -2011,15 +2091,10 @@ paths:
           in: query
           schema:
             type: string
-        - name: sysowner
+        - name: sysuser
           in: query
           schema:
             type: string
-        - name: dynamickey
-          in: query
-          schema:
-            type: boolean
-            default: false
         - name: keytype
           in: query
           schema:
@@ -2096,9 +2171,8 @@ paths:
 
           - **system**
             - *sysid*: the unique system id
-            - sysowner: the system owner (required when !dynamickey)
-            - dynamickey: *false* | true
-            - keytype: *sshkey* | password
+            - *sysuser*: the accessing user (except when keytype=cert)
+            - keytype: *sshkey* | password | accesskey | cert
           - **dbcred**
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
@@ -2127,15 +2201,10 @@ paths:
           in: query
           schema:
             type: string
-        - name: sysowner
+        - name: sysuser
           in: query
           schema:
             type: string
-        - name: dynamickey
-          in: query
-          schema:
-            type: boolean
-            default: false
         - name: keytype
           in: query
           schema:
@@ -2196,111 +2265,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/security/vault/secret/read/meta/{secretType}/{secretName}':
-    get:
-      tags:
-        - vault
-      description: |
-        List a secret's metadata including its version information. The input parameter must be a secret name, not a folder. The result includes which version of the secret is the latest.
-
-        ### Naming Secrets
-        Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
-
-        A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
-
-        ### Secret Types
-        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
-
-          - **system**
-            - *sysid*: the unique system id
-            - sysowner: the system owner (required when !dynamickey)
-            - dynamickey: *false* | true
-            - keytype: *sshkey* | password
-          - **dbcred**
-            - *dbhost*:  the DBMS hostname, IP address or alias
-            - *dbname*:  the database name or alias
-            - *service*: service name
-          - **jwtsigning** - *no query parameters*
-          - **user** - *no query parameters*
-          - **service** - *no query parameters*
-      operationId: readSecretMeta
-      parameters:
-        - name: secretType
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: secretName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-        - name: sysid
-          in: query
-          schema:
-            type: string
-        - name: sysowner
-          in: query
-          schema:
-            type: string
-        - name: dynamickey
-          in: query
-          schema:
-            type: boolean
-            default: false
-        - name: keytype
-          in: query
-          schema:
-            type: string
-            default: sshkey
-        - name: dbhost
-          in: query
-          schema:
-            type: string
-        - name: dbname
-          in: query
-          schema:
-            type: string
-        - name: service
-          in: query
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Secret read.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespSecretVersionMetadata'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '403':
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
   '/security/vault/secret/list/meta/{secretType}':
     get:
       tags:
@@ -2318,9 +2282,8 @@ paths:
 
           - **system**
             - *sysid*: the unique system id
-            - sysowner: the system owner (required when !dynamickey)
-            - dynamickey: *false* | true
-            - keytype: *sshkey* | password
+            - *sysuser*: the accessing user (except when keytype=cert)
+            - keytype: *sshkey* | password | accesskey | cert
           - **dbcred**
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
@@ -2344,15 +2307,10 @@ paths:
           in: query
           schema:
             type: string
-        - name: sysowner
+        - name: sysuser
           in: query
           schema:
             type: string
-        - name: dynamickey
-          in: query
-          schema:
-            type: boolean
-            default: false
         - name: keytype
           in: query
           schema:
@@ -2418,9 +2376,8 @@ paths:
 
           - **system**
             - *sysid*: the unique system id
-            - sysowner: the system owner (required when !dynamickey)
-            - dynamickey: *false* | true
-            - keytype: *sshkey* | password
+            - *sysuser*: the accessing user (except when keytype=cert)
+            - keytype: *sshkey* | password | accesskey | cert
           - **dbcred**
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
@@ -2449,15 +2406,10 @@ paths:
           in: query
           schema:
             type: string
-        - name: sysowner
+        - name: sysuser
           in: query
           schema:
             type: string
-        - name: dynamickey
-          in: query
-          schema:
-            type: boolean
-            default: false
         - name: keytype
           in: query
           schema:
@@ -2482,6 +2434,62 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  '/security/vault/secret/validateServicePassword/{serviceName}':
+    post:
+      tags:
+        - vault
+      description: |+
+        Validate a service's password. The JSON payload contains the password that needs to be validated against the password stored in the vault for the named service.
+
+      operationId: validateServicePassword
+      parameters:
+        - name: serviceName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqValidateServicePwd'
+        required: true
+      responses:
+        '200':
+          description: Secret written.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespAuthorized'
         '400':
           description: Input error.
           content:
@@ -2822,6 +2830,49 @@ components:
           items:
             type: integer
             format: int32
+    RespSecretVersionMetadata:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/SkSecretVersionMetadata'
+    SkSecretVersion:
+      type: object
+      properties:
+        version:
+          type: integer
+          format: int32
+        created_time:
+          type: string
+        deletion_time:
+          type: string
+        destroyed:
+          type: boolean
+    SkSecretVersionMetadata:
+      type: object
+      properties:
+        created_time:
+          type: string
+        current_version:
+          type: integer
+          format: int32
+        max_versions:
+          type: integer
+          format: int32
+        oldest_version:
+          type: integer
+          format: int32
+        updated_time:
+          type: string
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkSecretVersion'
     RespSecret:
       type: object
       properties:
@@ -2880,49 +2931,6 @@ components:
           type: object
           additionalProperties:
             type: string
-    RespSecretVersionMetadata:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          $ref: '#/components/schemas/SkSecretVersionMetadata'
-    SkSecretVersion:
-      type: object
-      properties:
-        version:
-          type: integer
-          format: int32
-        created_time:
-          type: string
-        deletion_time:
-          type: string
-        destroyed:
-          type: boolean
-    SkSecretVersionMetadata:
-      type: object
-      properties:
-        created_time:
-          type: string
-        current_version:
-          type: integer
-          format: int32
-        max_versions:
-          type: integer
-          format: int32
-        oldest_version:
-          type: integer
-          format: int32
-        updated_time:
-          type: string
-        versions:
-          type: array
-          items:
-            $ref: '#/components/schemas/SkSecretVersion'
     RespSecretList:
       type: object
       properties:
@@ -2943,6 +2951,11 @@ components:
           type: array
           items:
             type: string
+    ReqValidateServicePwd:
+      type: object
+      properties:
+        password:
+          type: string
   securitySchemes:
     TapisJWT:
       type: apiKey

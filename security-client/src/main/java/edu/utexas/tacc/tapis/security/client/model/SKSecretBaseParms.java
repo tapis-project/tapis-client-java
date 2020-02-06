@@ -19,7 +19,6 @@ public abstract class SKSecretBaseParms<T extends SKSecretBaseParms<T>>
     private String           secretName;
     private String           sysId;
     private String           sysOwner;
-    private boolean          dynamicKey;
     private KeyType          keyType = KeyType.sshkey; // never null
     private String           dbHost;
     private String           dbName;
@@ -49,9 +48,6 @@ public abstract class SKSecretBaseParms<T extends SKSecretBaseParms<T>>
     public String getSysOwner() {return sysOwner;}
     public T setSysOwner(String sysOwner) 
         {this.sysOwner = sysOwner; return (T) this;}
-    public boolean isDynamicKey() {return dynamicKey;}
-    public T setDynamicKey(boolean dynamicKey) 
-        {this.dynamicKey = dynamicKey; return (T) this;}
     public KeyType getKeyType() {return keyType;}
     public T setKeyType(KeyType keyType) 
         {if (keyType != null) this.keyType = keyType; return (T) this;}

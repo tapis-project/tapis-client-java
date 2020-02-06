@@ -33,6 +33,7 @@ import edu.utexas.tacc.tapis.security.client.gen.model.ReqUserHasRole;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqUserHasRoleMulti;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqUserIsPermitted;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqUserIsPermittedMulti;
+import edu.utexas.tacc.tapis.security.client.gen.model.ReqValidateServicePwd;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqVersions;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqWriteSecret;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespAuthorized;
@@ -935,7 +936,6 @@ public class SKClient
                                        false, // pretty
                                        parms.getSysId(),
                                        parms.getSysOwner(),
-                                       parms.isDynamicKey(),
                                        parms.getKeyType().name(),
                                        parms.getDbHost(),
                                        parms.getDbName(),
@@ -970,7 +970,6 @@ public class SKClient
                                         false, // pretty
                                         parms.getSysId(),
                                         parms.getSysOwner(),
-                                        parms.isDynamicKey(),
                                         parms.getKeyType().name(),
                                         parms.getDbHost(),
                                         parms.getDbName(),
@@ -1004,7 +1003,6 @@ public class SKClient
                                          false, // pretty
                                          parms.getSysId(),
                                          parms.getSysOwner(),
-                                         parms.isDynamicKey(),
                                          parms.getKeyType().name(),
                                          parms.getDbHost(),
                                          parms.getDbName(),
@@ -1037,7 +1035,6 @@ public class SKClient
                                            false, // pretty
                                            parms.getSysId(),
                                            parms.getSysOwner(),
-                                           parms.isDynamicKey(),
                                            parms.getKeyType().name(),
                                            parms.getDbHost(),
                                            parms.getDbName(),
@@ -1070,7 +1067,6 @@ public class SKClient
                                           false, // pretty
                                           parms.getSysId(),
                                           parms.getSysOwner(),
-                                          parms.isDynamicKey(),
                                           parms.getKeyType().name(),
                                           parms.getDbHost(),
                                           parms.getDbName(),
@@ -1098,7 +1094,6 @@ public class SKClient
                                            false, // pretty
                                            parms.getSysId(),
                                            parms.getSysOwner(),
-                                           parms.isDynamicKey(),
                                            parms.getKeyType().name(),
                                            parms.getDbHost(),
                                            parms.getDbName(),
@@ -1125,7 +1120,6 @@ public class SKClient
                                            false, // pretty
                                            parms.getSysId(),
                                            parms.getSysOwner(),
-                                           parms.isDynamicKey(),
                                            parms.getKeyType().name(),
                                            parms.getDbHost(),
                                            parms.getDbName(),
@@ -1154,13 +1148,38 @@ public class SKClient
                                               false, // pretty
                                               parms.getSysId(),
                                               parms.getSysOwner(),
-                                              parms.isDynamicKey(),
                                               parms.getKeyType().name(),
                                               parms.getDbHost(),
                                               parms.getDbName(),
                                               parms.getService());
         }
         catch (Exception e) {throwTapisClientException(e);}
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* validateServicePassword:                                                     */
+    /* ---------------------------------------------------------------------------- */
+    public boolean validateServicePassword(String serviceName, String password) 
+     throws TapisClientException
+    {
+        // Initialize parameter.
+        var reqValidateServicePwd = new ReqValidateServicePwd();
+        reqValidateServicePwd.setPassword(password);
+        
+        // Make the REST call.
+        RespAuthorized resp = null;
+        try {
+            // Get the API object using default networking.
+            var vaultApi = new VaultApi();
+            resp = vaultApi.validateServicePassword(serviceName, 
+                                                    reqValidateServicePwd, false);
+            
+        }
+        catch (Exception e) {throwTapisClientException(e);}
+        
+        // Return result value.
+        Boolean b = resp.getResult().getIsAuthorized();
+        return b == null ? false : b;
     }
     
     /* **************************************************************************** */
