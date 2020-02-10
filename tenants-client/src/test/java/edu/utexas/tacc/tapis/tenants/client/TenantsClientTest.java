@@ -32,7 +32,7 @@ public class TenantsClientTest
     tenantsClient = new TenantsClient(tenantsURL);
   }
 
-  @Test
+  @Test(enabled=true)
   public void testGetTenantByName() throws Exception
   {
     Tenant tenant1  = tenantsClient.getTenant(tenantName);
@@ -50,7 +50,14 @@ public class TenantsClientTest
     Assert.assertEquals(tenant1.getAuthenticator(), AUTH_URL);
     Assert.assertFalse(StringUtils.isBlank(tenant1.getPublicKey()), "Public key should not be blank");
   }
-
+  
+  @Test(enabled=true)
+  public void testGetAllTenants() throws Exception
+  {
+    var tenants = tenantsClient.getTenants();
+    Assert.assertNotNull(tenants, "Failed to retrieve tenant list.");
+  }
+  
   @AfterSuite
   public void tearDown()
   {

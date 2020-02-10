@@ -1,13 +1,21 @@
 package edu.utexas.tacc.tapis.tenants.client;
 
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import edu.utexas.tacc.tapis.shared.exceptions.TapisClientException;
+import edu.utexas.tacc.tapis.shared.utils.TapisGsonUtils;
 import edu.utexas.tacc.tapis.tenants.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.tenants.client.gen.ApiException;
 import edu.utexas.tacc.tapis.tenants.client.gen.Configuration;
 import edu.utexas.tacc.tapis.tenants.client.gen.api.TenantsApi;
-import edu.utexas.tacc.tapis.tenants.client.gen.model.*;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Map;
+import edu.utexas.tacc.tapis.tenants.client.gen.model.Tenant;
 
 /**
  * Class providing a convenient front-end for the automatically generated client code
@@ -22,8 +30,16 @@ public class TenantsClient
   // ************************************************************************
 
   // ************************************************************************
+  // ************************* Enums ****************************************
+  // ************************************************************************
+  // Custom error messages that may be reported by methods.
+  public enum EMsg {NO_RESPONSE, ERROR_STATUS, UNKNOWN_RESPONSE_TYPE}
+    
+  // ************************************************************************
   // *********************** Fields *****************************************
   // ************************************************************************
+  // Response serializer.
+  private static final Gson _gson = TapisGsonUtils.getGson();
 
   // ************************************************************************
   // *********************** Constructors ***********************************
@@ -50,7 +66,6 @@ public class TenantsClient
   // ************************************************************************
   // *********************** Public Methods *********************************
   // ************************************************************************
-
   /**
    * getApiClient: Return underlying ApiClient
    */
@@ -64,61 +79,123 @@ public class TenantsClient
     return Configuration.getDefaultApiClient().addDefaultHeader(key, val);
   }
 
-    /**
-     * Get Security Kernel base path from tenant
-     */
-    public String getSKBasePath(String tenant) throws Exception
-    {
-      String retUrl = null;
-      var tenantsApi = new TenantsApi();
-      // Build the request
-      Map resp = null;
-      // TODO exception handling
-      try { resp = (Map) tenantsApi.getTenant(tenant); }
-      catch (ApiException e) {System.out.println("" + e); throw e;}
-      // Generated code returns response as a map of maps
-      if (resp != null)
-      {
-        Map resp2 = (Map) resp.get("result");
-        if (resp2 != null) { retUrl = (String) resp2.get("security_kernel"); }
-      }
-      return retUrl;
-    }
+  /**
+   * Get Security Kernel base path from tenant
+   */
+  public String getSKBasePath(String tenantName) throws TapisClientException
+  {
+    Tenant tenant = getTenant(tenantName);
+    if (tenant == null) return null;
+    return tenant.getSecurityKernel();
+  }
 
   /**
    * Get all Tenant info given tenant name
    */
-  public Tenant getTenant(String tenantName) throws Exception
+  public Tenant getTenant(String tenantName) throws TapisClientException
   {
-    String tenantId = null;
-    String skUrl = null;
-    String tokUrl = null;
-    String authUrl = null;
-    String pubKey = null;
-    Tenant tenant = new Tenant();
-    var tenantsApi = new TenantsApi();
+    // Make the service call.
     Map resp = null;
-    // TODO exception handling
-    try { resp = (Map) tenantsApi.getTenant(tenantName); }
-    catch (ApiException e) {System.out.println("" + e); throw e;}
-    // Generated code returns response as a map of maps
-    if (resp != null)
-    {
-      Map resp2 = (Map) resp.get("result");
-      if (resp2 != null)
-      {
-        tenantId = (String) resp2.get("tenant_id");
-        pubKey = (String) resp2.get("public_key");
-        authUrl = (String) resp2.get("authenticator");
-        tokUrl = (String) resp2.get("token_service");
-        skUrl = (String) resp2.get("security_kernel");
-      }
+    try { 
+        var tenantsApi = new TenantsApi();
+        resp = (Map) tenantsApi.getTenant(tenantName); 
     }
-    tenant.setPublicKey(pubKey);
-    tenant.setTokenService(tokUrl);
-    tenant.setSecurityKernel(skUrl);
-    tenant.setAuthenticator(authUrl);
-    tenant.setTenantId(tenantId);
-    return tenant;
+    catch (Exception e) {throwTapisClientException(e);}
+    
+    // Marshal only the result from the map.
+    String json = _gson.toJson(resp.get("result"));
+    if (StringUtils.isBlank(json)) return null;
+    return _gson.fromJson(json, Tenant.class);
+  }
+
+  /**
+   * Get all Tenant info given tenant name
+   */
+  public List<Tenant> getTenants() throws TapisClientException
+  {
+      return getTenants(null, null);
+  }
+  
+  /**
+   * Get all Tenant info given tenant name
+   */
+  public List<Tenant> getTenants(Integer limit, Integer offset) throws TapisClientException
+  {
+    // Make the service call.
+    Map resp = null;
+    try { 
+        var tenantsApi = new TenantsApi();
+        resp = (Map) tenantsApi.listTenants(limit, offset); 
+    }
+    catch (Exception e) {throwTapisClientException(e);}
+    
+    // Marshal only the result from the map.
+    String json = _gson.toJson(resp.get("result"));
+    if (StringUtils.isBlank(json)) return null;
+    Type tenantListType = new TypeToken<List<Tenant>>(){}.getType();
+    List<Tenant> list = _gson.fromJson(json, tenantListType);
+    return list;
+  }
+  
+  /* **************************************************************************** */
+  /*                               Private Methods                                */
+  /* **************************************************************************** */
+  /* ---------------------------------------------------------------------------- */
+  /* throwTapisClientException:                                                   */
+  /* ---------------------------------------------------------------------------- */
+  private void throwTapisClientException(Exception e)
+   throws TapisClientException
+  {
+      // Initialize fields to be assigned to tapis exception.
+      TapisResponse tapisResponse = null;
+      int code = 0;
+      String msg = null;
+      
+      // This should always be true.
+      if (e instanceof ApiException) {
+          // Extract information from the thrown exception.  If the body was sent by
+          // SK, then it should be json.  Otherwise, we treat it as plain text.
+          var apiException = (ApiException) e;
+          String respBody = apiException.getResponseBody();
+          if (respBody != null) 
+              try {tapisResponse = _gson.fromJson(respBody, TapisResponse.class);}
+              catch (Exception e1) {msg = respBody;} // not proper json
+          
+          // Get the other parts of the exception.
+          code = apiException.getCode();
+      }
+      else msg = e.getMessage(); 
+
+      // Use the extracted information if there's any.
+      if (StringUtils.isBlank(msg))
+          if (tapisResponse != null) msg = tapisResponse.message;
+            else msg = EMsg.ERROR_STATUS.name();
+      
+      // Create the client exception.
+      var clientException = new TapisClientException(msg, e);
+      
+      // Fill in as many of the tapis exception fields as possible.
+      clientException.setCode(code);
+      if (tapisResponse != null) {
+          clientException.setStatus(tapisResponse.status);
+          clientException.setTapisMessage(tapisResponse.message);
+          clientException.setVersion(tapisResponse.version);
+          clientException.setResult(tapisResponse.result);
+      }
+      
+      // Throw the client exception.
+      throw clientException;
+  }
+  
+  /* **************************************************************************** */
+  /*                                TapisResponse                                 */
+  /* **************************************************************************** */
+  // Data transfer class to hold generic response content temporarily.
+  private static final class TapisResponse
+  {
+      private String status;
+      private String message;
+      private String version;
+      private Object result;
   }
 }

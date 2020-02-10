@@ -1,10 +1,16 @@
 package edu.utexas.tacc.tapis.tokens.client;
 
+import static org.testng.Assert.assertNotNull;
+
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
+
+import edu.utexas.tacc.tapis.tokens.client.gen.model.InlineObject1.AccountTypeEnum;
+import edu.utexas.tacc.tapis.tokens.client.model.CreateTokenParms;
+import edu.utexas.tacc.tapis.tokens.client.model.RefreshTokenParms;
 
 
 /**
@@ -37,7 +43,7 @@ public class TokensClientTest
     tokensClient = new TokensClient(tokensURL);
   }
 
-  @Test
+  @Test(enabled=true)
   public void testGetUserToken() throws Exception
   {
     String usrToken = tokensClient.getUsrToken(tenantName, userName);
@@ -46,7 +52,7 @@ public class TokensClientTest
     Assert.assertFalse(StringUtils.isBlank(usrToken), "User token should not be blank");
   }
 
-  @Test
+  @Test(enabled=true)
   public void testGetSvcToken() throws Exception
   {
     String svcToken = tokensClient.getSvcToken(tenantName, serviceName);
@@ -54,6 +60,60 @@ public class TokensClientTest
     System.out.println("Token: " + svcToken);
     Assert.assertFalse(StringUtils.isBlank(svcToken), "Service token should not be blank");
   }
+  
+  @Test(enabled=true)
+  public void testNewAndRefreshToken() throws Exception
+  {
+      // Populate the parameters object to configure a refresh token.
+      var createParms = new CreateTokenParms();
+      createParms.setTokenTenantId(tenantName);
+      createParms.setTokenUsername(serviceName);
+      createParms.setAccountType(AccountTypeEnum.SERVICE);
+      createParms.setAccessTokenTtl(360);
+      createParms.generateRefreshToken(true);
+      createParms.setRefreshTokenTtl(600);
+      var tokpkg = tokensClient.createToken(createParms);
+      
+      // Check create token results.
+      Assert.assertNotNull(tokpkg.getAccessToken(), "No access token created.");
+      Assert.assertNotNull(tokpkg.getAccessToken().getAccessToken(), "Null access token string.");
+      Assert.assertNotNull(tokpkg.getAccessToken().getExpiresAt(), "Null access token expiresAt.");
+      Assert.assertNotNull(tokpkg.getAccessToken().getExpiresIn(), "Null access token expiresIn.");
+      Assert.assertNotNull(tokpkg.getRefreshToken(), "No refresh token created.");
+      Assert.assertNotNull(tokpkg.getRefreshToken().getRefreshToken(), "Null refresh token string.");
+      Assert.assertNotNull(tokpkg.getRefreshToken().getExpiresAt(), "Null refresh token expiresAt.");
+      Assert.assertNotNull(tokpkg.getRefreshToken().getExpiresIn(), "Null refresh token expiresIn.");
+  
+      // Temporay code that forces the refreshed JWTs 
+      // to be different from the originals. This should
+      // be removed when unique ids are added to tokens.
+      Thread.currentThread().sleep(1000);
+      
+      // Issue the refresh call.
+      var refreshParms = new RefreshTokenParms();
+      refreshParms.setRefreshToken(tokpkg.getRefreshToken().getRefreshToken());
+      var tokpkg2 = tokensClient.refreshToken(refreshParms);
+      
+      // Check refresh token results.
+      Assert.assertNotNull(tokpkg2.getAccessToken(), "No access token created.");
+      Assert.assertNotNull(tokpkg2.getAccessToken().getAccessToken(), "Null access token string.");
+      Assert.assertNotNull(tokpkg2.getAccessToken().getExpiresAt(), "Null access token expiresAt.");
+      Assert.assertNotNull(tokpkg2.getAccessToken().getExpiresIn(), "Null access token expiresIn.");
+      Assert.assertNotNull(tokpkg2.getRefreshToken(), "No refresh token created.");
+      Assert.assertNotNull(tokpkg2.getRefreshToken().getRefreshToken(), "Null refresh token string.");
+      Assert.assertNotNull(tokpkg2.getRefreshToken().getExpiresAt(), "Null refresh token expiresAt.");
+      Assert.assertNotNull(tokpkg2.getRefreshToken().getExpiresIn(), "Null refresh token expiresIn.");
+  
+      // We like different JWTs.
+      Assert.assertNotEquals(tokpkg.getAccessToken().getAccessToken(), 
+                             tokpkg2.getAccessToken().getAccessToken(), 
+                             "Refreshed access token is the same as the original.");
+      Assert.assertNotEquals(tokpkg.getRefreshToken().getRefreshToken(), 
+                             tokpkg2.getRefreshToken().getRefreshToken(), 
+                             "Refreshed refresh token is the same as the original.");
+  
+  }
+
 
   @AfterSuite
   public void tearDown()
