@@ -33,7 +33,7 @@ public class SKVaultTest
         SKSecretMetaParms parms = new SKSecretMetaParms(SecretType.System)
                                   .setSecretName("secret1")
                                   .setSysId("sys1")
-                                  .setSysOwner("bud");
+                                  .setSysUser("bud");
         SkSecretVersionMetadata resp = skClient.readSecretMeta(parms);
         System.out.println("secretReadMeta: " + resp + "\n");
         

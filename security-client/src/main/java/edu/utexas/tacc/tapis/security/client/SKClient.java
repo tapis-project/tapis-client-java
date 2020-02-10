@@ -935,7 +935,7 @@ public class SKClient
                                        parms.getVersion(),
                                        false, // pretty
                                        parms.getSysId(),
-                                       parms.getSysOwner(),
+                                       parms.getSysUser(),
                                        parms.getKeyType().name(),
                                        parms.getDbHost(),
                                        parms.getDbName(),
@@ -969,7 +969,7 @@ public class SKClient
                                         reqWriteSecret,
                                         false, // pretty
                                         parms.getSysId(),
-                                        parms.getSysOwner(),
+                                        parms.getSysUser(),
                                         parms.getKeyType().name(),
                                         parms.getDbHost(),
                                         parms.getDbName(),
@@ -1002,7 +1002,7 @@ public class SKClient
                                          reqVersions,
                                          false, // pretty
                                          parms.getSysId(),
-                                         parms.getSysOwner(),
+                                         parms.getSysUser(),
                                          parms.getKeyType().name(),
                                          parms.getDbHost(),
                                          parms.getDbName(),
@@ -1034,7 +1034,7 @@ public class SKClient
                                            reqVersions,
                                            false, // pretty
                                            parms.getSysId(),
-                                           parms.getSysOwner(),
+                                           parms.getSysUser(),
                                            parms.getKeyType().name(),
                                            parms.getDbHost(),
                                            parms.getDbName(),
@@ -1066,7 +1066,7 @@ public class SKClient
                                           reqVersions,
                                           false, // pretty
                                           parms.getSysId(),
-                                          parms.getSysOwner(),
+                                          parms.getSysUser(),
                                           parms.getKeyType().name(),
                                           parms.getDbHost(),
                                           parms.getDbName(),
@@ -1093,7 +1093,7 @@ public class SKClient
                                            parms.getSecretName(),
                                            false, // pretty
                                            parms.getSysId(),
-                                           parms.getSysOwner(),
+                                           parms.getSysUser(),
                                            parms.getKeyType().name(),
                                            parms.getDbHost(),
                                            parms.getDbName(),
@@ -1119,7 +1119,7 @@ public class SKClient
             resp = vaultApi.listSecretMeta(parms.getSecretType().getUrlText(),
                                            false, // pretty
                                            parms.getSysId(),
-                                           parms.getSysOwner(),
+                                           parms.getSysUser(),
                                            parms.getKeyType().name(),
                                            parms.getDbHost(),
                                            parms.getDbName(),
@@ -1147,7 +1147,7 @@ public class SKClient
                                               parms.getSecretName(),
                                               false, // pretty
                                               parms.getSysId(),
-                                              parms.getSysOwner(),
+                                              parms.getSysUser(),
                                               parms.getKeyType().name(),
                                               parms.getDbHost(),
                                               parms.getDbName(),

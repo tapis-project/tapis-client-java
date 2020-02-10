@@ -18,7 +18,7 @@ public abstract class SKSecretBaseParms<T extends SKSecretBaseParms<T>>
     private final SecretType secretType;
     private String           secretName;
     private String           sysId;
-    private String           sysOwner;
+    private String           sysUser;
     private KeyType          keyType = KeyType.sshkey; // never null
     private String           dbHost;
     private String           dbName;
@@ -45,9 +45,9 @@ public abstract class SKSecretBaseParms<T extends SKSecretBaseParms<T>>
     public String getSysId() {return sysId;}
     public T setSysId(String sysId) 
         {this.sysId = sysId; return (T) this;}
-    public String getSysOwner() {return sysOwner;}
-    public T setSysOwner(String sysOwner) 
-        {this.sysOwner = sysOwner; return (T) this;}
+    public String getSysUser() {return sysUser;}
+    public T setSysUser(String sysUser) 
+        {this.sysUser = sysUser; return (T) this;}
     public KeyType getKeyType() {return keyType;}
     public T setKeyType(KeyType keyType) 
         {if (keyType != null) this.keyType = keyType; return (T) this;}
