@@ -162,10 +162,10 @@ public class SystemsClient
    * @return The system or null if system not found
    * @throws TapisClientException - If get call throws an exception
    */
-  public TSystem getSystemByName(String name, boolean returnCredentials) throws TapisClientException
+  public TSystem getSystemByName(String name, boolean returnCredentials, String accessMethod) throws TapisClientException
   {
     RespSystem resp = null;
-    try {resp = sysApi.getSystemByName(name, false, returnCredentials); }
+    try {resp = sysApi.getSystemByName(name, returnCredentials, accessMethod, false); }
     catch (Exception e) { throwTapisClientException(e); }
     return resp.getResult();
   }
@@ -307,10 +307,10 @@ public class SystemsClient
    *
    * @throws TapisClientException - If get call throws an exception
    */
-  public Credential getUserCredential(String systemName, String userName) throws TapisClientException
+  public Credential getUserCredential(String systemName, String userName, String accessMethod) throws TapisClientException
   {
     RespCredential resp = null;
-    try {resp = credsApi.getUserCredential(systemName, userName, false); }
+    try {resp = credsApi.getUserCredential(systemName, userName, accessMethod, false); }
     catch (Exception e) { throwTapisClientException(e); }
     return resp.getResult();
   }

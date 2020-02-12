@@ -27,7 +27,7 @@ paths:
       tags:
         - credentials
       summary: Retrieve credential for given system and user
-      description: Retrieve credential for given system and user. Requester must be owner of the system.
+      description: Retrieve credential for given system and user. Requester must be owner of the system. Use query parameter accessMethod=<method> to override default access method.
       operationId: getUserCredential
       parameters:
         - name: systemName
@@ -40,6 +40,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: accessMethod
+          in: query
+          schema:
+            type: string
+            default: ''
         - name: pretty
           in: query
           schema:
@@ -387,6 +392,107 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+  '/v3/systems/{sysName}':
+    get:
+      tags:
+        - systems
+      summary: Retrieve information for a system
+      description: Retrieve information for a system given the system name. Use query parameter returnCredentials=true to have the user access credentials included in the response. Use query parameter accessMethod=<method> to override default access method.
+      operationId: getSystemByName
+      parameters:
+        - name: sysName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: returnCredentials
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: accessMethod
+          in: query
+          schema:
+            type: string
+            default: ''
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: System found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSystem'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: System not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    delete:
+      tags:
+        - systems
+      summary: Delete a system given the system name
+      description: 'Delete a system given the system name. '
+      operationId: deleteSystemByName
+      parameters:
+        - name: sysName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: System deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
   '/v3/systems':
     get:
       tags:
@@ -475,102 +581,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/v3/systems/{sysName}':
-    get:
-      tags:
-        - systems
-      summary: Retrieve information for a system
-      description: Retrieve information for a system given the system name. Use query parameter returnCredentials = true to have the user access credentials included in the response.
-      operationId: getSystemByName
-      parameters:
-        - name: sysName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-        - name: returnCredentials
-          in: query
-          schema:
-            type: boolean
-            default: false
-      responses:
-        '200':
-          description: System found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespSystem'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '404':
-          description: System not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-    delete:
-      tags:
-        - systems
-      summary: Delete a system given the system name
-      description: 'Delete a system given the system name. '
-      operationId: deleteSystemByName
-      parameters:
-        - name: sysName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      responses:
-        '200':
-          description: System deleted.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespChangeCount'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
   '/v3/systems/healthcheck':
     get:
       tags:
@@ -588,32 +598,6 @@ paths:
           description: Server error.
 components:
   schemas:
-    Credential:
-      type: object
-      properties:
-        password:
-          type: string
-        privateKey:
-          type: string
-        publicKey:
-          type: string
-        certificate:
-          type: string
-        accessKey:
-          type: string
-        accessSecret:
-          type: string
-    RespCredential:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          $ref: '#/components/schemas/Credential'
     RespBasic:
       type: object
       properties:
@@ -640,13 +624,32 @@ components:
           type: string
         accessSecret:
           type: string
-    ReqPerms:
+    Credential:
       type: object
       properties:
-        permissions:
-          type: array
-          items:
-            type: string
+        password:
+          type: string
+        privateKey:
+          type: string
+        publicKey:
+          type: string
+        certificate:
+          type: string
+        accessKey:
+          type: string
+        accessSecret:
+          type: string
+    RespCredential:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/Credential'
     RespNameArray:
       type: object
       properties:
@@ -665,22 +668,13 @@ components:
           type: array
           items:
             type: string
-    RespResourceUrl:
+    ReqPerms:
       type: object
       properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          $ref: '#/components/schemas/ResultResourceUrl'
-    ResultResourceUrl:
-      type: object
-      properties:
-        url:
-          type: string
+        permissions:
+          type: array
+          items:
+            type: string
     Capability:
       type: object
       properties:
@@ -698,63 +692,6 @@ components:
         name:
           type: string
         value:
-          type: string
-    ReqCreateSystem:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        systemType:
-          type: string
-        owner:
-          type: string
-        host:
-          type: string
-        available:
-          type: boolean
-        effectiveUserId:
-          type: string
-        accessMethod:
-          type: string
-        accessCredential:
-          $ref: '#/components/schemas/Credential'
-        bucketName:
-          type: string
-        rootDir:
-          type: string
-        transferMethods:
-          type: array
-          items:
-            type: string
-        port:
-          type: integer
-          format: int32
-        useProxy:
-          type: boolean
-        proxyHost:
-          type: string
-        proxyPort:
-          type: integer
-          format: int32
-        jobCanExec:
-          type: boolean
-        jobLocalWorkingDir:
-          type: string
-        jobLocalArchiveDir:
-          type: string
-        jobRemoteArchiveSystem:
-          type: string
-        jobRemoteArchiveDir:
-          type: string
-        jobCapabilities:
-          type: array
-          items:
-            $ref: '#/components/schemas/Capability'
-        tags:
-          type: string
-        notes:
           type: string
     RespSystem:
       type: object
@@ -861,6 +798,79 @@ components:
         changes:
           type: integer
           format: int32
+    RespResourceUrl:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultResourceUrl'
+    ResultResourceUrl:
+      type: object
+      properties:
+        url:
+          type: string
+    ReqCreateSystem:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        systemType:
+          type: string
+        owner:
+          type: string
+        host:
+          type: string
+        available:
+          type: boolean
+        effectiveUserId:
+          type: string
+        accessMethod:
+          type: string
+        accessCredential:
+          $ref: '#/components/schemas/Credential'
+        bucketName:
+          type: string
+        rootDir:
+          type: string
+        transferMethods:
+          type: array
+          items:
+            type: string
+        port:
+          type: integer
+          format: int32
+        useProxy:
+          type: boolean
+        proxyHost:
+          type: string
+        proxyPort:
+          type: integer
+          format: int32
+        jobCanExec:
+          type: boolean
+        jobLocalWorkingDir:
+          type: string
+        jobLocalArchiveDir:
+          type: string
+        jobRemoteArchiveSystem:
+          type: string
+        jobRemoteArchiveDir:
+          type: string
+        jobCapabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Capability'
+        tags:
+          type: string
+        notes:
+          type: string
   securitySchemes:
     TapisJWT:
       type: apiKey
