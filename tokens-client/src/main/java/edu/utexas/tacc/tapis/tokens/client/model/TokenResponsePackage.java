@@ -13,4 +13,14 @@ public final class TokenResponsePackage
     public TapisRefreshToken getRefreshToken() {return refreshToken;}
     public void setRefreshToken(TapisRefreshToken refresToken) 
         {this.refreshToken = refresToken;}
+    
+    // Make sure all fields are filled in.
+    public boolean validateAccessToken() {
+        if (accessToken == null) return false;
+        return accessToken.validate();
+    }
+    public boolean validateRefreshToken() {
+        if (refreshToken == null) return false;
+        return refreshToken.validate();
+    }
 }

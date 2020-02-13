@@ -27,4 +27,10 @@ public abstract class TapisBaseToken
 
     public Integer getExpiresIn() {return expiresIn; }
     public void setExpiresIn(Integer expiresIn) {this.expiresIn = expiresIn;}
+
+    // Make sure both fields are filled in.
+    public boolean validate() {
+        if (expiresAt == null || expiresIn == null) return false;
+        return true;
+    }
 }

@@ -84,10 +84,7 @@ public class TokensClientTest
       Assert.assertNotNull(tokpkg.getRefreshToken().getExpiresAt(), "Null refresh token expiresAt.");
       Assert.assertNotNull(tokpkg.getRefreshToken().getExpiresIn(), "Null refresh token expiresIn.");
   
-      // Temporay code that forces the refreshed JWTs 
-      // to be different from the originals. This should
-      // be removed when unique ids are added to tokens.
-      Thread.currentThread().sleep(1000);
+//      Thread.currentThread().sleep(1000);
       
       // Issue the refresh call.
       var refreshParms = new RefreshTokenParms();
@@ -111,7 +108,6 @@ public class TokensClientTest
       Assert.assertNotEquals(tokpkg.getRefreshToken().getRefreshToken(), 
                              tokpkg2.getRefreshToken().getRefreshToken(), 
                              "Refreshed refresh token is the same as the original.");
-  
   }
 
 
