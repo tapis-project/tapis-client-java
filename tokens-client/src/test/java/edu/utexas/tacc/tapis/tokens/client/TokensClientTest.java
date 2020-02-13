@@ -84,8 +84,6 @@ public class TokensClientTest
       Assert.assertNotNull(tokpkg.getRefreshToken().getExpiresAt(), "Null refresh token expiresAt.");
       Assert.assertNotNull(tokpkg.getRefreshToken().getExpiresIn(), "Null refresh token expiresIn.");
   
-//      Thread.currentThread().sleep(1000);
-      
       // Issue the refresh call.
       var refreshParms = new RefreshTokenParms();
       refreshParms.setRefreshToken(tokpkg.getRefreshToken().getRefreshToken());
@@ -101,7 +99,7 @@ public class TokensClientTest
       Assert.assertNotNull(tokpkg2.getRefreshToken().getExpiresAt(), "Null refresh token expiresAt.");
       Assert.assertNotNull(tokpkg2.getRefreshToken().getExpiresIn(), "Null refresh token expiresIn.");
   
-      // We like different JWTs.
+      // We require different JWTs of the same type.
       Assert.assertNotEquals(tokpkg.getAccessToken().getAccessToken(), 
                              tokpkg2.getAccessToken().getAccessToken(), 
                              "Refreshed access token is the same as the original.");
