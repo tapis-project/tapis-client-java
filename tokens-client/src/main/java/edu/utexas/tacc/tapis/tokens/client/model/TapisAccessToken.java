@@ -14,8 +14,8 @@ public final class TapisAccessToken
 
     // Make all fields are filled in.
     @Override
-    public boolean validate() {
+    public boolean isValid() {
         if (StringUtils.isBlank(accessToken)) return false;
-        return super.validate();        
+        return super.isValid();        
     }
 }

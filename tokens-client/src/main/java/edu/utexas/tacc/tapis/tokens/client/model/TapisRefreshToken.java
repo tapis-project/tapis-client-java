@@ -14,8 +14,8 @@ public final class TapisRefreshToken
 
     // Make all fields are filled in.
     @Override
-    public boolean validate() {
+    public boolean isValid() {
         if (StringUtils.isBlank(refreshToken)) return false;
-        return super.validate();        
+        return super.isValid();        
     }
 }

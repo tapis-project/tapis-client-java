@@ -15,12 +15,12 @@ public final class TokenResponsePackage
         {this.refreshToken = refresToken;}
     
     // Make sure all fields are filled in.
-    public boolean validateAccessToken() {
+    public boolean isValidAccessToken() {
         if (accessToken == null) return false;
-        return accessToken.validate();
+        return accessToken.isValid();
     }
-    public boolean validateRefreshToken() {
+    public boolean isValidRefreshToken() {
         if (refreshToken == null) return false;
-        return refreshToken.validate();
+        return refreshToken.isValid();
     }
 }
