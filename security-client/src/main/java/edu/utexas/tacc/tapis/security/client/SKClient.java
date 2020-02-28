@@ -139,6 +139,15 @@ public class SKClient
     /*                                Utility Methods                               */
     /* **************************************************************************** */
     /* ---------------------------------------------------------------------------- */
+    /* setBasePath:                                                                 */
+    /* ---------------------------------------------------------------------------- */
+    public SKClient setBasePath(String path)
+    {
+        Configuration.getDefaultApiClient().setBasePath(path);
+        return this;
+    }
+    
+    /* ---------------------------------------------------------------------------- */
     /* addDefaultHeader:                                                            */
     /* ---------------------------------------------------------------------------- */
     public SKClient addDefaultHeader(String key, String value)
