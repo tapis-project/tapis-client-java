@@ -95,11 +95,21 @@ public class SystemsClient
   }
 
   /**
-   * addDefaultHeader: Add http header to client
+   * Update base path for default client.
    */
-  public ApiClient addDefaultHeader(String key, String val)
+  public SystemsClient setBasePath(String basePath)
   {
-    return Configuration.getDefaultApiClient().addDefaultHeader(key, val);
+    Configuration.getDefaultApiClient().setBasePath(basePath);
+    return this;
+  }
+
+  /**
+   * Add http header to default client
+   */
+  public SystemsClient addDefaultHeader(String key, String val)
+  {
+    Configuration.getDefaultApiClient().addDefaultHeader(key, val);
+    return this;
   }
 
   // -----------------------------------------------------------------------
@@ -155,10 +165,27 @@ public class SystemsClient
   }
 
   /**
-   * Get a system by name.
+   * Get a system by name without returning credentials
+   *
+   * @param name
+   * @return The system or null if system not found
+   * @throws TapisClientException - If get call throws an exception
+   */
+  public TSystem getSystemByName(String name) throws TapisClientException
+  {
+    RespSystem resp = null;
+    try {resp = sysApi.getSystemByName(name, false, null, false); }
+    catch (Exception e) { throwTapisClientException(e); }
+    return resp.getResult();
+  }
+
+  /**
+   * Get a system by name optionally returning credentials for specified access method.
+   * If accessMethod is null then default access method for the system is used.
    *
    * @param name
    * @param returnCredentials - Flag indicating if credentials should be included in result
+   * @param accessMethod - Desired access method used when fetching credentials, default access method used if this is null
    * @return The system or null if system not found
    * @throws TapisClientException - If get call throws an exception
    */
