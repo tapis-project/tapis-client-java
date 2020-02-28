@@ -11,7 +11,7 @@
 
 	<artifactId>meta-client</artifactId>
 
-	<name>Tapis meta Client</name>
+	<name>Tapis Meta Client</name>
 	<description>Java client for tapis-metaapi web application</description>
 
 	<dependencies>
