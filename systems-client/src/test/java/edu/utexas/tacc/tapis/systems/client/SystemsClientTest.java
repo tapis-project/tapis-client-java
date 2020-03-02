@@ -1,11 +1,13 @@
 package edu.utexas.tacc.tapis.systems.client;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import edu.utexas.tacc.tapis.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.shared.utils.TapisGsonUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,7 +20,7 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability.CategoryEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem.AccessMethodEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem.DefaultAccessMethodEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem.TransferMethodsEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem.SystemTypeEnum;
 import edu.utexas.tacc.tapis.tokens.client.TokensClient;
@@ -49,8 +51,10 @@ public class SystemsClientTest {
   private static final String prot1ProxyHost = "a";
   private static final int prot1ProxyPort = -1;
   private static final TransferMethodsEnum[] prot1TxfrMethods = {TransferMethodsEnum.SFTP, TransferMethodsEnum.S3};
-  private static final AccessMethodEnum prot1AccessMethod = AccessMethodEnum.PKI_KEYS;
-  private static final String tags = "{\"key1\":\"a\", \"key2\":\"b\"}";
+  private static final DefaultAccessMethodEnum prot1AccessMethod = DefaultAccessMethodEnum.PKI_KEYS;
+  private static final String tags = null;
+  private static final String[] tags2 = {"value1", "value2", "a",
+          "a long tag with spaces and numbers (1 3 2) and special characters [_ $ - & * % @ + = ! ^ ? < > , . ( ) { } / \\ | ]. Backslashes must be escaped."};
   private static final String notes = "{\"project\":\"myproj1\", \"testdata\":\"abc\"}";
   // TODO/TBD: No perms enum in auto-generated model class. Why not?
 //  private static final List<String> testPerms = new ArrayList<>(List.of(TSystem.Permissions.READ.name(),TSystem.Permissions.MODIFY.name(),
@@ -175,7 +179,7 @@ public class SystemsClientTest {
     String[] sys0 = sys9;
     Credential cred0 = null;
     System.out.println("Creating system with name: " + sys0[1]);
-    createSystem(sys0, AccessMethodEnum.CERT, cred0, prot1TxfrMethods, null);
+    createSystem(sys0, DefaultAccessMethodEnum.CERT, cred0, prot1TxfrMethods, null);
     Assert.fail("Exception should have been thrown");
   }
 
@@ -215,7 +219,7 @@ public class SystemsClientTest {
     Assert.assertEquals(tmpSys.getJobLocalArchiveDir(), sys0[11]);
     Assert.assertEquals(tmpSys.getJobRemoteArchiveSystem(), sys0[12]);
     Assert.assertEquals(tmpSys.getJobRemoteArchiveDir(), sys0[13]);
-    Assert.assertEquals(tmpSys.getAccessMethod(), prot1AccessMethod);
+    Assert.assertEquals(tmpSys.getDefaultAccessMethod(), prot1AccessMethod);
     Assert.assertEquals(tmpSys.getPort().intValue(), prot1Port);
     Assert.assertEquals(tmpSys.getUseProxy().booleanValue(), prot1UseProxy);
     Assert.assertEquals(tmpSys.getProxyHost(), prot1ProxyHost);
@@ -238,19 +242,22 @@ public class SystemsClientTest {
     {
       Assert.assertTrue(capNamesFound.contains(capSeed.getName()), "List of capabilities did not contain a capability named: " + capSeed.getName());
     }
-    // Retrieve tags, convert to json, verify keys and values
-    String tags = tmpSys.getTags();
-    System.out.println("Found tags: " + tags);
-    // Get the Json object and prepare to extract info from it
-    JsonObject obj = TapisGsonUtils.getGson().fromJson(tags, JsonObject.class);
-    Assert.assertTrue(obj.has("key1"));
-    Assert.assertEquals(obj.get("key1").getAsString(), "a");
-    Assert.assertTrue(obj.has("key2"));
-    Assert.assertEquals(obj.get("key2").getAsString(), "b");
-    // Retrieve notes, convert to json, verify elements
-    String notes = tmpSys.getNotes();
-    System.out.println("Found notes: " + notes);
-    obj = TapisGsonUtils.getGson().fromJson(notes, JsonObject.class);
+    // Verify tags
+//    String[] tmpTags = tmpSys.getTags();
+//    Assert.assertNotNull(tmpTags, "Tags value was null");
+//    var tagsList = Arrays.asList(tmpTags);
+//    Assert.assertEquals(tmpTags.length, tags2.length, "Wrong number of tags");
+//    for (String tagStr : tags2)
+//    {
+//      Assert.assertTrue(tagsList.contains(tagStr));
+//      System.out.println("Found tag: " + tagStr);
+//    }
+    // Verify notes
+    String notesStr = tmpSys.getNotes().toString();
+    System.out.println("Found notes: " + notesStr);
+    Assert.assertFalse(StringUtils.isBlank(notesStr), "Notes string not found");
+    JsonObject obj = JsonParser.parseString(notesStr).getAsJsonObject();
+    Assert.assertNotNull(obj, "Error parsing Notes string");
     Assert.assertTrue(obj.has("project"));
     Assert.assertEquals(obj.get("project").getAsString(), "myproj1");
     Assert.assertTrue(obj.has("testdata"));
@@ -365,19 +372,19 @@ public class SystemsClientTest {
       // Store and retrieve multiple secret types: password, ssh keys, access key and secret
       sysClient.updateUserCredential(sys0[1], testUser2, cred0.getPassword(), cred0.getPrivateKey(), cred0.getPublicKey(),
                                      cred0.getCertificate(), cred0.getAccessKey(), cred0.getAccessSecret());
-      Credential cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethodEnum.PASSWORD.name());
+      Credential cred1 = sysClient.getUserCredential(sys0[1], testUser2, DefaultAccessMethodEnum.PASSWORD.name());
       // Verify credentials
       Assert.assertEquals(cred1.getPassword(), cred0.getPassword());
-      cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethodEnum.PKI_KEYS.name());
+      cred1 = sysClient.getUserCredential(sys0[1], testUser2, DefaultAccessMethodEnum.PKI_KEYS.name());
       Assert.assertEquals(cred1.getPublicKey(), cred0.getPublicKey());
       Assert.assertEquals(cred1.getPrivateKey(), cred0.getPrivateKey());
-      cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethodEnum.ACCESS_KEY.name());
+      cred1 = sysClient.getUserCredential(sys0[1], testUser2, DefaultAccessMethodEnum.ACCESS_KEY.name());
       Assert.assertEquals(cred1.getAccessKey(), cred0.getAccessKey());
       Assert.assertEquals(cred1.getAccessSecret(), cred0.getAccessSecret());
       // Delete credentials and verify they were destroyed
       sysClient.deleteUserCredential(sys0[1], testUser2);
       try {
-        cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethodEnum.PASSWORD.name());
+        cred1 = sysClient.getUserCredential(sys0[1], testUser2, DefaultAccessMethodEnum.PASSWORD.name());
       } catch (TapisClientException tce) {
         Assert.assertTrue(tce.getTapisMessage().startsWith("SYSAPI_CRED_NOT_FOUND"), "Wrong exception message: " + tce.getTapisMessage());
         cred1 = null;
@@ -392,12 +399,12 @@ public class SystemsClientTest {
                                             "fakeAccessKey2", "fakeAccessSecret2");
       sysClient.updateUserCredential(sys0[1], testUser2, cred0.getPassword(), cred0.getPrivateKey(), cred0.getPublicKey(),
                                      cred0.getCertificate(), cred0.getAccessKey(), cred0.getAccessSecret());
-      cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethodEnum.ACCESS_KEY.name());
+      cred1 = sysClient.getUserCredential(sys0[1], testUser2, DefaultAccessMethodEnum.ACCESS_KEY.name());
       Assert.assertEquals(cred1.getAccessKey(), cred0.getAccessKey());
       Assert.assertEquals(cred1.getAccessSecret(), cred0.getAccessSecret());
       // Attempt to retrieve secret that has not been set
       try {
-        cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethodEnum.PKI_KEYS.name());
+        cred1 = sysClient.getUserCredential(sys0[1], testUser2, DefaultAccessMethodEnum.PKI_KEYS.name());
       } catch (TapisClientException tce) {
         Assert.assertTrue(tce.getTapisMessage().startsWith("SYSAPI_CRED_NOT_FOUND"), "Wrong exception message: " + tce.getTapisMessage());
         cred1 = null;
@@ -406,7 +413,7 @@ public class SystemsClientTest {
       // Delete credentials and verify they were destroyed
       sysClient.deleteUserCredential(sys0[1], testUser2);
       try {
-        cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethodEnum.ACCESS_KEY.name());
+        cred1 = sysClient.getUserCredential(sys0[1], testUser2, DefaultAccessMethodEnum.ACCESS_KEY.name());
       } catch (TapisClientException tce) {
         Assert.assertTrue(tce.getTapisMessage().startsWith("SYSAPI_CRED_NOT_FOUND"), "Wrong exception message: " + tce.getTapisMessage());
         cred1 = null;
@@ -414,7 +421,7 @@ public class SystemsClientTest {
       Assert.assertNull(cred1, "Credential not deleted. System name: " + sys0[1] + " User name: " + testUser2);
       // Attempt to retrieve secret from non-existent system
       try {
-        cred1 = sysClient.getUserCredential("AMissingSystemName", testUser2, AccessMethodEnum.PKI_KEYS.name());
+        cred1 = sysClient.getUserCredential("AMissingSystemName", testUser2, DefaultAccessMethodEnum.PKI_KEYS.name());
       } catch (TapisClientException tce) {
         Assert.assertTrue(tce.getTapisMessage().startsWith("SYSAPI_NOSYSTEM"), "Wrong exception message: " + tce.getTapisMessage());
         cred1 = null;
@@ -467,7 +474,7 @@ public class SystemsClientTest {
     } catch (Exception e) {    }
   }
 
-  private String createSystem(String[] sys, AccessMethodEnum accessMethod, Credential credential, TransferMethodsEnum[] txfrMethods,
+  private String createSystem(String[] sys, DefaultAccessMethodEnum accessMethod, Credential credential, TransferMethodsEnum[] txfrMethods,
                               List<Capability> jobCaps) throws TapisClientException {
     // Convert list of TransferMethod enums to list of strings
     List<String> transferMethods = Stream.of(txfrMethods).map(TransferMethodsEnum::name).collect(Collectors.toList());

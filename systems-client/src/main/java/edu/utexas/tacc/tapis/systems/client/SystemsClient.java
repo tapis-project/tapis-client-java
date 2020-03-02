@@ -122,8 +122,8 @@ public class SystemsClient
    * @return url pointing to created resource
    * @throws TapisClientException - If create call throws an exception
    */
-  public String createSystem(String name, String description, String systemType, String owner, String host, boolean available,
-                             String effectiveUserId, String accessMethod, Credential accessCredential,
+  public String createSystem(String name, String description, String systemType, String owner, String host, boolean enabled,
+                             String effectiveUserId, String defaultAccessMethod, Credential accessCredential,
                              String bucketName, String rootDir, List<String> transferMethods,
                              int port, boolean useProxy, String proxyHost, int proxyPort,
                              boolean jobCanExec, String jobLocalWorkingDir, String jobLocalArchiveDir,
@@ -138,9 +138,9 @@ public class SystemsClient
     req.setSystemType(systemType);
     req.setOwner(owner);
     req.setHost(host);
-    req.setAvailable(available);
+//    req.setEnabled(enabled);
     req.setEffectiveUserId(effectiveUserId);
-    req.setAccessMethod(accessMethod);
+    req.setDefaultAccessMethod(defaultAccessMethod);
     req.setAccessCredential(accessCredential);
     req.setBucketName(bucketName);
     req.setRootDir(rootDir);
