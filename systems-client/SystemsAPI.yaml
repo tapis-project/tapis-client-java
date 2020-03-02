@@ -722,7 +722,7 @@ components:
           type: string
         host:
           type: string
-        available:
+        enabled:
           type: boolean
         effectiveUserId:
           type: string
