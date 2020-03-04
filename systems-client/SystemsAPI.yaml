@@ -609,21 +609,6 @@ components:
           type: string
         result:
           type: object
-    ReqCreateCredential:
-      type: object
-      properties:
-        password:
-          type: string
-        privateKey:
-          type: string
-        publicKey:
-          type: string
-        certificate:
-          type: string
-        accessKey:
-          type: string
-        accessSecret:
-          type: string
     Credential:
       type: object
       properties:
@@ -639,6 +624,11 @@ components:
           type: string
         accessSecret:
           type: string
+    ReqCreateCredential:
+      type: object
+      properties:
+        credential:
+          $ref: '#/components/schemas/Credential'
     RespCredential:
       type: object
       properties:
@@ -650,6 +640,13 @@ components:
           type: string
         result:
           $ref: '#/components/schemas/Credential'
+    ReqPerms:
+      type: object
+      properties:
+        permissions:
+          type: array
+          items:
+            type: string
     RespNameArray:
       type: object
       properties:
@@ -665,13 +662,6 @@ components:
       type: object
       properties:
         names:
-          type: array
-          items:
-            type: string
-    ReqPerms:
-      type: object
-      properties:
-        permissions:
           type: array
           items:
             type: string
@@ -708,63 +698,6 @@ components:
         name:
           type: string
         value:
-          type: string
-    ReqCreateSystem:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        systemType:
-          type: string
-        owner:
-          type: string
-        host:
-          type: string
-        enabled:
-          type: boolean
-        effectiveUserId:
-          type: string
-        defaultAccessMethod:
-          type: string
-        accessCredential:
-          $ref: '#/components/schemas/Credential'
-        bucketName:
-          type: string
-        rootDir:
-          type: string
-        transferMethods:
-          type: array
-          items:
-            type: string
-        port:
-          type: integer
-          format: int32
-        useProxy:
-          type: boolean
-        proxyHost:
-          type: string
-        proxyPort:
-          type: integer
-          format: int32
-        jobCanExec:
-          type: boolean
-        jobLocalWorkingDir:
-          type: string
-        jobLocalArchiveDir:
-          type: string
-        jobRemoteArchiveSystem:
-          type: string
-        jobRemoteArchiveDir:
-          type: string
-        jobCapabilities:
-          type: array
-          items:
-            $ref: '#/components/schemas/Capability'
-        tags:
-          type: string
-        notes:
           type: string
     JsonArray:
       type: object
@@ -803,18 +736,18 @@ components:
           $ref: '#/components/schemas/JsonObject'
         asJsonArray:
           $ref: '#/components/schemas/JsonArray'
-        asJsonPrimitive:
-          $ref: '#/components/schemas/JsonPrimitive'
-        jsonArray:
-          type: boolean
         jsonObject:
           type: boolean
         jsonPrimitive:
           type: boolean
         jsonNull:
           type: boolean
+        asJsonPrimitive:
+          $ref: '#/components/schemas/JsonPrimitive'
         asJsonNull:
           $ref: '#/components/schemas/JsonNull'
+        jsonArray:
+          type: boolean
     JsonNull:
       type: object
       properties:
@@ -823,23 +756,21 @@ components:
         asInt:
           type: integer
           format: int32
-        asJsonObject:
-          $ref: '#/components/schemas/JsonObject'
         asByte:
           type: string
           format: byte
+        asJsonObject:
+          $ref: '#/components/schemas/JsonObject'
         asJsonArray:
           $ref: '#/components/schemas/JsonArray'
-        asJsonPrimitive:
-          $ref: '#/components/schemas/JsonPrimitive'
-        jsonArray:
-          type: boolean
         jsonObject:
           type: boolean
         jsonPrimitive:
           type: boolean
         jsonNull:
           type: boolean
+        asJsonPrimitive:
+          $ref: '#/components/schemas/JsonPrimitive'
         asJsonNull:
           $ref: '#/components/schemas/JsonNull'
         asNumber:
@@ -862,6 +793,8 @@ components:
         asShort:
           type: integer
           format: int32
+        jsonArray:
+          type: boolean
         asString:
           type: string
     JsonObject:
@@ -872,23 +805,21 @@ components:
         asInt:
           type: integer
           format: int32
-        asJsonObject:
-          $ref: '#/components/schemas/JsonObject'
         asByte:
           type: string
           format: byte
+        asJsonObject:
+          $ref: '#/components/schemas/JsonObject'
         asJsonArray:
           $ref: '#/components/schemas/JsonArray'
-        asJsonPrimitive:
-          $ref: '#/components/schemas/JsonPrimitive'
-        jsonArray:
-          type: boolean
         jsonObject:
           type: boolean
         jsonPrimitive:
           type: boolean
         jsonNull:
           type: boolean
+        asJsonPrimitive:
+          $ref: '#/components/schemas/JsonPrimitive'
         asJsonNull:
           $ref: '#/components/schemas/JsonNull'
         asNumber:
@@ -911,6 +842,8 @@ components:
         asShort:
           type: integer
           format: int32
+        jsonArray:
+          type: boolean
         asString:
           type: string
     JsonPrimitive:
@@ -928,8 +861,6 @@ components:
         asByte:
           type: string
           format: byte
-        string:
-          type: boolean
         asNumber:
           type: number
         asDouble:
@@ -950,34 +881,30 @@ components:
         asShort:
           type: integer
           format: int32
+        string:
+          type: boolean
         asString:
           type: string
         asJsonObject:
           $ref: '#/components/schemas/JsonObject'
         asJsonArray:
           $ref: '#/components/schemas/JsonArray'
-        asJsonPrimitive:
-          $ref: '#/components/schemas/JsonPrimitive'
-        jsonArray:
-          type: boolean
         jsonObject:
           type: boolean
         jsonPrimitive:
           type: boolean
         jsonNull:
           type: boolean
+        asJsonPrimitive:
+          $ref: '#/components/schemas/JsonPrimitive'
         asJsonNull:
           $ref: '#/components/schemas/JsonNull'
-    RespSystem:
+        jsonArray:
+          type: boolean
+    ReqCreateSystem:
       type: object
       properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
+        tSystem:
           $ref: '#/components/schemas/TSystem'
     TSystem:
       type: object
@@ -1058,6 +985,17 @@ components:
             type: string
         notes:
           $ref: '#/components/schemas/JsonObject'
+    RespSystem:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/TSystem'
     RespChangeCount:
       type: object
       properties:
@@ -1081,4 +1019,3 @@ components:
       description: Tapis signed JWT token authentication
       name: X-Tapis-Token
       in: header
-

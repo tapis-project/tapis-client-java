@@ -23,6 +23,7 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.RespNameArray;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespResourceUrl;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem.DefaultAccessMethodEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability.CategoryEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
@@ -122,41 +123,11 @@ public class SystemsClient
    * @return url pointing to created resource
    * @throws TapisClientException - If create call throws an exception
    */
-  public String createSystem(String name, String description, String systemType, String owner, String host, boolean enabled,
-                             String effectiveUserId, String defaultAccessMethod, Credential accessCredential,
-                             String bucketName, String rootDir, List<String> transferMethods,
-                             int port, boolean useProxy, String proxyHost, int proxyPort,
-                             boolean jobCanExec, String jobLocalWorkingDir, String jobLocalArchiveDir,
-                             String jobRemoteArchiveSystem, String jobRemoteArchiveDir, List<Capability> jobCapabilities,
-                             String tags, String notes)
-    throws TapisClientException
+  public String createSystem(TSystem tSystem) throws TapisClientException
   {
     // Build the request
     var req = new ReqCreateSystem();
-    req.setName(name);
-    req.setDescription(description);
-    req.setSystemType(systemType);
-    req.setOwner(owner);
-    req.setHost(host);
-//    req.setEnabled(enabled);
-    req.setEffectiveUserId(effectiveUserId);
-    req.setDefaultAccessMethod(defaultAccessMethod);
-    req.setAccessCredential(accessCredential);
-    req.setBucketName(bucketName);
-    req.setRootDir(rootDir);
-    req.setTransferMethods(transferMethods);
-    req.setPort(port);
-    req.setUseProxy(useProxy);
-    req.setProxyHost(proxyHost);
-    req.setProxyPort(proxyPort);
-    req.setJobCanExec(jobCanExec);
-    req.setJobLocalWorkingDir(jobLocalWorkingDir);
-    req.setJobLocalArchiveDir(jobLocalArchiveDir);
-    req.setJobRemoteArchiveSystem(jobRemoteArchiveSystem);
-    req.setJobRemoteArchiveDir(jobRemoteArchiveDir);
-    req.setJobCapabilities(jobCapabilities);
-    req.setTags(tags);
-    req.setNotes(notes);
+    req.settSystem(tSystem);
     // Submit the request and return the response
     RespResourceUrl resp = null;
     try { resp = sysApi.createSystem(req, false); }
@@ -180,19 +151,19 @@ public class SystemsClient
   }
 
   /**
-   * Get a system by name optionally returning credentials for specified access method.
+   * Get a system by name returning credentials for specified access method.
    * If accessMethod is null then default access method for the system is used.
    *
    * @param name
-   * @param returnCredentials - Flag indicating if credentials should be included in result
    * @param accessMethod - Desired access method used when fetching credentials, default access method used if this is null
    * @return The system or null if system not found
    * @throws TapisClientException - If get call throws an exception
    */
-  public TSystem getSystemByName(String name, boolean returnCredentials, String accessMethod) throws TapisClientException
+  public TSystem getSystemByName(String name, DefaultAccessMethodEnum accessMethod) throws TapisClientException
   {
     RespSystem resp = null;
-    try {resp = sysApi.getSystemByName(name, returnCredentials, accessMethod, false); }
+    String accessMethodStr = (accessMethod==null ? null : accessMethod.name());
+    try {resp = sysApi.getSystemByName(name, true, accessMethodStr, false); }
     catch (Exception e) { throwTapisClientException(e); }
     return resp.getResult();
   }
@@ -213,8 +184,8 @@ public class SystemsClient
    */
 //  public List<TSystem> getSystems() throws TapisClientException
 //  {
-//        RespNameArray resp = sysApi.getSystemNames(false);
-//        return resp.getResult();
+//    RespNameArray resp = sysApi.getSystemNames(false);
+//    return resp.getResult();
 //    return Collections.emptyList();
 //  }
 
@@ -310,18 +281,11 @@ public class SystemsClient
    *
    * @throws TapisClientException - If grant call throws an exception
    */
-  public void updateUserCredential(String systemName, String userName, String password, String privateKey, String publicKey,
-                                   String  certificate, String accessKey, String accessSecret)
-          throws TapisClientException
+  public void updateUserCredential(String systemName, String userName, Credential cred) throws TapisClientException
   {
     // Build the request
     var req = new ReqCreateCredential();
-    req.setPassword(password);
-    req.setPrivateKey(privateKey);
-    req.setPublicKey(publicKey);
-    req.setCertificate(certificate);
-    req.setAccessKey(accessKey);
-    req.setAccessSecret(accessSecret);
+    req.setCredential(cred);
     // Submit the request and return the response
     RespBasic resp = null;
     try { resp = credsApi.createUserCredential(systemName, userName, req, false); }
@@ -334,10 +298,10 @@ public class SystemsClient
    *
    * @throws TapisClientException - If get call throws an exception
    */
-  public Credential getUserCredential(String systemName, String userName, String accessMethod) throws TapisClientException
+  public Credential getUserCredential(String systemName, String userName, DefaultAccessMethodEnum accessMethod) throws TapisClientException
   {
     RespCredential resp = null;
-    try {resp = credsApi.getUserCredential(systemName, userName, accessMethod, false); }
+    try {resp = credsApi.getUserCredential(systemName, userName, accessMethod.name(), false); }
     catch (Exception e) { throwTapisClientException(e); }
     return resp.getResult();
   }
@@ -359,7 +323,6 @@ public class SystemsClient
 
   /**
    * Utility method to build a credential object given secrets.
-   *
    */
   public static Credential buildCredential(String password, String privateKey, String publicKey, String certificate,
                                     String accessKey, String accessSecret)
@@ -376,7 +339,6 @@ public class SystemsClient
 
   /**
    * Utility method to build a Capability object given category, name and value
-   *
    */
   public static Capability buildCapability(CategoryEnum category, String name, String value)
   {
