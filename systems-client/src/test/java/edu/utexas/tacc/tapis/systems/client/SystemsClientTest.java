@@ -86,6 +86,8 @@ public class SystemsClientTest {
           "bucketC", "/rootC", "jobLocalWorkDirC", "jobLocalArchDirC", "jobRemoteArchSystemC", "jobRemoteArchDirC"};
   private static final String[] sysD = {tenantName, "CsysD", "description D", sysType, sysOwner, "hostD", "effUserD", "fakePasswordD",
           "bucketD", "/rootD", "jobLocalWorkDirD", "jobLocalArchDirD", "jobRemoteArchSystemD", "jobRemoteArchDirD"};
+  private static final String[] sysE = {tenantName, "CsysE", null, sysType, null, "hostE", null, null,
+          null, null, null, null, null, null};
 
   private static final Capability capA1 = SystemsClient.buildCapability(CategoryEnum.SCHEDULER, "Type", "Slurm");
   private static final Capability capB1 = SystemsClient.buildCapability(CategoryEnum.HARDWARE, "CoresPerNode", "4");
@@ -134,6 +136,24 @@ public class SystemsClientTest {
     System.out.println("Creating system with name: " + sys0[1]);
     try {
       String respUrl = createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethods, cap1List);
+      System.out.println("Created system: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
+  }
+
+  // Create a system using minimal attributes:
+  //   name, systemType, host, defaultAccessMethod, jobCanExec
+  @Test
+  public void testCreateSystemMinimal() throws Exception
+  {
+    // Create a system
+    String[] sys0 = sysE;
+    System.out.println("Creating system with name: " + sys0[1]);
+    try {
+      String respUrl = createSystem(sys0, prot1AccessMethod, null, null, null);
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
@@ -534,6 +554,9 @@ public class SystemsClientTest {
     } catch (Exception e) {    }
     try {
       sysClient.deleteSystemByName(sysD[1]);
+    } catch (Exception e) {    }
+    try {
+      sysClient.deleteSystemByName(sysE[1]);
     } catch (Exception e) {    }
   }
 
