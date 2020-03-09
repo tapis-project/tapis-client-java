@@ -23,7 +23,6 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.RespNameArray;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespResourceUrl;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem.DefaultAccessMethodEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability.CategoryEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
@@ -46,6 +45,13 @@ public class SystemsClient
   // Error msg to use in unlikely event we are unable to extract one from underlying exception
   private static final String ERR_MSG = SystemsClient.class.getSimpleName() +
               ": Exception encountered but unable extract message from response or underlying exception";
+
+  // ************************************************************************
+  // *********************** Enums ******************************************
+  // ************************************************************************
+  // Define AccessMethod here to be used in place of the auto-generated model enum
+  //   because the auto-generated enum is named DefaultAccessMethodEnum which is misleading.
+  public enum AccessMethod {PASSWORD, PKI_KEYS, CERT, ACCESS_KEY}
 
   // ************************************************************************
   // *********************** Fields *****************************************
@@ -159,7 +165,7 @@ public class SystemsClient
    * @return The system or null if system not found
    * @throws TapisClientException - If get call throws an exception
    */
-  public TSystem getSystemByName(String name, DefaultAccessMethodEnum accessMethod) throws TapisClientException
+  public TSystem getSystemByName(String name, AccessMethod accessMethod) throws TapisClientException
   {
     RespSystem resp = null;
     String accessMethodStr = (accessMethod==null ? null : accessMethod.name());
@@ -298,10 +304,11 @@ public class SystemsClient
    *
    * @throws TapisClientException - If get call throws an exception
    */
-  public Credential getUserCredential(String systemName, String userName, DefaultAccessMethodEnum accessMethod) throws TapisClientException
+  public Credential getUserCredential(String systemName, String userName, AccessMethod accessMethod) throws TapisClientException
   {
     RespCredential resp = null;
-    try {resp = credsApi.getUserCredential(systemName, userName, accessMethod.name(), false); }
+    String accessMethodStr = (accessMethod==null ? null : accessMethod.name());
+    try {resp = credsApi.getUserCredential(systemName, userName, accessMethodStr, false); }
     catch (Exception e) { throwTapisClientException(e); }
     return resp.getResult();
   }

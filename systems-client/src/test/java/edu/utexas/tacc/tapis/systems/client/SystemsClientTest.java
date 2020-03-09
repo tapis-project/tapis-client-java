@@ -19,9 +19,9 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.Capability.CategoryEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.JsonObject;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem.DefaultAccessMethodEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem.TransferMethodsEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem.SystemTypeEnum;
+import edu.utexas.tacc.tapis.systems.client.SystemsClient.AccessMethod;
 import edu.utexas.tacc.tapis.tokens.client.TokensClient;
 
 /**
@@ -50,7 +50,7 @@ public class SystemsClientTest {
   private static final String prot1ProxyHost = "a";
   private static final int prot1ProxyPort = -1;
   private static final List<TransferMethodsEnum> prot1TxfrMethods = Arrays.asList(TransferMethodsEnum.SFTP, TransferMethodsEnum.S3);
-  private static final DefaultAccessMethodEnum prot1AccessMethod = DefaultAccessMethodEnum.PKI_KEYS;
+  private static final AccessMethod prot1AccessMethod = AccessMethod.PKI_KEYS;
   private static final List<String> tags = Arrays.asList("value1", "value2", "a",
           "a long tag with spaces and numbers (1 3 2) and special characters [_ $ - & * % @ + = ! ^ ? < > , . ( ) { } / \\ | ]. Backslashes must be escaped.");
   private static final JsonObject notesJO = TapisGsonUtils.getGson().fromJson("{\"project\":\"myproj1\", \"testdata\":\"abc\"}", JsonObject.class);
@@ -200,7 +200,7 @@ public class SystemsClientTest {
     String[] sys0 = sys9;
     Credential cred0 = null;
     System.out.println("Creating system with name: " + sys0[1]);
-    createSystem(sys0, DefaultAccessMethodEnum.CERT, cred0, prot1TxfrMethods, null);
+    createSystem(sys0, AccessMethod.CERT, cred0, prot1TxfrMethods, null);
     Assert.fail("Exception should have been thrown");
   }
 
@@ -223,7 +223,7 @@ public class SystemsClientTest {
     String[] sys0 = sys2;
     Credential cred0 = SystemsClient.buildCredential(sys0[7], "fakePrivateKey", "fakePublicKey",
                                            "fakeCert","fakeAccessKey", "fakeAccessSecret");
-    String respUrl = createSystem(sys0, DefaultAccessMethodEnum.PKI_KEYS, cred0, prot1TxfrMethods, cap2List);
+    String respUrl = createSystem(sys0, AccessMethod.PKI_KEYS, cred0, prot1TxfrMethods, cap2List);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     TSystem tmpSys = sysClient.getSystemByName(sys0[1], null);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
@@ -242,12 +242,11 @@ public class SystemsClientTest {
     Assert.assertEquals(tmpSys.getJobLocalArchiveDir(), sys0[11]);
     Assert.assertEquals(tmpSys.getJobRemoteArchiveSystem(), sys0[12]);
     Assert.assertEquals(tmpSys.getJobRemoteArchiveDir(), sys0[13]);
-    Assert.assertEquals(tmpSys.getDefaultAccessMethod(), prot1AccessMethod);
     Assert.assertEquals(tmpSys.getPort().intValue(), prot1Port);
     Assert.assertEquals(tmpSys.getUseProxy().booleanValue(), prot1UseProxy);
     Assert.assertEquals(tmpSys.getProxyHost(), prot1ProxyHost);
     Assert.assertEquals(tmpSys.getProxyPort().intValue(), prot1ProxyPort);
-    Assert.assertEquals(tmpSys.getDefaultAccessMethod().name(), DefaultAccessMethodEnum.PKI_KEYS.name());
+    Assert.assertEquals(tmpSys.getDefaultAccessMethod().name(), AccessMethod.PKI_KEYS.name());
     // Verify credentials. Only cred for default accessMethod is returned. In this case PKI_KEYS.
     Credential cred = tmpSys.getAccessCredential();
     Assert.assertNotNull(cred, "AccessCredential should not be null");
@@ -301,7 +300,7 @@ public class SystemsClientTest {
 //    Assert.assertEquals(obj.get("testdata").getAsString(), "abc");
 
     // Test retrieval using specified access method
-    tmpSys = sysClient.getSystemByName(sys0[1], DefaultAccessMethodEnum.PASSWORD);
+    tmpSys = sysClient.getSystemByName(sys0[1], AccessMethod.PASSWORD);
     // Verify credentials. Only cred for default accessMethod is returned. In this case PASSWORD.
     cred = tmpSys.getAccessCredential();
     Assert.assertNotNull(cred, "AccessCredential should not be null");
@@ -338,7 +337,7 @@ public class SystemsClientTest {
     Assert.assertEquals(tmpSys.getJobLocalArchiveDir(), sys0[11]);
     Assert.assertEquals(tmpSys.getJobRemoteArchiveSystem(), sys0[12]);
     Assert.assertEquals(tmpSys.getJobRemoteArchiveDir(), sys0[13]);
-    Assert.assertEquals(tmpSys.getDefaultAccessMethod(), prot1AccessMethod);
+    Assert.assertEquals(tmpSys.getDefaultAccessMethod().name(), prot1AccessMethod.name());
     Assert.assertEquals(tmpSys.getPort().intValue(), prot1Port);
     Assert.assertEquals(tmpSys.getUseProxy().booleanValue(), prot1UseProxy);
     Assert.assertEquals(tmpSys.getProxyHost(), prot1ProxyHost);
@@ -453,19 +452,19 @@ public class SystemsClientTest {
               "fakeCert","fakeAccessKey", "fakeAccessSecret");
       // Store and retrieve multiple secret types: password, ssh keys, access key and secret
       sysClient.updateUserCredential(sys0[1], testUser2, cred0);
-      Credential cred1 = sysClient.getUserCredential(sys0[1], testUser2, DefaultAccessMethodEnum.PASSWORD);
+      Credential cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethod.PASSWORD);
       // Verify credentials
       Assert.assertEquals(cred1.getPassword(), cred0.getPassword());
-      cred1 = sysClient.getUserCredential(sys0[1], testUser2, DefaultAccessMethodEnum.PKI_KEYS);
+      cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethod.PKI_KEYS);
       Assert.assertEquals(cred1.getPublicKey(), cred0.getPublicKey());
       Assert.assertEquals(cred1.getPrivateKey(), cred0.getPrivateKey());
-      cred1 = sysClient.getUserCredential(sys0[1], testUser2, DefaultAccessMethodEnum.ACCESS_KEY);
+      cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethod.ACCESS_KEY);
       Assert.assertEquals(cred1.getAccessKey(), cred0.getAccessKey());
       Assert.assertEquals(cred1.getAccessSecret(), cred0.getAccessSecret());
       // Delete credentials and verify they were destroyed
       sysClient.deleteUserCredential(sys0[1], testUser2);
       try {
-        cred1 = sysClient.getUserCredential(sys0[1], testUser2, DefaultAccessMethodEnum.PASSWORD);
+        cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethod.PASSWORD);
       } catch (TapisClientException tce) {
         Assert.assertTrue(tce.getTapisMessage().startsWith("SYSAPI_CRED_NOT_FOUND"), "Wrong exception message: " + tce.getTapisMessage());
         cred1 = null;
@@ -479,12 +478,12 @@ public class SystemsClientTest {
       cred0 = SystemsClient.buildCredential(null, null, null, null,
                                             "fakeAccessKey2", "fakeAccessSecret2");
       sysClient.updateUserCredential(sys0[1], testUser2, cred0);
-      cred1 = sysClient.getUserCredential(sys0[1], testUser2, DefaultAccessMethodEnum.ACCESS_KEY);
+      cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethod.ACCESS_KEY);
       Assert.assertEquals(cred1.getAccessKey(), cred0.getAccessKey());
       Assert.assertEquals(cred1.getAccessSecret(), cred0.getAccessSecret());
       // Attempt to retrieve secret that has not been set
       try {
-        cred1 = sysClient.getUserCredential(sys0[1], testUser2, DefaultAccessMethodEnum.PKI_KEYS);
+        cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethod.PKI_KEYS);
       } catch (TapisClientException tce) {
         Assert.assertTrue(tce.getTapisMessage().startsWith("SYSAPI_CRED_NOT_FOUND"), "Wrong exception message: " + tce.getTapisMessage());
         cred1 = null;
@@ -493,7 +492,7 @@ public class SystemsClientTest {
       // Delete credentials and verify they were destroyed
       sysClient.deleteUserCredential(sys0[1], testUser2);
       try {
-        cred1 = sysClient.getUserCredential(sys0[1], testUser2, DefaultAccessMethodEnum.ACCESS_KEY);
+        cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethod.ACCESS_KEY);
       } catch (TapisClientException tce) {
         Assert.assertTrue(tce.getTapisMessage().startsWith("SYSAPI_CRED_NOT_FOUND"), "Wrong exception message: " + tce.getTapisMessage());
         cred1 = null;
@@ -501,7 +500,7 @@ public class SystemsClientTest {
       Assert.assertNull(cred1, "Credential not deleted. System name: " + sys0[1] + " User name: " + testUser2);
       // Attempt to retrieve secret from non-existent system
       try {
-        cred1 = sysClient.getUserCredential("AMissingSystemName", testUser2, DefaultAccessMethodEnum.PKI_KEYS);
+        cred1 = sysClient.getUserCredential("AMissingSystemName", testUser2, AccessMethod.PKI_KEYS);
       } catch (TapisClientException tce) {
         Assert.assertTrue(tce.getTapisMessage().startsWith("SYSAPI_NOSYSTEM"), "Wrong exception message: " + tce.getTapisMessage());
         cred1 = null;
@@ -560,13 +559,13 @@ public class SystemsClientTest {
     } catch (Exception e) {    }
   }
 
-  private String createSystem(String[] sys, DefaultAccessMethodEnum accessMethod, Credential credential, List<TransferMethodsEnum> txfrMethods,
+  private String createSystem(String[] sys, AccessMethod accessMethod, Credential credential, List<TransferMethodsEnum> txfrMethods,
                               List<Capability> jobCaps) throws TapisClientException {
      TSystem tSys = new TSystem();
      tSys.setName(sys[1]);
      tSys.setSystemType(SystemTypeEnum.valueOf(sys[3]));
      tSys.setHost(sys[5]);
-     tSys.setDefaultAccessMethod(accessMethod);
+     tSys.setDefaultAccessMethod(TSystem.DefaultAccessMethodEnum.valueOf(accessMethod.name()));
      tSys.setJobCanExec(true);
      tSys.setAccessCredential(credential);
      tSys.setTransferMethods(txfrMethods);
