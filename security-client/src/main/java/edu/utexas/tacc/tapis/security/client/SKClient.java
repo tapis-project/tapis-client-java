@@ -110,8 +110,10 @@ public class SKClient
      * constructor typically used in production.
      * 
      * The path includes the URL prefix up to and including the service root.  By
-     * default this value is http://localhost:8080/security.  In production environments
-     * the protocol is https and the host/port will be specific to that environment. 
+     * default this value is http://localhost:8080/v3.  In more production-like
+     * environments the protocol will be https and the host/port will be specific to 
+     * that environment.  For example, a development environment might define its
+     * base url as https://tenant1.develop.tapis.io/v3.
      * 
      * The jwt is the base64url representation of a Tapis JWT.  If not null or empty,
      * the TAPIS_JWT_HEADER key will be set to the jwt value. 
