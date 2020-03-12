@@ -30,10 +30,10 @@ tags:
     description: The documents hosted in a collection.
 
 paths:
-  /v3/meta/:
+  /:
     get:
       tags:
-      - root
+        - root
       summary: listDBNames
       description: List the names of all Dbs available.
       operationId: listDBNames
@@ -49,12 +49,10 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: string
+                - $ref: '#/components/schemas/BasicNameListResponse'
         '401':
           description: Not authorized.
-  /v3/meta/{db}:
+  /{db}:
     get:
       tags:
         - db
@@ -78,9 +76,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: string
+                - $ref: '#/components/schemas/BasicNameListResponse'
         '401':
           description: Not authorized.
           content:
@@ -166,7 +162,7 @@ paths:
               schema:
                 type: object
       deprecated: false
-  /v3/meta/{db}/{collection}:
+  /{db}/{collection}:
     get:
       tags:
         - collection
@@ -210,9 +206,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
+                - $ref: '#/components/schemas/BasicDocumentListResponse'
         '401':
           description: Not authorized.
           content:
@@ -288,7 +282,7 @@ paths:
             default: false
       requestBody:
         description: "the json document being added to the collection"
-        required: false
+        required: true
         content:
           application/json:
             schema:
@@ -296,10 +290,6 @@ paths:
       responses:
         '201':
           description: Document created.
-          content:
-            application/json:
-              schema:
-                type: object
         '401':
           description: Not authorized.
           content:
@@ -313,7 +303,7 @@ paths:
               schema:
                 type: object
       deprecated: false
-  /v3/meta/{db}/{collection}/{docId}:
+  /{db}/{collection}/{docId}:
     get:
       tags:
         - document
@@ -347,7 +337,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                - $ref: '#/components/schemas/BasicDocumentResponse'
         '401':
           description: Not authorized.
           content:
@@ -455,3 +445,14 @@ components:
       description: Tapis signed JWT token authentication
       name: X-Tapis-Token
       in: header
+  schemas:
+    BasicNameListResponse:
+      type: array
+      items:
+        type: string
+    BasicDocumentListResponse:
+      type: array
+      items:
+        type: object
+    BasicDocumentResponse:
+      type: object
