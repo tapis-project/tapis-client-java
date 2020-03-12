@@ -30,10 +30,10 @@ tags:
     description: The documents hosted in a collection.
 
 paths:
-  /v3/meta/:
+  /:
     get:
       tags:
-      - root
+        - root
       summary: listDBNames
       description: List the names of all Dbs available.
       operationId: listDBNames
@@ -54,7 +54,7 @@ paths:
                   type: string
         '401':
           description: Not authorized.
-  /v3/meta/{db}:
+  /{db}:
     get:
       tags:
         - db
@@ -166,7 +166,7 @@ paths:
               schema:
                 type: object
       deprecated: false
-  /v3/meta/{db}/{collection}:
+  /{db}/{collection}:
     get:
       tags:
         - collection
@@ -313,7 +313,7 @@ paths:
               schema:
                 type: object
       deprecated: false
-  /v3/meta/{db}/{collection}/{docId}:
+  /{db}/{collection}/{docId}:
     get:
       tags:
         - document
