@@ -40,7 +40,7 @@ public class CollectionApiTest {
         String db = null;
         String collection = null;
         Boolean np = null;
-        Object response = api.createCollection(db, collection, np);
+//        Object response = api.createCollection(db, collection, np);
 
         // TODO: test validations
     }
