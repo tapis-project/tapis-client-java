@@ -49,7 +49,9 @@ paths:
           content:
             application/json:
               schema:
-                - $ref: '#/components/schemas/BasicNameListResponse'
+                type: array
+                items:
+                  type: string
         '401':
           description: Not authorized.
   /{db}:
@@ -76,7 +78,9 @@ paths:
           content:
             application/json:
               schema:
-                - $ref: '#/components/schemas/BasicNameListResponse'
+                type: array
+                items:
+                  type: string
         '401':
           description: Not authorized.
           content:
@@ -206,7 +210,9 @@ paths:
           content:
             application/json:
               schema:
-                - $ref: '#/components/schemas/BasicDocumentListResponse'
+                type: array
+                items:
+                  type: object
         '401':
           description: Not authorized.
           content:
@@ -282,7 +288,7 @@ paths:
             default: false
       requestBody:
         description: "the json document being added to the collection"
-        required: true
+        required: false
         content:
           application/json:
             schema:
@@ -290,6 +296,10 @@ paths:
       responses:
         '201':
           description: Document created.
+          content:
+            application/json:
+              schema:
+                type: object
         '401':
           description: Not authorized.
           content:
@@ -337,7 +347,7 @@ paths:
           content:
             application/json:
               schema:
-                - $ref: '#/components/schemas/BasicDocumentResponse'
+                type: object
         '401':
           description: Not authorized.
           content:
@@ -445,14 +455,3 @@ components:
       description: Tapis signed JWT token authentication
       name: X-Tapis-Token
       in: header
-  schemas:
-    BasicNameListResponse:
-      type: array
-      items:
-        type: string
-    BasicDocumentListResponse:
-      type: array
-      items:
-        type: object
-    BasicDocumentResponse:
-      type: object
