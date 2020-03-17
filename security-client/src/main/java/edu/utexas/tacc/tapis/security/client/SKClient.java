@@ -242,7 +242,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* getRoleNames:                                                                */
     /* ---------------------------------------------------------------------------- */
-    public List<String> getRoleNames()
+    public List<String> getRoleNames(String tenant)
      throws TapisClientException
     {
         // Make the REST call.
@@ -250,7 +250,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             RoleApi roleApi = new RoleApi();
-            resp = roleApi.getRoleNames(false);
+            resp = roleApi.getRoleNames(tenant, false);
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -261,7 +261,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* getRoleByName:                                                               */
     /* ---------------------------------------------------------------------------- */
-    public SkRole getRoleByName(String roleName)
+    public SkRole getRoleByName(String tenant, String roleName)
      throws TapisClientException
     {
         // Make the REST call.
@@ -269,7 +269,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             RoleApi roleApi = new RoleApi();
-            resp = roleApi.getRoleByName(roleName, false);
+            resp = roleApi.getRoleByName(roleName, tenant, false);
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -280,11 +280,13 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* createRole:                                                                  */
     /* ---------------------------------------------------------------------------- */
-    public String createRole(String roleName, String description)
+    public String createRole(String tenant, String user, String roleName, String description)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqCreateRole();
+        body.setTenant(tenant);
+        body.setUser(user);
         body.setRoleName(roleName);
         body.setDescription(description);
         
@@ -304,7 +306,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* deleteRoleByName:                                                            */
     /* ---------------------------------------------------------------------------- */
-    public int deleteRoleByName(String roleName)
+    public int deleteRoleByName(String tenant, String user, String roleName)
      throws TapisClientException
     {
         // Make the REST call.
@@ -312,7 +314,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             RoleApi roleApi = new RoleApi();
-            resp = roleApi.deleteRoleByName(roleName, false);
+            resp = roleApi.deleteRoleByName(roleName, tenant, user, false);
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -324,11 +326,14 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* updateRoleName:                                                              */
     /* ---------------------------------------------------------------------------- */
-    public void updateRoleName(String roleName, String newRoleName)
+    public void updateRoleName(String tenant, String user, String roleName, 
+                               String newRoleName)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqUpdateRoleName();
+        body.setTenant(tenant);
+        body.setUser(user);
         body.setNewRoleName(newRoleName);
         
         // Make the REST call.
@@ -345,11 +350,14 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* updateRoleDescription:                                                       */
     /* ---------------------------------------------------------------------------- */
-    public void updateRoleDescription(String roleName, String description)
+    public void updateRoleDescription(String tenant, String user, String roleName, 
+                                      String description)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqUpdateRoleDescription();
+        body.setTenant(tenant);
+        body.setUser(user);
         body.setDescription(description);
         
         // Make the REST call.
@@ -366,11 +374,14 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* addRolePermission:                                                           */
     /* ---------------------------------------------------------------------------- */
-    public int addRolePermission(String roleName, String permSpec)
+    public int addRolePermission(String tenant, String user, String roleName, 
+                                 String permSpec)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqAddRolePermission();
+        body.setTenant(tenant);
+        body.setUser(user);
         body.setRoleName(roleName);
         body.setPermSpec(permSpec);
         
@@ -391,11 +402,14 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* removeRolePermission:                                                        */
     /* ---------------------------------------------------------------------------- */
-    public int removeRolePermission(String roleName, String permSpec)
+    public int removeRolePermission(String tenant, String user, String roleName, 
+                                    String permSpec)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqRemoveRolePermission();
+        body.setTenant(tenant);
+        body.setUser(user);
         body.setRoleName(roleName);
         body.setPermSpec(permSpec);
         
@@ -416,11 +430,14 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* addChildRole:                                                                */
     /* ---------------------------------------------------------------------------- */
-    public int addChildRole(String parentRoleName, String childRoleName)
+    public int addChildRole(String tenant, String user, String parentRoleName, 
+                            String childRoleName)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqAddChildRole();
+        body.setTenant(tenant);
+        body.setUser(user);
         body.setParentRoleName(parentRoleName);
         body.setChildRoleName(childRoleName);
         
@@ -441,11 +458,14 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* removeChildRole:                                                             */
     /* ---------------------------------------------------------------------------- */
-    public int removeChildRole(String parentRoleName, String childRoleName)
+    public int removeChildRole(String tenant, String user, String parentRoleName, 
+                               String childRoleName)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqRemoveChildRole();
+        body.setTenant(tenant);
+        body.setUser(user);
         body.setParentRoleName(parentRoleName);
         body.setChildRoleName(childRoleName);
         
@@ -466,13 +486,16 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* previewPathPrefix:                                                           */
     /* ---------------------------------------------------------------------------- */
-    public List<Transformation> previewPathPrefix(String schema, String roleName,
+    public List<Transformation> previewPathPrefix(String tenant, String user, 
+                                                  String schema, String roleName,
                                                   String oldSystemId, String newSystemId,
                                                   String oldPrefix, String newPrefix)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqPreviewPathPrefix();
+        body.setTenant(tenant);
+        body.setUser(user);
         body.setSchema(schema);
         body.setRoleName(roleName);
         body.setOldSystemId(oldSystemId);
@@ -496,13 +519,15 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* replacePathPrefix:                                                           */
     /* ---------------------------------------------------------------------------- */
-    public int replacePathPrefix(String schema, String roleName,
-                                               String oldSystemId, String newSystemId,
-                                               String oldPrefix, String newPrefix)
+    public int replacePathPrefix(String tenant, String user, String schema, 
+                                 String roleName, String oldSystemId, String newSystemId,
+                                 String oldPrefix, String newPrefix)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqReplacePathPrefix();
+        body.setTenant(tenant);
+        body.setUser(user);
         body.setSchema(schema);
         body.setRoleName(roleName);
         body.setOldSystemId(oldSystemId);
@@ -530,7 +555,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* getUserNames:                                                                */
     /* ---------------------------------------------------------------------------- */
-    public List<String> getUserNames()
+    public List<String> getUserNames(String tenant)
      throws TapisClientException
     {
         // Make the REST call.
@@ -538,7 +563,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi();
-            resp = userApi.getUserNames(false);
+            resp = userApi.getUserNames(tenant, false);
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -549,7 +574,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* getUserNames:                                                                */
     /* ---------------------------------------------------------------------------- */
-    public List<String> getUserRoles(String user)
+    public List<String> getUserRoles(String tenant, String user)
      throws TapisClientException
     {
         // Make the REST call.
@@ -557,7 +582,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi();
-            resp = userApi.getUserRoles(user, false);
+            resp = userApi.getUserRoles(user, tenant, false);
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -568,17 +593,17 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* getUserPerms:                                                                */
     /* ---------------------------------------------------------------------------- */
-    public List<String> getUserPerms(String user)
+    public List<String> getUserPerms(String tenant, String user)
      throws TapisClientException
     {
-        return getUserPerms(user, null, null);
+        return getUserPerms(tenant, user, null, null);
     }
     
     /* ---------------------------------------------------------------------------- */
     /* getUserPerms:                                                                */
     /* ---------------------------------------------------------------------------- */
-    public List<String> getUserPerms(String user, String implies, 
-                                        String impliedBy)
+    public List<String> getUserPerms(String tenant, String user, String implies, 
+                                     String impliedBy)
      throws TapisClientException
     {
         // Make the REST call.
@@ -586,7 +611,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi();
-            resp = userApi.getUserPerms(user, implies, impliedBy, false);
+            resp = userApi.getUserPerms(user, tenant, implies, impliedBy, false);
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -597,11 +622,12 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* grantUserRole:                                                               */
     /* ---------------------------------------------------------------------------- */
-    public int grantUserRole(String user, String roleName)
+    public int grantUserRole(String tenant, String user, String roleName)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqGrantUserRole();
+        body.setTenant(tenant);
         body.setUser(user);
         body.setRoleName(roleName);
         
@@ -622,11 +648,12 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* revokeUserRole:                                                              */
     /* ---------------------------------------------------------------------------- */
-    public int revokeUserRole(String user, String roleName)
+    public int revokeUserRole(String tenant, String user, String roleName)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqRevokeUserRole();
+        body.setTenant(tenant);
         body.setUser(user);
         body.setRoleName(roleName);
         
@@ -647,11 +674,13 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* grantRoleWithPermission:                                                     */
     /* ---------------------------------------------------------------------------- */
-    public int grantRoleWithPermission(String user, String roleName, String permSpec)
+    public int grantRoleWithPermission(String tenant, String user, String roleName, 
+                                       String permSpec)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqGrantUserRoleWithPermission();
+        body.setTenant(tenant);
         body.setUser(user);
         body.setRoleName(roleName);
         body.setPermSpec(permSpec);
@@ -673,11 +702,12 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* grantRoleWithPermission:                                                     */
     /* ---------------------------------------------------------------------------- */
-    public int grantUserPermission(String user, String permSpec)
+    public int grantUserPermission(String tenant, String user, String permSpec)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqGrantUserPermission();
+        body.setTenant(tenant);
         body.setUser(user);
         body.setPermSpec(permSpec);
         
@@ -698,11 +728,12 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* revokeRoleWithPermission:                                                    */
     /* ---------------------------------------------------------------------------- */
-    public int revokeUserPermission(String user, String permSpec)
+    public int revokeUserPermission(String tenant, String user, String permSpec)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqRevokeUserPermission();
+        body.setTenant(tenant);
         body.setUser(user);
         body.setPermSpec(permSpec);
         
@@ -723,11 +754,12 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* hasRole:                                                                     */
     /* ---------------------------------------------------------------------------- */
-    public boolean hasRole(String user, String roleName)
+    public boolean hasRole(String tenant, String user, String roleName)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqUserHasRole();
+        body.setTenant(tenant);
         body.setUser(user);
         body.setRoleName(roleName);
         
@@ -748,11 +780,12 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* hasAnyRole:                                                                  */
     /* ---------------------------------------------------------------------------- */
-    public boolean hasRoleAny(String user, String[] roleNames)
+    public boolean hasRoleAny(String tenant, String user, String[] roleNames)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqUserHasRoleMulti();
+        body.setTenant(tenant);
         body.setUser(user);
         body.setRoleNames(Arrays.asList(roleNames));
         
@@ -773,11 +806,12 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* hasAllRole:                                                                  */
     /* ---------------------------------------------------------------------------- */
-    public boolean hasRoleAll(String user, String[] roleNames)
+    public boolean hasRoleAll(String tenant, String user, String[] roleNames)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqUserHasRoleMulti();
+        body.setTenant(tenant);
         body.setUser(user);
         body.setRoleNames(Arrays.asList(roleNames));
         
@@ -798,11 +832,12 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* isPermitted:                                                                 */
     /* ---------------------------------------------------------------------------- */
-    public boolean isPermitted(String user, String permSpec)
+    public boolean isPermitted(String tenant, String user, String permSpec)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqUserIsPermitted();
+        body.setTenant(tenant);
         body.setUser(user);
         body.setPermSpec(permSpec);
         
@@ -823,11 +858,12 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* isPermittedAny:                                                              */
     /* ---------------------------------------------------------------------------- */
-    public boolean isPermittedAny(String user, String[] permSpecs)
+    public boolean isPermittedAny(String tenant, String user, String[] permSpecs)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqUserIsPermittedMulti();
+        body.setTenant(tenant);
         body.setUser(user);
         body.setPermSpecs(Arrays.asList(permSpecs));
         
@@ -848,11 +884,12 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* isPermittedAll:                                                              */
     /* ---------------------------------------------------------------------------- */
-    public boolean isPermittedAll(String user, String[] permSpecs)
+    public boolean isPermittedAll(String tenant, String user, String[] permSpecs)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqUserIsPermittedMulti();
+        body.setTenant(tenant);
         body.setUser(user);
         body.setPermSpecs(Arrays.asList(permSpecs));
         
@@ -873,7 +910,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* getUsersWithRole:                                                            */
     /* ---------------------------------------------------------------------------- */
-    public List<String> getUsersWithRole(String roleName)
+    public List<String> getUsersWithRole(String tenant, String roleName)
      throws TapisClientException
     {
         // Make the REST call.
@@ -881,7 +918,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi();
-            resp = userApi.getUsersWithRole(roleName, false);
+            resp = userApi.getUsersWithRole(roleName, tenant, false);
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -892,7 +929,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* getUsersWithPermission:                                                      */
     /* ---------------------------------------------------------------------------- */
-    public List<String> getUsersWithPermission(String permSpec)
+    public List<String> getUsersWithPermission(String tenant, String permSpec)
      throws TapisClientException
     {
         // Make the REST call.
@@ -900,7 +937,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi();
-            resp = userApi.getUsersWithPermission(permSpec, false);
+            resp = userApi.getUsersWithPermission(permSpec, tenant, false);
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -943,6 +980,8 @@ public class SKClient
             var vaultApi = new VaultApi();
             resp = vaultApi.readSecret(parms.getSecretType().getUrlText(),
                                        parms.getSecretName(),
+                                       parms.getTenant(),
+                                       parms.getUser(),
                                        parms.getVersion(),
                                        false, // pretty
                                        parms.getSysId(),
@@ -961,11 +1000,13 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* writeSecret:                                                                  */
     /* ---------------------------------------------------------------------------- */
-    public SkSecretMetadata writeSecret(SKSecretWriteParms parms)
+    public SkSecretMetadata writeSecret(String tenant, String user, SKSecretWriteParms parms)
      throws TapisClientException
     {
         // Package the input.
         ReqWriteSecret reqWriteSecret = new ReqWriteSecret();
+        reqWriteSecret.setTenant(tenant);
+        reqWriteSecret.setUser(user);
         reqWriteSecret.setData(parms.getData());
         if (parms.getOptions() == null) reqWriteSecret.setOptions(new Options());
          else reqWriteSecret.setOptions(parms.getOptions());
@@ -996,11 +1037,13 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* deleteSecret:                                                                */
     /* ---------------------------------------------------------------------------- */
-    public List<Integer> deleteSecret(SKSecretDeleteParms parms)
+    public List<Integer> deleteSecret(String tenant, String user, SKSecretDeleteParms parms)
      throws TapisClientException
     {
         // Package the input.
         ReqVersions reqVersions = new ReqVersions();
+        reqVersions.setTenant(tenant);
+        reqVersions.setUser(user);
         reqVersions.setVersions(parms.getVersions());
 
         // Make the REST call.
@@ -1028,11 +1071,13 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* undeleteSecret:                                                              */
     /* ---------------------------------------------------------------------------- */
-    public List<Integer> undeleteSecret(SKSecretDeleteParms parms)
+    public List<Integer> undeleteSecret(String tenant, String user, SKSecretDeleteParms parms)
      throws TapisClientException
     {
         // Package the input.
         ReqVersions reqVersions = new ReqVersions();
+        reqVersions.setTenant(tenant);
+        reqVersions.setUser(user);
         reqVersions.setVersions(parms.getVersions());
         
         // Make the REST call.
@@ -1060,11 +1105,13 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* destroySecret:                                                               */
     /* ---------------------------------------------------------------------------- */
-    public List<Integer> destroySecret(SKSecretDeleteParms parms)
+    public List<Integer> destroySecret(String tenant, String user, SKSecretDeleteParms parms)
      throws TapisClientException
     {
         // Package the input.
         ReqVersions reqVersions = new ReqVersions();
+        reqVersions.setTenant(tenant);
+        reqVersions.setUser(user);
         reqVersions.setVersions(parms.getVersions());
         
         // Make the REST call.
@@ -1102,6 +1149,8 @@ public class SKClient
             var vaultApi = new VaultApi();
             resp = vaultApi.readSecretMeta(parms.getSecretType().getUrlText(),
                                            parms.getSecretName(),
+                                           parms.getTenant(),
+                                           parms.getUser(),
                                            false, // pretty
                                            parms.getSysId(),
                                            parms.getSysUser(),
@@ -1128,6 +1177,8 @@ public class SKClient
             // Get the API object using default networking.
             var vaultApi = new VaultApi();
             resp = vaultApi.listSecretMeta(parms.getSecretType().getUrlText(),
+                                           parms.getTenant(),
+                                           parms.getUser(),
                                            false, // pretty
                                            parms.getSysId(),
                                            parms.getSysUser(),
@@ -1156,6 +1207,8 @@ public class SKClient
             var vaultApi = new VaultApi();
             resp = vaultApi.destroySecretMeta(parms.getSecretType().getUrlText(),
                                               parms.getSecretName(),
+                                              parms.getTenant(),
+                                              parms.getUser(),
                                               false, // pretty
                                               parms.getSysId(),
                                               parms.getSysUser(),
@@ -1170,11 +1223,14 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* validateServicePassword:                                                     */
     /* ---------------------------------------------------------------------------- */
-    public boolean validateServicePassword(String serviceName, String password) 
+    public boolean validateServicePassword(String tenant, String user, 
+                                           String serviceName, String password) 
      throws TapisClientException
     {
         // Initialize parameter.
         var reqValidateServicePwd = new ReqValidateServicePwd();
+        reqValidateServicePwd.setTenant(tenant);
+        reqValidateServicePwd.setUser(user);
         reqValidateServicePwd.setPassword(password);
         
         // Make the REST call.

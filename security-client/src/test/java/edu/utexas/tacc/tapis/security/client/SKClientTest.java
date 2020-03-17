@@ -30,7 +30,8 @@ public class SKClientTest
         
         // Create a role.
         String resp1;
-        try {resp1 = skClient.createRole("peachy", "This is a peachy description.");}
+        try {resp1 = skClient.createRole("dev", "testuser2", "peachy", 
+                                         "This is a peachy description.");}
             catch (Exception e) {
                 System.out.println(e.toString());
                 throw e;
@@ -39,7 +40,7 @@ public class SKClientTest
         
         // Delete a role.
         Integer resp2;
-        try {resp2 = skClient.deleteRoleByName("peachy");}
+        try {resp2 = skClient.deleteRoleByName("dev", "testuser2", "peachy");}
         catch (Exception e) {
             System.out.println(e.toString());
             throw e;
@@ -54,11 +55,13 @@ public class SKClientTest
     public void testGetUsersWithRole() throws TapisException
     {
         SKClient skClient = new SKClient(null, JWT);
+        String tenant = "dev";
+        String user = "testuser2";
         String roleName = "piggy";
         
         // Create a role.
         String resp1;
-        try {resp1 = skClient.createRole(roleName, "you little piggy.");}
+        try {resp1 = skClient.createRole(tenant, user, roleName, "you little piggy.");}
             catch (Exception e) {
                 System.out.println(e.toString());
                 throw e;
@@ -67,7 +70,7 @@ public class SKClientTest
         
         // Assign a user the role.
         int resp2;
-        try {resp2 = skClient.grantUserRole("bud", roleName);}
+        try {resp2 = skClient.grantUserRole(tenant, "bud", roleName);}
         catch (Exception e) {
             System.out.println(e.toString());
             throw e;
@@ -76,7 +79,7 @@ public class SKClientTest
         
         // Assign a user the role.
         int resp3;
-        try {resp3 = skClient.grantUserRole("jane", roleName);}
+        try {resp3 = skClient.grantUserRole(tenant, "jane", roleName);}
         catch (Exception e) {
             System.out.println(e.toString());
             throw e;
@@ -85,7 +88,7 @@ public class SKClientTest
         
         // Get users with role.
         List<String> resp4;
-        try {resp4 = skClient.getUsersWithRole(roleName);}
+        try {resp4 = skClient.getUsersWithRole(tenant, roleName);}
         catch (Exception e) {
             System.out.println(e.toString());
             throw e;
@@ -94,7 +97,7 @@ public class SKClientTest
         
         // Delete a role.
         Integer resp5;
-        try {resp5 = skClient.deleteRoleByName(roleName);}
+        try {resp5 = skClient.deleteRoleByName(tenant, user, roleName);}
         catch (Exception e) {
             System.out.println(e.toString());
             throw e;
