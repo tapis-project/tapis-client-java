@@ -44,6 +44,8 @@ public class GenTest
         
         // Create a role.
         ReqCreateRole body = new ReqCreateRole();
+        body.setTenant("dev");
+        body.setUser("testuser2");
         body.setRoleName("peachy");
         body.setDescription("This is a peachy description.");
         RespResourceUrl urlResp = roleApi.createRole(body,true);
@@ -51,7 +53,8 @@ public class GenTest
         System.out.println("createRole: " + urlResp.getResult().getUrl() + "\n");
         
         
-        RespChangeCount countResp = roleApi.deleteRoleByName("peachy", true);
+        RespChangeCount countResp = roleApi.deleteRoleByName("peachy", body.getTenant(),
+                                                             body.getUser(), true);
         System.out.println("deleteRoleByName: " + countResp + "\n");
         
         System.out.println(TapisGsonUtils.getGson(true).toJson(countResp));

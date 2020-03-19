@@ -300,7 +300,8 @@ public class SystemsClient
   }
 
   /**
-   * Retrieve a credential for given system and user.
+   * Retrieve credential for given system, user and access method.
+   * If access method is null return credential for default access method defined for the system.
    *
    * @throws TapisClientException - If get call throws an exception
    */
@@ -311,6 +312,16 @@ public class SystemsClient
     try {resp = credsApi.getUserCredential(systemName, userName, accessMethodStr, false); }
     catch (Exception e) { throwTapisClientException(e); }
     return resp.getResult();
+  }
+
+  /**
+   * Retrieve a credential for given system and user for the default access method defined for the system
+   *
+   * @throws TapisClientException - If get call throws an exception
+   */
+  public Credential getUserCredential(String systemName, String userName) throws TapisClientException
+  {
+    return getUserCredential(systemName, userName, null);
   }
 
   /**
@@ -331,16 +342,16 @@ public class SystemsClient
   /**
    * Utility method to build a credential object given secrets.
    */
-  public static Credential buildCredential(String password, String privateKey, String publicKey, String certificate,
-                                    String accessKey, String accessSecret)
+  public static Credential buildCredential(String password, String privateKey, String publicKey,
+                                    String accessKey, String accessSecret, String certificate)
   {
     var cred = new Credential();
     cred.setPassword(password);
     cred.setPrivateKey(privateKey);
     cred.setPublicKey(publicKey);
-    cred.setCertificate(certificate);
     cred.setAccessKey(accessKey);
     cred.setAccessSecret(accessSecret);
+    cred.setCertificate(certificate);
     return cred;
   }
 

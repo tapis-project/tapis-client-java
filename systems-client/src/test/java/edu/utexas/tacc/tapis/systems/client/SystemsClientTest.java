@@ -210,7 +210,7 @@ public class SystemsClientTest {
     // Create a system
     String[] sys0 = sysB;
     Credential cred0 = SystemsClient.buildCredential(sys0[7], "fakePrivateKey", "fakePublicKey",
-                                           "fakeCert","fakeAccessKey", "fakeAccessSecret");
+                                           "fakeAccessKey", "fakeAccessSecret", "fakeCert");
     System.out.println("Creating system with name: " + sys0[1]);
     createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethods, null);
     Assert.fail("Exception should have been thrown");
@@ -222,7 +222,7 @@ public class SystemsClientTest {
   public void testGetSystemByName() throws Exception {
     String[] sys0 = sys2;
     Credential cred0 = SystemsClient.buildCredential(sys0[7], "fakePrivateKey", "fakePublicKey",
-                                           "fakeCert","fakeAccessKey", "fakeAccessSecret");
+                                           "fakeAccessKey", "fakeAccessSecret", "fakeCert");
     String respUrl = createSystem(sys0, AccessMethod.PKI_KEYS, cred0, prot1TxfrMethods, cap2List);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     TSystem tmpSys = sysClient.getSystemByName(sys0[1], null);
@@ -317,7 +317,7 @@ public class SystemsClientTest {
   public void testGetSystemByNameOnly() throws Exception {
     String[] sys0 = sysD;
     Credential cred0 = SystemsClient.buildCredential(sys0[7], "fakePrivateKey", "fakePublicKey",
-            "fakeCert","fakeAccessKey", "fakeAccessSecret");
+            "fakeAccessKey", "fakeAccessSecret", "fakeCert");
     String respUrl = createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethods, cap2List);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     TSystem tmpSys = sysClient.getSystemByName(sys0[1]);
@@ -449,7 +449,7 @@ public class SystemsClientTest {
       System.out.println("Testing credentials for user: " + testUser2);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
       cred0 = SystemsClient.buildCredential(sys0[7], "fakePrivateKey", "fakePublicKey",
-              "fakeCert","fakeAccessKey", "fakeAccessSecret");
+              "fakeAccessKey", "fakeAccessSecret", "fakeCert");
       // Store and retrieve multiple secret types: password, ssh keys, access key and secret
       sysClient.updateUserCredential(sys0[1], testUser2, cred0);
       Credential cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethod.PASSWORD);
@@ -461,6 +461,11 @@ public class SystemsClientTest {
       cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethod.ACCESS_KEY);
       Assert.assertEquals(cred1.getAccessKey(), cred0.getAccessKey());
       Assert.assertEquals(cred1.getAccessSecret(), cred0.getAccessSecret());
+      // Verify we get credentials for default accessMethod if we do not specify an access method
+      cred1 = sysClient.getUserCredential(sys0[1], testUser2);
+      Assert.assertEquals(cred1.getPublicKey(), cred0.getPublicKey());
+      Assert.assertEquals(cred1.getPrivateKey(), cred0.getPrivateKey());
+
       // Delete credentials and verify they were destroyed
       sysClient.deleteUserCredential(sys0[1], testUser2);
       try {
@@ -475,8 +480,8 @@ public class SystemsClientTest {
       sysClient.deleteUserCredential(sys0[1], testUser2);
 
       // Set just ACCESS_KEY only and test
-      cred0 = SystemsClient.buildCredential(null, null, null, null,
-                                            "fakeAccessKey2", "fakeAccessSecret2");
+      cred0 = SystemsClient.buildCredential(null, null, null,
+              "fakeAccessKey2", "fakeAccessSecret2", null);
       sysClient.updateUserCredential(sys0[1], testUser2, cred0);
       cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethod.ACCESS_KEY);
       Assert.assertEquals(cred1.getAccessKey(), cred0.getAccessKey());

@@ -15,6 +15,8 @@ public abstract class SKSecretBaseParms<T extends SKSecretBaseParms<T>>
     // The first two parameters are typically URL 
     // path parameters, the rest are typically
     // query parameters.
+    private String           tenant;
+    private String           user;
     private final SecretType secretType;
     private String           secretName;
     private String           sysId;
@@ -39,25 +41,40 @@ public abstract class SKSecretBaseParms<T extends SKSecretBaseParms<T>>
         
     // Accessors.  Fluent unchecked cast warnings are suppressed.
     public SecretType getSecretType() {return secretType;}
+
     public String getSecretName() {return secretName;}
     public T setSecretName(String secretName) 
         {this.secretName = secretName; return (T) this;}
+
     public String getSysId() {return sysId;}
     public T setSysId(String sysId) 
         {this.sysId = sysId; return (T) this;}
+
     public String getSysUser() {return sysUser;}
     public T setSysUser(String sysUser) 
         {this.sysUser = sysUser; return (T) this;}
+
     public KeyType getKeyType() {return keyType;}
     public T setKeyType(KeyType keyType) 
         {if (keyType != null) this.keyType = keyType; return (T) this;}
+
     public String getDbHost() {return dbHost;}
     public T setDbHost(String dbHost) 
         {this.dbHost = dbHost; return (T) this;}
+
     public String getDbName() {return dbName;}
     public T setDbName(String dbName) 
         {this.dbName = dbName; return (T) this;}
+
     public String getService() {return service;}
     public T setService(String service) 
         {this.service = service; return (T) this;}
+
+    public String getTenant() {return tenant;}
+    public T setTenant(String tenant) 
+        {this.tenant = tenant; return (T) this;}
+
+    public String getUser() {return user;}
+    public T setUser(String user) 
+        {this.user = user; return (T) this;}
 }
