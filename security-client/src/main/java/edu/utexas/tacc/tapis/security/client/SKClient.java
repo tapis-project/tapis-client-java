@@ -236,6 +236,23 @@ public class SKClient
         return Configuration.getDefaultApiClient().isDebugging();
     }
     
+    /* ---------------------------------------------------------------------------- */
+    /* close:                                                                       */
+    /* ---------------------------------------------------------------------------- */
+    /** Close connections and stop threads that can sometimes prevent JVM shutdown.
+     */
+    public void close()
+    {
+        try {
+            // Best effort attempt to shut things down.
+            var okClient = Configuration.getDefaultApiClient().getHttpClient();
+            if (okClient != null) {
+                var pool = okClient.connectionPool();
+                if (pool != null) pool.evictAll();
+            }
+        } catch (Exception e) {}      
+    }
+    
     /* **************************************************************************** */
     /*                              Public Role Methods                             */
     /* **************************************************************************** */
