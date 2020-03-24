@@ -24,7 +24,7 @@ public abstract class SKSecretBaseParms<T extends SKSecretBaseParms<T>>
     private KeyType          keyType = KeyType.sshkey; // never null
     private String           dbHost;
     private String           dbName;
-    private String           service;
+    private String           dbService;
         
     // Constructor.
     public SKSecretBaseParms(SecretType secretType) 
@@ -66,9 +66,9 @@ public abstract class SKSecretBaseParms<T extends SKSecretBaseParms<T>>
     public T setDbName(String dbName) 
         {this.dbName = dbName; return (T) this;}
 
-    public String getService() {return service;}
-    public T setService(String service) 
-        {this.service = service; return (T) this;}
+    public String getDbService() {return dbService;}
+    public T setDbService(String dbService) 
+        {this.dbService = dbService; return (T) this;}
 
     public String getTenant() {return tenant;}
     public T setTenant(String tenant) 

@@ -1006,7 +1006,7 @@ public class SKClient
                                        parms.getKeyType().name(),
                                        parms.getDbHost(),
                                        parms.getDbName(),
-                                       parms.getService());
+                                       parms.getDbService());
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -1042,7 +1042,7 @@ public class SKClient
                                         parms.getKeyType().name(),
                                         parms.getDbHost(),
                                         parms.getDbName(),
-                                        parms.getService());
+                                        parms.getDbService());
 
         }
         catch (Exception e) {throwTapisClientException(e);}
@@ -1077,7 +1077,7 @@ public class SKClient
                                          parms.getKeyType().name(),
                                          parms.getDbHost(),
                                          parms.getDbName(),
-                                         parms.getService());
+                                         parms.getDbService());
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -1111,7 +1111,7 @@ public class SKClient
                                            parms.getKeyType().name(),
                                            parms.getDbHost(),
                                            parms.getDbName(),
-                                           parms.getService());
+                                           parms.getDbService());
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -1145,7 +1145,7 @@ public class SKClient
                                           parms.getKeyType().name(),
                                           parms.getDbHost(),
                                           parms.getDbName(),
-                                          parms.getService());
+                                          parms.getDbService());
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -1174,7 +1174,7 @@ public class SKClient
                                            parms.getKeyType().name(),
                                            parms.getDbHost(),
                                            parms.getDbName(),
-                                           parms.getService());
+                                           parms.getDbService());
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -1202,7 +1202,7 @@ public class SKClient
                                            parms.getKeyType().name(),
                                            parms.getDbHost(),
                                            parms.getDbName(),
-                                           parms.getService());
+                                           parms.getDbService());
         }
         catch (Exception e) {throwTapisClientException(e);}
         
@@ -1232,7 +1232,7 @@ public class SKClient
                                               parms.getKeyType().name(),
                                               parms.getDbHost(),
                                               parms.getDbName(),
-                                              parms.getService());
+                                              parms.getDbService());
         }
         catch (Exception e) {throwTapisClientException(e);}
     }
