@@ -54,10 +54,6 @@ public class SystemsClientTest {
   private static final List<String> tags = Arrays.asList("value1", "value2", "a",
           "a long tag with spaces and numbers (1 3 2) and special characters [_ $ - & * % @ + = ! ^ ? < > , . ( ) { } / \\ | ]. Backslashes must be escaped.");
   private static final JsonObject notesJO = TapisGsonUtils.getGson().fromJson("{\"project\":\"myproj1\", \"testdata\":\"abc\"}", JsonObject.class);
-//  private static final String notesStr = "{\"project\":\"myproj1\", \"testdata\":\"abc\"}";
-  // TODO/TBD: No perms enum in auto-generated model class. Why not?
-//  private static final List<String> testPerms = new ArrayList<>(List.of(TSystem.Permissions.READ.name(),TSystem.Permissions.MODIFY.name(),
-//          TSystem.Permissions.DELETE.name()));
   private static final List<String> testPerms = new ArrayList<>(List.of("READ", "MODIFY"));
 
 
@@ -146,7 +142,7 @@ public class SystemsClientTest {
   // Create a system using minimal attributes:
   //   name, systemType, host, defaultAccessMethod, jobCanExec
   @Test
-  public void testCreateSystemMinimal() throws Exception
+  public void testCreateSystemMinimal()
   {
     // Create a system
     String[] sys0 = sysE;
@@ -437,7 +433,7 @@ public class SystemsClientTest {
 
   // Test creating, reading and deleting user credentials for a system after system created
   @Test
-  public void testUserCredentials() throws Exception
+  public void testUserCredentials()
   {
     // Create a system
     String[] sys0 = sysC;

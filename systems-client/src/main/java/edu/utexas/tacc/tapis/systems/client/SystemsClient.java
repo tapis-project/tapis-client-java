@@ -58,9 +58,9 @@ public class SystemsClient
   // ************************************************************************
   // Response body serializer
   private static final Gson gson = TapisGsonUtils.getGson();
-  private SystemsApi sysApi;
-  private PermissionsApi permsApi;
-  private CredentialsApi credsApi;
+  private final SystemsApi sysApi;
+  private final PermissionsApi permsApi;
+  private final CredentialsApi credsApi;
 
   // ************************************************************************
   // *********************** Constructors ***********************************
@@ -127,7 +127,7 @@ public class SystemsClient
    * Create a system
    *
    * @return url pointing to created resource
-   * @throws TapisClientException - If create call throws an exception
+   * @throws TapisClientException - If api call throws an exception
    */
   public String createSystem(TSystem tSystem) throws TapisClientException
   {
@@ -138,32 +138,33 @@ public class SystemsClient
     RespResourceUrl resp = null;
     try { resp = sysApi.createSystem(req, false); }
     catch (Exception e) { throwTapisClientException(e); }
-    return resp.getResult().getUrl();
+    if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
   }
 
   /**
    * Get a system by name without returning credentials
    *
-   * @param name
+   * @param name System name
    * @return The system or null if system not found
-   * @throws TapisClientException - If get call throws an exception
+   * @throws TapisClientException - If api call throws an exception
    */
   public TSystem getSystemByName(String name) throws TapisClientException
   {
     RespSystem resp = null;
     try {resp = sysApi.getSystemByName(name, false, null, false); }
     catch (Exception e) { throwTapisClientException(e); }
-    return resp.getResult();
+    if (resp != null) return resp.getResult(); else return null;
   }
 
   /**
    * Get a system by name returning credentials for specified access method.
    * If accessMethod is null then default access method for the system is used.
    *
-   * @param name
-   * @param accessMethod - Desired access method used when fetching credentials, default access method used if this is null
+   * @param name System name
+   * @param accessMethod - Desired access method used when fetching credentials,
+   *                    default access method used if this is null
    * @return The system or null if system not found
-   * @throws TapisClientException - If get call throws an exception
+   * @throws TapisClientException - If api call throws an exception
    */
   public TSystem getSystemByName(String name, AccessMethod accessMethod) throws TapisClientException
   {
@@ -171,7 +172,7 @@ public class SystemsClient
     String accessMethodStr = (accessMethod==null ? null : accessMethod.name());
     try {resp = sysApi.getSystemByName(name, true, accessMethodStr, false); }
     catch (Exception e) { throwTapisClientException(e); }
-    return resp.getResult();
+    if (resp != null) return resp.getResult(); else return null;
   }
 
   /**
@@ -182,34 +183,25 @@ public class SystemsClient
     RespNameArray resp = null;
     try { resp = sysApi.getSystemNames(false); }
     catch (Exception e) { throwTapisClientException(e); }
-    return resp.getResult().getNames();
+    if (resp != null && resp.getResult() != null) return resp.getResult().getNames(); else return null;
   }
-
-  /**
-   * Get all systems
-   */
-//  public List<TSystem> getSystems() throws TapisClientException
-//  {
-//    RespNameArray resp = sysApi.getSystemNames(false);
-//    return resp.getResult();
-//    return Collections.emptyList();
-//  }
 
   /**
    * Delete a system given the system name.
    * Return 1 if record was deleted
    * Return 0 if record not present
    *
-   * @param name
+   * @param name System name
    * @return number of records modified as a result of the action
-   * @throws TapisClientException
+   * @throws TapisClientException - If api call throws an exception
    */
   public int deleteSystemByName(String name) throws TapisClientException
   {
     RespChangeCount resp = null;
     try { resp = sysApi.deleteSystemByName(name, false); }
     catch (Exception e) { throwTapisClientException(e); }
-    return resp.getResult().getChanges();
+    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
+    else return -1;
   }
 
   // -----------------------------------------------------------------------
@@ -219,7 +211,7 @@ public class SystemsClient
   /**
    * Grant permissions for given system and user.
    *
-   * @throws TapisClientException - If grant call throws an exception
+   * @throws TapisClientException - If api call throws an exception
    */
   public void grantUserPermissions(String systemName, String userName, List<String> permissions)
           throws TapisClientException
@@ -231,7 +223,6 @@ public class SystemsClient
     RespBasic resp = null;
     try { resp = permsApi.grantUserPerms(systemName, userName, req, false); }
     catch (Exception e) { throwTapisClientException(e); }
-    // TODO: Check return status and throw exception on error
   }
 
   /**
@@ -242,13 +233,13 @@ public class SystemsClient
     RespNameArray resp = null;
     try { resp = permsApi.getUserPerms(systemName, userName, false); }
     catch (Exception e) { throwTapisClientException(e); }
-    return resp.getResult().getNames();
+    if (resp != null && resp.getResult() != null) return resp.getResult().getNames(); else return null;
   }
 
   /**
    * Revoke permissions for given system and user.
    *
-   * @throws TapisClientException
+   * @throws TapisClientException - if api call throws an exception
    */
   public void revokeUserPermissions(String systemName, String userName, List<String> permissions)
           throws TapisClientException
@@ -260,13 +251,12 @@ public class SystemsClient
     RespBasic resp = null;
     try { resp = permsApi.revokeUserPerms(systemName, userName, req, false); }
     catch (Exception e) { throwTapisClientException(e); }
-    // TODO: Check return status and throw exception on error
   }
 
   /**
    * Revoke single permission for given system and user.
    *
-   * @throws TapisClientException
+   * @throws TapisClientException - if api call throws an exception
    */
   public void revokeUserPermission(String systemName, String userName, String permission)
           throws TapisClientException
@@ -275,7 +265,6 @@ public class SystemsClient
     RespBasic resp = null;
     try { resp = permsApi.revokeUserPerm(systemName, userName, permission, false); }
     catch (Exception e) { throwTapisClientException(e); }
-    // TODO: Check return status and throw exception on error
   }
 
   // -----------------------------------------------------------------------
@@ -285,7 +274,7 @@ public class SystemsClient
   /**
    * Create or update credential for given system and user.
    *
-   * @throws TapisClientException - If grant call throws an exception
+   * @throws TapisClientException - If api call throws an exception
    */
   public void updateUserCredential(String systemName, String userName, Credential cred) throws TapisClientException
   {
@@ -296,28 +285,28 @@ public class SystemsClient
     RespBasic resp = null;
     try { resp = credsApi.createUserCredential(systemName, userName, req, false); }
     catch (Exception e) { throwTapisClientException(e); }
-    // TODO: Check return status and throw exception on error
   }
 
   /**
    * Retrieve credential for given system, user and access method.
    * If access method is null return credential for default access method defined for the system.
    *
-   * @throws TapisClientException - If get call throws an exception
+   * @throws TapisClientException - If api call throws an exception
    */
-  public Credential getUserCredential(String systemName, String userName, AccessMethod accessMethod) throws TapisClientException
+  public Credential getUserCredential(String systemName, String userName, AccessMethod accessMethod)
+          throws TapisClientException
   {
     RespCredential resp = null;
     String accessMethodStr = (accessMethod==null ? null : accessMethod.name());
     try {resp = credsApi.getUserCredential(systemName, userName, accessMethodStr, false); }
     catch (Exception e) { throwTapisClientException(e); }
-    return resp.getResult();
+    if (resp != null) return resp.getResult(); else return null;
   }
 
   /**
    * Retrieve a credential for given system and user for the default access method defined for the system
    *
-   * @throws TapisClientException - If get call throws an exception
+   * @throws TapisClientException - If api call throws an exception
    */
   public Credential getUserCredential(String systemName, String userName) throws TapisClientException
   {
@@ -327,7 +316,7 @@ public class SystemsClient
   /**
    * Delete credential for given system and user.
    *
-   * @throws TapisClientException
+   * @throws TapisClientException - if api call throws an exception
    */
   public void deleteUserCredential(String systemName, String userName)
           throws TapisClientException
@@ -336,7 +325,6 @@ public class SystemsClient
     RespBasic resp = null;
     try { resp = credsApi.removeUserCredential(systemName, userName, false); }
     catch (Exception e) { throwTapisClientException(e); }
-    // TODO: Check return status and throw exception on error
   }
 
   /**
