@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-//import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import edu.utexas.tacc.tapis.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.shared.utils.TapisGsonUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -43,6 +41,8 @@ public class SystemsClientTest {
   // Test data
   private static final String tenantName = "dev";
   private static final String testUser2 = "testuser2";
+  private static final String masterTenantName = "master";
+  private static final String filesSvcName = "files";
   private static final String sysType = SystemTypeEnum.LINUX.name();
   private static final String sysOwner = "sysOwner";
   private static final int prot1Port = -1;
@@ -54,11 +54,8 @@ public class SystemsClientTest {
   private static final List<String> tags = Arrays.asList("value1", "value2", "a",
           "a long tag with spaces and numbers (1 3 2) and special characters [_ $ - & * % @ + = ! ^ ? < > , . ( ) { } / \\ | ]. Backslashes must be escaped.");
   private static final JsonObject notesJO = TapisGsonUtils.getGson().fromJson("{\"project\":\"myproj1\", \"testdata\":\"abc\"}", JsonObject.class);
-//  private static final String notesStr = "{\"project\":\"myproj1\", \"testdata\":\"abc\"}";
-  // TODO/TBD: No perms enum in auto-generated model class. Why not?
-//  private static final List<String> testPerms = new ArrayList<>(List.of(TSystem.Permissions.READ.name(),TSystem.Permissions.MODIFY.name(),
-//          TSystem.Permissions.DELETE.name()));
-  private static final List<String> testPerms = new ArrayList<>(List.of("READ", "MODIFY", "DELETE"));
+  private static final List<String> testPerms = new ArrayList<>(List.of("READ", "MODIFY"));
+
 
   private static final String[] sys1 = {tenantName, "Csys1", "description 1", sysType, sysOwner, "host1", "effUser1", "fakePassword1",
           "bucket1", "/root1", "jobLocalWorkDir1", "jobLocalArchDir1", "jobRemoteArchSystem1", "jobRemoteArchDir1"};
@@ -99,7 +96,7 @@ public class SystemsClientTest {
   private static final List<Capability> cap1List = new ArrayList<>(List.of(capA1, capB1, capC1));
   private static final List<Capability> cap2List = new ArrayList<>(List.of(capA2, capB2, capC2, capD2));
 
-  private SystemsClient sysClient;
+  private String systemsURL, usrJWT, svcJWT;
 
   @BeforeSuite
   public void setUp() throws Exception {
@@ -110,20 +107,18 @@ public class SystemsClientTest {
     if (StringUtils.isBlank(tokensURL)) tokensURL = DEFAULT_BASE_URL_TOKENS;
     // Get short term user JWT from tokens service
     var tokClient = new TokensClient(tokensURL);
-    String usrJWT;
     try {
       usrJWT = tokClient.getUsrToken(tenantName, sysOwner);
+      svcJWT = tokClient.getSvcToken(masterTenantName, filesSvcName);
     } catch (Exception e) {
       throw new Exception("Exception from Tokens service", e);
     }
     System.out.println("Got usrJWT: " + usrJWT);
     // Basic check of JWT
     if (StringUtils.isBlank(usrJWT)) throw new Exception("Token service returned invalid JWT");
-    // Create the client
-    // Check for URL set as env var
-    String systemsURL = System.getenv(TAPIS_ENV_SVC_URL_SYSTEMS);
+    // Set base URL for systems service. Check for URL set as env var
+    systemsURL = System.getenv(TAPIS_ENV_SVC_URL_SYSTEMS);
     if (StringUtils.isBlank(systemsURL)) systemsURL = DEFAULT_BASE_URL_SYSTEMS;
-    sysClient = new SystemsClient(systemsURL, usrJWT);
     // Cleanup anything leftover from previous failed run
     tearDown();
   }
@@ -147,7 +142,7 @@ public class SystemsClientTest {
   // Create a system using minimal attributes:
   //   name, systemType, host, defaultAccessMethod, jobCanExec
   @Test
-  public void testCreateSystemMinimal() throws Exception
+  public void testCreateSystemMinimal()
   {
     // Create a system
     String[] sys0 = sysE;
@@ -225,7 +220,7 @@ public class SystemsClientTest {
                                            "fakeAccessKey", "fakeAccessSecret", "fakeCert");
     String respUrl = createSystem(sys0, AccessMethod.PKI_KEYS, cred0, prot1TxfrMethods, cap2List);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
-    TSystem tmpSys = sysClient.getSystemByName(sys0[1], null);
+    TSystem tmpSys = getClientSvc().getSystemByName(sys0[1], null);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
     System.out.println("Found item: " + sys0[1]);
 //    sys2 = {tenantName, "Csys2", "description 2", sysType, sysOwner, "host2", "effUser2", "fakePassword2",
@@ -299,8 +294,9 @@ public class SystemsClientTest {
 //    Assert.assertTrue(obj.has("testdata"));
 //    Assert.assertEquals(obj.get("testdata").getAsString(), "abc");
 
+    // TODO need service client to get creds. Currently unable to use both user client and service client in same program
     // Test retrieval using specified access method
-    tmpSys = sysClient.getSystemByName(sys0[1], AccessMethod.PASSWORD);
+    tmpSys = getClientSvc().getSystemByName(sys0[1], AccessMethod.PASSWORD);
     // Verify credentials. Only cred for default accessMethod is returned. In this case PASSWORD.
     cred = tmpSys.getAccessCredential();
     Assert.assertNotNull(cred, "AccessCredential should not be null");
@@ -320,7 +316,7 @@ public class SystemsClientTest {
             "fakeAccessKey", "fakeAccessSecret", "fakeCert");
     String respUrl = createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethods, cap2List);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
-    TSystem tmpSys = sysClient.getSystemByName(sys0[1]);
+    TSystem tmpSys = getClientUsr().getSystemByName(sys0[1]);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
     System.out.println("Found item: " + sys0[1]);
 //    sys2 = {tenantName, "Csys2", "description 2", sysType, sysOwner, "host2", "effUser2", "fakePassword2",
@@ -357,7 +353,7 @@ public class SystemsClientTest {
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Get list of all system names
-    List<String> systemNames = sysClient.getSystemNames();
+    List<String> systemNames = getClientUsr().getSystemNames();
     for (String name : systemNames) {
       System.out.println("Found item: " + name);
     }
@@ -385,9 +381,9 @@ public class SystemsClientTest {
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Delete the system
-    sysClient.deleteSystemByName(sys0[1]);
+    getClientUsr().deleteSystemByName(sys0[1]);
     try {
-      TSystem tmpSys2 = sysClient.getSystemByName(sys0[1]);
+      TSystem tmpSys2 = getClientUsr().getSystemByName(sys0[1]);
       Assert.fail("System not deleted. System name: " + sys0[1]);
     } catch (TapisClientException e) {
       Assert.assertEquals(e.getCode(), 404);
@@ -407,9 +403,9 @@ public class SystemsClientTest {
       System.out.println("Testing perms for user: " + testUser2);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
       // Create user perms for the system
-      sysClient.grantUserPermissions(sys0[1], testUser2, testPerms);
+      getClientUsr().grantUserPermissions(sys0[1], testUser2, testPerms);
       // Get the system perms for the user and make sure permissions are there
-      List<String> userPerms = sysClient.getSystemPermissions(sys0[1], testUser2);
+      List<String> userPerms = getClientUsr().getSystemPermissions(sys0[1], testUser2);
       Assert.assertNotNull(userPerms, "Null returned when retrieving perms.");
       for (String perm : userPerms) {
         System.out.println("After grant found user perm: " + perm);
@@ -419,9 +415,9 @@ public class SystemsClientTest {
         if (!userPerms.contains(perm)) Assert.fail("User perms should contain permission: " + perm);
       }
       // Remove perms for the user
-      sysClient.revokeUserPermissions(sys0[1], testUser2, testPerms);
+      getClientUsr().revokeUserPermissions(sys0[1], testUser2, testPerms);
       // Get the system perms for the user and make sure permissions are gone.
-      userPerms = sysClient.getSystemPermissions(sys0[1], testUser2);
+      userPerms = getClientUsr().getSystemPermissions(sys0[1], testUser2);
       Assert.assertNotNull(userPerms, "Null returned when retrieving perms.");
       for (String perm : userPerms) {
         System.out.println("After revoke found user perm: " + perm);
@@ -437,7 +433,7 @@ public class SystemsClientTest {
 
   // Test creating, reading and deleting user credentials for a system after system created
   @Test
-  public void testUserCredentials() throws Exception
+  public void testUserCredentials()
   {
     // Create a system
     String[] sys0 = sysC;
@@ -451,25 +447,25 @@ public class SystemsClientTest {
       cred0 = SystemsClient.buildCredential(sys0[7], "fakePrivateKey", "fakePublicKey",
               "fakeAccessKey", "fakeAccessSecret", "fakeCert");
       // Store and retrieve multiple secret types: password, ssh keys, access key and secret
-      sysClient.updateUserCredential(sys0[1], testUser2, cred0);
-      Credential cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethod.PASSWORD);
+      getClientUsr().updateUserCredential(sys0[1], testUser2, cred0);
+      Credential cred1 = getClientSvc().getUserCredential(sys0[1], testUser2, AccessMethod.PASSWORD);
       // Verify credentials
       Assert.assertEquals(cred1.getPassword(), cred0.getPassword());
-      cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethod.PKI_KEYS);
+      cred1 = getClientSvc().getUserCredential(sys0[1], testUser2, AccessMethod.PKI_KEYS);
       Assert.assertEquals(cred1.getPublicKey(), cred0.getPublicKey());
       Assert.assertEquals(cred1.getPrivateKey(), cred0.getPrivateKey());
-      cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethod.ACCESS_KEY);
+      cred1 = getClientSvc().getUserCredential(sys0[1], testUser2, AccessMethod.ACCESS_KEY);
       Assert.assertEquals(cred1.getAccessKey(), cred0.getAccessKey());
       Assert.assertEquals(cred1.getAccessSecret(), cred0.getAccessSecret());
       // Verify we get credentials for default accessMethod if we do not specify an access method
-      cred1 = sysClient.getUserCredential(sys0[1], testUser2);
+      cred1 = getClientSvc().getUserCredential(sys0[1], testUser2);
       Assert.assertEquals(cred1.getPublicKey(), cred0.getPublicKey());
       Assert.assertEquals(cred1.getPrivateKey(), cred0.getPrivateKey());
 
       // Delete credentials and verify they were destroyed
-      sysClient.deleteUserCredential(sys0[1], testUser2);
+      getClientUsr().deleteUserCredential(sys0[1], testUser2);
       try {
-        cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethod.PASSWORD);
+        cred1 = getClientSvc().getUserCredential(sys0[1], testUser2, AccessMethod.PASSWORD);
       } catch (TapisClientException tce) {
         Assert.assertTrue(tce.getTapisMessage().startsWith("SYSAPI_CRED_NOT_FOUND"), "Wrong exception message: " + tce.getTapisMessage());
         cred1 = null;
@@ -477,27 +473,27 @@ public class SystemsClientTest {
       Assert.assertNull(cred1, "Credential not deleted. System name: " + sys0[1] + " User name: " + testUser2);
 
       // Attempt to delete again, should not throw an exception
-      sysClient.deleteUserCredential(sys0[1], testUser2);
+      getClientUsr().deleteUserCredential(sys0[1], testUser2);
 
       // Set just ACCESS_KEY only and test
       cred0 = SystemsClient.buildCredential(null, null, null,
               "fakeAccessKey2", "fakeAccessSecret2", null);
-      sysClient.updateUserCredential(sys0[1], testUser2, cred0);
-      cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethod.ACCESS_KEY);
+      getClientUsr().updateUserCredential(sys0[1], testUser2, cred0);
+      cred1 = getClientSvc().getUserCredential(sys0[1], testUser2, AccessMethod.ACCESS_KEY);
       Assert.assertEquals(cred1.getAccessKey(), cred0.getAccessKey());
       Assert.assertEquals(cred1.getAccessSecret(), cred0.getAccessSecret());
       // Attempt to retrieve secret that has not been set
       try {
-        cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethod.PKI_KEYS);
+        cred1 = getClientSvc().getUserCredential(sys0[1], testUser2, AccessMethod.PKI_KEYS);
       } catch (TapisClientException tce) {
         Assert.assertTrue(tce.getTapisMessage().startsWith("SYSAPI_CRED_NOT_FOUND"), "Wrong exception message: " + tce.getTapisMessage());
         cred1 = null;
       }
       Assert.assertNull(cred1, "Credential was non-null for missing secret. System name: " + sys0[1] + " User name: " + testUser2);
       // Delete credentials and verify they were destroyed
-      sysClient.deleteUserCredential(sys0[1], testUser2);
+      getClientUsr().deleteUserCredential(sys0[1], testUser2);
       try {
-        cred1 = sysClient.getUserCredential(sys0[1], testUser2, AccessMethod.ACCESS_KEY);
+        cred1 = getClientSvc().getUserCredential(sys0[1], testUser2, AccessMethod.ACCESS_KEY);
       } catch (TapisClientException tce) {
         Assert.assertTrue(tce.getTapisMessage().startsWith("SYSAPI_CRED_NOT_FOUND"), "Wrong exception message: " + tce.getTapisMessage());
         cred1 = null;
@@ -505,7 +501,7 @@ public class SystemsClientTest {
       Assert.assertNull(cred1, "Credential not deleted. System name: " + sys0[1] + " User name: " + testUser2);
       // Attempt to retrieve secret from non-existent system
       try {
-        cred1 = sysClient.getUserCredential("AMissingSystemName", testUser2, AccessMethod.PKI_KEYS);
+        cred1 = getClientSvc().getUserCredential("AMissingSystemName", testUser2, AccessMethod.PKI_KEYS);
       } catch (TapisClientException tce) {
         Assert.assertTrue(tce.getTapisMessage().startsWith("SYSAPI_NOSYSTEM"), "Wrong exception message: " + tce.getTapisMessage());
         cred1 = null;
@@ -521,46 +517,46 @@ public class SystemsClientTest {
     System.out.println("Executing AfterSuite teardown method");
     //Remove all objects created by tests, ignore any exceptions
     try {
-      sysClient.deleteSystemByName(sys1[1]);
+      getClientUsr().deleteSystemByName(sys1[1]);
     } catch (Exception e) {    }
     try {
-      sysClient.deleteSystemByName(sys2[1]);
+      getClientUsr().deleteSystemByName(sys2[1]);
     } catch (Exception e) {    }
     try {
-      sysClient.deleteSystemByName(sys3[1]);
+      getClientUsr().deleteSystemByName(sys3[1]);
     } catch (Exception e) {    }
     try {
-      sysClient.deleteSystemByName(sys4[1]);
+      getClientUsr().deleteSystemByName(sys4[1]);
     } catch (Exception e) {    }
     try {
-      sysClient.deleteSystemByName(sys5[1]);
+      getClientUsr().deleteSystemByName(sys5[1]);
     } catch (Exception e) {    }
     try {
-      sysClient.deleteSystemByName(sys6[1]);
+      getClientUsr().deleteSystemByName(sys6[1]);
     } catch (Exception e) {    }
     try {
-      sysClient.deleteSystemByName(sys7[1]);
+      getClientUsr().deleteSystemByName(sys7[1]);
     } catch (Exception e) {    }
     try {
-      sysClient.deleteSystemByName(sys8[1]);
+      getClientUsr().deleteSystemByName(sys8[1]);
     } catch (Exception e) {    }
     try {
-      sysClient.deleteSystemByName(sys9[1]);
+      getClientUsr().deleteSystemByName(sys9[1]);
     } catch (Exception e) {    }
     try {
-      sysClient.deleteSystemByName(sysA[1]);
+      getClientUsr().deleteSystemByName(sysA[1]);
     } catch (Exception e) {    }
     try {
-      sysClient.deleteSystemByName(sysB[1]);
+      getClientUsr().deleteSystemByName(sysB[1]);
     } catch (Exception e) {    }
     try {
-      sysClient.deleteSystemByName(sysC[1]);
+      getClientUsr().deleteSystemByName(sysC[1]);
     } catch (Exception e) {    }
     try {
-      sysClient.deleteSystemByName(sysD[1]);
+      getClientUsr().deleteSystemByName(sysD[1]);
     } catch (Exception e) {    }
     try {
-      sysClient.deleteSystemByName(sysE[1]);
+      getClientUsr().deleteSystemByName(sysE[1]);
     } catch (Exception e) {    }
   }
 
@@ -585,6 +581,29 @@ public class SystemsClientTest {
     // Convert list of TransferMethod enums to list of strings
 //    List<String> transferMethods = Stream.of(txfrMethodsStrList).map(TransferMethodsEnum::name).collect(Collectors.toList());
     // Create the system
-    return sysClient.createSystem(tSys);
+    return getClientUsr().createSystem(tSys);
   }
+
+
+  private SystemsClient getClientUsr()
+  {
+    // Create the client each time due to issue with setting different headers needed by svc vs usr client
+    SystemsClient clt = new SystemsClient(systemsURL, usrJWT);
+    // Creating a separate client for svc is not working because headers end up being used for all clients.
+    // Underlying defaultHeaderMap is static so adding headers impacts all clients.
+//    sysClientSvc = new SystemsClient(systemsURL, svcJWT);
+//    sysClientSvc.addDefaultHeader("X-Tapis-User", sysOwner);
+//    sysClientSvc.addDefaultHeader("X-Tapis-Tenant", tenantName);
+    return clt;
+  }
+  private SystemsClient getClientSvc()
+  {
+    // Create the client each time due to issue with setting different headers needed by svc vs usr client
+    SystemsClient clt = new SystemsClient(systemsURL, svcJWT);
+    clt.addDefaultHeader("X-Tapis-User", sysOwner);
+    clt.addDefaultHeader("X-Tapis-Tenant", tenantName);
+    return clt;
+  }
+
 }
+

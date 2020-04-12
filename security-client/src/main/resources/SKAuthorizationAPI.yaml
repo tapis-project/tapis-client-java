@@ -1652,6 +1652,125 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+  '/security/vault/secret/delete/{secretType}/{secretName}':
+    post:
+      tags:
+        - vault
+      description: |
+        Soft delete one or more versions of a secret. Each version can be deleted individually or as part of a group specified in the input array. Deletion can be reversed using the *secret/undelete/{secretName}* endpoint, which make this a _soft_ deletion operation.
+
+        The input versions array is interpreted as follows:
+
+           * [-] - empty = delete all versions
+           * [0] - zero = delete only the latest version
+           * [1, 3, ...] - list = delete the specified versions
+
+        A valid tenant and user must also be specified in the body.
+
+        ### Naming Secrets
+        Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
+
+        A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+
+        ### Secret Types
+        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
+
+          - **system**
+            - *sysid*: the unique system id
+            - *sysuser*: the accessing user (except when keytype=cert)
+            - keytype: *sshkey* | password | accesskey | cert
+          - **dbcred**
+            - *dbhost*:  the DBMS hostname, IP address or alias
+            - *dbname*:  the database name or alias
+            - *dbservice*: service name
+          - **jwtsigning** - *no query parameters*
+          - **user** - *no query parameters*
+          - **service** - *no query parameters*
+      operationId: deleteSecret
+      parameters:
+        - name: secretType
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: secretName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: sysid
+          in: query
+          schema:
+            type: string
+        - name: sysuser
+          in: query
+          schema:
+            type: string
+        - name: keytype
+          in: query
+          schema:
+            type: string
+            default: sshkey
+        - name: dbhost
+          in: query
+          schema:
+            type: string
+        - name: dbname
+          in: query
+          schema:
+            type: string
+        - name: dbservice
+          in: query
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqVersions'
+        required: true
+      responses:
+        '200':
+          description: Secret deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespVersions'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Secret not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
   '/security/vault/secret/undelete/{secretType}/{secretName}':
     post:
       tags:
@@ -1682,7 +1801,7 @@ paths:
           - **dbcred**
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
-            - *service*: service name
+            - *dbservice*: service name
           - **jwtsigning** - *no query parameters*
           - **user** - *no query parameters*
           - **service** - *no query parameters*
@@ -1724,7 +1843,7 @@ paths:
           in: query
           schema:
             type: string
-        - name: service
+        - name: dbservice
           in: query
           schema:
             type: string
@@ -1801,7 +1920,7 @@ paths:
           - **dbcred**
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
-            - *service*: service name
+            - *dbservice*: service name
           - **jwtsigning** - *no query parameters*
           - **user** - *no query parameters*
           - **service** - *no query parameters*
@@ -1843,7 +1962,7 @@ paths:
           in: query
           schema:
             type: string
-        - name: service
+        - name: dbservice
           in: query
           schema:
             type: string
@@ -1914,7 +2033,7 @@ paths:
           - **dbcred**
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
-            - *service*: service name
+            - *dbservice*: service name
           - **jwtsigning** - *no query parameters*
           - **user** - *no query parameters*
           - **service** - *no query parameters*
@@ -1964,7 +2083,7 @@ paths:
           in: query
           schema:
             type: string
-        - name: service
+        - name: dbservice
           in: query
           schema:
             type: string
@@ -2025,7 +2144,7 @@ paths:
           - **dbcred**
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
-            - *service*: service name
+            - *dbservice*: service name
           - **jwtsigning** - *no query parameters*
           - **user** - *no query parameters*
           - **service** - *no query parameters*
@@ -2081,7 +2200,7 @@ paths:
           in: query
           schema:
             type: string
-        - name: service
+        - name: dbservice
           in: query
           schema:
             type: string
@@ -2149,7 +2268,7 @@ paths:
           - **dbcred**
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
-            - *service*: service name
+            - *dbservice*: service name
           - **jwtsigning** - *no query parameters*
           - **user** - *no query parameters*
           - **service** - *no query parameters*
@@ -2191,7 +2310,7 @@ paths:
           in: query
           schema:
             type: string
-        - name: service
+        - name: dbservice
           in: query
           schema:
             type: string
@@ -2238,125 +2357,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/security/vault/secret/delete/{secretType}/{secretName}':
-    post:
-      tags:
-        - vault
-      description: |
-        Soft delete one or more versions of a secret. Each version can be deleted individually or as part of a group specified in the input array. Deletion can be reversed using the *secret/undelete/{secretName}* endpoint, which make this a _soft_ deletion operation.
-
-        The input versions array is interpreted as follows:
-
-           * [-] - empty = delete all versions
-           * [0] - zero = delete only the latest version
-           * [1, 3, ...] - list = delete the specified versions
-
-        A valid tenant and user must also be specified in the body.
-
-        ### Naming Secrets
-        Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
-
-        A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
-
-        ### Secret Types
-        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
-
-          - **system**
-            - *sysid*: the unique system id
-            - *sysuser*: the accessing user (except when keytype=cert)
-            - keytype: *sshkey* | password | accesskey | cert
-          - **dbcred**
-            - *dbhost*:  the DBMS hostname, IP address or alias
-            - *dbname*:  the database name or alias
-            - *service*: service name
-          - **jwtsigning** - *no query parameters*
-          - **user** - *no query parameters*
-          - **service** - *no query parameters*
-      operationId: deleteSecret
-      parameters:
-        - name: secretType
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: secretName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-        - name: sysid
-          in: query
-          schema:
-            type: string
-        - name: sysuser
-          in: query
-          schema:
-            type: string
-        - name: keytype
-          in: query
-          schema:
-            type: string
-            default: sshkey
-        - name: dbhost
-          in: query
-          schema:
-            type: string
-        - name: dbname
-          in: query
-          schema:
-            type: string
-        - name: service
-          in: query
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqVersions'
-        required: true
-      responses:
-        '200':
-          description: Secret deleted.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespVersions'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '403':
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '404':
-          description: Secret not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
   '/security/vault/secret/list/meta/{secretType}':
     get:
       tags:
@@ -2381,7 +2381,7 @@ paths:
           - **dbcred**
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
-            - *service*: service name
+            - *dbservice*: service name
           - **jwtsigning** - *no query parameters*
           - **user** - *no query parameters*
           - **service** - *no query parameters*
@@ -2426,7 +2426,7 @@ paths:
           in: query
           schema:
             type: string
-        - name: service
+        - name: dbservice
           in: query
           schema:
             type: string
@@ -2485,7 +2485,7 @@ paths:
           - **dbcred**
             - *dbhost*:  the DBMS hostname, IP address or alias
             - *dbname*:  the database name or alias
-            - *service*: service name
+            - *dbservice*: service name
           - **jwtsigning** - *no query parameters*
           - **user** - *no query parameters*
           - **service** - *no query parameters*
@@ -2535,7 +2535,7 @@ paths:
           in: query
           schema:
             type: string
-        - name: service
+        - name: dbservice
           in: query
           schema:
             type: string
