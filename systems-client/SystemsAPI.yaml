@@ -17,7 +17,7 @@ servers:
     description: Base URL
     variables: {}
 security:
-  - Tapis JWT: []
+  - TapisJWT: []
 tags:
   - name: systems
     description: manage systems
