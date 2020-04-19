@@ -2,7 +2,9 @@ package edu.utexas.tacc.tapis.systems.client;
 
 import java.util.List;
 
+import edu.utexas.tacc.tapis.systems.client.gen.model.PatchSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateCredential;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.Gson;
 
@@ -51,7 +53,7 @@ public class SystemsClient
   // ************************************************************************
   // Define AccessMethod here to be used in place of the auto-generated model enum
   //   because the auto-generated enum is named DefaultAccessMethodEnum which is misleading.
-  public enum AccessMethod {PASSWORD, PKI_KEYS, CERT, ACCESS_KEY}
+  public enum AccessMethod {PASSWORD, PKI_KEYS, ACCESS_KEY, CERT}
 
   // ************************************************************************
   // *********************** Fields *****************************************
@@ -133,10 +135,28 @@ public class SystemsClient
   {
     // Build the request
     var req = new ReqCreateSystem();
-    req.settSystem(tSystem);
+    req.setSystem(tSystem);
     // Submit the request and return the response
     RespResourceUrl resp = null;
     try { resp = sysApi.createSystem(req, false); }
+    catch (Exception e) { throwTapisClientException(e); }
+    if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
+  }
+
+  /**
+   * Update a system
+   *
+   * @return url pointing to updated resource
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public String updateSystem(String name, PatchSystem patchSystem) throws TapisClientException
+  {
+    // Build the request
+    var req = new ReqUpdateSystem();
+    req.setPatchSystem(patchSystem);
+    // Submit the request and return the response
+    RespResourceUrl resp = null;
+    try { resp = sysApi.updateSystem(name, req, false); }
     catch (Exception e) { throwTapisClientException(e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
   }
