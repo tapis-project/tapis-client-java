@@ -182,6 +182,59 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+  '/v3/systems/perms/{systemName}/user/{userName}/{permission}':
+    delete:
+      tags:
+        - permissions
+      summary: Revoke specified permission in the Security Kernel
+      description: 'Revoke permission in the Security Kernel for a user. Requester must be owner of the system. Permissions: READ, MODIFY or ALL.'
+      operationId: revokeUserPerm
+      parameters:
+        - name: systemName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: permission
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Permission revoked.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
   '/v3/systems/perms/{systemName}/user/{userName}/revoke':
     post:
       tags:
@@ -317,59 +370,6 @@ paths:
       responses:
         '200':
           description: Permissions granted.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '400':
-          description: Input error. Invalid JSON.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-  '/v3/systems/perms/{systemName}/user/{userName}/{permission}':
-    delete:
-      tags:
-        - permissions
-      summary: Revoke specified permission in the Security Kernel
-      description: 'Revoke permission in the Security Kernel for a user. Requester must be owner of the system. Permissions: READ, MODIFY or ALL.'
-      operationId: revokeUserPerm
-      parameters:
-        - name: systemName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: userName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: permission
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      responses:
-        '200':
-          description: Permission revoked.
           content:
             application/json:
               schema:
@@ -664,6 +664,21 @@ components:
           type: string
         result:
           type: object
+    ReqCreateCredential:
+      type: object
+      properties:
+        password:
+          type: string
+        privateKey:
+          type: string
+        publicKey:
+          type: string
+        accessKey:
+          type: string
+        accessSecret:
+          type: string
+        certificate:
+          type: string
     Credential:
       type: object
       properties:
@@ -679,11 +694,6 @@ components:
           type: string
         certificate:
           type: string
-    ReqCreateCredential:
-      type: object
-      properties:
-        credential:
-          $ref: '#/components/schemas/Credential'
     RespCredential:
       type: object
       properties:
@@ -787,20 +797,20 @@ components:
           format: byte
         asString:
           type: string
-        asJsonArray:
-          $ref: '#/components/schemas/JsonArray'
-        jsonArray:
-          type: boolean
-        jsonObject:
-          type: boolean
-        jsonPrimitive:
-          type: boolean
         jsonNull:
           type: boolean
         asJsonPrimitive:
           $ref: '#/components/schemas/JsonPrimitive'
         asJsonNull:
           $ref: '#/components/schemas/JsonNull'
+        jsonArray:
+          type: boolean
+        jsonObject:
+          type: boolean
+        jsonPrimitive:
+          type: boolean
+        asJsonArray:
+          $ref: '#/components/schemas/JsonArray'
         asJsonObject:
           $ref: '#/components/schemas/JsonObject'
     JsonElement:
@@ -811,14 +821,6 @@ components:
         asInt:
           type: integer
           format: int32
-        asJsonArray:
-          $ref: '#/components/schemas/JsonArray'
-        jsonArray:
-          type: boolean
-        jsonObject:
-          type: boolean
-        jsonPrimitive:
-          type: boolean
         jsonNull:
           type: boolean
         asJsonPrimitive:
@@ -845,6 +847,14 @@ components:
         asShort:
           type: integer
           format: int32
+        jsonArray:
+          type: boolean
+        jsonObject:
+          type: boolean
+        jsonPrimitive:
+          type: boolean
+        asJsonArray:
+          $ref: '#/components/schemas/JsonArray'
         asJsonObject:
           $ref: '#/components/schemas/JsonObject'
         asByte:
@@ -860,14 +870,6 @@ components:
         asInt:
           type: integer
           format: int32
-        asJsonArray:
-          $ref: '#/components/schemas/JsonArray'
-        jsonArray:
-          type: boolean
-        jsonObject:
-          type: boolean
-        jsonPrimitive:
-          type: boolean
         jsonNull:
           type: boolean
         asJsonPrimitive:
@@ -894,6 +896,14 @@ components:
         asShort:
           type: integer
           format: int32
+        jsonArray:
+          type: boolean
+        jsonObject:
+          type: boolean
+        jsonPrimitive:
+          type: boolean
+        asJsonArray:
+          $ref: '#/components/schemas/JsonArray'
         asJsonObject:
           $ref: '#/components/schemas/JsonObject'
         asByte:
@@ -909,14 +919,6 @@ components:
         asInt:
           type: integer
           format: int32
-        asJsonArray:
-          $ref: '#/components/schemas/JsonArray'
-        jsonArray:
-          type: boolean
-        jsonObject:
-          type: boolean
-        jsonPrimitive:
-          type: boolean
         jsonNull:
           type: boolean
         asJsonPrimitive:
@@ -943,6 +945,14 @@ components:
         asShort:
           type: integer
           format: int32
+        jsonArray:
+          type: boolean
+        jsonObject:
+          type: boolean
+        jsonPrimitive:
+          type: boolean
+        asJsonArray:
+          $ref: '#/components/schemas/JsonArray'
         asJsonObject:
           $ref: '#/components/schemas/JsonObject'
         asByte:
@@ -960,10 +970,6 @@ components:
           format: int32
         number:
           type: boolean
-        string:
-          type: boolean
-        boolean:
-          type: boolean
         asNumber:
           type: number
         asDouble:
@@ -984,25 +990,29 @@ components:
         asShort:
           type: integer
           format: int32
+        boolean:
+          type: boolean
         asByte:
           type: string
           format: byte
+        string:
+          type: boolean
         asString:
           type: string
-        asJsonArray:
-          $ref: '#/components/schemas/JsonArray'
-        jsonArray:
-          type: boolean
-        jsonObject:
-          type: boolean
-        jsonPrimitive:
-          type: boolean
         jsonNull:
           type: boolean
         asJsonPrimitive:
           $ref: '#/components/schemas/JsonPrimitive'
         asJsonNull:
           $ref: '#/components/schemas/JsonNull'
+        jsonArray:
+          type: boolean
+        jsonObject:
+          type: boolean
+        jsonPrimitive:
+          type: boolean
+        asJsonArray:
+          $ref: '#/components/schemas/JsonArray'
         asJsonObject:
           $ref: '#/components/schemas/JsonObject'
     Notes:
@@ -1015,7 +1025,145 @@ components:
     ReqCreateSystem:
       type: object
       properties:
-        System:
+        name:
+          type: string
+        description:
+          type: string
+        systemType:
+          type: string
+          enum:
+            - LINUX
+            - OBJECT_STORE
+        owner:
+          type: string
+        host:
+          type: string
+        enabled:
+          type: boolean
+        effectiveUserId:
+          type: string
+        defaultAccessMethod:
+          type: string
+          enum:
+            - PASSWORD
+            - PKI_KEYS
+            - ACCESS_KEY
+            - CERT
+        accessCredential:
+          $ref: '#/components/schemas/Credential'
+        bucketName:
+          type: string
+        rootDir:
+          type: string
+        transferMethods:
+          type: array
+          items:
+            type: string
+            enum:
+              - SFTP
+              - S3
+        port:
+          type: integer
+          format: int32
+        useProxy:
+          type: boolean
+        proxyHost:
+          type: string
+        proxyPort:
+          type: integer
+          format: int32
+        jobCanExec:
+          type: boolean
+        jobLocalWorkingDir:
+          type: string
+        jobLocalArchiveDir:
+          type: string
+        jobRemoteArchiveSystem:
+          type: string
+        jobRemoteArchiveDir:
+          type: string
+        jobCapabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Capability'
+        tags:
+          type: array
+          items:
+            type: string
+        notes:
+          $ref: '#/components/schemas/Notes'
+    RespChangeCount:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultChangeCount'
+    ResultChangeCount:
+      type: object
+      properties:
+        changes:
+          type: integer
+          format: int32
+    ReqUpdateSystem:
+      type: object
+      properties:
+        description:
+          type: string
+        host:
+          type: string
+        enabled:
+          type: boolean
+        effectiveUserId:
+          type: string
+        defaultAccessMethod:
+          type: string
+          enum:
+            - PASSWORD
+            - PKI_KEYS
+            - ACCESS_KEY
+            - CERT
+        transferMethods:
+          type: array
+          items:
+            type: string
+            enum:
+              - SFTP
+              - S3
+        port:
+          type: integer
+          format: int32
+        useProxy:
+          type: boolean
+        proxyHost:
+          type: string
+        proxyPort:
+          type: integer
+          format: int32
+        jobCapabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Capability'
+        tags:
+          type: array
+          items:
+            type: string
+        notes:
+          $ref: '#/components/schemas/Notes'
+    RespSystem:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
           $ref: '#/components/schemas/TSystem'
     TSystem:
       type: object
@@ -1096,92 +1244,9 @@ components:
             type: string
         notes:
           $ref: '#/components/schemas/Notes'
-    PatchSystem:
-      type: object
-      properties:
-        tenant:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        host:
-          type: string
-        enabled:
-          type: boolean
-        effectiveUserId:
-          type: string
-        defaultAccessMethod:
-          type: string
-          enum:
-            - PASSWORD
-            - PKI_KEYS
-            - ACCESS_KEY
-            - CERT
-        transferMethods:
-          type: array
-          items:
-            type: string
-            enum:
-              - SFTP
-              - S3
-        port:
-          type: integer
-          format: int32
-        useProxy:
-          type: boolean
-        proxyHost:
-          type: string
-        proxyPort:
-          type: integer
-          format: int32
-        jobCapabilities:
-          type: array
-          items:
-            $ref: '#/components/schemas/Capability'
-        tags:
-          type: array
-          items:
-            type: string
-        notes:
-          $ref: '#/components/schemas/Notes'
-    ReqUpdateSystem:
-      type: object
-      properties:
-        PatchSystem:
-          $ref: '#/components/schemas/PatchSystem'
-    RespSystem:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          $ref: '#/components/schemas/TSystem'
-    RespChangeCount:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          $ref: '#/components/schemas/ResultChangeCount'
-    ResultChangeCount:
-      type: object
-      properties:
-        changes:
-          type: integer
-          format: int32
   securitySchemes:
     TapisJWT:
       type: apiKey
       description: Tapis signed JWT token authentication
       name: X-Tapis-Token
       in: header
-

@@ -4,21 +4,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import edu.utexas.tacc.tapis.shared.exceptions.TapisClientException;
-import edu.utexas.tacc.tapis.shared.utils.TapisGsonUtils;
-import edu.utexas.tacc.tapis.systems.client.gen.model.Notes;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateCredential;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
+import edu.utexas.tacc.tapis.shared.exceptions.TapisClientException;
+import edu.utexas.tacc.tapis.shared.utils.TapisGsonUtils;
+import edu.utexas.tacc.tapis.systems.client.gen.model.Notes;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem.SystemTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability.CategoryEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
-import edu.utexas.tacc.tapis.systems.client.gen.model.PatchSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem.SystemTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.SystemsClient.AccessMethod;
 import edu.utexas.tacc.tapis.tokens.client.TokensClient;
 
@@ -51,9 +53,12 @@ public class SystemsClientTest {
   private static final int prot1Port = -1, prot1ProxyPort = -1, prot2Port = 22, prot2ProxyPort = 222;
   private static final boolean prot1UseProxy = false, prot2UseProxy = true;
   private static final String prot1ProxyHost = "proxyhost1", prot2ProxyHost = "proxyhost2";
-  private static final List<TSystem.TransferMethodsEnum> prot1TxfrMethods = Arrays.asList(TSystem.TransferMethodsEnum.SFTP, TSystem.TransferMethodsEnum.S3);
-  private static final List<TSystem.TransferMethodsEnum> prot2TxfrMethods = Arrays.asList(TSystem.TransferMethodsEnum.SFTP);
-  private static final List<PatchSystem.TransferMethodsEnum> prot2TxfrMethodsP = Arrays.asList(PatchSystem.TransferMethodsEnum.SFTP);
+  private static final List<ReqCreateSystem.TransferMethodsEnum> prot1TxfrMethodsC =
+          Arrays.asList(ReqCreateSystem.TransferMethodsEnum.SFTP, ReqCreateSystem.TransferMethodsEnum.S3);
+  private static final List<TSystem.TransferMethodsEnum> prot1TxfrMethodsT =
+          Arrays.asList(TSystem.TransferMethodsEnum.SFTP, TSystem.TransferMethodsEnum.S3);
+  private static final List<ReqUpdateSystem.TransferMethodsEnum> prot2TxfrMethodsU = Arrays.asList(ReqUpdateSystem.TransferMethodsEnum.SFTP);
+  private static final List<TSystem.TransferMethodsEnum> prot2TxfrMethodsT = Arrays.asList(TSystem.TransferMethodsEnum.SFTP);
   private static final AccessMethod prot1AccessMethod = AccessMethod.PKI_KEYS;
   private static final AccessMethod prot2AccessMethod = AccessMethod.ACCESS_KEY;
   private static final List<String> tags1 = Arrays.asList("value1", "value2", "a",
@@ -143,7 +148,7 @@ public class SystemsClientTest {
     Credential cred0 = null;
     System.out.println("Creating system with name: " + sys0[1]);
     try {
-      String respUrl = createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethods, jobCaps1);
+      String respUrl = createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethodsC, jobCaps1);
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
@@ -177,7 +182,7 @@ public class SystemsClientTest {
     Credential cred0 = null;
     System.out.println("Creating system with name: " + sys0[1]);
     try {
-      String respUrl = createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethods, null);
+      String respUrl = createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethodsC, null);
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
@@ -186,7 +191,7 @@ public class SystemsClientTest {
     }
     // Now attempt to create it again, should throw exception
     System.out.println("Creating system with name: " + sys7[1]);
-    createSystem(sys7, prot1AccessMethod, cred0, prot1TxfrMethods, null);
+    createSystem(sys7, prot1AccessMethod, cred0, prot1TxfrMethodsC, null);
     Assert.fail("Exception should have been thrown");
   }
 
@@ -197,7 +202,7 @@ public class SystemsClientTest {
     String[] sys0 = sys8;
     Credential cred0 = null;
     System.out.println("Creating system with name: " + sys0[1]);
-    createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethods, jobCaps1);
+    createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethodsC, jobCaps1);
     Assert.fail("Exception should have been thrown");
   }
 
@@ -208,7 +213,7 @@ public class SystemsClientTest {
     String[] sys0 = sys9;
     Credential cred0 = null;
     System.out.println("Creating system with name: " + sys0[1]);
-    createSystem(sys0, AccessMethod.CERT, cred0, prot1TxfrMethods, null);
+    createSystem(sys0, AccessMethod.CERT, cred0, prot1TxfrMethodsC, null);
     Assert.fail("Exception should have been thrown");
   }
 
@@ -220,7 +225,7 @@ public class SystemsClientTest {
     Credential cred0 = SystemsClient.buildCredential(sys0[7], "fakePrivateKey", "fakePublicKey",
                                            "fakeAccessKey", "fakeAccessSecret", "fakeCert");
     System.out.println("Creating system with name: " + sys0[1]);
-    createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethods, null);
+    createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethodsC, null);
     Assert.fail("Exception should have been thrown");
   }
 
@@ -231,7 +236,7 @@ public class SystemsClientTest {
     String[] sys0 = sys2;
     Credential cred0 = SystemsClient.buildCredential(sys0[7], "fakePrivateKey", "fakePublicKey",
                                            "fakeAccessKey", "fakeAccessSecret", "fakeCert");
-    String respUrl = createSystem(sys0, AccessMethod.PKI_KEYS, cred0, prot1TxfrMethods, jobCaps1);
+    String respUrl = createSystem(sys0, AccessMethod.PKI_KEYS, cred0, prot1TxfrMethodsC, jobCaps1);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     TSystem tmpSys = getClientSvc().getSystemByName(sys0[1], null);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
@@ -265,7 +270,7 @@ public class SystemsClientTest {
     // Verify transfer methods
     List<TSystem.TransferMethodsEnum> tMethodsList = tmpSys.getTransferMethods();
     Assert.assertNotNull(tMethodsList, "TransferMethods list should not be null");
-    for (TSystem.TransferMethodsEnum txfrMethod : prot1TxfrMethods)
+    for (TSystem.TransferMethodsEnum txfrMethod : prot1TxfrMethodsT)
     {
       Assert.assertTrue(tMethodsList.contains(txfrMethod), "List of transfer methods did not contain: " + txfrMethod.name());
     }
@@ -321,15 +326,15 @@ public class SystemsClientTest {
   public void testUpdateSystem() {
     String[] sys0 = sysF;
     Credential cred0 = null;
-    PatchSystem patchSystem = createPatchSystem(sysF2);
+    ReqUpdateSystem rSystem = createPatchSystem(sysF2);
     System.out.println("Creating and updating system with name: " + sys0[1]);
     try {
       // Create a system
-      String respUrl = createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethods, jobCaps1);
+      String respUrl = createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethodsC, jobCaps1);
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
       // Update the system
-      respUrl = getClientUsr().updateSystem(sys0[1], patchSystem);
+      respUrl = getClientUsr().updateSystem(sys0[1], rSystem);
       System.out.println("Updated system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
       // Verify attributes
@@ -357,7 +362,7 @@ public class SystemsClientTest {
       // Verify transfer methods
       List<TSystem.TransferMethodsEnum> tMethodsList = tmpSys.getTransferMethods();
       Assert.assertNotNull(tMethodsList, "TransferMethods list should not be null");
-      for (TSystem.TransferMethodsEnum txfrMethod : prot2TxfrMethods)
+      for (TSystem.TransferMethodsEnum txfrMethod : prot2TxfrMethodsT)
       {
         Assert.assertTrue(tMethodsList.contains(txfrMethod), "List of transfer methods did not contain: " + txfrMethod.name());
       }
@@ -406,7 +411,7 @@ public class SystemsClientTest {
     String[] sys0 = sysD;
     Credential cred0 = SystemsClient.buildCredential(sys0[7], "fakePrivateKey", "fakePublicKey",
             "fakeAccessKey", "fakeAccessSecret", "fakeCert");
-    String respUrl = createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethods, jobCaps1);
+    String respUrl = createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethodsC, jobCaps1);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     TSystem tmpSys = getClientUsr().getSystemByName(sys0[1]);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
@@ -438,10 +443,10 @@ public class SystemsClientTest {
     // Create 2 systems
     String[] sys0 = sys3;
     Credential cred0 = null;
-    String respUrl = createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethods, jobCaps1);
+    String respUrl = createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethodsC, jobCaps1);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     sys0 = sys4;
-    respUrl = createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethods, jobCaps2);
+    respUrl = createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethodsC, jobCaps2);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Get list of all system names
@@ -469,7 +474,7 @@ public class SystemsClientTest {
     // Create the system
     String[] sys0 = sys6;
     Credential cred0 = null;
-    String respUrl = createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethods, jobCaps1);
+    String respUrl = createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethodsC, jobCaps1);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Delete the system
@@ -490,7 +495,7 @@ public class SystemsClientTest {
     // Create a system
     System.out.println("Creating system with name: " + sys0[1]);
     try {
-      String respUrl = createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethods, null);
+      String respUrl = createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethodsC, null);
       System.out.println("Created system: " + respUrl);
       System.out.println("Testing perms for user: " + testUser2);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
@@ -529,30 +534,30 @@ public class SystemsClientTest {
   {
     // Create a system
     String[] sys0 = sysC;
-    Credential cred0 = null;
     System.out.println("Creating system with name: " + sys0[1]);
     try {
-      String respUrl = createSystem(sys0, prot1AccessMethod, cred0, prot1TxfrMethods, null);
+      String respUrl = createSystem(sys0, prot1AccessMethod, null, prot1TxfrMethodsC, null);
       System.out.println("Created system: " + respUrl);
       System.out.println("Testing credentials for user: " + testUser2);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
-      cred0 = SystemsClient.buildCredential(sys0[7], "fakePrivateKey", "fakePublicKey",
-              "fakeAccessKey", "fakeAccessSecret", "fakeCert");
+      ReqCreateCredential reqCred = new ReqCreateCredential();
+      reqCred.password(sys0[7]).privateKey("fakePrivateKey").publicKey("fakePublicKey")
+           .accessKey("fakeAccessKey").accessSecret("fakeAccessSecret").certificate("fakeCert");
       // Store and retrieve multiple secret types: password, ssh keys, access key and secret
-      getClientUsr().updateUserCredential(sys0[1], testUser2, cred0);
+      getClientUsr().updateUserCredential(sys0[1], testUser2, reqCred);
       Credential cred1 = getClientSvc().getUserCredential(sys0[1], testUser2, AccessMethod.PASSWORD);
       // Verify credentials
-      Assert.assertEquals(cred1.getPassword(), cred0.getPassword());
+      Assert.assertEquals(cred1.getPassword(), reqCred.getPassword());
       cred1 = getClientSvc().getUserCredential(sys0[1], testUser2, AccessMethod.PKI_KEYS);
-      Assert.assertEquals(cred1.getPublicKey(), cred0.getPublicKey());
-      Assert.assertEquals(cred1.getPrivateKey(), cred0.getPrivateKey());
+      Assert.assertEquals(cred1.getPublicKey(), reqCred.getPublicKey());
+      Assert.assertEquals(cred1.getPrivateKey(), reqCred.getPrivateKey());
       cred1 = getClientSvc().getUserCredential(sys0[1], testUser2, AccessMethod.ACCESS_KEY);
-      Assert.assertEquals(cred1.getAccessKey(), cred0.getAccessKey());
-      Assert.assertEquals(cred1.getAccessSecret(), cred0.getAccessSecret());
+      Assert.assertEquals(cred1.getAccessKey(), reqCred.getAccessKey());
+      Assert.assertEquals(cred1.getAccessSecret(), reqCred.getAccessSecret());
       // Verify we get credentials for default accessMethod if we do not specify an access method
       cred1 = getClientSvc().getUserCredential(sys0[1], testUser2);
-      Assert.assertEquals(cred1.getPublicKey(), cred0.getPublicKey());
-      Assert.assertEquals(cred1.getPrivateKey(), cred0.getPrivateKey());
+      Assert.assertEquals(cred1.getPublicKey(), reqCred.getPublicKey());
+      Assert.assertEquals(cred1.getPrivateKey(), reqCred.getPrivateKey());
 
       // Delete credentials and verify they were destroyed
       getClientUsr().deleteUserCredential(sys0[1], testUser2);
@@ -568,12 +573,11 @@ public class SystemsClientTest {
       getClientUsr().deleteUserCredential(sys0[1], testUser2);
 
       // Set just ACCESS_KEY only and test
-      cred0 = SystemsClient.buildCredential(null, null, null,
-              "fakeAccessKey2", "fakeAccessSecret2", null);
-      getClientUsr().updateUserCredential(sys0[1], testUser2, cred0);
+      reqCred = new ReqCreateCredential().accessKey("fakeAccessKey2").accessSecret("fakeAccessSecret2");
+      getClientUsr().updateUserCredential(sys0[1], testUser2, reqCred);
       cred1 = getClientSvc().getUserCredential(sys0[1], testUser2, AccessMethod.ACCESS_KEY);
-      Assert.assertEquals(cred1.getAccessKey(), cred0.getAccessKey());
-      Assert.assertEquals(cred1.getAccessSecret(), cred0.getAccessSecret());
+      Assert.assertEquals(cred1.getAccessKey(), reqCred.getAccessKey());
+      Assert.assertEquals(cred1.getAccessSecret(), reqCred.getAccessSecret());
       // Attempt to retrieve secret that has not been set
       try {
         cred1 = getClientSvc().getUserCredential(sys0[1], testUser2, AccessMethod.PKI_KEYS);
@@ -650,40 +654,49 @@ public class SystemsClientTest {
     try {
       getClientUsr().deleteSystemByName(sysE[1]);
     } catch (Exception e) {    }
+    try {
+      getClientUsr().deleteSystemByName(sysF[1]);
+    } catch (Exception e) {    }
   }
 
-  private String createSystem(String[] sys, AccessMethod accessMethod, Credential credential, List<TSystem.TransferMethodsEnum> txfrMethods,
-                              List<Capability> jobCaps) throws TapisClientException {
-     TSystem tSys = new TSystem();
-     tSys.setName(sys[1]);
-     tSys.setSystemType(SystemTypeEnum.valueOf(sys[3]));
-     tSys.setHost(sys[5]);
-     tSys.setDefaultAccessMethod(TSystem.DefaultAccessMethodEnum.valueOf(accessMethod.name()));
-     tSys.setJobCanExec(true);
-     tSys.setAccessCredential(credential);
-     tSys.setTransferMethods(txfrMethods);
-     tSys.setJobCapabilities(jobCaps);
-     tSys.description(sys[2]).owner(sys[4]).effectiveUserId(sys[6]);
-     tSys.bucketName(sys[8]).rootDir(sys[9]);
-     tSys.jobLocalWorkingDir(sys[10]).jobLocalArchiveDir(sys[11]).jobRemoteArchiveSystem(sys[12]).jobRemoteArchiveDir(sys[13]);
-     tSys.port(prot1Port).useProxy(prot1UseProxy).proxyHost(prot1ProxyHost).proxyPort(prot1ProxyPort);
-     tSys.tags(tags1);
-    tSys.notes(new Notes().stringData(notes1JOStr));
-    // Convert list of TransferMethod enums to list of strings
-//    List<String> transferMethods = Stream.of(txfrMethodsStrList).map(TSystem.TransferMethodsEnum::name).collect(Collectors.toList());
-    // Create the system
-    return getClientUsr().createSystem(tSys);
-  }
-
-  private PatchSystem createPatchSystem(String[] sys)
+  private String createSystem(String[] sys, AccessMethod accessMethod, Credential credential,
+                              List<ReqCreateSystem.TransferMethodsEnum> txfrMethods, List<Capability> jobCaps)
+          throws TapisClientException
   {
-    PatchSystem pSys = new PatchSystem();
+    ReqCreateSystem rSys = new ReqCreateSystem();
+    rSys.setName(sys[1]);
+    rSys.description(sys[2]);
+    rSys.setSystemType(ReqCreateSystem.SystemTypeEnum.valueOf(sys[3]));
+    rSys.owner(sys[4]);
+    rSys.setHost(sys[5]);
+    rSys.enabled(true);
+    rSys.effectiveUserId(sys[6]);
+    rSys.defaultAccessMethod(ReqCreateSystem.DefaultAccessMethodEnum.valueOf(accessMethod.name()));
+    rSys.accessCredential(credential);
+    rSys.bucketName(sys[8]);
+    rSys.rootDir(sys[9]);
+    rSys.setTransferMethods(txfrMethods);
+    rSys.port(prot1Port).useProxy(prot1UseProxy).proxyHost(prot1ProxyHost).proxyPort(prot1ProxyPort);
+    rSys.jobCanExec(true);
+    rSys.jobLocalWorkingDir(sys[10]).jobLocalArchiveDir(sys[11]).jobRemoteArchiveSystem(sys[12]).jobRemoteArchiveDir(sys[13]);
+    rSys.jobCapabilities(jobCaps);
+    rSys.tags(tags1);
+    rSys.notes(new Notes().stringData(notes1JOStr));
+    // Convert list of TransferMethod enums to list of strings
+//    List<String> transferMethods = Stream.of(txfrMethodsStrList).map(TransferMethodsEnum::name).collect(Collectors.toList());
+    // Create the system
+    return getClientUsr().createSystem(rSys);
+  }
+
+  private ReqUpdateSystem createPatchSystem(String[] sys)
+  {
+    ReqUpdateSystem pSys = new ReqUpdateSystem();
     pSys.description(sys[2]);
     pSys.host(sys[5]);
     pSys.enabled(false);
     pSys.effectiveUserId(sys[6]);
-    pSys.defaultAccessMethod(PatchSystem.DefaultAccessMethodEnum.valueOf(prot2AccessMethod.name()));
-    pSys.transferMethods(prot2TxfrMethodsP);
+    pSys.defaultAccessMethod(ReqUpdateSystem.DefaultAccessMethodEnum.valueOf(prot2AccessMethod.name()));
+    pSys.transferMethods(prot2TxfrMethodsU);
     pSys.port(prot2Port).useProxy(prot2UseProxy).proxyHost(prot2ProxyHost).proxyPort(prot2ProxyPort);
     pSys.jobCapabilities(jobCaps2);
     pSys.tags(tags2);
