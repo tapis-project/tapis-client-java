@@ -2,7 +2,6 @@ package edu.utexas.tacc.tapis.systems.client;
 
 import java.util.List;
 
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateCredential;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.Gson;
 
@@ -14,8 +13,10 @@ import edu.utexas.tacc.tapis.systems.client.gen.Configuration;
 import edu.utexas.tacc.tapis.systems.client.gen.api.CredentialsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.PermissionsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.SystemsApi;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespBasic;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespChangeCount;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespCredential;
@@ -51,7 +52,7 @@ public class SystemsClient
   // ************************************************************************
   // Define AccessMethod here to be used in place of the auto-generated model enum
   //   because the auto-generated enum is named DefaultAccessMethodEnum which is misleading.
-  public enum AccessMethod {PASSWORD, PKI_KEYS, CERT, ACCESS_KEY}
+  public enum AccessMethod {PASSWORD, PKI_KEYS, ACCESS_KEY, CERT}
 
   // ************************************************************************
   // *********************** Fields *****************************************
@@ -129,14 +130,26 @@ public class SystemsClient
    * @return url pointing to created resource
    * @throws TapisClientException - If api call throws an exception
    */
-  public String createSystem(TSystem tSystem) throws TapisClientException
+  public String createSystem(ReqCreateSystem req) throws TapisClientException
   {
-    // Build the request
-    var req = new ReqCreateSystem();
-    req.settSystem(tSystem);
     // Submit the request and return the response
     RespResourceUrl resp = null;
     try { resp = sysApi.createSystem(req, false); }
+    catch (Exception e) { throwTapisClientException(e); }
+    if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
+  }
+
+  /**
+   * Update a system
+   *
+   * @return url pointing to updated resource
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public String updateSystem(String name, ReqUpdateSystem req) throws TapisClientException
+  {
+    // Submit the request and return the response
+    RespResourceUrl resp = null;
+    try { resp = sysApi.updateSystem(name, req, false); }
     catch (Exception e) { throwTapisClientException(e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
   }
@@ -276,11 +289,8 @@ public class SystemsClient
    *
    * @throws TapisClientException - If api call throws an exception
    */
-  public void updateUserCredential(String systemName, String userName, Credential cred) throws TapisClientException
+  public void updateUserCredential(String systemName, String userName, ReqCreateCredential req) throws TapisClientException
   {
-    // Build the request
-    var req = new ReqCreateCredential();
-    req.setCredential(cred);
     // Submit the request and return the response
     RespBasic resp = null;
     try { resp = credsApi.createUserCredential(systemName, userName, req, false); }
