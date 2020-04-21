@@ -530,6 +530,8 @@ paths:
               schema:
                 type: object
       deprecated: false
+
+  /meta/{db}/{collection}/_indexes/{indexName}:
     put:
       tags:
         - index
