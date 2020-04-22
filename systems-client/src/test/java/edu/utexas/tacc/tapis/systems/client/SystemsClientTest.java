@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.gson.JsonObject;
+import com.google.gson.internal.LinkedTreeMap;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +16,6 @@ import org.testng.annotations.Test;
 
 import edu.utexas.tacc.tapis.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.shared.utils.TapisGsonUtils;
-import edu.utexas.tacc.tapis.systems.client.gen.model.Notes;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem.SystemTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
@@ -38,7 +39,6 @@ public class SystemsClientTest {
   // Env variables for setting URLs
   private static final String TAPIS_ENV_SVC_URL_SYSTEMS = "TAPIS_SVC_URL_SYSTEMS";
   private static final String TAPIS_ENV_SVC_URL_TOKENS = "TAPIS_SVC_URL_TOKENS";
-
 
   // Test data
   private static final String tenantName = "dev";
@@ -64,11 +64,8 @@ public class SystemsClientTest {
   private static final List<String> tags1 = Arrays.asList("value1", "value2", "a",
     "a long tag with spaces and numbers (1 3 2) and special characters [_ $ - & * % @ + = ! ^ ? < > , . ( ) { } / \\ | ]. Backslashes must be escaped.");
   private static final List<String> tags2 = Arrays.asList("value3", "value4");
-  // TODO Client model has it's own JsonObject class. Not clear how to pass in Notes as gson JsonObject which is what is needed.
-//  private static final JsonObject notes1JO = TapisGsonUtils.getGson().fromJson("{\"project\":\"myproj1\", \"testdata\":\"abc1\"}", JsonObject.class);
-//  private static final JsonObject notes2JO = TapisGsonUtils.getGson().fromJson("{\"project\":\"myproj2\", \"testdata\":\"abc2\"}", JsonObject.class);
-  private static final String notes1JOStr = "{\"project\":\"myproj1\", \"testdata\":\"abc1\"}";
-  private static final String notes2JOStr = "{\"project\":\"myproj2\", \"testdata\":\"abc2\"}";
+  private static final JsonObject notes1JO = TapisGsonUtils.getGson().fromJson("{\"project\":\"myproj1\", \"testdata\":\"abc1\"}", JsonObject.class);
+  private static final JsonObject notes2JO = TapisGsonUtils.getGson().fromJson("{\"project\":\"myproj2\", \"testdata\":\"abc2\"}", JsonObject.class);
   private static final List<String> testPerms = new ArrayList<>(List.of("READ", "MODIFY"));
 
   private static final String[] sys1 = {tenantName, "Csys1", "description 1", sysType, ownerUser, "host1", "effUser1", "fakePassword1",
@@ -294,19 +291,13 @@ public class SystemsClientTest {
       System.out.println("Found tag: " + tagStr);
     }
     // Verify notes
-    // TODO: Note stringData value in Notes is populated but jsonData is all NULLs
-    //       Figure out why working OK with curl but not with java client.
-    Notes tmpNotes = tmpSys.getNotes();
+    LinkedTreeMap tmpNotes = (LinkedTreeMap) tmpSys.getNotes();
     Assert.assertNotNull(tmpNotes);
-    String notesStr = tmpSys.getNotes().getStringData();
-    Assert.assertFalse(StringUtils.isBlank(notesStr), "Notes string not found");
-    System.out.println("Found notes: " + notesStr);
-    com.google.gson.JsonObject tmpObj = TapisGsonUtils.getGson().fromJson(notesStr, com.google.gson.JsonObject.class);
-    Assert.assertNotNull(tmpObj, "Error parsing Notes string");
-    Assert.assertTrue(tmpObj.has("project"));
-    Assert.assertEquals(tmpObj.get("project").getAsString(), "myproj1");
-    Assert.assertTrue(tmpObj.has("testdata"));
-    Assert.assertEquals(tmpObj.get("testdata").getAsString(), "abc1");
+    System.out.println("Found notes: " + tmpNotes.toString());
+    Assert.assertTrue(tmpNotes.containsKey("project"));
+    Assert.assertEquals(tmpNotes.get("project"), notes1JO.get("project").getAsString());
+    Assert.assertTrue(tmpNotes.containsKey("testdata"));
+    Assert.assertEquals(tmpNotes.get("testdata"), notes1JO.get("testdata").getAsString());
 
     // TODO need service client to get creds. Currently unable to use both user client and service client in same program
     // Test retrieval using specified access method
@@ -386,19 +377,13 @@ public class SystemsClientTest {
         System.out.println("Found tag: " + tagStr);
       }
       // Verify notes
-      // TODO: Note stringData value in Notes is populated but jsonData is all NULLs
-      //       Figure out why working OK with curl but not with java client.
-      Notes tmpNotes = tmpSys.getNotes();
+      LinkedTreeMap tmpNotes = (LinkedTreeMap) tmpSys.getNotes();
       Assert.assertNotNull(tmpNotes);
-      String notesStr = tmpSys.getNotes().getStringData();
-      Assert.assertFalse(StringUtils.isBlank(notesStr), "Notes string not found");
-      System.out.println("Found notes: " + notesStr);
-      com.google.gson.JsonObject tmpObj = TapisGsonUtils.getGson().fromJson(notesStr, com.google.gson.JsonObject.class);
-      Assert.assertNotNull(tmpObj, "Error parsing Notes string");
-      Assert.assertTrue(tmpObj.has("project"));
-      Assert.assertEquals(tmpObj.get("project").getAsString(), "myproj2");
-      Assert.assertTrue(tmpObj.has("testdata"));
-      Assert.assertEquals(tmpObj.get("testdata").getAsString(), "abc2");
+      System.out.println("Found notes: " + tmpNotes.toString());
+      Assert.assertTrue(tmpNotes.containsKey("project"));
+      Assert.assertEquals(tmpNotes.get("project"), notes2JO.get("project").getAsString());
+      Assert.assertTrue(tmpNotes.containsKey("testdata"));
+      Assert.assertEquals(tmpNotes.get("testdata"), notes2JO.get("testdata").getAsString());
     } catch (Exception e) {
       System.out.println("Caught exception: " + e);
       Assert.fail();
@@ -681,7 +666,7 @@ public class SystemsClientTest {
     rSys.jobLocalWorkingDir(sys[10]).jobLocalArchiveDir(sys[11]).jobRemoteArchiveSystem(sys[12]).jobRemoteArchiveDir(sys[13]);
     rSys.jobCapabilities(jobCaps);
     rSys.tags(tags1);
-    rSys.notes(new Notes().stringData(notes1JOStr));
+    rSys.notes(notes1JO);
     // Convert list of TransferMethod enums to list of strings
 //    List<String> transferMethods = Stream.of(txfrMethodsStrList).map(TransferMethodsEnum::name).collect(Collectors.toList());
     // Create the system
@@ -700,7 +685,7 @@ public class SystemsClientTest {
     pSys.port(prot2Port).useProxy(prot2UseProxy).proxyHost(prot2ProxyHost).proxyPort(prot2ProxyPort);
     pSys.jobCapabilities(jobCaps2);
     pSys.tags(tags2);
-    pSys.notes(new Notes().stringData(notes2JOStr));
+    pSys.notes(notes2JO);
     return pSys;
   }
 

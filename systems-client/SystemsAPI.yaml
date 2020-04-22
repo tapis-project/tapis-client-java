@@ -392,94 +392,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/v3/systems':
-    get:
-      tags:
-        - systems
-      summary: Retrieve list of system names
-      description: Retrieve list of system names.
-      operationId: getSystemNames
-      parameters:
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      responses:
-        '200':
-          description: Success.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespNameArray'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-    post:
-      tags:
-        - systems
-      summary: Create a system
-      description: 'Create a system using a request body. System name must be unique within a tenant and can be composed of alphanumeric characters and the following special characters: [-._~]. Name must begin with an alphabetic character and can be no more than 256 characters in length. Description is optional with a maximum length of 2048 characters.'
-      operationId: createSystem
-      parameters:
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        description: A JSON object specifying information for the system to be created.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqCreateSystem'
-        required: true
-      responses:
-        '201':
-          description: System created.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespResourceUrl'
-        '400':
-          description: Input error. Invalid JSON.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '409':
-          description: System already exists.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespResourceUrl'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
   '/v3/systems/{sysName}':
     get:
       tags:
@@ -636,6 +548,147 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+  '/v3/systems':
+    get:
+      tags:
+        - systems
+      summary: Retrieve list of system names
+      description: Retrieve list of system names.
+      operationId: getSystemNames
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespNameArray'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    post:
+      tags:
+        - systems
+      summary: Create a system
+      description: 'Create a system using a request body. System name must be unique within a tenant and can be composed of alphanumeric characters and the following special characters: [-._~]. Name must begin with an alphabetic character and can be no more than 256 characters in length. Description is optional with a maximum length of 2048 characters.'
+      operationId: createSystem
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        description: A JSON object specifying information for the system to be created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqCreateSystem'
+        required: true
+      responses:
+        '201':
+          description: System created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '409':
+          description: System already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  '/v3/systems/{sysName}/changeOwner/{userName}':
+    post:
+      tags:
+        - systems
+      summary: Change owner of a system
+      description: Change owner of a system.
+      operationId: changeSystemOwner
+      parameters:
+        - name: sysName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: System updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: System not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
   '/v3/systems/healthcheck':
     get:
       tags:
@@ -730,6 +783,23 @@ components:
           type: array
           items:
             type: string
+    RespChangeCount:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultChangeCount'
+    ResultChangeCount:
+      type: object
+      properties:
+        changes:
+          type: integer
+          format: int32
     RespResourceUrl:
       type: object
       properties:
@@ -764,264 +834,6 @@ components:
           type: string
         value:
           type: string
-    JsonArray:
-      type: object
-      properties:
-        asBoolean:
-          type: boolean
-        asInt:
-          type: integer
-          format: int32
-        asNumber:
-          type: number
-        asDouble:
-          type: number
-          format: double
-        asFloat:
-          type: number
-          format: float
-        asLong:
-          type: integer
-          format: int64
-        asCharacter:
-          type: string
-        asBigDecimal:
-          type: number
-        asBigInteger:
-          type: integer
-        asShort:
-          type: integer
-          format: int32
-        asByte:
-          type: string
-          format: byte
-        asString:
-          type: string
-        jsonNull:
-          type: boolean
-        asJsonPrimitive:
-          $ref: '#/components/schemas/JsonPrimitive'
-        asJsonNull:
-          $ref: '#/components/schemas/JsonNull'
-        jsonArray:
-          type: boolean
-        jsonObject:
-          type: boolean
-        jsonPrimitive:
-          type: boolean
-        asJsonArray:
-          $ref: '#/components/schemas/JsonArray'
-        asJsonObject:
-          $ref: '#/components/schemas/JsonObject'
-    JsonElement:
-      type: object
-      properties:
-        asBoolean:
-          type: boolean
-        asInt:
-          type: integer
-          format: int32
-        jsonNull:
-          type: boolean
-        asJsonPrimitive:
-          $ref: '#/components/schemas/JsonPrimitive'
-        asJsonNull:
-          $ref: '#/components/schemas/JsonNull'
-        asNumber:
-          type: number
-        asDouble:
-          type: number
-          format: double
-        asFloat:
-          type: number
-          format: float
-        asLong:
-          type: integer
-          format: int64
-        asCharacter:
-          type: string
-        asBigDecimal:
-          type: number
-        asBigInteger:
-          type: integer
-        asShort:
-          type: integer
-          format: int32
-        jsonArray:
-          type: boolean
-        jsonObject:
-          type: boolean
-        jsonPrimitive:
-          type: boolean
-        asJsonArray:
-          $ref: '#/components/schemas/JsonArray'
-        asJsonObject:
-          $ref: '#/components/schemas/JsonObject'
-        asByte:
-          type: string
-          format: byte
-        asString:
-          type: string
-    JsonNull:
-      type: object
-      properties:
-        asBoolean:
-          type: boolean
-        asInt:
-          type: integer
-          format: int32
-        jsonNull:
-          type: boolean
-        asJsonPrimitive:
-          $ref: '#/components/schemas/JsonPrimitive'
-        asJsonNull:
-          $ref: '#/components/schemas/JsonNull'
-        asNumber:
-          type: number
-        asDouble:
-          type: number
-          format: double
-        asFloat:
-          type: number
-          format: float
-        asLong:
-          type: integer
-          format: int64
-        asCharacter:
-          type: string
-        asBigDecimal:
-          type: number
-        asBigInteger:
-          type: integer
-        asShort:
-          type: integer
-          format: int32
-        jsonArray:
-          type: boolean
-        jsonObject:
-          type: boolean
-        jsonPrimitive:
-          type: boolean
-        asJsonArray:
-          $ref: '#/components/schemas/JsonArray'
-        asJsonObject:
-          $ref: '#/components/schemas/JsonObject'
-        asByte:
-          type: string
-          format: byte
-        asString:
-          type: string
-    JsonObject:
-      type: object
-      properties:
-        asBoolean:
-          type: boolean
-        asInt:
-          type: integer
-          format: int32
-        jsonNull:
-          type: boolean
-        asJsonPrimitive:
-          $ref: '#/components/schemas/JsonPrimitive'
-        asJsonNull:
-          $ref: '#/components/schemas/JsonNull'
-        asNumber:
-          type: number
-        asDouble:
-          type: number
-          format: double
-        asFloat:
-          type: number
-          format: float
-        asLong:
-          type: integer
-          format: int64
-        asCharacter:
-          type: string
-        asBigDecimal:
-          type: number
-        asBigInteger:
-          type: integer
-        asShort:
-          type: integer
-          format: int32
-        jsonArray:
-          type: boolean
-        jsonObject:
-          type: boolean
-        jsonPrimitive:
-          type: boolean
-        asJsonArray:
-          $ref: '#/components/schemas/JsonArray'
-        asJsonObject:
-          $ref: '#/components/schemas/JsonObject'
-        asByte:
-          type: string
-          format: byte
-        asString:
-          type: string
-    JsonPrimitive:
-      type: object
-      properties:
-        asBoolean:
-          type: boolean
-        asInt:
-          type: integer
-          format: int32
-        number:
-          type: boolean
-        asNumber:
-          type: number
-        asDouble:
-          type: number
-          format: double
-        asFloat:
-          type: number
-          format: float
-        asLong:
-          type: integer
-          format: int64
-        asCharacter:
-          type: string
-        asBigDecimal:
-          type: number
-        asBigInteger:
-          type: integer
-        asShort:
-          type: integer
-          format: int32
-        boolean:
-          type: boolean
-        asByte:
-          type: string
-          format: byte
-        string:
-          type: boolean
-        asString:
-          type: string
-        jsonNull:
-          type: boolean
-        asJsonPrimitive:
-          $ref: '#/components/schemas/JsonPrimitive'
-        asJsonNull:
-          $ref: '#/components/schemas/JsonNull'
-        jsonArray:
-          type: boolean
-        jsonObject:
-          type: boolean
-        jsonPrimitive:
-          type: boolean
-        asJsonArray:
-          $ref: '#/components/schemas/JsonArray'
-        asJsonObject:
-          $ref: '#/components/schemas/JsonObject'
-    Notes:
-      type: object
-      properties:
-        stringData:
-          type: string
-        jsonData:
-          $ref: '#/components/schemas/JsonElement'
     ReqCreateSystem:
       type: object
       properties:
@@ -1091,24 +903,7 @@ components:
           items:
             type: string
         notes:
-          $ref: '#/components/schemas/Notes'
-    RespChangeCount:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          $ref: '#/components/schemas/ResultChangeCount'
-    ResultChangeCount:
-      type: object
-      properties:
-        changes:
-          type: integer
-          format: int32
+          type: object
     ReqUpdateSystem:
       type: object
       properties:
@@ -1153,7 +948,7 @@ components:
           items:
             type: string
         notes:
-          $ref: '#/components/schemas/Notes'
+          type: object
     RespSystem:
       type: object
       properties:
@@ -1243,7 +1038,7 @@ components:
           items:
             type: string
         notes:
-          $ref: '#/components/schemas/Notes'
+          type: object
   securitySchemes:
     TapisJWT:
       type: apiKey
