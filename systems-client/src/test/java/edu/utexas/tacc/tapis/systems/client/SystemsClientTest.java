@@ -3,9 +3,9 @@ package edu.utexas.tacc.tapis.systems.client;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gson.JsonObject;
-import com.google.gson.internal.LinkedTreeMap;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
 import org.apache.commons.lang3.StringUtils;
@@ -100,6 +100,8 @@ public class SystemsClientTest {
           "bucketF", "/rootF", "jobLocalWorkDirF", "jobLocalArchDirF", "jobRemoteArchSystemF", "jobRemoteArchDirF"};
   private static final String[] sysF2 = {tenantName, "CsysF", "description PATCHED", sysType, ownerUser, "hostPATCHED", "effUserPATCHED",
           "fakePasswordF", "bucketF", "/rootF", "jobLocalWorkDirF", "jobLocalArchDirF", "jobRemoteArchSystemF", "jobRemoteArchDirF"};
+  private static final String[] sysG = {tenantName, "CsysG", "description G", sysType, ownerUser, "hostG", null, null,
+          "bucketG", null, null, null, null, null};
 
   private static final Capability capA1 = SystemsClient.buildCapability(CategoryEnum.SCHEDULER, "Type", "Slurm");
   private static final Capability capB1 = SystemsClient.buildCapability(CategoryEnum.HARDWARE, "CoresPerNode", "4");
@@ -291,7 +293,7 @@ public class SystemsClientTest {
       System.out.println("Found tag: " + tagStr);
     }
     // Verify notes
-    LinkedTreeMap tmpNotes = (LinkedTreeMap) tmpSys.getNotes();
+    var tmpNotes = (Map<String,String>) tmpSys.getNotes();
     Assert.assertNotNull(tmpNotes);
     System.out.println("Found notes: " + tmpNotes.toString());
     Assert.assertTrue(tmpNotes.containsKey("project"));
@@ -377,7 +379,7 @@ public class SystemsClientTest {
         System.out.println("Found tag: " + tagStr);
       }
       // Verify notes
-      LinkedTreeMap tmpNotes = (LinkedTreeMap) tmpSys.getNotes();
+      var tmpNotes = (Map<String,String>) tmpSys.getNotes();
       Assert.assertNotNull(tmpNotes);
       System.out.println("Found notes: " + tmpNotes.toString());
       Assert.assertTrue(tmpNotes.containsKey("project"));
@@ -388,6 +390,19 @@ public class SystemsClientTest {
       System.out.println("Caught exception: " + e);
       Assert.fail();
     }
+  }
+
+  @Test
+  public void testChangeOwner() throws Exception {
+    // Create the system
+    String[] sys0 = sysG;
+    String respUrl = createSystem(sys0, prot1AccessMethod, null, prot1TxfrMethodsC, jobCaps1);
+    Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    getClientUsr().changeSystemOwner(sys0[1], testUser2);
+    TSystem tmpSys = getClientSvc().getSystemByName(sys0[1], null);
+    Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
+    System.out.println("Found item: " + sys0[1]);
+    Assert.assertEquals(tmpSys.getOwner(), testUser2);
   }
 
   // Test retrieving a system using only the name. No credentials returned.

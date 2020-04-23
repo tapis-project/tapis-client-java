@@ -155,6 +155,22 @@ public class SystemsClient
   }
 
   /**
+   * Change system owner given the system name and new owner name.
+   *
+   * @param name System name
+   * @return number of records modified as a result of the action
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public int changeSystemOwner(String name, String newOwnerName) throws TapisClientException
+  {
+    RespChangeCount resp = null;
+    try { resp = sysApi.changeSystemOwner(name, newOwnerName, false); }
+    catch (Exception e) { throwTapisClientException(e); }
+    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
+    else return -1;
+  }
+
+  /**
    * Get a system by name without returning credentials
    *
    * @param name System name

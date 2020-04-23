@@ -13,8 +13,11 @@ externalDocs:
   description: Tapis Home
   url: 'https://tacc-cloud.readthedocs.io/projects/agave'
 servers:
-  - url: /v3/systems
-    description: Base URL
+  - url: 'http://localhost:8080/'
+    description: Local test environment
+    variables: {}
+  - url: 'https://dev.develop.tapis.io/'
+    description: Development environment
     variables: {}
 security:
   - TapisJWT: []
@@ -182,108 +185,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/v3/systems/perms/{systemName}/user/{userName}/{permission}':
-    delete:
-      tags:
-        - permissions
-      summary: Revoke specified permission in the Security Kernel
-      description: 'Revoke permission in the Security Kernel for a user. Requester must be owner of the system. Permissions: READ, MODIFY or ALL.'
-      operationId: revokeUserPerm
-      parameters:
-        - name: systemName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: userName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: permission
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      responses:
-        '200':
-          description: Permission revoked.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '400':
-          description: Input error. Invalid JSON.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-  '/v3/systems/perms/{systemName}/user/{userName}/revoke':
-    post:
-      tags:
-        - permissions
-      summary: Revoke system permissions in the Security Kernel using request body
-      description: 'Revoke permissions in the Security Kernel for a user using a request body. Requester must be owner of the system. Permissions: READ, MODIFY or ALL.'
-      operationId: revokeUserPerms
-      parameters:
-        - name: systemName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: userName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        description: A JSON object specifying a list of permissions.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqPerms'
-        required: true
-      responses:
-        '200':
-          description: Permission revoked.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
   '/v3/systems/perms/{systemName}/user/{userName}':
     get:
       tags:
@@ -376,6 +277,108 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
         '400':
           description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  '/v3/systems/perms/{systemName}/user/{userName}/{permission}':
+    delete:
+      tags:
+        - permissions
+      summary: Revoke specified permission in the Security Kernel
+      description: 'Revoke permission in the Security Kernel for a user. Requester must be owner of the system. Permissions: READ, MODIFY or ALL.'
+      operationId: revokeUserPerm
+      parameters:
+        - name: systemName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: permission
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Permission revoked.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  '/v3/systems/perms/{systemName}/user/{userName}/revoke':
+    post:
+      tags:
+        - permissions
+      summary: Revoke system permissions in the Security Kernel using request body
+      description: 'Revoke permissions in the Security Kernel for a user using a request body. Requester must be owner of the system. Permissions: READ, MODIFY or ALL.'
+      operationId: revokeUserPerms
+      parameters:
+        - name: systemName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        description: A JSON object specifying a list of permissions.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqPerms'
+        required: true
+      responses:
+        '200':
+          description: Permission revoked.
           content:
             application/json:
               schema:
@@ -548,6 +551,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+  '/v3/systems/{sysName}/changeOwner/{userName}':
+    post:
+      tags:
+        - systems
+      summary: Change owner of a system
+      description: Change owner of a system.
+      operationId: changeSystemOwner
+      parameters:
+        - name: sysName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: System owner updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: System not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
   '/v3/systems':
     get:
       tags:
@@ -636,59 +687,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/v3/systems/{sysName}/changeOwner/{userName}':
-    post:
-      tags:
-        - systems
-      summary: Change owner of a system
-      description: Change owner of a system.
-      operationId: changeSystemOwner
-      parameters:
-        - name: sysName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: userName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-      responses:
-        '200':
-          description: System updated.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespResourceUrl'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '404':
-          description: System not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
   '/v3/systems/healthcheck':
     get:
       tags:
@@ -758,13 +756,6 @@ components:
           type: string
         result:
           $ref: '#/components/schemas/Credential'
-    ReqPerms:
-      type: object
-      properties:
-        permissions:
-          type: array
-          items:
-            type: string
     RespNameArray:
       type: object
       properties:
@@ -780,6 +771,13 @@ components:
       type: object
       properties:
         names:
+          type: array
+          items:
+            type: string
+    ReqPerms:
+      type: object
+      properties:
+        permissions:
           type: array
           items:
             type: string
@@ -834,76 +832,6 @@ components:
           type: string
         value:
           type: string
-    ReqCreateSystem:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        systemType:
-          type: string
-          enum:
-            - LINUX
-            - OBJECT_STORE
-        owner:
-          type: string
-        host:
-          type: string
-        enabled:
-          type: boolean
-        effectiveUserId:
-          type: string
-        defaultAccessMethod:
-          type: string
-          enum:
-            - PASSWORD
-            - PKI_KEYS
-            - ACCESS_KEY
-            - CERT
-        accessCredential:
-          $ref: '#/components/schemas/Credential'
-        bucketName:
-          type: string
-        rootDir:
-          type: string
-        transferMethods:
-          type: array
-          items:
-            type: string
-            enum:
-              - SFTP
-              - S3
-        port:
-          type: integer
-          format: int32
-        useProxy:
-          type: boolean
-        proxyHost:
-          type: string
-        proxyPort:
-          type: integer
-          format: int32
-        jobCanExec:
-          type: boolean
-        jobLocalWorkingDir:
-          type: string
-        jobLocalArchiveDir:
-          type: string
-        jobRemoteArchiveSystem:
-          type: string
-        jobRemoteArchiveDir:
-          type: string
-        jobCapabilities:
-          type: array
-          items:
-            $ref: '#/components/schemas/Capability'
-        tags:
-          type: array
-          items:
-            type: string
-        notes:
-          type: object
     ReqUpdateSystem:
       type: object
       properties:
@@ -1039,9 +967,80 @@ components:
             type: string
         notes:
           type: object
+    ReqCreateSystem:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        systemType:
+          type: string
+          enum:
+            - LINUX
+            - OBJECT_STORE
+        owner:
+          type: string
+        host:
+          type: string
+        enabled:
+          type: boolean
+        effectiveUserId:
+          type: string
+        defaultAccessMethod:
+          type: string
+          enum:
+            - PASSWORD
+            - PKI_KEYS
+            - ACCESS_KEY
+            - CERT
+        accessCredential:
+          $ref: '#/components/schemas/Credential'
+        bucketName:
+          type: string
+        rootDir:
+          type: string
+        transferMethods:
+          type: array
+          items:
+            type: string
+            enum:
+              - SFTP
+              - S3
+        port:
+          type: integer
+          format: int32
+        useProxy:
+          type: boolean
+        proxyHost:
+          type: string
+        proxyPort:
+          type: integer
+          format: int32
+        jobCanExec:
+          type: boolean
+        jobLocalWorkingDir:
+          type: string
+        jobLocalArchiveDir:
+          type: string
+        jobRemoteArchiveSystem:
+          type: string
+        jobRemoteArchiveDir:
+          type: string
+        jobCapabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Capability'
+        tags:
+          type: array
+          items:
+            type: string
+        notes:
+          type: object
   securitySchemes:
     TapisJWT:
       type: apiKey
       description: Tapis signed JWT token authentication
       name: X-Tapis-Token
       in: header
+
