@@ -61,7 +61,7 @@ public class CollectionApiTest {
         Integer page = null;
         Integer pagesize = null;
         String filter = null;
-        List<Object> response = api.listDocuments(db, collection, np, page, pagesize, filter);
+//        List<Object> response = api.listDocuments(db, collection, np, page, pagesize, filter);
 
         // TODO: test validations
     }
