@@ -248,9 +248,8 @@ public class SystemsClient
     // Build the request
     var req = new ReqPerms();
     req.setPermissions(permissions);
-    // Submit the request and return the response
-    RespBasic resp = null;
-    try { resp = permsApi.grantUserPerms(systemName, userName, req, false); }
+    // Submit the request
+    try { permsApi.grantUserPerms(systemName, userName, req, false); }
     catch (Exception e) { throwTapisClientException(e); }
   }
 
@@ -276,9 +275,8 @@ public class SystemsClient
     // Build the request
     var req = new ReqPerms();
     req.setPermissions(permissions);
-    // Submit the request and return the response
-    RespBasic resp = null;
-    try { resp = permsApi.revokeUserPerms(systemName, userName, req, false); }
+    // Submit the request
+    try { permsApi.revokeUserPerms(systemName, userName, req, false); }
     catch (Exception e) { throwTapisClientException(e); }
   }
 
@@ -290,9 +288,8 @@ public class SystemsClient
   public void revokeUserPermission(String systemName, String userName, String permission)
           throws TapisClientException
   {
-    // Submit the request and return the response
-    RespBasic resp = null;
-    try { resp = permsApi.revokeUserPerm(systemName, userName, permission, false); }
+    // Submit the request
+    try { permsApi.revokeUserPerm(systemName, userName, permission, false); }
     catch (Exception e) { throwTapisClientException(e); }
   }
 
@@ -307,9 +304,8 @@ public class SystemsClient
    */
   public void updateUserCredential(String systemName, String userName, ReqCreateCredential req) throws TapisClientException
   {
-    // Submit the request and return the response
-    RespBasic resp = null;
-    try { resp = credsApi.createUserCredential(systemName, userName, req, false); }
+    // Submit the request
+    try { credsApi.createUserCredential(systemName, userName, req, false); }
     catch (Exception e) { throwTapisClientException(e); }
   }
 
@@ -347,9 +343,8 @@ public class SystemsClient
   public void deleteUserCredential(String systemName, String userName)
           throws TapisClientException
   {
-    // Submit the request and return the response
-    RespBasic resp = null;
-    try { resp = credsApi.removeUserCredential(systemName, userName, false); }
+    // Submit the request
+    try { credsApi.removeUserCredential(systemName, userName, false); }
     catch (Exception e) { throwTapisClientException(e); }
   }
 
