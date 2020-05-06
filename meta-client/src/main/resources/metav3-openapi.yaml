@@ -316,11 +316,7 @@ paths:
       tags:
         - document
       summary: createDocument
-      description: Create a new document in collection.
-      More detail here about flavors of document creation.
-      1. document request body wo _id gets an auto generated id
-      2. document request body w _id writes a document with that id unless a duplicate
-      3. array of documents in request body with add all those documents to the collection in bulk.
+      description: Create a new document in collection.More detail here about flavors of document creation. document request body wo _id gets an auto generated id document request body w _id writes a document with that id unless a duplicate. array of documents in request body with add all those documents to the collection in bulk.
       operationId: createDocument
       parameters:
         - name: db
@@ -672,7 +668,7 @@ paths:
       tags:
         - document
       summary: replaceDocument
-      description: Update a document in the collection with the id.
+      description: Replace a document in the collection with the id.
       operationId: replaceDocument
       parameters:
         - name: db
@@ -696,7 +692,7 @@ paths:
             type: boolean
             default: false
       requestBody:
-        description: "the json document being added to the collection"
+        description: "the json document being replaced in the collection"
         content:
           application/json:
             schema:
