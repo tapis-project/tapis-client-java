@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.Gson;
 
+import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.shared.utils.TapisGsonUtils;
 import edu.utexas.tacc.tapis.systems.client.gen.ApiClient;
@@ -17,7 +18,6 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespBasic;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespChangeCount;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespNameArray;
@@ -42,10 +42,6 @@ public class SystemsClient
 
   // Header key for JWT
   public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
-
-  // Error msg to use in unlikely event we are unable to extract one from underlying exception
-  private static final String ERR_MSG = SystemsClient.class.getSimpleName() +
-              ": Exception encountered but unable extract message from response or underlying exception";
 
   // ************************************************************************
   // *********************** Enums ******************************************
@@ -74,7 +70,7 @@ public class SystemsClient
    * constructor is typically used in production.
    * <p>
    * The path includes the URL prefix up to and including the service root.  By
-   * default this value is http://localhost/v3/systems.  In production environments
+   * default this value is http://localhost/v3/service_name.  In production environments
    * the protocol is https and the host/port will be specific to that environment.
    *
    * @param path the base path
@@ -135,7 +131,8 @@ public class SystemsClient
     // Submit the request and return the response
     RespResourceUrl resp = null;
     try { resp = sysApi.createSystem(req, false); }
-    catch (Exception e) { throwTapisClientException(e); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+    catch (Exception e) { /*  TODO */ Utils.throwTapisClientException(-1, null, e);}
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
   }
 
@@ -150,7 +147,8 @@ public class SystemsClient
     // Submit the request and return the response
     RespResourceUrl resp = null;
     try { resp = sysApi.updateSystem(name, req, false); }
-    catch (Exception e) { throwTapisClientException(e); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+    catch (Exception e) { /*  TODO */ Utils.throwTapisClientException(-1, null, e);}
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
   }
 
@@ -165,7 +163,8 @@ public class SystemsClient
   {
     RespChangeCount resp = null;
     try { resp = sysApi.changeSystemOwner(name, newOwnerName, false); }
-    catch (Exception e) { throwTapisClientException(e); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+    catch (Exception e) { /*  TODO */ Utils.throwTapisClientException(-1, null, e);}
     if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
     else return -1;
   }
@@ -181,7 +180,8 @@ public class SystemsClient
   {
     RespSystem resp = null;
     try {resp = sysApi.getSystemByName(name, false, null, false); }
-    catch (Exception e) { throwTapisClientException(e); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+    catch (Exception e) { /*  TODO */ Utils.throwTapisClientException(-1, null, e);}
     if (resp != null) return resp.getResult(); else return null;
   }
 
@@ -200,7 +200,8 @@ public class SystemsClient
     RespSystem resp = null;
     String accessMethodStr = (accessMethod==null ? null : accessMethod.name());
     try {resp = sysApi.getSystemByName(name, true, accessMethodStr, false); }
-    catch (Exception e) { throwTapisClientException(e); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+    catch (Exception e) { /*  TODO */ Utils.throwTapisClientException(-1, null, e);}
     if (resp != null) return resp.getResult(); else return null;
   }
 
@@ -211,7 +212,8 @@ public class SystemsClient
   {
     RespNameArray resp = null;
     try { resp = sysApi.getSystemNames(false); }
-    catch (Exception e) { throwTapisClientException(e); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+    catch (Exception e) { /*  TODO */ Utils.throwTapisClientException(-1, null, e);}
     if (resp != null && resp.getResult() != null) return resp.getResult().getNames(); else return null;
   }
 
@@ -228,7 +230,8 @@ public class SystemsClient
   {
     RespChangeCount resp = null;
     try { resp = sysApi.deleteSystemByName(name, false); }
-    catch (Exception e) { throwTapisClientException(e); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+    catch (Exception e) { /*  TODO */ Utils.throwTapisClientException(-1, null, e);}
     if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
     else return -1;
   }
@@ -250,7 +253,8 @@ public class SystemsClient
     req.setPermissions(permissions);
     // Submit the request
     try { permsApi.grantUserPerms(systemName, userName, req, false); }
-    catch (Exception e) { throwTapisClientException(e); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+    catch (Exception e) { /*  TODO */ Utils.throwTapisClientException(-1, null, e);}
   }
 
   /**
@@ -260,7 +264,8 @@ public class SystemsClient
   {
     RespNameArray resp = null;
     try { resp = permsApi.getUserPerms(systemName, userName, false); }
-    catch (Exception e) { throwTapisClientException(e); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+    catch (Exception e) { /*  TODO */ Utils.throwTapisClientException(-1, null, e);}
     if (resp != null && resp.getResult() != null) return resp.getResult().getNames(); else return null;
   }
 
@@ -277,7 +282,8 @@ public class SystemsClient
     req.setPermissions(permissions);
     // Submit the request
     try { permsApi.revokeUserPerms(systemName, userName, req, false); }
-    catch (Exception e) { throwTapisClientException(e); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+    catch (Exception e) { /*  TODO */ Utils.throwTapisClientException(-1, null, e);}
   }
 
   /**
@@ -290,7 +296,8 @@ public class SystemsClient
   {
     // Submit the request
     try { permsApi.revokeUserPerm(systemName, userName, permission, false); }
-    catch (Exception e) { throwTapisClientException(e); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+    catch (Exception e) { /*  TODO */ Utils.throwTapisClientException(-1, null, e);}
   }
 
   // -----------------------------------------------------------------------
@@ -306,7 +313,8 @@ public class SystemsClient
   {
     // Submit the request
     try { credsApi.createUserCredential(systemName, userName, req, false); }
-    catch (Exception e) { throwTapisClientException(e); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+    catch (Exception e) { /*  TODO */ Utils.throwTapisClientException(-1, null, e);}
   }
 
   /**
@@ -321,7 +329,8 @@ public class SystemsClient
     RespCredential resp = null;
     String accessMethodStr = (accessMethod==null ? null : accessMethod.name());
     try {resp = credsApi.getUserCredential(systemName, userName, accessMethodStr, false); }
-    catch (Exception e) { throwTapisClientException(e); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+    catch (Exception e) { /*  TODO */ Utils.throwTapisClientException(-1, null, e);}
     if (resp != null) return resp.getResult(); else return null;
   }
 
@@ -345,7 +354,8 @@ public class SystemsClient
   {
     // Submit the request
     try { credsApi.removeUserCredential(systemName, userName, false); }
-    catch (Exception e) { throwTapisClientException(e); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+    catch (Exception e) { /*  TODO */ Utils.throwTapisClientException(-1, null, e);}
   }
 
   /**
@@ -380,64 +390,4 @@ public class SystemsClient
   // *********************** Private Methods ********************************
   // ************************************************************************
 
-  /**
-   * throwTapisClientException
-   * Attempt to extract info from any exception thrown by ApiClient and wrap it in a TapisClientException.
-   * This method always throws a TapisClientException
-   *
-   * @param e - Exception thrown by ApiClient, typically ApiException
-   * @throws TapisClientException - Always thrown
-   */
-  private void throwTapisClientException(Exception e) throws TapisClientException
-  {
-    TapisResponse tapisResponse = null; // For storing results of parsed response body
-    int code = 0; // Code from ApiException, e.g. 404 for not found
-    String msg = null; // Top level message to put in final exception
-
-    // If it is an ApiException then we should be able to extract info from response body
-    // If it is not an ApiException then pass along message from the original Exception
-    if (e instanceof ApiException) {
-      var apiException = (ApiException) e;
-      code = apiException.getCode();
-      // Attempt to parse response body
-      String respBody = apiException.getResponseBody();
-      if (respBody != null)
-        try {tapisResponse = gson.fromJson(respBody, TapisResponse.class);}
-        catch (Exception e1) {msg = respBody;} // response body was not json, use it as top level msg
-    }
-    else msg = e.getMessage();
-
-    // If top level msg is empty attempt to use msg from response body
-    if (StringUtils.isBlank(msg))
-    {
-      if (tapisResponse != null) msg = tapisResponse.message;
-      else msg = ERR_MSG;
-    }
-
-    // Create the client exception.
-    var clientException = new TapisClientException(msg, e);
-
-    // Fill in as many of the tapis client exception fields as possible.
-    clientException.setCode(code);
-    if (tapisResponse != null)
-    {
-      clientException.setStatus(tapisResponse.status);
-      clientException.setTapisMessage(tapisResponse.message);
-      clientException.setVersion(tapisResponse.version);
-      clientException.setResult(tapisResponse.result);
-    }
-    // Throw the client exception.
-    throw clientException;
-  }
-
-  /**
-   * Class used when attempting to parse ResponseBody found in ApiException
-   */
-  private static final class TapisResponse
-  {
-    private String status;
-    private String message;
-    private String version;
-    private Object result;
-  }
 }

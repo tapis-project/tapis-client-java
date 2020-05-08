@@ -78,6 +78,8 @@
     </dependencies>
 
     <modules>
+        <module>shared</module>
+        <module>auth-client</module>
         <module>security-client</module>
         <module>tokens-client</module>
         <module>tenants-client</module>

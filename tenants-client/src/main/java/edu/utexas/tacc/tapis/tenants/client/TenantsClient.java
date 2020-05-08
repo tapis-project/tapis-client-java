@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.shared.utils.TapisGsonUtils;
 import edu.utexas.tacc.tapis.tenants.client.gen.ApiClient;
@@ -32,9 +33,7 @@ public class TenantsClient
   // ************************************************************************
   // ************************* Enums ****************************************
   // ************************************************************************
-  // Custom error messages that may be reported by methods.
-  public enum EMsg {NO_RESPONSE, ERROR_STATUS, UNKNOWN_RESPONSE_TYPE}
-    
+
   // ************************************************************************
   // *********************** Fields *****************************************
   // ************************************************************************
@@ -100,7 +99,8 @@ public class TenantsClient
         var tenantsApi = new TenantsApi();
         resp = (Map) tenantsApi.getTenant(tenantName); 
     }
-    catch (Exception e) {throwTapisClientException(e);}
+    catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+    catch (Exception e) { /*  TODO */ Utils.throwTapisClientException(-1, null, e);}
     
     // Marshal only the result from the map.
     String json = _gson.toJson(resp.get("result"));
@@ -127,8 +127,9 @@ public class TenantsClient
         var tenantsApi = new TenantsApi();
         resp = (Map) tenantsApi.listTenants(limit, offset); 
     }
-    catch (Exception e) {throwTapisClientException(e);}
-    
+    catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+    catch (Exception e) { /*  TODO */ Utils.throwTapisClientException(-1, null, e);}
+
     // Marshal only the result from the map.
     String json = _gson.toJson(resp.get("result"));
     if (StringUtils.isBlank(json)) return null;
@@ -140,62 +141,4 @@ public class TenantsClient
   /* **************************************************************************** */
   /*                               Private Methods                                */
   /* **************************************************************************** */
-  /* ---------------------------------------------------------------------------- */
-  /* throwTapisClientException:                                                   */
-  /* ---------------------------------------------------------------------------- */
-  private void throwTapisClientException(Exception e)
-   throws TapisClientException
-  {
-      // Initialize fields to be assigned to tapis exception.
-      TapisResponse tapisResponse = null;
-      int code = 0;
-      String msg = null;
-      
-      // This should always be true.
-      if (e instanceof ApiException) {
-          // Extract information from the thrown exception.  If the body was sent by
-          // SK, then it should be json.  Otherwise, we treat it as plain text.
-          var apiException = (ApiException) e;
-          String respBody = apiException.getResponseBody();
-          if (respBody != null) 
-              try {tapisResponse = _gson.fromJson(respBody, TapisResponse.class);}
-              catch (Exception e1) {msg = respBody;} // not proper json
-          
-          // Get the other parts of the exception.
-          code = apiException.getCode();
-      }
-      else msg = e.getMessage(); 
-
-      // Use the extracted information if there's any.
-      if (StringUtils.isBlank(msg))
-          if (tapisResponse != null) msg = tapisResponse.message;
-            else msg = EMsg.ERROR_STATUS.name();
-      
-      // Create the client exception.
-      var clientException = new TapisClientException(msg, e);
-      
-      // Fill in as many of the tapis exception fields as possible.
-      clientException.setCode(code);
-      if (tapisResponse != null) {
-          clientException.setStatus(tapisResponse.status);
-          clientException.setTapisMessage(tapisResponse.message);
-          clientException.setVersion(tapisResponse.version);
-          clientException.setResult(tapisResponse.result);
-      }
-      
-      // Throw the client exception.
-      throw clientException;
-  }
-  
-  /* **************************************************************************** */
-  /*                                TapisResponse                                 */
-  /* **************************************************************************** */
-  // Data transfer class to hold generic response content temporarily.
-  private static final class TapisResponse
-  {
-      private String status;
-      private String message;
-      private String version;
-      private Object result;
-  }
 }

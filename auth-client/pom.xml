@@ -8,10 +8,10 @@
     <version>1.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>systems-client</artifactId>
+  <artifactId>auth-client</artifactId>
 
-  <name>Tapis Systems Client</name>
-  <description>Java client for Systems Service</description>
+  <name>Tapis Authenticator Client</name>
+  <description>Java client for Authenticator Service</description>
 
   <dependencies>
     <dependency>
@@ -19,18 +19,29 @@
       <artifactId>shared</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>tokens-client</artifactId>
-      <version>1.1-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
-
     <plugins>
+      <!-- Run script to download latest auth openapi_v3.yml and generate bundled json file  -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>${exec-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>Generate bundled openapi json file</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>${basedir}/gen_spec.sh</executable>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <!-- Build generated client code using openapi-generator -->
       <plugin>
         <groupId>org.openapitools</groupId>
@@ -42,48 +53,30 @@
               <goal>generate</goal>
             </goals>
             <configuration>
-              <!-- Use the openapi spec here. Tapis live-docs website should also get spec from here -->
-              <inputSpec>${project.basedir}/SystemsAPI.yaml</inputSpec>
+              <inputSpec>${project.basedir}/target/auth.json</inputSpec>
               <enablePostProcessFile>true</enablePostProcessFile>
+              <generateAliasAsModel>true</generateAliasAsModel>
               <output>${project.build.directory}/generated-sources/openapi</output>
               <generatorName>java</generatorName>
               <groupId>edu.utexas.tacc.tapis</groupId>
-              <invokerPackage>edu.utexas.tacc.tapis.systems.client.gen</invokerPackage>
-              <apiPackage>edu.utexas.tacc.tapis.systems.client.gen.api</apiPackage>
-              <modelPackage>edu.utexas.tacc.tapis.systems.client.gen.model</modelPackage>
-              <!-- Turn off generation of stuff we do not need -->
+              <invokerPackage>edu.utexas.tacc.tapis.auth.client.gen</invokerPackage>
+              <apiPackage>edu.utexas.tacc.tapis.auth.client.gen.api</apiPackage>
+              <modelPackage>edu.utexas.tacc.tapis.auth.client.gen.model</modelPackage>
               <generateApiTests>false</generateApiTests>
               <generateApiDocumentation>false</generateApiDocumentation>
               <generateModelTests>false</generateModelTests>
               <generateModelDocumentation>false</generateModelDocumentation>
               <configOptions>
                 <sourceFolder>src/gen/java/main</sourceFolder>
-                <!-- Use java 8 libraries instead of 3rd party libraries -->
-                <java8>true</java8>
                 <dateLibrary>java8</dateLibrary>
               </configOptions>
             </configuration>
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <configuration>
-          <createDependencyReducedPom>false</createDependencyReducedPom>
-        </configuration>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
 
-    <finalName>systems-client</finalName>
+    <finalName>auth-client</finalName>
   </build>
 
 </project>

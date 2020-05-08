@@ -32,7 +32,7 @@ import edu.utexas.tacc.tapis.tokens.client.TokensClient;
  *  - Tokens service URL comes from the env or the default hard coded URL.
  */
 @Test(groups={"integration"})
-public class SystemsClientTest {
+public class SystemsUsrClientTest {
   // Default URLs. These can be overridden by env variables
   private static final String DEFAULT_BASE_URL_SYSTEMS = "https://dev.develop.tapis.io";
   private static final String DEFAULT_BASE_URL_TOKENS = "https://dev.develop.tapis.io";
