@@ -26,9 +26,10 @@ public class TokensClientTest
   private static final String TAPIS_ENV_SVC_URL_TOKENS = "TAPIS_SVC_URL_TOKENS";
 
   // Test data
-  private static final String tenantName = "dev";
+  private static final String tenantName = "master";
   private static final String userName = "testuser1";
-  private static final String serviceName = "test_service";
+  private static final String serviceName = "systems";
+  private static final String servicePassword = "S4nUNjL6JCwmCw3QQWR7Lyx1J/ayV6BEnAwTBi5sJ8E=";
 
   private TokensClient tokensClient;
 
@@ -40,17 +41,18 @@ public class TokensClientTest
     // Get token using URL from env or from default
     String tokensURL = System.getenv(TAPIS_ENV_SVC_URL_TOKENS);
     if (StringUtils.isBlank(tokensURL)) tokensURL = DEFAULT_BASE_URL_TOKENS;
-    tokensClient = new TokensClient(tokensURL);
+    tokensClient = new TokensClient(tokensURL, serviceName, servicePassword);
   }
 
-  @Test(enabled=true)
-  public void testGetUserToken() throws Exception
-  {
-    String usrToken = tokensClient.getUsrToken(tenantName, userName);
-    System.out.println("Got token for user: " + userName);
-    System.out.println("Token: " + usrToken);
-    Assert.assertFalse(StringUtils.isBlank(usrToken), "User token should not be blank");
-  }
+  // Tokens service not used for users. Use auth service instead.
+//  @Test(enabled=true)
+//  public void testGetUserToken() throws Exception
+//  {
+//    String usrToken = tokensClient.getUsrToken(tenantName, userName);
+//    System.out.println("Got token for user: " + userName);
+//    System.out.println("Token: " + usrToken);
+//    Assert.assertFalse(StringUtils.isBlank(usrToken), "User token should not be blank");
+//  }
 
   @Test(enabled=true)
   public void testGetSvcToken() throws Exception
@@ -116,5 +118,4 @@ public class TokensClientTest
     //Remove all objects created by tests, ignore any exceptions
 //    try { tokensClient.delete???("id"); } catch (Exception e) {}
   }
-
 }

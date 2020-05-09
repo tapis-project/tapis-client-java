@@ -51,8 +51,8 @@ public class TokensClient
   public TokensClient() { }
 
   /**
-   * Constructor that overrides the compiled-in basePath value in ApiClient.  This
-   * constructor is typically used in production.
+   * Constructor that overrides the compiled-in basePath value in ApiClient.
+   * This constructor is typically used in production.
    * <p>
    * The path includes the URL prefix up to and including the service root.  By
    * default this value is http://localhost:8080/security.  In production environments
@@ -60,10 +60,29 @@ public class TokensClient
    *
    * @param path the base path
    */
-  public TokensClient(String path)
-  {
+  public TokensClient(String path) {
     ApiClient apiClient = Configuration.getDefaultApiClient();
     if (!StringUtils.isBlank(path)) apiClient.setBasePath(path);
+  }
+
+  /**
+   * Constructor that overrides the compiled-in basePath value in ApiClient and sets
+   * basic auth user and password (if provided)
+   * This constructor is typically used in production.
+   * <p>
+   * The path includes the URL prefix up to and including the service root.  By
+   * default this value is http://localhost:8080/security.  In production environments
+   * the protocol is https and the host/port will be specific to that environment.
+   *
+   * @param path the base path
+   * @param userName basic auth username
+   * @param password basic auth password
+   */
+  public TokensClient(String path, String userName, String password) {
+    ApiClient apiClient = Configuration.getDefaultApiClient();
+    if (!StringUtils.isBlank(path)) apiClient.setBasePath(path);
+    if (!StringUtils.isBlank(userName)) apiClient.setUsername(userName);
+    if (!StringUtils.isBlank(password)) apiClient.setPassword(password);
   }
 
   // ************************************************************************
