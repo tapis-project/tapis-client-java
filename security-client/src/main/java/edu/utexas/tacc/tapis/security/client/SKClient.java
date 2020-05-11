@@ -5,8 +5,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.google.gson.Gson;
-
+import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.security.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.security.client.gen.ApiException;
 import edu.utexas.tacc.tapis.security.client.gen.Configuration;
@@ -83,15 +82,11 @@ public class SKClient
     /* **************************************************************************** */
     /*                                     Enums                                    */
     /* **************************************************************************** */
-    // Custom error messages that may be reported by methods.
-    public enum EMsg {NO_RESPONSE, ERROR_STATUS, UNKNOWN_RESPONSE_TYPE}
-    
+
     /* **************************************************************************** */
     /*                                    Fields                                    */
     /* **************************************************************************** */
-    // Response serializer.
-    private static final Gson _gson = TapisGsonUtils.getGson();
-    
+
     /* **************************************************************************** */
     /*                                 Constructors                                 */
     /* **************************************************************************** */
@@ -269,7 +264,8 @@ public class SKClient
             RoleApi roleApi = new RoleApi();
             resp = roleApi.getRoleNames(tenant, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         return resp.getResult().getNames();
@@ -288,7 +284,8 @@ public class SKClient
             RoleApi roleApi = new RoleApi();
             resp = roleApi.getRoleByName(roleName, tenant, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         return resp.getResult();
@@ -314,7 +311,8 @@ public class SKClient
             RoleApi roleApi = new RoleApi();
             resp = roleApi.createRole(body, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         return resp.getResult().getUrl();
@@ -333,7 +331,8 @@ public class SKClient
             RoleApi roleApi = new RoleApi();
             resp = roleApi.deleteRoleByName(roleName, tenant, user, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         Integer x = resp.getResult().getChanges();
@@ -361,7 +360,8 @@ public class SKClient
             RoleApi roleApi = new RoleApi();
             resp = roleApi.updateRoleName(roleName, body,false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
     }
     
     /* ---------------------------------------------------------------------------- */
@@ -385,7 +385,8 @@ public class SKClient
             RoleApi roleApi = new RoleApi();
             resp = roleApi.updateRoleDescription(roleName, body, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
     }
     
     /* ---------------------------------------------------------------------------- */
@@ -409,7 +410,8 @@ public class SKClient
             RoleApi roleApi = new RoleApi();
             resp = roleApi.addRolePermission(body, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         Integer x = resp.getResult().getChanges();
@@ -437,7 +439,8 @@ public class SKClient
             RoleApi roleApi = new RoleApi();
             resp = roleApi.removeRolePermission(body, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         Integer x = resp.getResult().getChanges();
@@ -465,7 +468,8 @@ public class SKClient
             RoleApi roleApi = new RoleApi();
             resp = roleApi.addChildRole(body, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         Integer x = resp.getResult().getChanges();
@@ -493,7 +497,8 @@ public class SKClient
             RoleApi roleApi = new RoleApi();
             resp = roleApi.removeChildRole(body, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         Integer x = resp.getResult().getChanges();
@@ -527,7 +532,8 @@ public class SKClient
             RoleApi roleApi = new RoleApi();
             resp = roleApi.previewPathPrefix(body, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         return resp.getResult();
@@ -559,7 +565,8 @@ public class SKClient
             RoleApi roleApi = new RoleApi();
             resp = roleApi.replacePathPrefix(body, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         Integer x = resp.getResult().getChanges();
@@ -582,7 +589,8 @@ public class SKClient
             var userApi = new UserApi();
             resp = userApi.getUserNames(tenant, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         return resp.getResult().getNames();
@@ -601,7 +609,8 @@ public class SKClient
             var userApi = new UserApi();
             resp = userApi.getUserRoles(user, tenant, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         return resp.getResult().getNames();
@@ -630,7 +639,8 @@ public class SKClient
             var userApi = new UserApi();
             resp = userApi.getUserPerms(user, tenant, implies, impliedBy, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         return resp.getResult().getNames();
@@ -655,7 +665,8 @@ public class SKClient
             var userApi = new UserApi();
             resp = userApi.grantRole(body, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         Integer x = resp.getResult().getChanges();
@@ -681,7 +692,8 @@ public class SKClient
             var userApi = new UserApi();
             resp = userApi.revokeUserRole(body, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         Integer x = resp.getResult().getChanges();
@@ -709,7 +721,8 @@ public class SKClient
             var userApi = new UserApi();
             resp = userApi.grantRoleWithPermission(body, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         Integer x = resp.getResult().getChanges();
@@ -735,7 +748,8 @@ public class SKClient
             var userApi = new UserApi();
             resp = userApi.grantUserPermission(body, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         Integer x = resp.getResult().getChanges();
@@ -761,7 +775,8 @@ public class SKClient
             var userApi = new UserApi();
             resp = userApi.revokeUserPermission(body, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         Integer x = resp.getResult().getChanges();
@@ -787,7 +802,8 @@ public class SKClient
             var userApi = new UserApi();
             resp = userApi.hasRole(body, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         Boolean b = resp.getResult().getIsAuthorized();
@@ -813,7 +829,8 @@ public class SKClient
             var userApi = new UserApi();
             resp = userApi.hasRoleAny(body, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         Boolean b = resp.getResult().getIsAuthorized();
@@ -839,7 +856,8 @@ public class SKClient
             var userApi = new UserApi();
             resp = userApi.hasRoleAll(body, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         Boolean b = resp.getResult().getIsAuthorized();
@@ -865,7 +883,8 @@ public class SKClient
             var userApi = new UserApi();
             resp = userApi.isPermitted(body, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         Boolean b = resp.getResult().getIsAuthorized();
@@ -891,7 +910,8 @@ public class SKClient
             var userApi = new UserApi();
             resp = userApi.isPermittedAny(body, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         Boolean b = resp.getResult().getIsAuthorized();
@@ -917,7 +937,8 @@ public class SKClient
             var userApi = new UserApi();
             resp = userApi.isPermittedAll(body, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         Boolean b = resp.getResult().getIsAuthorized();
@@ -937,7 +958,8 @@ public class SKClient
             var userApi = new UserApi();
             resp = userApi.getUsersWithRole(roleName, tenant, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         return resp.getResult().getNames();
@@ -956,7 +978,8 @@ public class SKClient
             var userApi = new UserApi();
             resp = userApi.getUsersWithPermission(permSpec, tenant, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         return resp.getResult().getNames();
@@ -975,7 +998,8 @@ public class SKClient
             var userApi = new UserApi();
             resp = userApi.getDefaultUserRole1(user, false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         return resp.getResult().getName();
@@ -1008,7 +1032,8 @@ public class SKClient
                                        parms.getDbName(),
                                        parms.getDbService());
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         return resp.getResult();
@@ -1045,7 +1070,8 @@ public class SKClient
                                         parms.getDbService());
 
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         return resp.getResult();
@@ -1079,7 +1105,8 @@ public class SKClient
                                          parms.getDbName(),
                                          parms.getDbService());
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         return resp.getResult();
@@ -1113,7 +1140,8 @@ public class SKClient
                                            parms.getDbName(),
                                            parms.getDbService());
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         return resp.getResult();
@@ -1147,7 +1175,8 @@ public class SKClient
                                           parms.getDbName(),
                                           parms.getDbService());
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         return resp.getResult();
@@ -1176,7 +1205,8 @@ public class SKClient
                                            parms.getDbName(),
                                            parms.getDbService());
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         return resp.getResult();
@@ -1204,7 +1234,8 @@ public class SKClient
                                            parms.getDbName(),
                                            parms.getDbService());
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         return resp.getResult();
@@ -1234,7 +1265,8 @@ public class SKClient
                                               parms.getDbName(),
                                               parms.getDbService());
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
     }
     
     /* ---------------------------------------------------------------------------- */
@@ -1259,7 +1291,8 @@ public class SKClient
                                                     reqValidateServicePwd, false);
             
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value.
         Boolean b = resp.getResult().getIsAuthorized();
@@ -1282,7 +1315,8 @@ public class SKClient
             var generalApi = new GeneralApi();
             resp = generalApi.sayHello(false);
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value as a string.
         Object obj = resp.getResult();
@@ -1302,7 +1336,8 @@ public class SKClient
             var generalApi = new GeneralApi();
             resp = generalApi.checkHealth();
         }
-        catch (Exception e) {throwTapisClientException(e);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         // Return result value as a string.
         Object obj = resp.getResult();
@@ -1312,63 +1347,5 @@ public class SKClient
     /* **************************************************************************** */
     /*                               Private Methods                                */
     /* **************************************************************************** */
-    /* ---------------------------------------------------------------------------- */
-    /* throwTapisClientException:                                                   */
-    /* ---------------------------------------------------------------------------- */
-    private void throwTapisClientException(Exception e)
-     throws TapisClientException
-    {
-        // Initialize fields to be assigned to tapis exception.
-        TapisResponse tapisResponse = null;
-        int code = 0;
-        String msg = null;
-        
-        // This should always be true.
-        if (e instanceof ApiException) {
-            // Extract information from the thrown exception.  If the body was sent by
-            // SK, then it should be json.  Otherwise, we treat it as plain text.
-            var apiException = (ApiException) e;
-            String respBody = apiException.getResponseBody();
-            if (respBody != null) 
-                try {tapisResponse = _gson.fromJson(respBody, TapisResponse.class);}
-                catch (Exception e1) {msg = respBody;} // not proper json
-            
-            // Get the other parts of the exception.
-            code = apiException.getCode();
-        }
-        else msg = e.getMessage(); 
-
-        // Use the extracted information if there's any.
-        if (StringUtils.isBlank(msg))
-            if (tapisResponse != null) msg = tapisResponse.message;
-              else msg = EMsg.ERROR_STATUS.name();
-        
-        // Create the client exception.
-        var clientException = new TapisClientException(msg, e);
-        
-        // Fill in as many of the tapis exception fields as possible.
-        clientException.setCode(code);
-        if (tapisResponse != null) {
-            clientException.setStatus(tapisResponse.status);
-            clientException.setTapisMessage(tapisResponse.message);
-            clientException.setVersion(tapisResponse.version);
-            clientException.setResult(tapisResponse.result);
-        }
-        
-        // Throw the client exception.
-        throw clientException;
-    }
-    
-    /* **************************************************************************** */
-    /*                                TapisResponse                                 */
-    /* **************************************************************************** */
-    // Data transfer class to hold generic response content temporarily.
-    private static final class TapisResponse
-    {
-        private String status;
-        private String message;
-        private String version;
-        private Object result;
-    }
 
 }

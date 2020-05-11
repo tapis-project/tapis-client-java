@@ -104,8 +104,8 @@ public class AuthClient
       var tokApi = new TokensApi();
       resp = (Map) tokApi.createToken(req);
     }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
-    catch (Exception e) { /*  TODO */ Utils.throwTapisClientException(-1, null, e);}
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
 
     // If response came back null return null
     if (resp == null) return result;

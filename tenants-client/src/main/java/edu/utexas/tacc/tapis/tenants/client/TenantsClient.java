@@ -99,8 +99,8 @@ public class TenantsClient
         var tenantsApi = new TenantsApi();
         resp = (Map) tenantsApi.getTenant(tenantName); 
     }
-    catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
-    catch (Exception e) { /*  TODO */ Utils.throwTapisClientException(-1, null, e);}
+    catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     
     // Marshal only the result from the map.
     String json = _gson.toJson(resp.get("result"));
@@ -127,8 +127,8 @@ public class TenantsClient
         var tenantsApi = new TenantsApi();
         resp = (Map) tenantsApi.listTenants(limit, offset); 
     }
-    catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
-    catch (Exception e) { /*  TODO */ Utils.throwTapisClientException(-1, null, e);}
+    catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
 
     // Marshal only the result from the map.
     String json = _gson.toJson(resp.get("result"));
