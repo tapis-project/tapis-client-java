@@ -2,6 +2,7 @@ package edu.utexas.tacc.tapis.systems.client;
 
 import java.util.List;
 
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystemArray;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.Gson;
 
@@ -206,15 +207,15 @@ public class SystemsClient
   }
 
   /**
-   * Get list of system names
+   * Get list of systems
    */
-  public List<String> getSystemNames() throws TapisClientException
+  public List<TSystem> getSystems() throws TapisClientException
   {
-    RespNameArray resp = null;
-    try { resp = sysApi.getSystemNames(false); }
+    RespSystemArray resp = null;
+    try { resp = sysApi.getSystems(false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null) return resp.getResult().getNames(); else return null;
+    if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
   }
 
   /**

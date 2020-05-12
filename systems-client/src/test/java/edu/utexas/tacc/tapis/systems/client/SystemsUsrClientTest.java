@@ -450,7 +450,7 @@ public class SystemsUsrClientTest {
   }
 
   @Test
-  public void testGetSystemNames() throws Exception {
+  public void testGetSystems() throws Exception {
     // Create 2 systems
     String[] sys0 = sys3;
     Credential cred0 = null;
@@ -461,24 +461,17 @@ public class SystemsUsrClientTest {
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Get list of all system names
-    List<String> systemNames = getClientUsr().getSystemNames();
-    for (String name : systemNames) {
-      System.out.println("Found item: " + name);
+    List<TSystem> systems = getClientUsr().getSystems();
+    Assert.assertNotNull(systems);
+    Assert.assertFalse(systems.isEmpty());
+    var systemNames = new ArrayList<String>();
+    for (TSystem system : systems) {
+      System.out.println("Found item: " + system.getName());
+      systemNames.add(system.getName());
     }
     Assert.assertTrue(systemNames.contains(sys3[1]), "List of systems did not contain system name: " + sys3[1]);
     Assert.assertTrue(systemNames.contains(sys4[1]), "List of systems did not contain system name: " + sys4[1]);
   }
-
-//  @Test
-//  public void testGetSystems() throws Exception
-//  {
-//    String respUrl = createSystem(sys5);
-//    Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
-//    List<TSystem> systems = sysClient.getSystems();
-//    for (TSystem system : systems) {
-//      System.out.println("Found item with id: " + system.getId() + " and name: " + system.getName());
-//    }
-//  }
 
   @Test
   public void testDelete() throws Exception {
