@@ -2,6 +2,7 @@ package edu.utexas.tacc.tapis.systems.client;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -60,15 +61,19 @@ public class SystemsUsrClientTest {
           Arrays.asList(ReqCreateSystem.TransferMethodsEnum.SFTP, ReqCreateSystem.TransferMethodsEnum.S3);
   private static final List<TSystem.TransferMethodsEnum> prot1TxfrMethodsT =
           Arrays.asList(TSystem.TransferMethodsEnum.SFTP, TSystem.TransferMethodsEnum.S3);
-  private static final List<ReqUpdateSystem.TransferMethodsEnum> prot2TxfrMethodsU = Arrays.asList(ReqUpdateSystem.TransferMethodsEnum.SFTP);
-  private static final List<TSystem.TransferMethodsEnum> prot2TxfrMethodsT = Arrays.asList(TSystem.TransferMethodsEnum.SFTP);
+  private static final List<ReqUpdateSystem.TransferMethodsEnum> prot2TxfrMethodsU =
+          Collections.singletonList(ReqUpdateSystem.TransferMethodsEnum.SFTP);
+  private static final List<TSystem.TransferMethodsEnum> prot2TxfrMethodsT =
+          Collections.singletonList(TSystem.TransferMethodsEnum.SFTP);
   private static final AccessMethod prot1AccessMethod = AccessMethod.PKI_KEYS;
   private static final AccessMethod prot2AccessMethod = AccessMethod.ACCESS_KEY;
   private static final List<String> tags1 = Arrays.asList("value1", "value2", "a",
     "a long tag with spaces and numbers (1 3 2) and special characters [_ $ - & * % @ + = ! ^ ? < > , . ( ) { } / \\ | ]. Backslashes must be escaped.");
   private static final List<String> tags2 = Arrays.asList("value3", "value4");
-  private static final JsonObject notes1JO = TapisGsonUtils.getGson().fromJson("{\"project\":\"myproj1\", \"testdata\":\"abc1\"}", JsonObject.class);
-  private static final JsonObject notes2JO = TapisGsonUtils.getGson().fromJson("{\"project\":\"myproj2\", \"testdata\":\"abc2\"}", JsonObject.class);
+  private static final JsonObject notes1JO =
+          TapisGsonUtils.getGson().fromJson("{\"project\":\"myproj1\", \"testdata\":\"abc1\"}", JsonObject.class);
+  private static final JsonObject notes2JO =
+          TapisGsonUtils.getGson().fromJson("{\"project\":\"myproj2\", \"testdata\":\"abc2\"}", JsonObject.class);
   private static final List<String> testPerms = new ArrayList<>(List.of("READ", "MODIFY"));
 
   private static final String[] sys1 = {tenantName, "Csys1", "description 1", sysType, ownerUser, "host1", "effUser1", "fakePassword1",
@@ -145,6 +150,27 @@ public class SystemsUsrClientTest {
     if (StringUtils.isBlank(serviceURL)) serviceURL = DEFAULT_BASE_URL_SYSTEMS;
     // Cleanup anything leftover from previous failed run
     tearDown();
+  }
+
+  @Test
+  public void testHealthAndReady() {
+    try {
+      System.out.println("Checking health status");
+      String status = getClientUsr().checkHealth();
+      System.out.println("Health status: " + status);
+      Assert.assertNotNull(status);
+      Assert.assertFalse(StringUtils.isBlank(status), "Invalid response: " + status);
+      Assert.assertEquals(status, "success", "Service failed health check");
+      System.out.println("Checking ready status");
+      status = getClientUsr().checkReady();
+      System.out.println("Ready status: " + status);
+      Assert.assertNotNull(status);
+      Assert.assertFalse(StringUtils.isBlank(status), "Invalid response: " + status);
+      Assert.assertEquals(status, "success", "Service failed ready check");
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
   }
 
   @Test

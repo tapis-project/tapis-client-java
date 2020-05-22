@@ -48,11 +48,6 @@ paths:
           schema:
             type: string
             default: ''
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
       responses:
         '200':
           description: Success.
@@ -101,11 +96,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
       requestBody:
         description: A JSON object specifying a credential.
         content:
@@ -155,11 +145,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
       responses:
         '200':
           description: Credential removed.
@@ -203,11 +188,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
       responses:
         '200':
           description: Success.
@@ -256,11 +236,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
       requestBody:
         description: A JSON object specifying a list of permissions.
         content:
@@ -271,59 +246,6 @@ paths:
       responses:
         '200':
           description: Permissions granted.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '400':
-          description: Input error. Invalid JSON.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-  '/v3/systems/perms/{systemName}/user/{userName}/{permission}':
-    delete:
-      tags:
-        - permissions
-      summary: Revoke specified permission in the Security Kernel
-      description: 'Revoke permission in the Security Kernel for a user. Requester must be owner of the system. Permissions: READ, MODIFY or ALL.'
-      operationId: revokeUserPerm
-      parameters:
-        - name: systemName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: userName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: permission
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      responses:
-        '200':
-          description: Permission revoked.
           content:
             application/json:
               schema:
@@ -364,11 +286,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
       requestBody:
         description: A JSON object specifying a list of permissions.
         content:
@@ -395,6 +312,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+  '/v3/systems/perms/{systemName}/user/{userName}/{permission}':
+    delete:
+      tags:
+        - permissions
+      summary: Revoke specified permission in the Security Kernel
+      description: 'Revoke permission in the Security Kernel for a user. Requester must be owner of the system. Permissions: READ, MODIFY or ALL.'
+      operationId: revokeUserPerm
+      parameters:
+        - name: systemName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: permission
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Permission revoked.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
   '/v3/systems':
     get:
       tags:
@@ -405,9 +370,9 @@ paths:
       parameters:
         - name: pretty
           in: query
+          description: Pretty print the response
           schema:
             type: boolean
-            default: false
       responses:
         '200':
           description: Success.
@@ -439,12 +404,6 @@ paths:
       summary: Create a system
       description: 'Create a system using a request body. System name must be unique within a tenant and can be composed of alphanumeric characters and the following special characters: [-._~]. Name must begin with an alphabetic character and can be no more than 256 characters in length. Description is optional with a maximum length of 2048 characters.'
       operationId: createSystem
-      parameters:
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
       requestBody:
         description: A JSON object specifying information for the system to be created.
         content:
@@ -506,11 +465,6 @@ paths:
           schema:
             type: string
             default: ''
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
       responses:
         '200':
           description: System found.
@@ -554,11 +508,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
       responses:
         '200':
           description: System deleted.
@@ -596,11 +545,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
       requestBody:
         description: A JSON object specifying changes to be applied.
         content:
@@ -657,11 +601,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
       responses:
         '200':
           description: System owner updated.
@@ -702,6 +641,21 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
         '500':
           description: Server error.
+  '/v3/systems/readycheck':
+    get:
+      tags:
+        - general
+      description: Ready check.
+      operationId: readyCheck
+      responses:
+        '200':
+          description: Service ready.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '503':
+          description: Service unavailable.
 components:
   schemas:
     RespBasic:
@@ -715,21 +669,6 @@ components:
           type: string
         result:
           type: object
-    ReqCreateCredential:
-      type: object
-      properties:
-        password:
-          type: string
-        privateKey:
-          type: string
-        publicKey:
-          type: string
-        accessKey:
-          type: string
-        accessSecret:
-          type: string
-        certificate:
-          type: string
     Credential:
       type: object
       properties:
@@ -756,13 +695,21 @@ components:
           type: string
         result:
           $ref: '#/components/schemas/Credential'
-    ReqPerms:
+    ReqCreateCredential:
       type: object
       properties:
-        permissions:
-          type: array
-          items:
-            type: string
+        password:
+          type: string
+        privateKey:
+          type: string
+        publicKey:
+          type: string
+        accessKey:
+          type: string
+        accessSecret:
+          type: string
+        certificate:
+          type: string
     RespNameArray:
       type: object
       properties:
@@ -781,22 +728,13 @@ components:
           type: array
           items:
             type: string
-    RespResourceUrl:
+    ReqPerms:
       type: object
       properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          $ref: '#/components/schemas/ResultResourceUrl'
-    ResultResourceUrl:
-      type: object
-      properties:
-        url:
-          type: string
+        permissions:
+          type: array
+          items:
+            type: string
     Capability:
       type: object
       properties:
@@ -814,6 +752,133 @@ components:
         name:
           type: string
         value:
+          type: string
+    RespSystemArray:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/TSystem'
+    TSystem:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        tenant:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        systemType:
+          type: string
+          enum:
+            - LINUX
+            - OBJECT_STORE
+        owner:
+          type: string
+        host:
+          type: string
+        enabled:
+          type: boolean
+        effectiveUserId:
+          type: string
+        defaultAccessMethod:
+          type: string
+          enum:
+            - PASSWORD
+            - PKI_KEYS
+            - ACCESS_KEY
+            - CERT
+        accessCredential:
+          $ref: '#/components/schemas/Credential'
+        bucketName:
+          type: string
+        rootDir:
+          type: string
+        transferMethods:
+          type: array
+          items:
+            type: string
+            enum:
+              - SFTP
+              - S3
+        port:
+          type: integer
+          format: int32
+        useProxy:
+          type: boolean
+        proxyHost:
+          type: string
+        proxyPort:
+          type: integer
+          format: int32
+        jobCanExec:
+          type: boolean
+        jobLocalWorkingDir:
+          type: string
+        jobLocalArchiveDir:
+          type: string
+        jobRemoteArchiveSystem:
+          type: string
+        jobRemoteArchiveDir:
+          type: string
+        jobCapabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Capability'
+        tags:
+          type: array
+          items:
+            type: string
+        notes:
+          type: object
+        deleted:
+          type: boolean
+        created:
+          type: string
+        updated:
+          type: string
+    RespChangeCount:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultChangeCount'
+    ResultChangeCount:
+      type: object
+      properties:
+        changes:
+          type: integer
+          format: int32
+    RespResourceUrl:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/ResultResourceUrl'
+    ResultResourceUrl:
+      type: object
+      properties:
+        url:
           type: string
     ReqCreateSystem:
       type: object
@@ -930,23 +995,6 @@ components:
             type: string
         notes:
           type: object
-    RespChangeCount:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          $ref: '#/components/schemas/ResultChangeCount'
-    ResultChangeCount:
-      type: object
-      properties:
-        changes:
-          type: integer
-          format: int32
     RespSystem:
       type: object
       properties:
@@ -958,98 +1006,6 @@ components:
           type: string
         result:
           $ref: '#/components/schemas/TSystem'
-    TSystem:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int32
-        created:
-          type: string
-        updated:
-          type: string
-        tenant:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        systemType:
-          type: string
-          enum:
-            - LINUX
-            - OBJECT_STORE
-        owner:
-          type: string
-        host:
-          type: string
-        enabled:
-          type: boolean
-        effectiveUserId:
-          type: string
-        defaultAccessMethod:
-          type: string
-          enum:
-            - PASSWORD
-            - PKI_KEYS
-            - ACCESS_KEY
-            - CERT
-        accessCredential:
-          $ref: '#/components/schemas/Credential'
-        bucketName:
-          type: string
-        rootDir:
-          type: string
-        transferMethods:
-          type: array
-          items:
-            type: string
-            enum:
-              - SFTP
-              - S3
-        port:
-          type: integer
-          format: int32
-        useProxy:
-          type: boolean
-        proxyHost:
-          type: string
-        proxyPort:
-          type: integer
-          format: int32
-        jobCanExec:
-          type: boolean
-        jobLocalWorkingDir:
-          type: string
-        jobLocalArchiveDir:
-          type: string
-        jobRemoteArchiveSystem:
-          type: string
-        jobRemoteArchiveDir:
-          type: string
-        jobCapabilities:
-          type: array
-          items:
-            $ref: '#/components/schemas/Capability'
-        tags:
-          type: array
-          items:
-            type: string
-        notes:
-          type: object
-    RespSystemArray:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          type: array
-          items:
-            $ref: '#/components/schemas/TSystem'
   securitySchemes:
     TapisJWT:
       type: apiKey
