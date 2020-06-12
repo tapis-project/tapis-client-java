@@ -16,8 +16,6 @@ servers:
   - url: 'http://localhost:8080/v3'
     description: Local test environment
     variables: {}
-security:
-  - TapisJWT: []
 tags:
   - name: role
     description: manage roles and permissions
@@ -33,7 +31,7 @@ paths:
       tags:
         - role
       description: |-
-        Get the names of all roles in the tenant in alphabetic order.
+        Get the names of all roles in the tenant in alphabetic order.  Future enhancements will include search filtering.
 
         A valid tenant must be specified as a query parameter.
       operationId: getRoleNames
@@ -72,13 +70,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
     post:
       tags:
         - role
       description: |-
         Create a role using a request body.  Role names are case sensitive, alpha-numeric strings that can also contain underscores.  Role names must start with an alphbetic character and can be no more than 58 characters in length.  The desciption can be no more than 2048 characters long.  If the role already exists, this request has no effect.
 
-        A valid tenant and user must be specified in the request body.
+        A valid tenant and user must be specified in the request body.  The user@tenant in the request payload is authorized and becomes the new role's owner only if:
+
+        - the user@tenant in a user JWT is the same as the user@tenant in the request payload, or
+        - the user@tenant in the JWT represents a tenant administrator,  or
+        - the user@tenant in a service JWT is allowed to act on behalf of the request tenant.
       operationId: createRole
       parameters:
         - name: pretty
@@ -123,6 +127,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   '/security/role/{roleName}':
     get:
       tags:
@@ -175,10 +181,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
     delete:
       tags:
         - role
-      description: Delete the named role. A valid tenant and user must be specified as query parameters.
+      description: |-
+        Delete the named role. A valid tenant and user must be specified as query parameters.
+
+        The user@tenant specified in the request query parameters is authorized to delete the role only if:
+
+        - the user@tenant in the JWT represents the user that owns the role, or
+        - the user@tenant in the JWT represents a tenant administrator,  or
+        - the user@tenant in a service JWT is acting on behalf of the role owner, or
+        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
       operationId: deleteRoleByName
       parameters:
         - name: roleName
@@ -224,6 +240,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   '/security/role/{roleName}/perms':
     get:
       tags:
@@ -281,14 +299,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   '/security/role/updateName/{roleName}':
     post:
       tags:
         - role
       description: |-
-        Update an existing role using a request body.  Role names are case sensitive, alphanumeric strings that can contain underscores but must begin with an alphabetic character.  The limit on role name is 58 characters.
+        Update an existing role's name using a request body.  Role names are case sensitive, alphanumeric strings that can contain underscores but must begin with an alphabetic character.  The limit on role name is 58 characters.
 
-        A valid tenant and user must be specified in the request body.
+        The user@tenant specified in the request payload is authorized to update the role name only if:
+
+        - the user@tenant in the JWT represents the user that owns the role, or
+        - the user@tenant in the JWT represents a tenant administrator,  or
+        - the user@tenant in a service JWT is acting on behalf of the role owner, or
+        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
       operationId: updateRoleName
       parameters:
         - name: roleName
@@ -338,11 +363,85 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  '/security/role/updateOwner/{roleName}':
+    post:
+      tags:
+        - role
+      description: |-
+        Update an existing role's owner using a request body.
+
+        The user@tenant specified in the request payload is authorized to update the role owner only if:
+
+        - the user@tenant in the JWT represents the user that owns the role, or
+        - the user@tenant in the JWT represents a tenant administrator,  or
+        - the user@tenant in a service JWT is acting on behalf of the role owner, or
+        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
+      operationId: updateRoleOwner
+      parameters:
+        - name: roleName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqUpdateRoleOwner'
+        required: true
+      responses:
+        '200':
+          description: Role owner updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Named role not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   '/security/role/updateDesc/{roleName}':
     post:
       tags:
         - role
-      description: Update an existing role using a request body.  The size limit on a description is 2048 characters.  A valid tenant and user must be specified in the request body.
+      description: |-
+        Update an existing role's decription using a request body.  The size limit on a description is 2048 characters.
+
+        The user@tenant specified in the request payload is authorized to update the role description only if:
+
+        - the user@tenant in the JWT represents the user that owns the role, or
+        - the user@tenant in the JWT represents a tenant administrator,  or
+        - the user@tenant in a service JWT is acting on behalf of the role owner, or
+        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
       operationId: updateRoleDescription
       parameters:
         - name: roleName
@@ -392,6 +491,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   /security/role/addPerm:
     post:
       tags:
@@ -404,7 +505,12 @@ paths:
 
         See the Shiro documentation for further details.  Note that the three reserved characters, [: * ,], cannot appear in the text of any part.  It's the application's responsibility to escape those characters in a manner that is safe in the application's domain.
 
-        A valid tenant and user must be specified in the request body.
+        The user@tenant specified in the request payload is authorized to add a permission to the role only if:
+
+        - the user@tenant in the JWT represents the user that owns the role, or
+        - the user@tenant in the JWT represents a tenant administrator,  or
+        - the user@tenant in a service JWT is acting on behalf of the role owner, or
+        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
       operationId: addRolePermission
       parameters:
         - name: pretty
@@ -449,11 +555,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   /security/role/removePerm:
     post:
       tags:
         - role
-      description: Remove a permission from a role using a request body.  A valid tenant and user must be specified in the request body.
+      description: |-
+        Remove a permission from a role using a request body.  A valid tenant and user must be specified in the request body.
+
+        The user@tenant specified in the request payload is authorized to remove a permission from the role only if:
+
+        - the user@tenant in the JWT represents the user that owns the role, or
+        - the user@tenant in the JWT represents a tenant administrator,  or
+        - the user@tenant in a service JWT is acting on behalf of the role owner, or
+        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
       operationId: removeRolePermission
       parameters:
         - name: pretty
@@ -498,6 +614,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   /security/role/addChild:
     post:
       tags:
@@ -505,7 +623,12 @@ paths:
       description: |-
         Add a child role to another role using a request body.  If the child already exists, then the request has no effect and the change count returned is zero. Otherwise, the child is added and the change count is one.
 
-        A valid tenant and user must be specified in the request body.
+        The user@tenant specified in the request payload is authorized to a child role to the parent role only if:
+
+        - the user@tenant in the JWT represents the user that owns the role, or
+        - the user@tenant in the JWT represents a tenant administrator,  or
+        - the user@tenant in a service JWT is acting on behalf of the owner of both roles, or
+        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
       operationId: addChildRole
       parameters:
         - name: pretty
@@ -550,11 +673,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   /security/role/removeChild:
     post:
       tags:
         - role
-      description: Remove a child role from a parent role using a request body.  A valid tenant and user must be specified in the request body.
+      description: |-
+        Remove a child role from a parent role using a request body.  A valid tenant and user must be specified in the request body.
+
+        The user@tenant specified in the request payload is authorized to remove a permission from the role only if:
+
+        - the user@tenant in the JWT represents the user that owns the role, or
+        - the user@tenant in the JWT represents a tenant administrator,  or
+        - the user@tenant in a service JWT is acting on behalf of the parent role owner, or
+        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
       operationId: removeChildRole
       parameters:
         - name: pretty
@@ -599,6 +732,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   /security/role/previewPathPrefix:
     post:
       tags:
@@ -661,6 +796,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   /security/role/replacePathPrefix:
     post:
       tags:
@@ -684,7 +821,10 @@ paths:
 
         The input parameters are passed in the payload of this request.  The response indicates the number of changed permission specifications.
 
-        A valid tenant and user must be specified in the request body.
+        The path prefix replacement operation is authorized only if:
+
+        - the user@tenant in the JWT represents a tenant administrator, or
+        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
       operationId: replacePathPrefix
       parameters:
         - name: pretty
@@ -729,14 +869,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   '/security/role/defaultRole/{user}':
     get:
       tags:
         - role
-      description: |-
-        Get a user's default role. The default role can be explicitly created by a POST call or implicitly by the system whenever it's needed and it doesn't already exist. A user's default role is *currently* constructed by prepending '$$' to the user's name.  This implies the maximum length of a user name is 58 since role names are limited to 60 characters.
+      description: |+
+        Get a user's default role. The default role is implicitly created by the system when needed if it doesn't already exist. No authorization required.
 
-        Since the default role name may be constructed differently in the future, this API is the recommended way to determine the default role.
+        A user's default role is constructed by prepending '$$' to the user's name.  This implies the maximum length of a user name is 58 since role names are limited to 60 characters.
+
       operationId: getDefaultUserRole
       parameters:
         - name: user
@@ -778,7 +921,7 @@ paths:
     get:
       tags:
         - general
-      description: Lightwieght readiness check.
+      description: Lightwieght readiness check. No authorization required.
       operationId: ready
       responses:
         '200':
@@ -786,14 +929,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RespBasic'
+                $ref: '#/components/schemas/RespProbe'
         '503':
           description: Service unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespProbe'
   /security/hello:
     get:
       tags:
         - general
-      description: Logged connectivity test.
+      description: Logged connectivity test. No authorization required.
       operationId: sayHello
       parameters:
         - name: pretty
@@ -808,15 +955,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
         '500':
           description: Server error.
   /security/healthcheck:
     get:
       tags:
         - general
-      description: Lightwieght health check for liveness.
+      description: Lightwieght health check for liveness. No authorization required.
       operationId: checkHealth
       responses:
         '200':
@@ -824,9 +969,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RespBasic'
+                $ref: '#/components/schemas/RespProbe'
         '503':
           description: Service unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespProbe'
   /security/user/hasRole:
     post:
       tags:
@@ -852,6 +1001,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespAuthorized'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  '/security/user/defaultRole/{user}':
+    get:
+      tags:
+        - user
+      description: |-
+        Get a user's default role. The default role is implicitly created by the system when needed if it doesn't already exist. No authorization required.
+
+        A user's default role is constructed by prepending '$$' to the user's name.  This implies the maximum length of a user name is 58 since role names are limited to 60 characters.
+      operationId: getDefaultUserRole_1
+      parameters:
+        - name: user
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: The user's default role name.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
         '400':
           description: Input error.
           content:
@@ -911,51 +1107,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/security/user/defaultRole/{user}':
-    get:
-      tags:
-        - user
-      description: |-
-        Get a user's default role. The default role can be explicitly created by a POST call or implicitly by the system whenever it's needed and it doesn't already exist. A user's default role is *currently* constructed by prepending '$$' to the user's name.  This implies the maximum length of a user name is 58 since role names are limited to 60 characters.
-
-        Since the default role name may be constructed differently in the future, this API is the recommended way to determine the default role.
-      operationId: getDefaultUserRole_1
-      parameters:
-        - name: user
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      responses:
-        '200':
-          description: The user's default role name.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespName'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   '/security/user/roles/{user}':
     get:
       tags:
@@ -1002,6 +1155,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   '/security/user/perms/{user}':
     get:
       tags:
@@ -1085,11 +1240,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   /security/user/grantRole:
     post:
       tags:
         - user
-      description: Grant a user the specified role.  A valid tenant and user must be specified in the request body.
+      description: |-
+        Grant a user the specified role.  A valid tenant and user must be specified in the request body.
+
+        The user@tenant specified in the request payload is authorized to grant the role only if:
+
+        - the user@tenant in the JWT represents the user that owns the role, or
+        - the user@tenant in the JWT represents a tenant administrator,  or
+        - the user@tenant in a service JWT is acting on behalf of the role owner, or
+        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
       operationId: grantRole
       parameters:
         - name: pretty
@@ -1134,6 +1299,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   /security/user/revokeUserRole:
     post:
       tags:
@@ -1141,7 +1308,12 @@ paths:
       description: |-
         Revoke a previously granted role from a user. No action is taken if the user is not currently assigned the role. This request is idempotent.
 
-        A valid tenant and user must be specified in the request body.
+        The user@tenant specified in the request payload is authorized to revoke the role only if:
+
+        - the user@tenant in the JWT represents the user that owns the role, or
+        - the user@tenant in the JWT represents a tenant administrator,  or
+        - the user@tenant in a service JWT is acting on behalf of the role owner, or
+        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
       operationId: revokeUserRole
       parameters:
         - name: pretty
@@ -1180,63 +1352,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  /security/user/grantUserPermission:
+      security:
+        - TapisJWT: []
+  /security/user/grantAdminRole:
     post:
       tags:
         - user
       description: |-
-        Grant a user the specified permission by assigning that permission to to the user's default role.  If the user's default role does not exist,this request will create that role and grant it to the user before assigning the permission to the role.
-
-        A user's default role name is discoverable by calling either of the user/defaultRole or role/defaultRole endpoints.
-
-        The change count returned can range from zero to three depending on how many insertions and updates were actually required.
-      operationId: grantUserPermission
-      parameters:
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqGrantUserPermission'
-        required: true
-      responses:
-        '200':
-          description: Permission assigned to user.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespChangeCount'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-  /security/user/grantRoleWithPerm:
-    post:
-      tags:
-        - user
-      description: |-
-        Grant a user the specified role containing the specified permission.  This compound request first adds the permission to the role if it is not already a member of the role and then assigns the role to the user.  The change count returned can range from zero to two depending on how many insertions were actually required.
+        Grant a user the tenant administrator role.  A valid tenant and user must be specified in the request body.  The user specified in the JWT must themselves be an administrator.
 
         A valid tenant and user must be specified in the request body.
-      operationId: grantRoleWithPermission
+      operationId: grantAdminRole
       parameters:
         - name: pretty
           in: query
@@ -1247,11 +1373,11 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ReqGrantUserRoleWithPermission'
+              $ref: '#/components/schemas/ReqGrantAdminRole'
         required: true
       responses:
         '200':
-          description: Permission assigned to user.
+          description: Role assigned to user.
           content:
             application/json:
               schema:
@@ -1269,7 +1395,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/RespBasic'
         '404':
-          description: Role not found.
+          description: Named role not found.
           content:
             application/json:
               schema:
@@ -1280,17 +1406,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  /security/user/revokeUserPermission:
+      security:
+        - TapisJWT: []
+  /security/user/revokeAdminRole:
     post:
       tags:
         - user
       description: |-
-        Revoke the specified permission from the user's default role. A user's default role is constructed by prepending '$$' to the user's name. Default roles are created on demand. If the role does not exist when this method is called no error is reported and no changes occur.
+        Revoke the previously granted tenant administrator role from a user. No action is taken if the user is not currently assigned the role (the request is idempotent).  The request will not be honored if revoking the role would leave the tenant with no administrator.
 
-        The change count returned can be zero or one depending on how many permissions were revoked.
-
-        A valid tenant and user must be specified in the request body.
-      operationId: revokeUserPermission
+        The user specified in the JWT must themselves be an administrator and a valid tenant and user must be specified in the request body.
+      operationId: revokeAdminRole
       parameters:
         - name: pretty
           in: query
@@ -1301,11 +1427,11 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ReqRevokeUserPermission'
+              $ref: '#/components/schemas/ReqRevokeAdminRole'
         required: true
       responses:
         '200':
-          description: Permission assigned to user.
+          description: Role removed from user.
           content:
             application/json:
               schema:
@@ -1328,12 +1454,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  /security/user/hasRoleAny:
+      security:
+        - TapisJWT: []
+  /security/user/isAdmin:
     post:
       tags:
         - user
-      description: Check whether a user in a tenant has been assigned any of the roles specified in the request body.
-      operationId: hasRoleAny
+      description: 'Check whether a user in a tenant has been assigned the tenant administrator role, either directly or transitively.'
+      operationId: isAdmin
       parameters:
         - name: pretty
           in: query
@@ -1344,7 +1472,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ReqUserHasRoleMulti'
+              $ref: '#/components/schemas/ReqUserIsAdmin'
         required: true
       responses:
         '200':
@@ -1371,31 +1499,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  /security/user/hasRoleAll:
-    post:
+      security:
+        - TapisJWT: []
+  '/security/user/admins/{tenant}':
+    get:
       tags:
         - user
-      description: Check whether a user in a tenant has been assigned all of the roles specified in the request body.
-      operationId: hasRoleAll
+      description: Get all users assigned the tenant administrator role ($!tenant_admin).
+      operationId: getAdmins
       parameters:
+        - name: tenant
+          in: path
+          required: true
+          schema:
+            type: string
         - name: pretty
           in: query
           schema:
             type: boolean
             default: false
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqUserHasRoleMulti'
-        required: true
       responses:
         '200':
-          description: Check completed.
+          description: Sorted list of administrator users.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RespAuthorized'
+                $ref: '#/components/schemas/RespNameArray'
         '400':
           description: Input error.
           content:
@@ -1408,141 +1537,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Named role not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
         '500':
           description: Server error.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  /security/user/isPermitted:
-    post:
-      tags:
-        - user
-      description: 'Check whether specified permission matches a permission assigned to the user, either directly or transitively.'
-      operationId: isPermitted
-      parameters:
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqUserIsPermitted'
-        required: true
-      responses:
-        '200':
-          description: Check completed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespAuthorized'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-  /security/user/isPermittedAny:
-    post:
-      tags:
-        - user
-      description: Check whether a user's permissions satisfy any of the permission specifications contained in the request body.
-      operationId: isPermittedAny
-      parameters:
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqUserIsPermittedMulti'
-        required: true
-      responses:
-        '200':
-          description: Check completed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespAuthorized'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-  /security/user/isPermittedAll:
-    post:
-      tags:
-        - user
-      description: Check whether a user's permissions satisfy all of the permission specifications contained in the request body.
-      operationId: isPermittedAll
-      parameters:
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqUserIsPermittedMulti'
-        required: true
-      responses:
-        '200':
-          description: Check completed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespAuthorized'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   '/security/user/withRole/{roleName}':
     get:
       tags:
@@ -1595,6 +1603,394 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  /security/user/grantUserPermission:
+    post:
+      tags:
+        - user
+      description: |-
+        Grant a user the specified permission by assigning that permission to to the user's default role.  If the user's default role does not exist,this request will create that role and grant it to the user before assigning the permission to the role.
+
+        A user's default role name is discoverable by calling either of the user/defaultRole or role/defaultRole endpoints.
+
+        The change count returned can range from zero to three depending on how many insertions and updates were actually required
+
+        The caller must be an administrator or service.
+      operationId: grantUserPermission
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqGrantUserPermission'
+        required: true
+      responses:
+        '200':
+          description: Permission assigned to user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  /security/user/grantRoleWithPerm:
+    post:
+      tags:
+        - user
+      description: |-
+        Grant a user the specified role containing the specified permission.  This compound request first adds the permission to the role if it is not already a member of the role and then assigns the role to the user.  The change count returned can range from zero to two depending on how many insertions were actually required.
+
+        The user@tenant specified in the request payload is authorized to grant the role only if:
+
+        - the user@tenant in the JWT represents the user that owns the role, or
+        - the user@tenant in the JWT represents a tenant administrator,  or
+        - the user@tenant in a service JWT is acting on behalf of the role owner, or
+        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.A valid tenant and user must be specified in the request body.
+      operationId: grantRoleWithPermission
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqGrantUserRoleWithPermission'
+        required: true
+      responses:
+        '200':
+          description: Permission assigned to user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Role not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  /security/user/revokeUserPermission:
+    post:
+      tags:
+        - user
+      description: |-
+        Revoke the specified permission from the user's default role. A user's default role is constructed by prepending '$$' to the user's name. Default roles are created on demand. If the role does not exist when this method is called no error is reported and no changes occur.
+
+        The change count returned can be zero or one depending on how many permissions were revoked.
+
+        A valid tenant and user must be specified in the request body.  The caller must be an administrator, a service or the user themselves.
+      operationId: revokeUserPermission
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqRevokeUserPermission'
+        required: true
+      responses:
+        '200':
+          description: Permission assigned to user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  /security/user/hasRoleAny:
+    post:
+      tags:
+        - user
+      description: Check whether a user in a tenant has been assigned any of the roles specified in the request body.
+      operationId: hasRoleAny
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqUserHasRoleMulti'
+        required: true
+      responses:
+        '200':
+          description: Check completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespAuthorized'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  /security/user/hasRoleAll:
+    post:
+      tags:
+        - user
+      description: Check whether a user in a tenant has been assigned all of the roles specified in the request body.
+      operationId: hasRoleAll
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqUserHasRoleMulti'
+        required: true
+      responses:
+        '200':
+          description: Check completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespAuthorized'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  /security/user/isPermitted:
+    post:
+      tags:
+        - user
+      description: 'Check whether specified permission matches a permission assigned to the user, either directly or transitively.'
+      operationId: isPermitted
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqUserIsPermitted'
+        required: true
+      responses:
+        '200':
+          description: Check completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespAuthorized'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  /security/user/isPermittedAny:
+    post:
+      tags:
+        - user
+      description: Check whether a user's permissions satisfy any of the permission specifications contained in the request body.
+      operationId: isPermittedAny
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqUserIsPermittedMulti'
+        required: true
+      responses:
+        '200':
+          description: Check completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespAuthorized'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  /security/user/isPermittedAll:
+    post:
+      tags:
+        - user
+      description: Check whether a user's permissions satisfy all of the permission specifications contained in the request body.
+      operationId: isPermittedAll
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqUserIsPermittedMulti'
+        required: true
+      responses:
+        '200':
+          description: Check completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespAuthorized'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   '/security/user/withPermission/{permSpec}':
     get:
       tags:
@@ -1652,477 +2048,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/security/vault/secret/delete/{secretType}/{secretName}':
-    post:
-      tags:
-        - vault
-      description: |
-        Soft delete one or more versions of a secret. Each version can be deleted individually or as part of a group specified in the input array. Deletion can be reversed using the *secret/undelete/{secretName}* endpoint, which make this a _soft_ deletion operation.
-
-        The input versions array is interpreted as follows:
-
-           * [-] - empty = delete all versions
-           * [0] - zero = delete only the latest version
-           * [1, 3, ...] - list = delete the specified versions
-
-        A valid tenant and user must also be specified in the body.
-
-        ### Naming Secrets
-        Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
-
-        A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
-
-        ### Secret Types
-        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
-
-          - **system**
-            - *sysid*: the unique system id
-            - *sysuser*: the accessing user (except when keytype=cert)
-            - keytype: *sshkey* | password | accesskey | cert
-          - **dbcred**
-            - *dbhost*:  the DBMS hostname, IP address or alias
-            - *dbname*:  the database name or alias
-            - *dbservice*: service name
-          - **jwtsigning** - *no query parameters*
-          - **user** - *no query parameters*
-          - **service** - *no query parameters*
-      operationId: deleteSecret
-      parameters:
-        - name: secretType
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: secretName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-        - name: sysid
-          in: query
-          schema:
-            type: string
-        - name: sysuser
-          in: query
-          schema:
-            type: string
-        - name: keytype
-          in: query
-          schema:
-            type: string
-            default: sshkey
-        - name: dbhost
-          in: query
-          schema:
-            type: string
-        - name: dbname
-          in: query
-          schema:
-            type: string
-        - name: dbservice
-          in: query
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqVersions'
-        required: true
-      responses:
-        '200':
-          description: Secret deleted.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespVersions'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '403':
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '404':
-          description: Secret not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-  '/security/vault/secret/undelete/{secretType}/{secretName}':
-    post:
-      tags:
-        - vault
-      description: |
-        Restore one or more versions of a secret that have previously been deleted. This endpoint undoes soft deletions performed using the *secret/delete/{secretType}/{secretName}* endpoint.
-
-        The input versions array is interpreted as follows:
-
-           * [-] - empty = undelete all versions
-           * [0] - zero = undelete only the latest version
-           * [1, 3, ...] - list = undelete the specified versions
-
-        A valid tenant and user must be specified in the body.
-
-        ### Naming Secrets
-        Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
-
-        A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
-
-        ### Secret Types
-        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
-
-          - **system**
-            - *sysid*: the unique system id
-            - *sysuser*: the accessing user (except when keytype=cert)
-            - keytype: *sshkey* | password | accesskey | cert
-          - **dbcred**
-            - *dbhost*:  the DBMS hostname, IP address or alias
-            - *dbname*:  the database name or alias
-            - *dbservice*: service name
-          - **jwtsigning** - *no query parameters*
-          - **user** - *no query parameters*
-          - **service** - *no query parameters*
-      operationId: undeleteSecret
-      parameters:
-        - name: secretType
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: secretName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-        - name: sysid
-          in: query
-          schema:
-            type: string
-        - name: sysuser
-          in: query
-          schema:
-            type: string
-        - name: keytype
-          in: query
-          schema:
-            type: string
-            default: sshkey
-        - name: dbhost
-          in: query
-          schema:
-            type: string
-        - name: dbname
-          in: query
-          schema:
-            type: string
-        - name: dbservice
-          in: query
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqVersions'
-        required: true
-      responses:
-        '200':
-          description: Secret written.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespVersions'
-        '204':
-          description: No content.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '403':
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-  '/security/vault/secret/destroy/{secretType}/{secretName}':
-    post:
-      tags:
-        - vault
-      description: |
-        Destroy one or more versions of a secret. Destroy implements a hard delete which delete that cannot be undone. It does not, however, remove any metadata associated with the secret.
-
-        The input versions array is interpreted as follows:
-
-           * [-] - empty = destroy all versions
-           * [0] - zero = destroy only the latest version
-           * [1, 3, ...] - list = destroy the specified versions
-
-        A valid tenant and user must be specified in the body.
-
-        ### Naming Secrets
-        Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
-
-        A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
-
-        ### Secret Types
-        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
-
-          - **system**
-            - *sysid*: the unique system id
-            - *sysuser*: the accessing user (except when keytype=cert)
-            - keytype: *sshkey* | password | accesskey | cert
-          - **dbcred**
-            - *dbhost*:  the DBMS hostname, IP address or alias
-            - *dbname*:  the database name or alias
-            - *dbservice*: service name
-          - **jwtsigning** - *no query parameters*
-          - **user** - *no query parameters*
-          - **service** - *no query parameters*
-      operationId: destroySecret
-      parameters:
-        - name: secretType
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: secretName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-        - name: sysid
-          in: query
-          schema:
-            type: string
-        - name: sysuser
-          in: query
-          schema:
-            type: string
-        - name: keytype
-          in: query
-          schema:
-            type: string
-            default: sshkey
-        - name: dbhost
-          in: query
-          schema:
-            type: string
-        - name: dbname
-          in: query
-          schema:
-            type: string
-        - name: dbservice
-          in: query
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqVersions'
-        required: true
-      responses:
-        '200':
-          description: Secret written.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespVersions'
-        '204':
-          description: No content.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '403':
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-  '/security/vault/secret/read/meta/{secretType}/{secretName}':
-    get:
-      tags:
-        - vault
-      description: |
-        List a secret's metadata including its version information. The input parameter must be a secret name, not a folder. The result includes which version of the secret is the latest.
-
-        A valid tenant and user must be specified as query parameters.
-
-        ### Naming Secrets
-        Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
-
-        A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
-
-        ### Secret Types
-        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
-
-          - **system**
-            - *sysid*: the unique system id
-            - *sysuser*: the accessing user (except when keytype=cert)
-            - keytype: *sshkey* | password | accesskey | cert
-          - **dbcred**
-            - *dbhost*:  the DBMS hostname, IP address or alias
-            - *dbname*:  the database name or alias
-            - *dbservice*: service name
-          - **jwtsigning** - *no query parameters*
-          - **user** - *no query parameters*
-          - **service** - *no query parameters*
-      operationId: readSecretMeta
-      parameters:
-        - name: secretType
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: secretName
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: tenant
-          in: query
-          schema:
-            type: string
-        - name: user
-          in: query
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-        - name: sysid
-          in: query
-          schema:
-            type: string
-        - name: sysuser
-          in: query
-          schema:
-            type: string
-        - name: keytype
-          in: query
-          schema:
-            type: string
-            default: sshkey
-        - name: dbhost
-          in: query
-          schema:
-            type: string
-        - name: dbname
-          in: query
-          schema:
-            type: string
-        - name: dbservice
-          in: query
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Secret read.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespSecretVersionMetadata'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '403':
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   '/security/vault/secret/{secretType}/{secretName}':
     get:
       tags:
         - vault
-      description: |
+      description: |-
         Read a versioned secret. By default, the latest version of the secret is read. If the *version* query parameter is specified then that version of the secret is read.  The *version* parameter should be passed as an integer with zero indicating the latest version of the secret. A NOT FOUND status code is returned if the secret version does not exist or if it's deleted or destroyed.
 
         The response object includes the map of zero or more key/value pairs and metadata that describes the secret. The metadata includes which version of the secret was returned.
@@ -2148,6 +2080,14 @@ paths:
           - **jwtsigning** - *no query parameters*
           - **user** - *no query parameters*
           - **service** - *no query parameters*
+        ### Authorization
+        Requestors are authorized based on the secret type specified in the URL path.  The following authorizations are enforced:
+
+        - system: limited to the systems service
+        - dbcred: any service
+        - jwtsigning: limited to the tokens service
+        - user: any user
+        - service: any service
       operationId: readSecret
       parameters:
         - name: secretType
@@ -2241,10 +2181,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
     post:
       tags:
         - vault
-      description: |
+      description: |-
         Create or update a secret. The JSON payload contains a required *data* object and an optional *options* object.  It also contains the required tenant and user fields.
 
         The *data* object is a JSON object that contains one or more key/value pairs in which both the key and value are strings. These are the individual secrets that are saved under the path name. The secrets are automatically versioned, which allows a pre-configured number of past secret values to be accessible even after new values are assigned. See the various GET operations for details on how to access different aspects of secrets.
@@ -2272,6 +2214,14 @@ paths:
           - **jwtsigning** - *no query parameters*
           - **user** - *no query parameters*
           - **service** - *no query parameters*
+        ### Authorization
+        Requestors are authorized based on the secret type specified in the URL path.  The following authorizations are enforced:
+
+        - system: limited to the systems service
+        - dbcred: any service
+        - jwtsigning: limited to the tokens service
+        - user: any user
+        - service: any service
       operationId: writeSecret
       parameters:
         - name: secretType
@@ -2357,11 +2307,519 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  '/security/vault/secret/delete/{secretType}/{secretName}':
+    post:
+      tags:
+        - vault
+      description: |-
+        Soft delete one or more versions of a secret. Each version can be deleted individually or as part of a group specified in the input array. Deletion can be reversed using the *secret/undelete/{secretName}* endpoint, which make this a _soft_ deletion operation.
+
+        The input versions array is interpreted as follows:
+
+           * [-] - empty = delete all versions
+           * [0] - zero = delete only the latest version
+           * [1, 3, ...] - list = delete the specified versions
+
+        A valid tenant and user must also be specified in the body.
+
+        ### Naming Secrets
+        Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
+
+        A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+
+        ### Secret Types
+        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
+
+          - **system**
+            - *sysid*: the unique system id
+            - *sysuser*: the accessing user (except when keytype=cert)
+            - keytype: *sshkey* | password | accesskey | cert
+          - **dbcred**
+            - *dbhost*:  the DBMS hostname, IP address or alias
+            - *dbname*:  the database name or alias
+            - *dbservice*: service name
+          - **jwtsigning** - *no query parameters*
+          - **user** - *no query parameters*
+          - **service** - *no query parameters*
+        ### Authorization
+        Requestors are authorized based on the secret type specified in the URL path.  The following authorizations are enforced:
+
+        - system: limited to the systems service
+        - dbcred: any service
+        - jwtsigning: limited to the tokens service
+        - user: any user
+        - service: any service
+      operationId: deleteSecret
+      parameters:
+        - name: secretType
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: secretName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: sysid
+          in: query
+          schema:
+            type: string
+        - name: sysuser
+          in: query
+          schema:
+            type: string
+        - name: keytype
+          in: query
+          schema:
+            type: string
+            default: sshkey
+        - name: dbhost
+          in: query
+          schema:
+            type: string
+        - name: dbname
+          in: query
+          schema:
+            type: string
+        - name: dbservice
+          in: query
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqVersions'
+        required: true
+      responses:
+        '200':
+          description: Secret deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespVersions'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Secret not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  '/security/vault/secret/undelete/{secretType}/{secretName}':
+    post:
+      tags:
+        - vault
+      description: |-
+        Restore one or more versions of a secret that have previously been deleted. This endpoint undoes soft deletions performed using the *secret/delete/{secretType}/{secretName}* endpoint.
+
+        The input versions array is interpreted as follows:
+
+           * [-] - empty = undelete all versions
+           * [0] - zero = undelete only the latest version
+           * [1, 3, ...] - list = undelete the specified versions
+
+        A valid tenant and user must be specified in the body.
+
+        ### Naming Secrets
+        Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
+
+        A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+
+        ### Secret Types
+        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
+
+          - **system**
+            - *sysid*: the unique system id
+            - *sysuser*: the accessing user (except when keytype=cert)
+            - keytype: *sshkey* | password | accesskey | cert
+          - **dbcred**
+            - *dbhost*:  the DBMS hostname, IP address or alias
+            - *dbname*:  the database name or alias
+            - *dbservice*: service name
+          - **jwtsigning** - *no query parameters*
+          - **user** - *no query parameters*
+          - **service** - *no query parameters*
+        ### Authorization
+        Requestors are authorized based on the secret type specified in the URL path.  The following authorizations are enforced:
+
+        - system: limited to the systems service
+        - dbcred: any service
+        - jwtsigning: limited to the tokens service
+        - user: any user
+        - service: any service
+      operationId: undeleteSecret
+      parameters:
+        - name: secretType
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: secretName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: sysid
+          in: query
+          schema:
+            type: string
+        - name: sysuser
+          in: query
+          schema:
+            type: string
+        - name: keytype
+          in: query
+          schema:
+            type: string
+            default: sshkey
+        - name: dbhost
+          in: query
+          schema:
+            type: string
+        - name: dbname
+          in: query
+          schema:
+            type: string
+        - name: dbservice
+          in: query
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqVersions'
+        required: true
+      responses:
+        '200':
+          description: Secret written.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespVersions'
+        '204':
+          description: No content.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  '/security/vault/secret/destroy/{secretType}/{secretName}':
+    post:
+      tags:
+        - vault
+      description: |-
+        Destroy one or more versions of a secret. Destroy implements a hard delete which delete that cannot be undone. It does not, however, remove any metadata associated with the secret.
+
+        The input versions array is interpreted as follows:
+
+           * [-] - empty = destroy all versions
+           * [0] - zero = destroy only the latest version
+           * [1, 3, ...] - list = destroy the specified versions
+
+        A valid tenant and user must be specified in the body.
+
+        ### Naming Secrets
+        Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
+
+        A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+
+        ### Secret Types
+        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
+
+          - **system**
+            - *sysid*: the unique system id
+            - *sysuser*: the accessing user (except when keytype=cert)
+            - keytype: *sshkey* | password | accesskey | cert
+          - **dbcred**
+            - *dbhost*:  the DBMS hostname, IP address or alias
+            - *dbname*:  the database name or alias
+            - *dbservice*: service name
+          - **jwtsigning** - *no query parameters*
+          - **user** - *no query parameters*
+          - **service** - *no query parameters*
+        ### Authorization
+        Requestors are authorized based on the secret type specified in the URL path.  The following authorizations are enforced:
+
+        - system: limited to the systems service
+        - dbcred: any service
+        - jwtsigning: limited to the tokens service
+        - user: any user
+        - service: any service
+      operationId: destroySecret
+      parameters:
+        - name: secretType
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: secretName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: sysid
+          in: query
+          schema:
+            type: string
+        - name: sysuser
+          in: query
+          schema:
+            type: string
+        - name: keytype
+          in: query
+          schema:
+            type: string
+            default: sshkey
+        - name: dbhost
+          in: query
+          schema:
+            type: string
+        - name: dbname
+          in: query
+          schema:
+            type: string
+        - name: dbservice
+          in: query
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqVersions'
+        required: true
+      responses:
+        '200':
+          description: Secret written.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespVersions'
+        '204':
+          description: No content.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  '/security/vault/secret/read/meta/{secretType}/{secretName}':
+    get:
+      tags:
+        - vault
+      description: |-
+        List a secret's metadata including its version information. The input parameter must be a secret name, not a folder. The result includes which version of the secret is the latest.
+
+        A valid tenant and user must be specified as query parameters.
+
+        ### Naming Secrets
+        Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
+
+        A secret is assigned a path name constructed from the *secretType* and *secretName* path parameters and, optionally, from query parameters determined by the *secretType*. Each *secretType* determines a specific transformation from the url path to a path in the vault.  The *secretType* may require certain query parameters to be present on the request in order to construct the vault path.  See the next section for details.
+
+        ### Secret Types
+        The list below documents each *secretType* and their applicable query parameters. Highlighted parameter names indicate required parameters. When present, default values are listed first and also highlighted.
+
+          - **system**
+            - *sysid*: the unique system id
+            - *sysuser*: the accessing user (except when keytype=cert)
+            - keytype: *sshkey* | password | accesskey | cert
+          - **dbcred**
+            - *dbhost*:  the DBMS hostname, IP address or alias
+            - *dbname*:  the database name or alias
+            - *dbservice*: service name
+          - **jwtsigning** - *no query parameters*
+          - **user** - *no query parameters*
+          - **service** - *no query parameters*
+        ### Authorization
+        Requestors are authorized based on the secret type specified in the URL path.  The following authorizations are enforced:
+
+        - system: limited to the systems service
+        - dbcred: any service
+        - jwtsigning: limited to the tokens service
+        - user: any user
+        - service: any service
+      operationId: readSecretMeta
+      parameters:
+        - name: secretType
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: secretName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          schema:
+            type: string
+        - name: user
+          in: query
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: sysid
+          in: query
+          schema:
+            type: string
+        - name: sysuser
+          in: query
+          schema:
+            type: string
+        - name: keytype
+          in: query
+          schema:
+            type: string
+            default: sshkey
+        - name: dbhost
+          in: query
+          schema:
+            type: string
+        - name: dbname
+          in: query
+          schema:
+            type: string
+        - name: dbservice
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Secret read.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSecretVersionMetadata'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   '/security/vault/secret/list/meta/{secretType}':
     get:
       tags:
         - vault
-      description: |
+      description: |-
         List the secret names at the specified path. The path must represent a folder, not an actual secret name. If the path does not have a trailing slash one will be inserted. Secret names should not encode private information.
 
         A valid tenant and user must be specified as query parameters.
@@ -2385,6 +2843,14 @@ paths:
           - **jwtsigning** - *no query parameters*
           - **user** - *no query parameters*
           - **service** - *no query parameters*
+        ### Authorization
+        Requestors are authorized based on the secret type specified in the URL path.  The following authorizations are enforced:
+
+        - system: limited to the systems service
+        - dbcred: any service
+        - jwtsigning: limited to the tokens service
+        - user: any user
+        - service: any service
       operationId: listSecretMeta
       parameters:
         - name: secretType
@@ -2461,11 +2927,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   '/security/vault/secret/destroy/meta/{secretType}/{secretName}':
     delete:
       tags:
         - vault
-      description: |
+      description: |-
         Erase all traces of a secret: its key, all versions of its value and all its metadata. Specifying a folder erases all secrets in that folder.
 
         A valid tenant and user must be specified as query parameters.
@@ -2489,6 +2957,14 @@ paths:
           - **jwtsigning** - *no query parameters*
           - **user** - *no query parameters*
           - **service** - *no query parameters*
+        ### Authorization
+        Requestors are authorized based on the secret type specified in the URL path.  The following authorizations are enforced:
+
+        - system: limited to the systems service
+        - dbcred: any service
+        - jwtsigning: limited to the tokens service
+        - user: any user
+        - service: any service
       operationId: destroySecretMeta
       parameters:
         - name: secretType
@@ -2570,11 +3046,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   '/security/vault/secret/validateServicePassword/{secretName}':
     post:
       tags:
         - vault
-      description: |+
+      description: |-
         Validate a service's password. The JSON payload contains the password that needs to be validated against the password stored in the vault for the service specifiedin the X-Tapis-User header. The secret name is the path under whichthe password was stored.
 
         A valid tenant and user must also be specified in the payload.
@@ -2582,6 +3060,7 @@ paths:
         ### Naming Secrets
         Secrets can be arranged hierarchically by using the "+" characters in the *secretName*.  These characters will be converted to slashes upon receipt, allowing secrets to be arranged in folders.
 
+        Only services can make this request.
       operationId: validateServicePassword
       parameters:
         - name: secretName
@@ -2631,6 +3110,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
 components:
   schemas:
     RespResourceUrl:
@@ -2720,6 +3201,8 @@ components:
           type: string
         updatedby:
           type: string
+        owner:
+          type: string
     RespName:
       type: object
       properties:
@@ -2761,6 +3244,15 @@ components:
         user:
           type: string
         newRoleName:
+          type: string
+    ReqUpdateRoleOwner:
+      type: object
+      properties:
+        tenant:
+          type: string
+        user:
+          type: string
+        newOwner:
           type: string
     ReqUpdateRoleDescription:
       type: object
@@ -2876,6 +3368,29 @@ components:
           type: string
         newPrefix:
           type: string
+    RespProbe:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/SkProbe'
+    SkProbe:
+      type: object
+      properties:
+        checkNum:
+          type: integer
+          format: int64
+        databaseAccess:
+          type: boolean
+        vaultAccess:
+          type: boolean
+        tenantsAccess:
+          type: boolean
     RespAuthorized:
       type: object
       properties:
@@ -2901,6 +3416,8 @@ components:
           type: string
         roleName:
           type: string
+        orAdmin:
+          type: boolean
     ReqGrantUserRole:
       type: object
       properties:
@@ -2918,6 +3435,27 @@ components:
         user:
           type: string
         roleName:
+          type: string
+    ReqGrantAdminRole:
+      type: object
+      properties:
+        tenant:
+          type: string
+        user:
+          type: string
+    ReqRevokeAdminRole:
+      type: object
+      properties:
+        tenant:
+          type: string
+        user:
+          type: string
+    ReqUserIsAdmin:
+      type: object
+      properties:
+        tenant:
+          type: string
+        user:
           type: string
     ReqGrantUserPermission:
       type: object
@@ -2959,6 +3497,8 @@ components:
           type: array
           items:
             type: string
+        orAdmin:
+          type: boolean
     ReqUserIsPermitted:
       type: object
       properties:
@@ -2968,6 +3508,8 @@ components:
           type: string
         permSpec:
           type: string
+        orAdmin:
+          type: boolean
     ReqUserIsPermittedMulti:
       type: object
       properties:
@@ -2978,6 +3520,50 @@ components:
         permSpecs:
           type: array
           items:
+            type: string
+        orAdmin:
+          type: boolean
+    RespSecretMeta:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/SkSecretMetadata'
+    SkSecretMetadata:
+      type: object
+      properties:
+        created_time:
+          type: string
+        deletion_time:
+          type: string
+        destroyed:
+          type: boolean
+        version:
+          type: integer
+          format: int32
+    Options:
+      type: object
+      properties:
+        cas:
+          type: integer
+          format: int32
+    ReqWriteSecret:
+      type: object
+      properties:
+        tenant:
+          type: string
+        user:
+          type: string
+        options:
+          $ref: '#/components/schemas/Options'
+        data:
+          type: object
+          additionalProperties:
             type: string
     RespVersions:
       type: object
@@ -3005,6 +3591,26 @@ components:
           items:
             type: integer
             format: int32
+    RespSecret:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/SkSecret'
+    SkSecret:
+      type: object
+      properties:
+        secretMap:
+          type: object
+          additionalProperties:
+            type: string
+        metadata:
+          $ref: '#/components/schemas/SkSecretMetadata'
     RespSecretVersionMetadata:
       type: object
       properties:
@@ -3048,68 +3654,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SkSecretVersion'
-    RespSecret:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          $ref: '#/components/schemas/SkSecret'
-    SkSecret:
-      type: object
-      properties:
-        secretMap:
-          type: object
-          additionalProperties:
-            type: string
-        metadata:
-          $ref: '#/components/schemas/SkSecretMetadata'
-    SkSecretMetadata:
-      type: object
-      properties:
-        created_time:
-          type: string
-        deletion_time:
-          type: string
-        destroyed:
-          type: boolean
-        version:
-          type: integer
-          format: int32
-    RespSecretMeta:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          $ref: '#/components/schemas/SkSecretMetadata'
-    Options:
-      type: object
-      properties:
-        cas:
-          type: integer
-          format: int32
-    ReqWriteSecret:
-      type: object
-      properties:
-        tenant:
-          type: string
-        user:
-          type: string
-        options:
-          $ref: '#/components/schemas/Options'
-        data:
-          type: object
-          additionalProperties:
-            type: string
     RespSecretList:
       type: object
       properties:
