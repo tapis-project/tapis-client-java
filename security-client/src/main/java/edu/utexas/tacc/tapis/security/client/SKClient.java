@@ -1329,9 +1329,9 @@ public class SKClient
     /*                            Public General Methods                            */
     /* **************************************************************************** */
     /* ---------------------------------------------------------------------------- */
-    /* sayHello:                                                                    */
+    /* hello:                                                                       */
     /* ---------------------------------------------------------------------------- */
-    public String sayHello()
+    public String hello()
      throws TapisClientException
     {
         // Make the REST call.
