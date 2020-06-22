@@ -12,11 +12,11 @@
         <!-- Set empty relative path to avoid maven warning and -->
         <!--   ensure parent is found in local repository if that -->
         <!--   is the only place it exists. -->
-        <relativePath></relativePath>
+        <relativePath />
     </parent>
 
     <artifactId>tapis-client-java</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
 
     <name>Tapis Client</name>
     <description>Top level java client</description>
