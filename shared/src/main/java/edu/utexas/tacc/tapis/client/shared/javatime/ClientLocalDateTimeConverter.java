@@ -26,16 +26,16 @@ package edu.utexas.tacc.tapis.client.shared.javatime;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * GSON serialiser/deserialiser for converting {@link ZonedDateTime} objects.
+ * GSON serialiser/deserialiser for converting {@link LocalDateTime} objects.
  */
-public class ZonedDateTimeConverter implements JsonSerializer<ZonedDateTime>, JsonDeserializer<ZonedDateTime>
+public class ClientLocalDateTimeConverter implements JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime>
 {
   /** Formatter. */
-  private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_DATE_TIME;
+  private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
   /**
    * Gson invokes this call-back method during serialization when it encounters a field of the
@@ -52,7 +52,7 @@ public class ZonedDateTimeConverter implements JsonSerializer<ZonedDateTime>, Js
    * @return a JsonElement corresponding to the specified object.
    */
   @Override
-  public JsonElement serialize(ZonedDateTime src, Type typeOfSrc, JsonSerializationContext context)
+  public JsonElement serialize(LocalDateTime src, Type typeOfSrc, JsonSerializationContext context)
   {
     return new JsonPrimitive(FORMATTER.format(src));
   }
@@ -73,9 +73,9 @@ public class ZonedDateTimeConverter implements JsonSerializer<ZonedDateTime>, Js
    * @throws JsonParseException if json is not in the expected format of {@code typeOfT}
    */
   @Override
-  public ZonedDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+  public LocalDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
       throws JsonParseException
   {
-    return FORMATTER.parse(json.getAsString(), ZonedDateTime::from);
+    return FORMATTER.parse(json.getAsString(), LocalDateTime::from);
   }
 }

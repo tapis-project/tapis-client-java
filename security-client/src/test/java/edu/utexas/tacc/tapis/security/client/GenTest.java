@@ -2,7 +2,7 @@ package edu.utexas.tacc.tapis.security.client;
 
 import org.testng.annotations.Test;
 
-import edu.utexas.tacc.tapis.client.shared.TapisGsonUtils;
+import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.security.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.security.client.gen.ApiException;
 import edu.utexas.tacc.tapis.security.client.gen.Configuration;
@@ -57,6 +57,6 @@ public class GenTest
                                                              body.getUser(), true);
         System.out.println("deleteRoleByName: " + countResp + "\n");
         
-        System.out.println(TapisGsonUtils.getGson(true).toJson(countResp));
+        System.out.println(ClientTapisGsonUtils.getGson(true).toJson(countResp));
     }
 }
