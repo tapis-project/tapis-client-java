@@ -2,6 +2,7 @@ package edu.utexas.tacc.tapis.security.client;
 
 import org.testng.annotations.Test;
 
+import edu.utexas.tacc.tapis.client.shared.TapisGsonUtils;
 import edu.utexas.tacc.tapis.security.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.security.client.gen.ApiException;
 import edu.utexas.tacc.tapis.security.client.gen.Configuration;
@@ -9,7 +10,6 @@ import edu.utexas.tacc.tapis.security.client.gen.api.RoleApi;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqCreateRole;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespChangeCount;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespResourceUrl;
-import edu.utexas.tacc.tapis.shared.utils.TapisGsonUtils;
 
 @Test(groups={"integration"})
 public class GenTest 
