@@ -16,7 +16,7 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
-import edu.utexas.tacc.tapis.client.shared.TapisGsonUtils;
+import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem.SystemTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
@@ -71,9 +71,9 @@ public class SystemsUsrClientTest {
     "a long tag with spaces and numbers (1 3 2) and special characters [_ $ - & * % @ + = ! ^ ? < > , . ( ) { } / \\ | ]. Backslashes must be escaped.");
   private static final List<String> tags2 = Arrays.asList("value3", "value4");
   private static final JsonObject notes1JO =
-          TapisGsonUtils.getGson().fromJson("{\"project\":\"myproj1\", \"testdata\":\"abc1\"}", JsonObject.class);
+          ClientTapisGsonUtils.getGson().fromJson("{\"project\":\"myproj1\", \"testdata\":\"abc1\"}", JsonObject.class);
   private static final JsonObject notes2JO =
-          TapisGsonUtils.getGson().fromJson("{\"project\":\"myproj2\", \"testdata\":\"abc2\"}", JsonObject.class);
+          ClientTapisGsonUtils.getGson().fromJson("{\"project\":\"myproj2\", \"testdata\":\"abc2\"}", JsonObject.class);
   private static final List<String> testPerms = new ArrayList<>(List.of("READ", "MODIFY"));
 
   private static final String[] sys1 = {tenantName, "Csys1", "description 1", sysType, ownerUser, "host1", "effUser1", "fakePassword1",

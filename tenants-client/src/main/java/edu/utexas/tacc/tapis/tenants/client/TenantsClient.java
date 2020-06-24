@@ -11,7 +11,7 @@ import com.google.gson.reflect.TypeToken;
 
 import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
-import edu.utexas.tacc.tapis.client.shared.TapisGsonUtils;
+import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.tenants.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.tenants.client.gen.ApiException;
 import edu.utexas.tacc.tapis.tenants.client.gen.Configuration;
@@ -38,7 +38,7 @@ public class TenantsClient
   // *********************** Fields *****************************************
   // ************************************************************************
   // Response serializer.
-  private static final Gson _gson = TapisGsonUtils.getGson();
+  private static final Gson _gson = ClientTapisGsonUtils.getGson();
 
   // ************************************************************************
   // *********************** Constructors ***********************************

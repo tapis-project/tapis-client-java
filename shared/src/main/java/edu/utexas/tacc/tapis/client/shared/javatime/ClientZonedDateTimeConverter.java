@@ -26,16 +26,16 @@ package edu.utexas.tacc.tapis.client.shared.javatime;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
-import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * GSON serialiser/deserialiser for converting {@link Instant} objects.
+ * GSON serialiser/deserialiser for converting {@link ZonedDateTime} objects.
  */
-public class InstantConverter implements JsonSerializer<Instant>, JsonDeserializer<Instant>
+public class ClientZonedDateTimeConverter implements JsonSerializer<ZonedDateTime>, JsonDeserializer<ZonedDateTime>
 {
   /** Formatter. */
-  private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_INSTANT;
+  private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_DATE_TIME;
 
   /**
    * Gson invokes this call-back method during serialization when it encounters a field of the
@@ -52,7 +52,7 @@ public class InstantConverter implements JsonSerializer<Instant>, JsonDeserializ
    * @return a JsonElement corresponding to the specified object.
    */
   @Override
-  public JsonElement serialize(Instant src, Type typeOfSrc, JsonSerializationContext context)
+  public JsonElement serialize(ZonedDateTime src, Type typeOfSrc, JsonSerializationContext context)
   {
     return new JsonPrimitive(FORMATTER.format(src));
   }
@@ -73,8 +73,9 @@ public class InstantConverter implements JsonSerializer<Instant>, JsonDeserializ
    * @throws JsonParseException if json is not in the expected format of {@code typeOfT}
    */
   @Override
-  public Instant deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException
+  public ZonedDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+      throws JsonParseException
   {
-    return FORMATTER.parse(json.getAsString(), Instant::from);
+    return FORMATTER.parse(json.getAsString(), ZonedDateTime::from);
   }
 }
