@@ -2,10 +2,10 @@ package edu.utexas.tacc.tapis.security.client;
 
 import org.testng.annotations.Test;
 
+import edu.utexas.tacc.tapis.client.shared.exceptions.TException;
 import edu.utexas.tacc.tapis.security.client.gen.model.SkSecretVersionMetadata;
 import edu.utexas.tacc.tapis.security.client.model.SKSecretMetaParms;
 import edu.utexas.tacc.tapis.security.client.model.SecretType;
-import edu.utexas.tacc.tapis.shared.exceptions.TapisException;
 
 @Test(groups={"integration"})
 public class SKVaultTest 
@@ -25,7 +25,7 @@ public class SKVaultTest
     /* testRole:                                                              */
     /* ---------------------------------------------------------------------- */
     @Test(enabled = true)
-    public void testRole() throws TapisException
+    public void testRole() throws TException
     {
         SKClient skClient = new SKClient(null, JWT);
         
