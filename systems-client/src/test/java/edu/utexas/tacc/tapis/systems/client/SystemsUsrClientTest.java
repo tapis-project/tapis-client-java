@@ -15,8 +15,8 @@ import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
-import edu.utexas.tacc.tapis.shared.exceptions.TapisClientException;
-import edu.utexas.tacc.tapis.shared.utils.TapisGsonUtils;
+import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
+import edu.utexas.tacc.tapis.client.shared.TapisGsonUtils;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem.SystemTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
