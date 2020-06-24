@@ -1,7 +1,7 @@
 package edu.utexas.tacc.tapis.client.shared.exceptions;
 
 public class TapisClientException 
- extends TapisException
+ extends TException
 {
     private static final long serialVersionUID = 2070468207317431854L;
     
