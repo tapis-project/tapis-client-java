@@ -8,7 +8,7 @@
     <parent>
         <groupId>edu.utexas.tacc.tapis</groupId>
         <artifactId>tapis-bom</artifactId>
-        <version>1.6</version>
+        <version>1.7-SNAPSHOT</version>
         <!-- Set empty relative path to avoid maven warning and -->
         <!--   ensure parent is found in local repository if that -->
         <!--   is the only place it exists. -->
@@ -32,15 +32,17 @@
       <!-- Most properties set in parent tapis-bom -->
       <!-- Properties can be overridden here       -->
       <!-- Version of tapis-shared-java to be used. Individual projects may want to override. -->
-      <tapis-shared-java.version>1.3</tapis-shared-java.version>
     </properties>
 
     <!-- Dependencies shared by all modules -->
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>tapis-shared-lib</artifactId>
-            <version>${tapis-shared-java.version}</version>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>

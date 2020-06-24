@@ -9,8 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.gson.Gson;
 
 import edu.utexas.tacc.tapis.client.shared.Utils;
-import edu.utexas.tacc.tapis.shared.exceptions.TapisClientException;
-import edu.utexas.tacc.tapis.shared.utils.TapisGsonUtils;
+import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
+import edu.utexas.tacc.tapis.client.shared.TapisGsonUtils;
 import edu.utexas.tacc.tapis.systems.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.systems.client.gen.ApiException;
 import edu.utexas.tacc.tapis.systems.client.gen.Configuration;
