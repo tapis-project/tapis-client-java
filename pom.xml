@@ -28,6 +28,12 @@
         <tag>HEAD</tag>
     </scm>
 
+    <!-- AVOID CIRCULAR DEPENDENCY WITH TAPIS-SHARED-JAVA -->
+    <!--                                                  -->
+    <!-- Code in this repository should not depend on     -->
+    <!-- the Tapis shared libraries since those libraries -->
+    <!-- depend on client libraries defined here.         -->
+
     <properties>
       <!-- Most properties set in parent tapis-bom -->
       <!-- Properties can be overridden here       -->
