@@ -57,7 +57,7 @@ public class DbApiTest {
     public void deleteDBTest() throws ApiException {
         String db = null;
         Boolean np = null;
-        api.deleteDB(db, np);
+        // api.deleteDB(db, np);
 
         // TODO: test validations
     }
