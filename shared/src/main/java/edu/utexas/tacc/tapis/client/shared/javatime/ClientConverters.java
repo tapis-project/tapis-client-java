@@ -34,7 +34,7 @@ import java.time.*;
  * The {@code Converters} class contains static methods for registering Java Time converters.
  */
 @SuppressWarnings({ "UnusedReturnValue", "WeakerAccess" })
-public class Converters
+public class ClientConverters
 {
   /** The specific genericized type for {@code LocalDate}. */
   public static final Type LOCAL_DATE_TYPE = new TypeToken<LocalDate>(){}.getType();
@@ -78,85 +78,85 @@ public class Converters
   }
 
   /**
-   * Registers the {@link LocalDateConverter} converter.
+   * Registers the {@link ClientLocalDateConverter} converter.
    * @param builder The GSON builder to register the converter with.
    * @return A reference to {@code builder}.
    */
   public static GsonBuilder registerLocalDate(GsonBuilder builder)
   {
-    builder.registerTypeAdapter(LOCAL_DATE_TYPE, new LocalDateConverter());
+    builder.registerTypeAdapter(LOCAL_DATE_TYPE, new ClientLocalDateConverter());
 
     return builder;
   }
 
   /**
-   * Registers the {@link LocalDateTimeConverter} converter.
+   * Registers the {@link ClientLocalDateTimeConverter} converter.
    * @param builder The GSON builder to register the converter with.
    * @return A reference to {@code builder}.
    */
   public static GsonBuilder registerLocalDateTime(GsonBuilder builder)
   {
-    builder.registerTypeAdapter(LOCAL_DATE_TIME_TYPE, new LocalDateTimeConverter());
+    builder.registerTypeAdapter(LOCAL_DATE_TIME_TYPE, new ClientLocalDateTimeConverter());
 
     return builder;
   }
 
   /**
-   * Registers the {@link LocalTimeConverter} converter.
+   * Registers the {@link ClientLocalTimeConverter} converter.
    * @param builder The GSON builder to register the converter with.
    * @return A reference to {@code builder}.
    */
   public static GsonBuilder registerLocalTime(GsonBuilder builder)
   {
-    builder.registerTypeAdapter(LOCAL_TIME_TYPE, new LocalTimeConverter());
+    builder.registerTypeAdapter(LOCAL_TIME_TYPE, new ClientLocalTimeConverter());
 
     return builder;
   }
 
   /**
-   * Registers the {@link OffsetDateTimeConverter} converter.
+   * Registers the {@link ClientOffsetDateTimeConverter} converter.
    * @param builder The GSON builder to register the converter with.
    * @return A reference to {@code builder}.
    */
   public static GsonBuilder registerOffsetDateTime(GsonBuilder builder)
   {
-    builder.registerTypeAdapter(OFFSET_DATE_TIME_TYPE, new OffsetDateTimeConverter());
+    builder.registerTypeAdapter(OFFSET_DATE_TIME_TYPE, new ClientOffsetDateTimeConverter());
 
     return builder;
   }
 
   /**
-   * Registers the {@link OffsetTimeConverter} converter.
+   * Registers the {@link ClientOffsetTimeConverter} converter.
    * @param builder The GSON builder to register the converter with.
    * @return A reference to {@code builder}.
    */
   public static GsonBuilder registerOffsetTime(GsonBuilder builder)
   {
-    builder.registerTypeAdapter(OFFSET_TIME_TYPE, new OffsetTimeConverter());
+    builder.registerTypeAdapter(OFFSET_TIME_TYPE, new ClientOffsetTimeConverter());
 
     return builder;
   }
 
   /**
-   * Registers the {@link ZonedDateTimeConverter} converter.
+   * Registers the {@link ClientZonedDateTimeConverter} converter.
    * @param builder The GSON builder to register the converter with.
    * @return A reference to {@code builder}.
    */
   public static GsonBuilder registerZonedDateTime(GsonBuilder builder)
   {
-    builder.registerTypeAdapter(ZONED_DATE_TIME_TYPE, new ZonedDateTimeConverter());
+    builder.registerTypeAdapter(ZONED_DATE_TIME_TYPE, new ClientZonedDateTimeConverter());
 
     return builder;
   }
 
   /**
-   * Registers the {@link InstantConverter} converter.
+   * Registers the {@link ClientInstantConverter} converter.
    * @param builder The GSON builder to register the converter with.
    * @return A reference to {@code builder}.
    */
   public static GsonBuilder registerInstant(GsonBuilder builder)
   {
-    builder.registerTypeAdapter(INSTANT_TYPE, new InstantConverter());
+    builder.registerTypeAdapter(INSTANT_TYPE, new ClientInstantConverter());
     
     return builder;
   }

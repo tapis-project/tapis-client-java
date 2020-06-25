@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.testng.annotations.Test;
 
-import edu.utexas.tacc.tapis.client.shared.exceptions.TException;
+import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 
 
 @Test(groups={"integration"})
@@ -25,7 +25,7 @@ public class SKClientTest
     /* testRole:                                                              */
     /* ---------------------------------------------------------------------- */
     @Test(enabled = true)
-    public void testRole() throws TException
+    public void testRole() throws TapisClientException
     {
         SKClient skClient = new SKClient(null, JWT);
         
@@ -53,7 +53,7 @@ public class SKClientTest
     /* testGetUsersWithRole:                                                  */
     /* ---------------------------------------------------------------------- */
     @Test(enabled = true)
-    public void testGetUsersWithRole() throws TException
+    public void testGetUsersWithRole() throws TapisClientException
     {
         SKClient skClient = new SKClient(null, JWT);
         String tenant = "dev";

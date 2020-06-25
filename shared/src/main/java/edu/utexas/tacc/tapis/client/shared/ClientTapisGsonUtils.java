@@ -1,9 +1,9 @@
 package edu.utexas.tacc.tapis.client.shared;
 
 import com.google.gson.*;
-import edu.utexas.tacc.tapis.client.shared.javatime.Converters;
+import edu.utexas.tacc.tapis.client.shared.javatime.ClientConverters;
 
-public class TapisGsonUtils 
+public class ClientTapisGsonUtils
 {
 	/* **************************************************************************** */
 	/*                                Public Methods                                */
@@ -27,7 +27,7 @@ public class TapisGsonUtils
 		// Set the date/time translators.
 		GsonBuilder builder = new GsonBuilder().serializeNulls().disableHtmlEscaping();
 		if (prettyPrint) builder.setPrettyPrinting();
-		Converters.registerAll(builder);
+		ClientConverters.registerAll(builder);
 		
 		return builder;
 	}

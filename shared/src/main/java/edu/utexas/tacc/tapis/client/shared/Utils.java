@@ -26,7 +26,7 @@ public class Utils
   // *********************** Fields *****************************************
   // ************************************************************************
   // Response serializer.
-  private static final Gson _gson = TapisGsonUtils.getGson();
+  private static final Gson _gson = ClientTapisGsonUtils.getGson();
 
   // ************************************************************************
   // *********************** Constructors ***********************************

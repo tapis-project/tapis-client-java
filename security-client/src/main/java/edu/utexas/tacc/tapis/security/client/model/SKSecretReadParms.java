@@ -1,6 +1,6 @@
 package edu.utexas.tacc.tapis.security.client.model;
 
-import edu.utexas.tacc.tapis.client.shared.exceptions.TException;
+import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 
 public class SKSecretReadParms
  extends SKSecretBaseParms<SKSecretReadParms>
@@ -10,7 +10,7 @@ public class SKSecretReadParms
     
     // Constructor.
     public SKSecretReadParms(SecretType secretType) 
-    throws TException 
+    throws TapisClientException 
     {
         super(secretType);
     }

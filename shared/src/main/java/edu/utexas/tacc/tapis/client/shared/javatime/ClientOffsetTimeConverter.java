@@ -26,16 +26,16 @@ package edu.utexas.tacc.tapis.client.shared.javatime;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
-import java.time.LocalTime;
+import java.time.OffsetTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * GSON serialiser/deserialiser for converting {@link LocalTime} objects.
+ * GSON serialiser/deserialiser for converting {@link OffsetTime} objects.
  */
-public class LocalTimeConverter implements JsonSerializer<LocalTime>, JsonDeserializer<LocalTime>
+public class ClientOffsetTimeConverter implements JsonSerializer<OffsetTime>, JsonDeserializer<OffsetTime>
 {
   /** Formatter. */
-  private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_TIME;
+  private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_OFFSET_TIME;
 
   /**
    * Gson invokes this call-back method during serialization when it encounters a field of the
@@ -52,7 +52,7 @@ public class LocalTimeConverter implements JsonSerializer<LocalTime>, JsonDeseri
    * @return a JsonElement corresponding to the specified object.
    */
   @Override
-  public JsonElement serialize(LocalTime src, Type typeOfSrc, JsonSerializationContext context)
+  public JsonElement serialize(OffsetTime src, Type typeOfSrc, JsonSerializationContext context)
   {
     return new JsonPrimitive(FORMATTER.format(src));
   }
@@ -73,9 +73,9 @@ public class LocalTimeConverter implements JsonSerializer<LocalTime>, JsonDeseri
    * @throws JsonParseException if json is not in the expected format of {@code typeOfT}
    */
   @Override
-  public LocalTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+  public OffsetTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
       throws JsonParseException
   {
-    return FORMATTER.parse(json.getAsString(), LocalTime::from);
+    return FORMATTER.parse(json.getAsString(), OffsetTime::from);
   }
 }
