@@ -101,6 +101,14 @@ if [ $RET_CODE -ne 0 ]; then
   exit $RET_CODE
 fi
 
+sleep 10
+echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "DOCKER PS"
+echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.RunningFor}}\t{{.Status}}"
+echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+docker logs $DOCK_RUN_ID
+
 # Run the integration tests
 echo "Running client integration tests"
 mvn verify -DskipIntegrationTests=false
