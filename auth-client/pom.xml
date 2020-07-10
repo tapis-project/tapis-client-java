@@ -29,6 +29,9 @@
 
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
+    
+    <!-- NOTE: THE CALLED SCRIPT INTRODUCES HIDDEN DEPENDENCIES -->
+    <!--       These dependencies include Docker and curl.      -->
     <plugins>
       <!-- Run script to download latest auth openapi_v3.yml and generate bundled json file  -->
       <plugin>
