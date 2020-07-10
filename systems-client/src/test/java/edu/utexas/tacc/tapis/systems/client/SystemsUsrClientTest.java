@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import com.google.gson.JsonObject;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateCredential;
@@ -31,11 +30,14 @@ import edu.utexas.tacc.tapis.tokens.client.TokensClient;
  * Test the Systems API client acting as a user calling the systems service.
  * Tests that retrieve credentials act as a files service client calling the systems service.
  *  - Systems service base URL comes from the env or the default hard coded base URL.
+ *  - Auth and tokens base URL comes from the env or the default hard coded base URL.
  *  - Auth service is used to get a short term JWT.
- *  - Auth service URL comes from the env or the default hard coded URL.
  *  - Tokens service is used to get a files service JWT.
- *  - Tokens service URL comes from the env or the default hard coded URL.
- *  - Files service password must come from the environment
+ *  - Files service password must come from the environment: TAPIS_FILES_SVC_PASSWORD
+ *
+ *  To override base URLs use the following env variables:
+ *    TAPIS_SVC_URL_SYSTEMS
+ *    TAPIS_BASE_URL (for auth, tokens services)
  */
 @Test(groups={"integration"})
 public class SystemsUsrClientTest {
@@ -45,13 +47,11 @@ public class SystemsUsrClientTest {
   // staging -> staging.tapis.io
   // prod    -> tapis.io
   // Default URLs. These can be overridden by env variables
-  private static final String DEFAULT_BASE_URL_SUFFIX = "develop.tapis.io";
+  private static final String DEFAULT_BASE_URL = "https://" + tenantName + ".develop.tapis.io";
   private static final String DEFAULT_BASE_URL_SYSTEMS = "http://localhost:8080";
   // Env variables for setting URLs and passwords
-  private static final String TAPIS_ENV_BASE_URL_SUFFIX = "TAPIS_BASE_URL_SUFFIX";
+  private static final String TAPIS_ENV_BASE_URL = "TAPIS_BASE_URL";
   private static final String TAPIS_ENV_SVC_URL_SYSTEMS = "TAPIS_SVC_URL_SYSTEMS";
-  private static final String TAPIS_ENV_SVC_URL_AUTH = "TAPIS_SVC_URL_AUTH";
-  private static final String TAPIS_ENV_SVC_URL_TOKENS = "TAPIS_SVC_URL_TOKENS";
   private static final String TAPIS_ENV_FILES_SVC_PASSWORD = "TAPIS_FILES_SVC_PASSWORD";
 
   // Test data
@@ -147,20 +147,15 @@ public class SystemsUsrClientTest {
     System.out.println("Systems Service URL from ENV: " + serviceURL);
     if (StringUtils.isBlank(serviceURL)) serviceURL = DEFAULT_BASE_URL_SYSTEMS;
     // Get base URL suffix from env or from default
-    String baseURL = System.getenv(TAPIS_ENV_BASE_URL_SUFFIX);
-    if (StringUtils.isBlank(baseURL)) baseURL = DEFAULT_BASE_URL_SUFFIX;
-    // Get auth and token URLs from env or from defaults
-    String authURL = System.getenv(TAPIS_ENV_SVC_URL_AUTH);
-    if (StringUtils.isBlank(authURL)) authURL = "https://" + tenantName + "." + baseURL;
-    String tokURL = System.getenv(TAPIS_ENV_SVC_URL_TOKENS);
-    if (StringUtils.isBlank(tokURL)) tokURL = "https://" + tenantName + "." + baseURL;
+    String baseURL = System.getenv(TAPIS_ENV_BASE_URL);
+    if (StringUtils.isBlank(baseURL)) baseURL = DEFAULT_BASE_URL;
     // Log URLs being used
     System.out.println("Using Systems URL: " + serviceURL);
-    System.out.println("Using Authenticator URL: " + authURL);
-    System.out.println("Using Tokens URL: " + tokURL);
+    System.out.println("Using Authenticator URL: " + baseURL);
+    System.out.println("Using Tokens URL: " + baseURL);
     // Get short term user JWT from tokens service
-    var authClient = new AuthClient(authURL);
-    var tokClient = new TokensClient(tokURL, filesSvcName, filesSvcPasswd);
+    var authClient = new AuthClient(baseURL);
+    var tokClient = new TokensClient(baseURL, filesSvcName, filesSvcPasswd);
     try {
       ownerUserJWT = authClient.getToken(ownerUser, ownerUser);
       newOwnerUserJWT = authClient.getToken(newOwnerUser, newOwnerUser);
