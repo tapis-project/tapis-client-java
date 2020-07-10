@@ -91,7 +91,7 @@ export PRG_PATH=$(pwd)
 
 # Start up the systems service locally
 echo "Staring systems service locally"
-./docker_run_sys_svc.sh ${RUN_ENV}
+DOCK_RUN_ID=`./docker_run_sys_svc.sh ${RUN_ENV}`
 RET_CODE=$?
 if [ $RET_CODE -ne 0 ]; then
   echo "======================================================================"
@@ -116,3 +116,7 @@ fi
 # Cleanup DB artifacts
 echo "Removing test artifacts from DB"
 ./delete_client_test_data.sh
+
+# Stop local systems service
+echo "Stopping local systems service using docker container ID: $DOCK_RUN_ID"
+docker stop $DOCK_RUN_ID
