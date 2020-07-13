@@ -102,6 +102,10 @@ if [ $RET_CODE -ne 0 ]; then
   exit $RET_CODE
 fi
 
+echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "Docker container ID: $DOCK_RUN_ID"
+echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "Pausing 10 seconds ... "
 sleep 10
 echo "++++++++++++++++++++++++++++++++++++++++++++++++"
 echo "DOCKER PS"
@@ -109,15 +113,22 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++"
 docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.RunningFor}}\t{{.Status}}\t{{.Ports}}"
 echo "++++++++++++++++++++++++++++++++++++++++++++++++"
 docker logs $DOCK_RUN_ID
+echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "Pausing 10 seconds ... "
 sleep 10
+echo "++++++++++++++++++++++++++++++++++++++++++++++++"
 docker logs $DOCK_RUN_ID
-sleep 10
-docker logs $DOCK_RUN_ID
+echo "++++++++++++++++++++++++++++++++++++++++++++++++"
 
 # Run the integration tests
 echo "Running client integration tests"
 mvn verify -DskipIntegrationTests=false
 RET_CODE=$?
+
+# Stop local systems service
+echo "Stopping local systems service using docker container ID: $DOCK_RUN_ID"
+docker stop $DOCK_RUN_ID
+
 if [ $RET_CODE -ne 0 ]; then
   echo "======================================================================"
   echo "ERROR: Test failures"
@@ -129,9 +140,5 @@ fi
 # Cleanup DB artifacts
 echo "Removing test artifacts from DB"
 ./delete_client_test_data.sh
-
-# Stop local systems service
-echo "Stopping local systems service using docker container ID: $DOCK_RUN_ID"
-docker stop $DOCK_RUN_ID
 
 cd $RUN_DIR
