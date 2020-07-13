@@ -92,7 +92,7 @@ export PRG_PATH=$(pwd)
 
 # Start up the systems service locally
 echo "Staring systems service locally"
-DOCK_RUN_ID=`./docker_run_sys_svc.sh ${RUN_ENV}`
+DOCK_RUN_ID=$(./docker_run_sys_svc.sh ${RUN_ENV})
 RET_CODE=$?
 if [ $RET_CODE -ne 0 ]; then
   echo "======================================================================"
@@ -108,6 +108,10 @@ echo "DOCKER PS"
 echo "++++++++++++++++++++++++++++++++++++++++++++++++"
 docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.RunningFor}}\t{{.Status}}\t{{.Ports}}"
 echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+docker logs $DOCK_RUN_ID
+sleep 10
+docker logs $DOCK_RUN_ID
+sleep 10
 docker logs $DOCK_RUN_ID
 
 # Run the integration tests
