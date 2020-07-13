@@ -38,6 +38,9 @@ import edu.utexas.tacc.tapis.tokens.client.TokensClient;
  *  To override base URLs use the following env variables:
  *    TAPIS_SVC_URL_SYSTEMS
  *    TAPIS_BASE_URL (for auth, tokens services)
+ *  To override systems service port use:
+ *    TAPIS_SERVICE_PORT
+ *  NOTE that service port is ignored if TAPIS_SVC_URL_SYSTEMS is set
  */
 @Test(groups={"integration"})
 public class SystemsUsrClientTest {
@@ -48,11 +51,13 @@ public class SystemsUsrClientTest {
   // prod    -> tapis.io
   // Default URLs. These can be overridden by env variables
   private static final String DEFAULT_BASE_URL = "https://" + tenantName + ".develop.tapis.io";
-  private static final String DEFAULT_BASE_URL_SYSTEMS = "http://localhost:8080";
-  // Env variables for setting URLs and passwords
+  private static final String DEFAULT_BASE_URL_SYSTEMS = "http://localhost";
+  private static final String DEFAULT_SVC_PORT = "8080";
+  // Env variables for setting URLs, passwords, etc
   private static final String TAPIS_ENV_BASE_URL = "TAPIS_BASE_URL";
   private static final String TAPIS_ENV_SVC_URL_SYSTEMS = "TAPIS_SVC_URL_SYSTEMS";
   private static final String TAPIS_ENV_FILES_SVC_PASSWORD = "TAPIS_FILES_SVC_PASSWORD";
+  private static final String TAPIS_ENV_SVC_PORT = "TAPIS_SERVICE_PORT";
 
   // Test data
   private static final String ownerUser = "testuser2";
@@ -129,7 +134,7 @@ public class SystemsUsrClientTest {
   private static final List<Capability> jobCaps1 = new ArrayList<>(List.of(capA1, capB1, capC1));
   private static final List<Capability> jobCaps2 = new ArrayList<>(List.of(capA2, capB2, capC2, capD2));
 
-  private String serviceURL, ownerUserJWT, newOwnerUserJWT, filesServiceJWT;
+  private String serviceURL, servicePort, ownerUserJWT, newOwnerUserJWT, filesServiceJWT;
 
   @BeforeSuite
   public void setUp() throws Exception {
@@ -142,10 +147,15 @@ public class SystemsUsrClientTest {
       System.out.println("ERROR: Files service password must be set using environment variable:  " + TAPIS_ENV_FILES_SVC_PASSWORD);
       System.exit(1);
     }
+    // Set service port for systems service. Check for port set as env var
+    // NOTE: This is ignored if TAPIS_ENV_SVC_URL_SYSTEMS is set
+    servicePort = System.getenv(TAPIS_ENV_SVC_PORT);
+    System.out.println("Systems Service port from ENV: " + serviceURL);
+    if (StringUtils.isBlank(servicePort)) servicePort = DEFAULT_SVC_PORT;
     // Set base URL for systems service. Check for URL set as env var
     serviceURL = System.getenv(TAPIS_ENV_SVC_URL_SYSTEMS);
     System.out.println("Systems Service URL from ENV: " + serviceURL);
-    if (StringUtils.isBlank(serviceURL)) serviceURL = DEFAULT_BASE_URL_SYSTEMS;
+    if (StringUtils.isBlank(serviceURL)) serviceURL = DEFAULT_BASE_URL_SYSTEMS + ":" + servicePort;
     // Get base URL suffix from env or from default
     String baseURL = System.getenv(TAPIS_ENV_BASE_URL);
     if (StringUtils.isBlank(baseURL)) baseURL = DEFAULT_BASE_URL;

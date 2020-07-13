@@ -9,6 +9,9 @@
 #   TAPIS_SERVICE_PASSWORD
 #   TAPIS_DB_PASSWORD
 #   TAPIS_DB_JDBC_URL
+#
+# Following environment variable may be set for PORT. Default is 8080
+#   TAPIS_SERVICE_PORT
 
 PrgName=$(basename "$0")
 
@@ -65,6 +68,7 @@ export PRG_PATH=$(pwd)
 
 # Running with network=host exposes ports directly. Only works for linux
 docker run -e TAPIS_SERVICE_PASSWORD="${TAPIS_SERVICE_PASSWORD}" \
+           -e TAPIS_SERVICE_PORT="${TAPIS_SERVICE_PORT}" \
            -e TAPIS_TENANT_SVC_BASEURL="${BASE_URL}" \
            -e TAPIS_DB_PASSWORD="${TAPIS_DB_PASSWORD}" \
            -e TAPIS_DB_JDBC_URL="${TAPIS_DB_JDBC_URL}" \

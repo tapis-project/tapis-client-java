@@ -14,6 +14,8 @@
 #     TAPIS_DB_PASSWORD
 #     TAPIS_DB_JDBC_URL
 #     TAPIS_SERVICE_PASSWORD
+# By default service listens on port 8080. To change it set
+#     TAPIS_SERVICE_PORT
 #
 # To run the client integration tests the following env variables must be set:
 #   TAPIS_FILES_SVC_PASSWORD - used for testing credential retrieval
@@ -81,7 +83,6 @@ else
   exit 1
 fi
 
-
 # Determine absolute path to location from which we are running
 #  and change to that directory
 export RUN_DIR=$(pwd)
@@ -105,7 +106,7 @@ sleep 10
 echo "++++++++++++++++++++++++++++++++++++++++++++++++"
 echo "DOCKER PS"
 echo "++++++++++++++++++++++++++++++++++++++++++++++++"
-docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.RunningFor}}\t{{.Status}}"
+docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.RunningFor}}\t{{.Status}}\t{{.Ports}}"
 echo "++++++++++++++++++++++++++++++++++++++++++++++++"
 docker logs $DOCK_RUN_ID
 
@@ -128,3 +129,5 @@ echo "Removing test artifacts from DB"
 # Stop local systems service
 echo "Stopping local systems service using docker container ID: $DOCK_RUN_ID"
 docker stop $DOCK_RUN_ID
+
+cd $RUN_DIR
