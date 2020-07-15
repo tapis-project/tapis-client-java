@@ -1,10 +1,10 @@
 #!/bin/sh
-# Use docker and mvn to run tests for the systems client
-#   against the systems service running locally and the other
-#   services (tenants, sk, auth, tokens) running in DEV, STAGING, or PROD
+# Use mvn to run tests for the systems client
+#   against the systems service running either locally or in k8s
+#   and other services (tenants, sk, auth, tokens) running in DEV, STAGING, or PROD
 # NOTE: For safety, for now do not allow running against PROD
-# Use docker to start up the systems service locally using an image
-#   Image used is based on TAPIS_RUN_ENV
+# If requested use docker to start up the systems service locally using an image
+#   - image used is based on TAPIS_RUN_ENV, for example tapis/systems:dev
 # Use mvn to run the systems-client integration tests.
 #
 # The Tapis environment we are running in must be set to one of: dev, staging, prod
@@ -22,37 +22,46 @@
 
 PrgName=$(basename "$0")
 
-USAGE1="Usage: $PrgName [ { dev staging } ]"
-USAGE2="Usage: Set tapis run env by passing in or set using TAPIS_RUN_ENV, but not both"
+USAGE1="Usage: $PrgName { local | k8s } { dev | staging }"
+USAGE2="Usage: Run systems client tests against service running locally or in K8S."
+#USAGE2="Usage: Set tapis run env by passing in or set using TAPIS_RUN_ENV, but not both"
 
 # Check number of arguments
-if [ $# -gt 1 ]; then
+if [ $# -ne 2 ]; then
   echo "ERROR: Incorrect number of arguments"
   echo $USAGE1
   echo $USAGE2
   exit 1
 fi
-
-if [ $# -eq 0 -a -z "$TAPIS_RUN_ENV" ]; then
+RUN_SVC=$1
+RUN_ENV=$2
+if [ -z "$RUN_ENV" ] && [ -z "$TAPIS_RUN_ENV" ]; then
   echo "ERROR: Unable to determine Tapis run env"
   echo $USAGE1
   echo $USAGE2
   exit 1
 fi
-if [ $# -eq 1 -a -n "$TAPIS_RUN_ENV" ]; then
+if [ -n "$RUN_ENV" ] && [ -n "$TAPIS_RUN_ENV" ]; then
   echo "ERROR: Tapis run env set in TAPIS_RUN_ENV and passed in."
   echo $USAGE1
   echo $USAGE2
   exit 1
 fi
 
-RUN_ENV=$1
 if [ -n "$TAPIS_RUN_ENV" ]; then
   RUN_ENV=$TAPIS_RUN_ENV
 fi
 
+# Make target svc is valid
+if [ "$RUN_SVC" != "local" ] && [ "$RUN_SVC" != "k8s" ]; then
+  echo "ERROR: Invalid Tapis target svc location = $RUN_SVC"
+  echo $USAGE1
+  echo $USAGE2
+  exit 1
+fi
+
 # Make sure run env is valid
-if [ "$RUN_ENV" != "dev" -a "$RUN_ENV" != "staging" ]; then
+if [ "$RUN_ENV" != "dev" ] && [ "$RUN_ENV" != "staging" ]; then
   echo "ERROR: Invalid Tapis run env = $RUN_ENV"
   echo $USAGE1
   echo $USAGE2
@@ -90,44 +99,50 @@ export PRG_RELPATH=$(dirname "$0")
 cd "$PRG_RELPATH"/. || exit
 export PRG_PATH=$(pwd)
 
-# Start up the systems service locally
-echo "Staring systems service locally"
-DOCK_RUN_ID=$(./docker_run_sys_svc.sh ${RUN_ENV})
-RET_CODE=$?
-if [ $RET_CODE -ne 0 ]; then
-  echo "======================================================================"
-  echo "Error starting Systems service locally."
-  echo "Exiting ..."
-  echo "======================================================================"
-  exit $RET_CODE
-fi
+echo "****** Running client tests for Systmes service. Target service = $RUN_SVC, TAPIS_RUN_ENV = $RUN_ENV"
 
-echo "++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "Docker container ID: $DOCK_RUN_ID"
-echo "++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "Pausing 10 seconds ... "
-sleep 10
-echo "++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "DOCKER PS"
-echo "++++++++++++++++++++++++++++++++++++++++++++++++"
-docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.RunningFor}}\t{{.Status}}\t{{.Ports}}"
-echo "++++++++++++++++++++++++++++++++++++++++++++++++"
-docker logs $DOCK_RUN_ID
-echo "++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "Pausing 10 seconds ... "
-sleep 10
-echo "++++++++++++++++++++++++++++++++++++++++++++++++"
-docker logs $DOCK_RUN_ID
-echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+# if requested start up the systems service locally
+if [ "$RUN_SVC" = "local" ]; then
+ echo "Staring systems service locally"
+ DOCK_RUN_ID=$(./docker_run_sys_svc.sh ${RUN_ENV})
+ RET_CODE=$?
+ if [ $RET_CODE -ne 0 ]; then
+   echo "======================================================================"
+   echo "Error starting Systems service locally."
+   echo "Exiting ..."
+   echo "======================================================================"
+   exit $RET_CODE
+ fi
+
+ echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+ echo "Docker container ID: $DOCK_RUN_ID"
+ echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+ echo "Pausing 10 seconds ... "
+ sleep 10
+ echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+ echo "DOCKER PS"
+ echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+ docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.RunningFor}}\t{{.Status}}\t{{.Ports}}"
+ echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+ docker logs $DOCK_RUN_ID
+ echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+ echo "Pausing 10 seconds ... "
+ sleep 10
+ echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+ docker logs $DOCK_RUN_ID
+ echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+fi
 
 # Run the integration tests
 echo "Running client integration tests"
 mvn verify -DskipIntegrationTests=false
 RET_CODE=$?
 
-# Stop local systems service
-echo "Stopping local systems service using docker container ID: $DOCK_RUN_ID"
-docker stop $DOCK_RUN_ID
+# If local then stop local systems service
+if [ "$RUN_SVC" = "local" ]; then
+ echo "Stopping local systems service using docker container ID: $DOCK_RUN_ID"
+ docker stop $DOCK_RUN_ID
+fi
 
 if [ $RET_CODE -ne 0 ]; then
   echo "======================================================================"
@@ -137,8 +152,10 @@ if [ $RET_CODE -ne 0 ]; then
   exit $RET_CODE
 fi
 
-# Cleanup DB artifacts
-echo "Removing test artifacts from DB"
-./delete_client_test_data.sh
+# If it is a local run then cleanup DB artifacts
+if [ "$RUN_SVC" = "local" ]; then
+ echo "Removing test artifacts from DB"
+ ./delete_client_test_data.sh
+fi
 
 cd $RUN_DIR
