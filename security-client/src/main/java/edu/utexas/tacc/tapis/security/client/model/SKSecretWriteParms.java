@@ -2,8 +2,8 @@ package edu.utexas.tacc.tapis.security.client.model;
 
 import java.util.Map;
 
+import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.security.client.gen.model.Options;
-import edu.utexas.tacc.tapis.shared.exceptions.TapisException;
 
 public class SKSecretWriteParms
  extends SKSecretBaseParms<SKSecretWriteParms>
@@ -14,7 +14,7 @@ public class SKSecretWriteParms
     
     // Constructor.
     public SKSecretWriteParms(SecretType secretType) 
-    throws TapisException 
+    throws TapisClientException
     {
         super(secretType);
     }

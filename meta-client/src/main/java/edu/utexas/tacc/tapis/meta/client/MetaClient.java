@@ -1,10 +1,10 @@
 package edu.utexas.tacc.tapis.meta.client;
 
 import edu.utexas.tacc.tapis.client.shared.Utils;
+import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.meta.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.meta.client.gen.ApiException;
 import edu.utexas.tacc.tapis.meta.client.gen.Configuration;
-import edu.utexas.tacc.tapis.shared.exceptions.TapisClientException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;

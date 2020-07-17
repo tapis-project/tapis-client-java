@@ -3,13 +3,21 @@
   <parent>
     <groupId>edu.utexas.tacc.tapis</groupId>
     <artifactId>tapis-client-java</artifactId>
-    <version>1.6-SNAPSHOT</version>
+    <version>1.10</version>
   </parent>
 
   <artifactId>systems-client</artifactId>
 
   <name>Tapis Systems Client</name>
   <description>Java client for Systems Service</description>
+
+  <properties>
+    <!-- Skip integration tests by default -->
+    <!-- To run tests TAPIS_FILES_SVC_PASSWORD must be set in the env -->
+    <!-- Use following command to run integration tests -->
+    <!--   TAPIS_FILES_SVC_PASSWORD=<files_service_password> mvn verify -DskipIntegrationTests=false  -->
+    <skipIntegrationTests>true</skipIntegrationTests>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -84,6 +92,17 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <!-- failsafe plugin is for running integration tests -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <skip>${skipIntegrationTests}</skip>
+          <environmentVariables>
+            <APP_ENV>test</APP_ENV>
+          </environmentVariables>
+        </configuration>
       </plugin>
     </plugins>
 

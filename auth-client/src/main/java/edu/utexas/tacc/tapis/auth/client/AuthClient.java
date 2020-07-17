@@ -1,14 +1,14 @@
 package edu.utexas.tacc.tapis.auth.client;
 
 
-import edu.utexas.tacc.tapis.shared.exceptions.TapisClientException;
+import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.auth.client.gen.ApiException;
 import edu.utexas.tacc.tapis.auth.client.gen.api.TokensApi;
 import edu.utexas.tacc.tapis.auth.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.auth.client.gen.Configuration;
 import edu.utexas.tacc.tapis.auth.client.model.GetTokenParms;
 import edu.utexas.tacc.tapis.client.shared.Utils;
-import edu.utexas.tacc.tapis.shared.utils.TapisGsonUtils;
+import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.Gson;
@@ -37,7 +37,7 @@ public class AuthClient
   // *********************** Fields *****************************************
   // ************************************************************************
   // Response serializer.
-  private static final Gson _gson = TapisGsonUtils.getGson();
+  private static final Gson _gson = ClientTapisGsonUtils.getGson();
 
   // ************************************************************************
   // *********************** Constructors ***********************************

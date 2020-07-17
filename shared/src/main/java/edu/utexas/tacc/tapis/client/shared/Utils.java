@@ -1,9 +1,8 @@
 package edu.utexas.tacc.tapis.client.shared;
 
+import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.Gson;
-import edu.utexas.tacc.tapis.shared.exceptions.TapisClientException;
-import edu.utexas.tacc.tapis.shared.utils.TapisGsonUtils;
 
 /**
  * Utility class containing code shared among clients.
@@ -27,7 +26,7 @@ public class Utils
   // *********************** Fields *****************************************
   // ************************************************************************
   // Response serializer.
-  private static final Gson _gson = TapisGsonUtils.getGson();
+  private static final Gson _gson = ClientTapisGsonUtils.getGson();
 
   // ************************************************************************
   // *********************** Constructors ***********************************

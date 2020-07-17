@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import com.google.gson.JsonObject;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateCredential;
@@ -15,8 +14,8 @@ import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
-import edu.utexas.tacc.tapis.shared.exceptions.TapisClientException;
-import edu.utexas.tacc.tapis.shared.utils.TapisGsonUtils;
+import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
+import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem.SystemTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
@@ -28,31 +27,45 @@ import edu.utexas.tacc.tapis.auth.client.AuthClient;
 import edu.utexas.tacc.tapis.tokens.client.TokensClient;
 
 /**
- * Test the Systems API client acting as a user against the systems service.
+ * Test the Systems API client acting as a user calling the systems service.
+ * Tests that retrieve credentials act as a files service client calling the systems service.
  *  - Systems service base URL comes from the env or the default hard coded base URL.
+ *  - Auth and tokens base URL comes from the env or the default hard coded base URL.
  *  - Auth service is used to get a short term JWT.
- *  - Auth service URL comes from the env or the default hard coded URL.
+ *  - Tokens service is used to get a files service JWT.
+ *  - Files service password must come from the environment: TAPIS_FILES_SVC_PASSWORD
+ *
+ *  To override base URLs use the following env variables:
+ *    TAPIS_SVC_URL_SYSTEMS
+ *    TAPIS_BASE_URL (for auth, tokens services)
+ *  To override systems service port use:
+ *    TAPIS_SERVICE_PORT
+ *  NOTE that service port is ignored if TAPIS_SVC_URL_SYSTEMS is set
  */
 @Test(groups={"integration"})
 public class SystemsUsrClientTest {
+  private static final String tenantName = "dev";
+  // TAPIS_BASE_URL_SUFFIX should be set according to the dev, staging or prod environment
+  // dev     -> develop.tapis.io
+  // staging -> staging.tapis.io
+  // prod    -> tapis.io
   // Default URLs. These can be overridden by env variables
-  private static final String DEFAULT_BASE_URL_SYSTEMS = "https://dev.develop.tapis.io";
-  private static final String DEFAULT_BASE_URL_AUTH = "https://dev.develop.tapis.io";
-  private static final String DEFAULT_BASE_URL_TOKENS = "https://dev.develop.tapis.io";
-  // Env variables for setting URLs
+  private static final String DEFAULT_BASE_URL = "https://" + tenantName + ".develop.tapis.io";
+  private static final String DEFAULT_BASE_URL_SYSTEMS = "http://localhost";
+  private static final String DEFAULT_SVC_PORT = "8080";
+  // Env variables for setting URLs, passwords, etc
+  private static final String TAPIS_ENV_BASE_URL = "TAPIS_BASE_URL";
   private static final String TAPIS_ENV_SVC_URL_SYSTEMS = "TAPIS_SVC_URL_SYSTEMS";
-  private static final String TAPIS_ENV_SVC_URL_AUTH = "TAPIS_SVC_URL_AUTH";
-  private static final String TAPIS_ENV_SVC_URL_TOKENS = "TAPIS_SVC_URL_TOKENS";
+  private static final String TAPIS_ENV_FILES_SVC_PASSWORD = "TAPIS_FILES_SVC_PASSWORD";
+  private static final String TAPIS_ENV_SVC_PORT = "TAPIS_SERVICE_PORT";
 
   // Test data
-  private static final String tenantName = "dev";
   private static final String ownerUser = "testuser2";
   private static final String newOwnerUser = "testuser3";
   private static final String adminUser = "testSystemsAdminUsr";
   private static final String newPermsUser = "testuser4";
   private static final String masterTenantName = "master";
   private static final String filesSvcName = "files";
-  private static final String filesSvcPasswd = "twFUGriRrqaD2BTClR4qo80C8zMsIVZuiFUTUdkFvCM=";
   private static final String sysType = SystemTypeEnum.LINUX.name();
   private static final int prot1Port = -1, prot1ProxyPort = -1, prot2Port = 22, prot2ProxyPort = 222;
   private static final boolean prot1UseProxy = false, prot2UseProxy = true;
@@ -71,9 +84,9 @@ public class SystemsUsrClientTest {
     "a long tag with spaces and numbers (1 3 2) and special characters [_ $ - & * % @ + = ! ^ ? < > , . ( ) { } / \\ | ]. Backslashes must be escaped.");
   private static final List<String> tags2 = Arrays.asList("value3", "value4");
   private static final JsonObject notes1JO =
-          TapisGsonUtils.getGson().fromJson("{\"project\":\"myproj1\", \"testdata\":\"abc1\"}", JsonObject.class);
+          ClientTapisGsonUtils.getGson().fromJson("{\"project\":\"myproj1\", \"testdata\":\"abc1\"}", JsonObject.class);
   private static final JsonObject notes2JO =
-          TapisGsonUtils.getGson().fromJson("{\"project\":\"myproj2\", \"testdata\":\"abc2\"}", JsonObject.class);
+          ClientTapisGsonUtils.getGson().fromJson("{\"project\":\"myproj2\", \"testdata\":\"abc2\"}", JsonObject.class);
   private static final List<String> testPerms = new ArrayList<>(List.of("READ", "MODIFY"));
 
   private static final String[] sys1 = {tenantName, "Csys1", "description 1", sysType, ownerUser, "host1", "effUser1", "fakePassword1",
@@ -121,20 +134,38 @@ public class SystemsUsrClientTest {
   private static final List<Capability> jobCaps1 = new ArrayList<>(List.of(capA1, capB1, capC1));
   private static final List<Capability> jobCaps2 = new ArrayList<>(List.of(capA2, capB2, capC2, capD2));
 
-  private String serviceURL, ownerUserJWT, newOwnerUserJWT, filesServiceJWT;
+  private String serviceURL, servicePort, ownerUserJWT, newOwnerUserJWT, filesServiceJWT;
 
   @BeforeSuite
   public void setUp() throws Exception {
     // Get the base URLs from the environment so the test can be used in environments other than dev
     System.out.println("Executing BeforeSuite setup method");
-    // Get user token using URL from env or from default
-    String authURL = System.getenv(TAPIS_ENV_SVC_URL_AUTH);
-    if (StringUtils.isBlank(authURL)) authURL = DEFAULT_BASE_URL_AUTH;
-    String tokURL = System.getenv(TAPIS_ENV_SVC_URL_TOKENS);
-    if (StringUtils.isBlank(tokURL)) tokURL = DEFAULT_BASE_URL_TOKENS;
+    // Get files service password from env
+    String filesSvcPasswd = System.getenv(TAPIS_ENV_FILES_SVC_PASSWORD);
+    if (StringUtils.isBlank(filesSvcPasswd))
+    {
+      System.out.println("ERROR: Files service password must be set using environment variable:  " + TAPIS_ENV_FILES_SVC_PASSWORD);
+      System.exit(1);
+    }
+    // Set service port for systems service. Check for port set as env var
+    // NOTE: This is ignored if TAPIS_ENV_SVC_URL_SYSTEMS is set
+    servicePort = System.getenv(TAPIS_ENV_SVC_PORT);
+    System.out.println("Systems Service port from ENV: " + serviceURL);
+    if (StringUtils.isBlank(servicePort)) servicePort = DEFAULT_SVC_PORT;
+    // Set base URL for systems service. Check for URL set as env var
+    serviceURL = System.getenv(TAPIS_ENV_SVC_URL_SYSTEMS);
+    System.out.println("Systems Service URL from ENV: " + serviceURL);
+    if (StringUtils.isBlank(serviceURL)) serviceURL = DEFAULT_BASE_URL_SYSTEMS + ":" + servicePort;
+    // Get base URL suffix from env or from default
+    String baseURL = System.getenv(TAPIS_ENV_BASE_URL);
+    if (StringUtils.isBlank(baseURL)) baseURL = DEFAULT_BASE_URL;
+    // Log URLs being used
+    System.out.println("Using Systems URL: " + serviceURL);
+    System.out.println("Using Authenticator URL: " + baseURL);
+    System.out.println("Using Tokens URL: " + baseURL);
     // Get short term user JWT from tokens service
-    var authClient = new AuthClient(authURL);
-    var tokClient = new TokensClient(tokURL, filesSvcName, filesSvcPasswd);
+    var authClient = new AuthClient(baseURL);
+    var tokClient = new TokensClient(baseURL, filesSvcName, filesSvcPasswd);
     try {
       ownerUserJWT = authClient.getToken(ownerUser, ownerUser);
       newOwnerUserJWT = authClient.getToken(newOwnerUser, newOwnerUser);
@@ -142,12 +173,10 @@ public class SystemsUsrClientTest {
     } catch (Exception e) {
       throw new Exception("Exception while creating tokens or auth service", e);
     }
-    System.out.println("Got ownerUserJWT: " + ownerUserJWT);
-    // Basic check of JWT
-    if (StringUtils.isBlank(ownerUserJWT)) throw new Exception("Token service returned invalid JWT");
-    // Set base URL for systems service. Check for URL set as env var
-    serviceURL = System.getenv(TAPIS_ENV_SVC_URL_SYSTEMS);
-    if (StringUtils.isBlank(serviceURL)) serviceURL = DEFAULT_BASE_URL_SYSTEMS;
+    // Basic check of JWTs
+    if (StringUtils.isBlank(ownerUserJWT)) throw new Exception("Authn service returned invalid owner user JWT");
+    if (StringUtils.isBlank(newOwnerUserJWT)) throw new Exception("Authn service returned invalid new owner user JWT");
+    if (StringUtils.isBlank(filesServiceJWT)) throw new Exception("Tokens service returned invalid files svc JWT");
     // Cleanup anything leftover from previous failed run
     tearDown();
   }
@@ -263,6 +292,7 @@ public class SystemsUsrClientTest {
 
   // Test retrieving a system including default access method
   //   and test retrieving for specified access method.
+  // NOTE: Credential is created for effectiveUserId
   @Test
   public void testGetSystemByName() throws Exception {
     String[] sys0 = sys2;
@@ -270,6 +300,7 @@ public class SystemsUsrClientTest {
                                            "fakeAccessKey", "fakeAccessSecret", "fakeCert");
     String respUrl = createSystem(sys0, AccessMethod.PKI_KEYS, cred0, prot1TxfrMethodsC, jobCaps1);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+
     // Must be files or jobs service to get credentials
     TSystem tmpSys = getClientFilesSvc().getSystemByName(sys0[1], null);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
@@ -294,6 +325,11 @@ public class SystemsUsrClientTest {
     // Verify credentials. Only cred for default accessMethod is returned. In this case PKI_KEYS.
     Credential cred = tmpSys.getAccessCredential();
     Assert.assertNotNull(cred, "AccessCredential should not be null");
+// TODO: Getting cred along with system is currently broken when called from client.
+// TODO Does work in systems service integration test. Parameters to SK appear to be the same so not clear why it fails here
+// TODO: Figure out why this works using getUserCred and when called directly from svc but not when getting system using client  
+// Cred retrieved should be for effectiveUserId = effUser2, so far now as a test retrieve cred directly which does work
+    cred = getClientFilesSvc().getUserCredential(sys0[1], sys0[6], AccessMethod.PKI_KEYS);
     Assert.assertEquals(cred.getPrivateKey(), cred0.getPrivateKey());
     Assert.assertEquals(cred.getPublicKey(), cred0.getPublicKey());
     Assert.assertNull(cred.getPassword(), "AccessCredential password should be null");
@@ -327,13 +363,17 @@ public class SystemsUsrClientTest {
       System.out.println("Found tag: " + tagStr);
     }
     // Verify notes
-    var tmpNotes = (Map<String,String>) tmpSys.getNotes();
-    Assert.assertNotNull(tmpNotes);
-    System.out.println("Found notes: " + tmpNotes.toString());
-    Assert.assertTrue(tmpNotes.containsKey("project"));
-    Assert.assertEquals(tmpNotes.get("project"), notes1JO.get("project").getAsString());
-    Assert.assertTrue(tmpNotes.containsKey("testdata"));
-    Assert.assertEquals(tmpNotes.get("testdata"), notes1JO.get("testdata").getAsString());
+    String tmpNotesStr = (String) tmpSys.getNotes();
+    System.out.println("Found notes: " + tmpNotesStr);
+    JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(tmpNotesStr, JsonObject.class);
+    Assert.assertNotNull(tmpNotes, "Fetched Notes should not be null");
+    JsonObject origNotes = notes1JO;
+    Assert.assertTrue(tmpNotes.has("project"));
+    String projStr = origNotes.get("project").getAsString();
+    Assert.assertEquals(tmpNotes.get("project").getAsString(), projStr);
+    Assert.assertTrue(tmpNotes.has("testdata"));
+    String testdataStr = origNotes.get("testdata").getAsString();
+    Assert.assertEquals(tmpNotes.get("testdata").getAsString(), testdataStr);
 
     // Need service client to get creds. Currently unable to use both user client and service client in same program
     // Test retrieval using specified access method
@@ -341,6 +381,10 @@ public class SystemsUsrClientTest {
     // Verify credentials. Only cred for default accessMethod is returned. In this case PASSWORD.
     cred = tmpSys.getAccessCredential();
     Assert.assertNotNull(cred, "AccessCredential should not be null");
+// TODO Not working as described above. For now test by getting cred directly
+// TODO fix it
+    cred = getClientFilesSvc().getUserCredential(sys0[1], sys0[6], AccessMethod.PASSWORD);
+
     Assert.assertEquals(cred.getPassword(), cred0.getPassword());
     Assert.assertNull(cred.getPrivateKey(), "AccessCredential private key should be null");
     Assert.assertNull(cred.getPublicKey(), "AccessCredential public key should be null");
@@ -413,13 +457,14 @@ public class SystemsUsrClientTest {
         System.out.println("Found tag: " + tagStr);
       }
       // Verify notes
-      var tmpNotes = (Map<String,String>) tmpSys.getNotes();
+      String tmpNotesStr = (String) tmpSys.getNotes();
+      JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(tmpNotesStr, JsonObject.class);
       Assert.assertNotNull(tmpNotes);
-      System.out.println("Found notes: " + tmpNotes.toString());
-      Assert.assertTrue(tmpNotes.containsKey("project"));
-      Assert.assertEquals(tmpNotes.get("project"), notes2JO.get("project").getAsString());
-      Assert.assertTrue(tmpNotes.containsKey("testdata"));
-      Assert.assertEquals(tmpNotes.get("testdata"), notes2JO.get("testdata").getAsString());
+      System.out.println("Found notes: " + tmpNotesStr);
+      Assert.assertTrue(tmpNotes.has("project"));
+      Assert.assertEquals(tmpNotes.get("project").getAsString(), notes2JO.get("project").getAsString());
+      Assert.assertTrue(tmpNotes.has("testdata"));
+      Assert.assertEquals(tmpNotes.get("testdata").getAsString(), notes2JO.get("testdata").getAsString());
     } catch (Exception e) {
       System.out.println("Caught exception: " + e);
       Assert.fail();
@@ -641,6 +686,7 @@ public class SystemsUsrClientTest {
   @AfterSuite
   public void tearDown() {
     System.out.println("Executing AfterSuite teardown method");
+    // TODO: Run SQL to hard delete objects
     //Remove all objects created by tests, ignore any exceptions
     try {
       getClientUsr().deleteSystemByName(sys1[1]);

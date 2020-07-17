@@ -2,7 +2,7 @@ package edu.utexas.tacc.tapis.security.client.model;
 
 import java.util.List;
 
-import edu.utexas.tacc.tapis.shared.exceptions.TapisException;
+import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 
 public class SKSecretDeleteParms
  extends SKSecretBaseParms<SKSecretDeleteParms>
@@ -12,7 +12,7 @@ public class SKSecretDeleteParms
     
     // Constructor.
     public SKSecretDeleteParms(SecretType secretType) 
-    throws TapisException 
+    throws TapisClientException 
     {
         super(secretType);
     }

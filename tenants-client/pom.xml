@@ -3,7 +3,7 @@
   <parent>
     <groupId>edu.utexas.tacc.tapis</groupId>
     <artifactId>tapis-client-java</artifactId>
-    <version>1.6-SNAPSHOT</version>
+    <version>1.10</version>
   </parent>
 
   <artifactId>tenants-client</artifactId>
@@ -21,6 +21,9 @@
 
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
+
+    <!-- NOTE: THE CALLED SCRIPT INTRODUCES HIDDEN DEPENDENCIES -->
+    <!--       These dependencies include Docker and curl.      -->
     <plugins>
       <!-- Run script to download latest tenants openapi_v3.yml and generate bundled json file  -->
       <plugin>
