@@ -29,6 +29,7 @@ import edu.utexas.tacc.tapis.security.client.gen.model.ReqRevokeUserPermission;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqRevokeUserRole;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqUpdateRoleDescription;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqUpdateRoleName;
+import edu.utexas.tacc.tapis.security.client.gen.model.ReqUpdateRoleOwner;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqUserHasRole;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqUserHasRoleMulti;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqUserIsPermitted;
@@ -42,6 +43,7 @@ import edu.utexas.tacc.tapis.security.client.gen.model.RespChangeCount;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespName;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespNameArray;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespPathPrefixes;
+import edu.utexas.tacc.tapis.security.client.gen.model.RespProbe;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespResourceUrl;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespRole;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespSecret;
@@ -59,7 +61,6 @@ import edu.utexas.tacc.tapis.security.client.model.SKSecretDeleteParms;
 import edu.utexas.tacc.tapis.security.client.model.SKSecretMetaParms;
 import edu.utexas.tacc.tapis.security.client.model.SKSecretReadParms;
 import edu.utexas.tacc.tapis.security.client.model.SKSecretWriteParms;
-
 
 public class SKClient 
 {
@@ -357,7 +358,32 @@ public class SKClient
         try {
             // Get the API object using default networking.
             RoleApi roleApi = new RoleApi();
-            resp = roleApi.updateRoleName(roleName, body,false);
+            resp = roleApi.updateRoleName(roleName, body, false);
+        }
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* updateRoleOwner:                                                             */
+    /* ---------------------------------------------------------------------------- */
+    public void updateRoleOwner(String tenant, String user, String roleName, 
+                                String newOwner)
+     throws TapisClientException
+    {
+        // Assign input body.
+        var body = new ReqUpdateRoleOwner();
+        body.setTenant(tenant);
+        body.setUser(user);
+        body.setNewOwner(newOwner);
+        
+        // Make the REST call.
+        @SuppressWarnings("unused")
+        RespBasic resp = null;
+        try {
+            // Get the API object using default networking.
+            RoleApi roleApi = new RoleApi();
+            resp = roleApi.updateRoleOwner(roleName, body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -1302,9 +1328,9 @@ public class SKClient
     /*                            Public General Methods                            */
     /* **************************************************************************** */
     /* ---------------------------------------------------------------------------- */
-    /* sayHello:                                                                    */
+    /* hello:                                                                       */
     /* ---------------------------------------------------------------------------- */
-    public String sayHello()
+    public String hello()
      throws TapisClientException
     {
         // Make the REST call.
@@ -1329,11 +1355,32 @@ public class SKClient
      throws TapisClientException
     {
         // Make the REST call.
-        RespBasic resp = null;
+        RespProbe resp = null;
         try {
             // Get the API object using default networking.
             var generalApi = new GeneralApi();
             resp = generalApi.checkHealth();
+        }
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+        
+        // Return result value as a string.
+        Object obj = resp.getResult();
+        return obj == null ? null : obj.toString();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* ready:                                                                       */
+    /* ---------------------------------------------------------------------------- */
+    public String ready()
+     throws TapisClientException
+    {
+        // Make the REST call.
+        RespProbe resp = null;
+        try {
+            // Get the API object using default networking.
+            var generalApi = new GeneralApi();
+            resp = generalApi.ready();
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
