@@ -29,22 +29,22 @@ USAGE2="Usage: Run systems client tests against service running locally or in K8
 # Check number of arguments
 if [ $# -ne 2 ]; then
   echo "ERROR: Incorrect number of arguments"
-  echo $USAGE1
-  echo $USAGE2
+  echo "$USAGE1"
+  echo "$USAGE2"
   exit 1
 fi
 RUN_SVC=$1
 RUN_ENV=$2
 if [ -z "$RUN_ENV" ] && [ -z "$TAPIS_RUN_ENV" ]; then
   echo "ERROR: Unable to determine Tapis run env"
-  echo $USAGE1
-  echo $USAGE2
+  echo "$USAGE1"
+  echo "$USAGE2"
   exit 1
 fi
 if [ -n "$RUN_ENV" ] && [ -n "$TAPIS_RUN_ENV" ]; then
   echo "ERROR: Tapis run env set in TAPIS_RUN_ENV and passed in."
-  echo $USAGE1
-  echo $USAGE2
+  echo "$USAGE1"
+  echo "$USAGE2"
   exit 1
 fi
 
@@ -55,16 +55,16 @@ fi
 # Make target svc is valid
 if [ "$RUN_SVC" != "local" ] && [ "$RUN_SVC" != "k8s" ]; then
   echo "ERROR: Invalid Tapis target svc location = $RUN_SVC"
-  echo $USAGE1
-  echo $USAGE2
+  echo "$USAGE1"
+  echo "$USAGE2"
   exit 1
 fi
 
 # Make sure run env is valid
 if [ "$RUN_ENV" != "dev" ] && [ "$RUN_ENV" != "staging" ]; then
   echo "ERROR: Invalid Tapis run env = $RUN_ENV"
-  echo $USAGE1
-  echo $USAGE2
+  echo "$USAGE1"
+  echo "$USAGE2"
   exit 1
 fi
 
@@ -72,24 +72,31 @@ fi
 # This is used for testing credential retrieval
 if [ -z "$TAPIS_FILES_SVC_PASSWORD" ]; then
   echo "Please set env variable TAPIS_FILES_SVC_PASSWORD to the files service password"
-  echo $USAGE1
-  echo $USAGE2
+  echo "$USAGE1"
+  echo "$USAGE2"
   exit 1
 fi
 
 # Set base url for services we depend on (auth, tokens)
 # NOTE: client test uses hard coded tenant name "dev"
 if [ "$RUN_ENV" = "dev" ]; then
- TAPIS_BASE_URL="https://dev.develop.tapis.io"
+ export TAPIS_BASE_URL="https://dev.develop.tapis.io"
 elif [ "$RUN_ENV" = "staging" ]; then
- TAPIS_BASE_URL="https://dev.staging.tapis.io"
+ export TAPIS_BASE_URL="https://dev.staging.tapis.io"
 # elif [ "$RUN_ENV" = "prod" ]; then
-#  TAPIS_BASE_URL="https://dev.tapis.io"
+# export TAPIS_BASE_URL="https://dev.tapis.io"
 else
   echo "ERROR: Invalid Tapis run env = $RUN_ENV"
-  echo $USAGE1
-  echo $USAGE2
+  echo "$USAGE1"
+  echo "$USAGE2"
   exit 1
+fi
+
+# If running against k8s and not locally set an env
+#   var to let the client test program know. Default is
+#   to look for systems service locally.
+if [ "$RUN_SVC" = "k8s" ]; then
+  export TAPIS_SVC_URL_SYSTEMS="$TAPIS_BASE_URL"
 fi
 
 # Determine absolute path to location from which we are running
@@ -104,7 +111,7 @@ echo "****** Running client tests for Systmes service. Target service = $RUN_SVC
 # if requested start up the systems service locally
 if [ "$RUN_SVC" = "local" ]; then
  echo "Staring systems service locally"
- DOCK_RUN_ID=$(./docker_run_sys_svc.sh ${RUN_ENV})
+ DOCK_RUN_ID=$(./docker_run_sys_svc.sh "${RUN_ENV}")
  RET_CODE=$?
  if [ $RET_CODE -ne 0 ]; then
    echo "======================================================================"
@@ -124,12 +131,12 @@ if [ "$RUN_SVC" = "local" ]; then
  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
  docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.RunningFor}}\t{{.Status}}\t{{.Ports}}"
  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
- docker logs $DOCK_RUN_ID
+ docker logs "$DOCK_RUN_ID"
  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
  echo "Pausing 10 seconds ... "
  sleep 10
  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
- docker logs $DOCK_RUN_ID
+ docker logs "$DOCK_RUN_ID"
  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
 fi
 
@@ -141,7 +148,7 @@ RET_CODE=$?
 # If local then stop local systems service
 if [ "$RUN_SVC" = "local" ]; then
  echo "Stopping local systems service using docker container ID: $DOCK_RUN_ID"
- docker stop $DOCK_RUN_ID
+ docker stop "$DOCK_RUN_ID"
 fi
 
 if [ $RET_CODE -ne 0 ]; then
