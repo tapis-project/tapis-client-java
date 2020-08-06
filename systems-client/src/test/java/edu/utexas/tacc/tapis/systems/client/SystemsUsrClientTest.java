@@ -56,7 +56,7 @@ public class SystemsUsrClientTest {
   // Env variables for setting URLs, passwords, etc
   private static final String TAPIS_ENV_BASE_URL = "TAPIS_BASE_URL";
   private static final String TAPIS_ENV_SVC_URL_SYSTEMS = "TAPIS_SVC_URL_SYSTEMS";
-  private static final String TAPIS_ENV_FILES_SVC_PASSWORD = "TAPIS_FILES_SVC_PASSWORD";
+  private static final String TAPIS_ENV_FILES_SVC_PASSWORD = "TAPIS_FILES_SERVICE_PASSWORD";
   private static final String TAPIS_ENV_SVC_PORT = "TAPIS_SERVICE_PORT";
 
   // Test data

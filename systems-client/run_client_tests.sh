@@ -18,7 +18,7 @@
 #     TAPIS_SERVICE_PORT
 #
 # To run the client integration tests the following env variables must be set:
-#   TAPIS_FILES_SVC_PASSWORD - used for testing credential retrieval
+#   TAPIS_FILES_SERVICE_PASSWORD - used for testing credential retrieval
 
 PrgName=$(basename "$0")
 
@@ -70,8 +70,8 @@ fi
 
 # Make sure we have the files service password
 # This is used for testing credential retrieval
-if [ -z "$TAPIS_FILES_SVC_PASSWORD" ]; then
-  echo "Please set env variable TAPIS_FILES_SVC_PASSWORD to the files service password"
+if [ -z "$TAPIS_FILES_SERVICE_PASSWORD" ]; then
+  echo "Please set env variable TAPIS_FILES_SERVICE_PASSWORD to the files service password"
   echo "$USAGE1"
   echo "$USAGE2"
   exit 1
