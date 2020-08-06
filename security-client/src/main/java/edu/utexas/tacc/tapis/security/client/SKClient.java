@@ -5,11 +5,10 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.client.shared.Utils;
+import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.security.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.security.client.gen.ApiException;
-import edu.utexas.tacc.tapis.security.client.gen.Configuration;
 import edu.utexas.tacc.tapis.security.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.security.client.gen.api.RoleApi;
 import edu.utexas.tacc.tapis.security.client.gen.api.UserApi;
@@ -80,13 +79,11 @@ public class SKClient
     private static final String SKCLIENT_USER_AGENT = "SKClient";
     
     /* **************************************************************************** */
-    /*                                     Enums                                    */
-    /* **************************************************************************** */
-
-    /* **************************************************************************** */
     /*                                    Fields                                    */
     /* **************************************************************************** */
-
+    // This client instance's underlying generated client.
+    private final ApiClient _apiClient;
+    
     /* **************************************************************************** */
     /*                                 Constructors                                 */
     /* **************************************************************************** */
@@ -123,13 +120,15 @@ public class SKClient
      */
     public SKClient(String path, String jwt) 
     {
+    	// Create actual client.
+    	_apiClient = new ApiClient();
+    	
         // Process input.
-        ApiClient apiClient = Configuration.getDefaultApiClient();
-        if (!StringUtils.isBlank(path)) apiClient.setBasePath(path);
-        if (!StringUtils.isBlank(jwt)) apiClient.addDefaultHeader(TAPIS_JWT_HEADER, jwt);
+        if (!StringUtils.isBlank(path)) _apiClient.setBasePath(path);
+        if (!StringUtils.isBlank(jwt))  _apiClient.addDefaultHeader(TAPIS_JWT_HEADER, jwt);
         
         // Other defaults.
-        apiClient.setUserAgent(SKCLIENT_USER_AGENT);
+        _apiClient.setUserAgent(SKCLIENT_USER_AGENT);
     }
     
     /* **************************************************************************** */
@@ -140,7 +139,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     public SKClient setBasePath(String path)
     {
-        Configuration.getDefaultApiClient().setBasePath(path);
+        _apiClient.setBasePath(path);
         return this;
     }
     
@@ -149,7 +148,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     public SKClient addDefaultHeader(String key, String value)
     {
-        Configuration.getDefaultApiClient().addDefaultHeader(key, value);
+        _apiClient.addDefaultHeader(key, value);
         return this;
     }
     
@@ -158,7 +157,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     public SKClient setUserAgent(String userAgent) 
     {
-        Configuration.getDefaultApiClient().setUserAgent(userAgent);
+        _apiClient.setUserAgent(userAgent);
         return this;
     }
     
@@ -172,7 +171,7 @@ public class SKClient
      */
     public SKClient setConnectTimeout(int millis)
     {
-        Configuration.getDefaultApiClient().setConnectTimeout(millis);
+        _apiClient.setConnectTimeout(millis);
         return this;
     }
     
@@ -186,7 +185,7 @@ public class SKClient
      */
     public SKClient setReadTimeout(int millis)
     {
-        Configuration.getDefaultApiClient().setReadTimeout(millis);
+        _apiClient.setReadTimeout(millis);
         return this;
     }
     
@@ -195,7 +194,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     public SKClient setDebugging(boolean debugging) 
     {
-        Configuration.getDefaultApiClient().setDebugging(debugging);
+        _apiClient.setDebugging(debugging);
         return this;
     }
     
@@ -208,7 +207,7 @@ public class SKClient
      */
     public int getConnectTimeout()
     {
-        return Configuration.getDefaultApiClient().getConnectTimeout();
+        return _apiClient.getConnectTimeout();
     }
     
     /* ---------------------------------------------------------------------------- */
@@ -220,7 +219,7 @@ public class SKClient
      */
     public int getReadTimeout()
     {
-        return Configuration.getDefaultApiClient().getReadTimeout();
+        return _apiClient.getReadTimeout();
     }
     
     /* ---------------------------------------------------------------------------- */
@@ -228,7 +227,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     public boolean isDebugging() 
     {
-        return Configuration.getDefaultApiClient().isDebugging();
+        return _apiClient.isDebugging();
     }
     
     /* ---------------------------------------------------------------------------- */
@@ -240,7 +239,7 @@ public class SKClient
     {
         try {
             // Best effort attempt to shut things down.
-            var okClient = Configuration.getDefaultApiClient().getHttpClient();
+            var okClient = _apiClient.getHttpClient();
             if (okClient != null) {
                 var pool = okClient.connectionPool();
                 if (pool != null) pool.evictAll();
@@ -261,7 +260,7 @@ public class SKClient
         RespNameArray resp = null;
         try {
             // Get the API object using default networking.
-            RoleApi roleApi = new RoleApi();
+            RoleApi roleApi = new RoleApi(_apiClient);
             resp = roleApi.getRoleNames(tenant, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -281,7 +280,7 @@ public class SKClient
         RespRole resp = null;
         try {
             // Get the API object using default networking.
-            RoleApi roleApi = new RoleApi();
+            RoleApi roleApi = new RoleApi(_apiClient);
             resp = roleApi.getRoleByName(roleName, tenant, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -308,7 +307,7 @@ public class SKClient
         RespResourceUrl resp = null;
         try {
             // Get the API object using default networking.
-            RoleApi roleApi = new RoleApi();
+            RoleApi roleApi = new RoleApi(_apiClient);
             resp = roleApi.createRole(body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -328,7 +327,7 @@ public class SKClient
         RespChangeCount resp = null;
         try {
             // Get the API object using default networking.
-            RoleApi roleApi = new RoleApi();
+            RoleApi roleApi = new RoleApi(_apiClient);
             resp = roleApi.deleteRoleByName(roleName, tenant, user, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -357,7 +356,7 @@ public class SKClient
         RespBasic resp = null;
         try {
             // Get the API object using default networking.
-            RoleApi roleApi = new RoleApi();
+            RoleApi roleApi = new RoleApi(_apiClient);
             resp = roleApi.updateRoleName(roleName, body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -382,7 +381,7 @@ public class SKClient
         RespBasic resp = null;
         try {
             // Get the API object using default networking.
-            RoleApi roleApi = new RoleApi();
+            RoleApi roleApi = new RoleApi(_apiClient);
             resp = roleApi.updateRoleOwner(roleName, body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -407,7 +406,7 @@ public class SKClient
         RespBasic resp = null;
         try {
             // Get the API object using default networking.
-            RoleApi roleApi = new RoleApi();
+            RoleApi roleApi = new RoleApi(_apiClient);
             resp = roleApi.updateRoleDescription(roleName, body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -432,7 +431,7 @@ public class SKClient
         RespChangeCount resp = null;
         try {
             // Get the API object using default networking.
-            RoleApi roleApi = new RoleApi();
+            RoleApi roleApi = new RoleApi(_apiClient);
             resp = roleApi.addRolePermission(body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -461,7 +460,7 @@ public class SKClient
         RespChangeCount resp = null;
         try {
             // Get the API object using default networking.
-            RoleApi roleApi = new RoleApi();
+            RoleApi roleApi = new RoleApi(_apiClient);
             resp = roleApi.removeRolePermission(body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -490,7 +489,7 @@ public class SKClient
         RespChangeCount resp = null;
         try {
             // Get the API object using default networking.
-            RoleApi roleApi = new RoleApi();
+            RoleApi roleApi = new RoleApi(_apiClient);
             resp = roleApi.addChildRole(body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -519,7 +518,7 @@ public class SKClient
         RespChangeCount resp = null;
         try {
             // Get the API object using default networking.
-            RoleApi roleApi = new RoleApi();
+            RoleApi roleApi = new RoleApi(_apiClient);
             resp = roleApi.removeChildRole(body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -554,7 +553,7 @@ public class SKClient
         RespPathPrefixes resp = null;
         try {
             // Get the API object using default networking.
-            RoleApi roleApi = new RoleApi();
+            RoleApi roleApi = new RoleApi(_apiClient);
             resp = roleApi.previewPathPrefix(body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -587,7 +586,7 @@ public class SKClient
         RespChangeCount resp = null;
         try {
             // Get the API object using default networking.
-            RoleApi roleApi = new RoleApi();
+            RoleApi roleApi = new RoleApi(_apiClient);
             resp = roleApi.replacePathPrefix(body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -611,7 +610,7 @@ public class SKClient
         RespNameArray resp = null;
         try {
             // Get the API object using default networking.
-            var userApi = new UserApi();
+            var userApi = new UserApi(_apiClient);
             resp = userApi.getUserNames(tenant, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -631,7 +630,7 @@ public class SKClient
         RespNameArray resp = null;
         try {
             // Get the API object using default networking.
-            var userApi = new UserApi();
+            var userApi = new UserApi(_apiClient);
             resp = userApi.getUserRoles(user, tenant, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -661,7 +660,7 @@ public class SKClient
         RespNameArray resp = null;
         try {
             // Get the API object using default networking.
-            var userApi = new UserApi();
+            var userApi = new UserApi(_apiClient);
             resp = userApi.getUserPerms(user, tenant, implies, impliedBy, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -687,7 +686,7 @@ public class SKClient
         RespChangeCount resp = null;
         try {
             // Get the API object using default networking.
-            var userApi = new UserApi();
+            var userApi = new UserApi(_apiClient);
             resp = userApi.grantRole(body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -714,7 +713,7 @@ public class SKClient
         RespChangeCount resp = null;
         try {
             // Get the API object using default networking.
-            var userApi = new UserApi();
+            var userApi = new UserApi(_apiClient);
             resp = userApi.revokeUserRole(body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -743,7 +742,7 @@ public class SKClient
         RespChangeCount resp = null;
         try {
             // Get the API object using default networking.
-            var userApi = new UserApi();
+            var userApi = new UserApi(_apiClient);
             resp = userApi.grantRoleWithPermission(body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -770,7 +769,7 @@ public class SKClient
         RespChangeCount resp = null;
         try {
             // Get the API object using default networking.
-            var userApi = new UserApi();
+            var userApi = new UserApi(_apiClient);
             resp = userApi.grantUserPermission(body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -797,7 +796,7 @@ public class SKClient
         RespChangeCount resp = null;
         try {
             // Get the API object using default networking.
-            var userApi = new UserApi();
+            var userApi = new UserApi(_apiClient);
             resp = userApi.revokeUserPermission(body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -824,7 +823,7 @@ public class SKClient
         RespAuthorized resp = null;
         try {
             // Get the API object using default networking.
-            var userApi = new UserApi();
+            var userApi = new UserApi(_apiClient);
             resp = userApi.hasRole(body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -851,7 +850,7 @@ public class SKClient
         RespAuthorized resp = null;
         try {
             // Get the API object using default networking.
-            var userApi = new UserApi();
+            var userApi = new UserApi(_apiClient);
             resp = userApi.hasRoleAny(body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -878,7 +877,7 @@ public class SKClient
         RespAuthorized resp = null;
         try {
             // Get the API object using default networking.
-            var userApi = new UserApi();
+            var userApi = new UserApi(_apiClient);
             resp = userApi.hasRoleAll(body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -905,7 +904,7 @@ public class SKClient
         RespAuthorized resp = null;
         try {
             // Get the API object using default networking.
-            var userApi = new UserApi();
+            var userApi = new UserApi(_apiClient);
             resp = userApi.isPermitted(body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -932,7 +931,7 @@ public class SKClient
         RespAuthorized resp = null;
         try {
             // Get the API object using default networking.
-            var userApi = new UserApi();
+            var userApi = new UserApi(_apiClient);
             resp = userApi.isPermittedAny(body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -959,7 +958,7 @@ public class SKClient
         RespAuthorized resp = null;
         try {
             // Get the API object using default networking.
-            var userApi = new UserApi();
+            var userApi = new UserApi(_apiClient);
             resp = userApi.isPermittedAll(body, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -980,7 +979,7 @@ public class SKClient
         RespNameArray resp = null;
         try {
             // Get the API object using default networking.
-            var userApi = new UserApi();
+            var userApi = new UserApi(_apiClient);
             resp = userApi.getUsersWithRole(roleName, tenant, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -1000,7 +999,7 @@ public class SKClient
         RespNameArray resp = null;
         try {
             // Get the API object using default networking.
-            var userApi = new UserApi();
+            var userApi = new UserApi(_apiClient);
             resp = userApi.getUsersWithPermission(permSpec, tenant, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -1020,7 +1019,7 @@ public class SKClient
         RespName resp = null;
         try {
             // Get the API object using default networking.
-            var userApi = new UserApi();
+            var userApi = new UserApi(_apiClient);
             resp = userApi.getDefaultUserRole1(user, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -1043,7 +1042,7 @@ public class SKClient
         RespSecret resp = null;
         try {
             // Get the API object using default networking.
-            var vaultApi = new VaultApi();
+            var vaultApi = new VaultApi(_apiClient);
             resp = vaultApi.readSecret(parms.getSecretType().getUrlText(),
                                        parms.getSecretName(),
                                        parms.getTenant(),
@@ -1082,7 +1081,7 @@ public class SKClient
         RespSecretMeta resp = null;
         try {
             // Get the API object using default networking.
-            var vaultApi = new VaultApi();
+            var vaultApi = new VaultApi(_apiClient);
             resp = vaultApi.writeSecret(parms.getSecretType().getUrlText(),
                                         parms.getSecretName(),
                                         reqWriteSecret,
@@ -1118,7 +1117,7 @@ public class SKClient
         RespVersions resp = null;
         try {
             // Get the API object using default networking.
-            var vaultApi = new VaultApi();
+            var vaultApi = new VaultApi(_apiClient);
             resp = vaultApi.deleteSecret(parms.getSecretType().getUrlText(),
                                          parms.getSecretName(),
                                          reqVersions,
@@ -1153,7 +1152,7 @@ public class SKClient
         RespVersions resp = null;
         try {
             // Get the API object using default networking.
-            var vaultApi = new VaultApi();
+            var vaultApi = new VaultApi(_apiClient);
             resp = vaultApi.undeleteSecret(parms.getSecretType().getUrlText(),
                                            parms.getSecretName(),
                                            reqVersions,
@@ -1188,7 +1187,7 @@ public class SKClient
         RespVersions resp = null;
         try {
             // Get the API object using default networking.
-            var vaultApi = new VaultApi();
+            var vaultApi = new VaultApi(_apiClient);
             resp = vaultApi.destroySecret(parms.getSecretType().getUrlText(),
                                           parms.getSecretName(),
                                           reqVersions,
@@ -1217,7 +1216,7 @@ public class SKClient
         RespSecretVersionMetadata resp = null;
         try {
             // Get the API object using default networking.
-            var vaultApi = new VaultApi();
+            var vaultApi = new VaultApi(_apiClient);
             resp = vaultApi.readSecretMeta(parms.getSecretType().getUrlText(),
                                            parms.getSecretName(),
                                            parms.getTenant(),
@@ -1247,7 +1246,7 @@ public class SKClient
         RespSecretList resp = null;
         try {
             // Get the API object using default networking.
-            var vaultApi = new VaultApi();
+            var vaultApi = new VaultApi(_apiClient);
             resp = vaultApi.listSecretMeta(parms.getSecretType().getUrlText(),
                                            parms.getTenant(),
                                            parms.getUser(),
@@ -1277,7 +1276,7 @@ public class SKClient
         RespBasic resp = null;
         try {
             // Get the API object using default networking.
-            var vaultApi = new VaultApi();
+            var vaultApi = new VaultApi(_apiClient);
             resp = vaultApi.destroySecretMeta(parms.getSecretType().getUrlText(),
                                               parms.getSecretName(),
                                               parms.getTenant(),
@@ -1311,7 +1310,7 @@ public class SKClient
         RespAuthorized resp = null;
         try {
             // Get the API object using default networking.
-            var vaultApi = new VaultApi();
+            var vaultApi = new VaultApi(_apiClient);
             resp = vaultApi.validateServicePassword(serviceName, 
                                                     reqValidateServicePwd, false);
             
@@ -1337,7 +1336,7 @@ public class SKClient
         RespBasic resp = null;
         try {
             // Get the API object using default networking.
-            var generalApi = new GeneralApi();
+            var generalApi = new GeneralApi(_apiClient);
             resp = generalApi.sayHello(false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -1358,7 +1357,7 @@ public class SKClient
         RespProbe resp = null;
         try {
             // Get the API object using default networking.
-            var generalApi = new GeneralApi();
+            var generalApi = new GeneralApi(_apiClient);
             resp = generalApi.checkHealth();
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -1379,7 +1378,7 @@ public class SKClient
         RespProbe resp = null;
         try {
             // Get the API object using default networking.
-            var generalApi = new GeneralApi();
+            var generalApi = new GeneralApi(_apiClient);
             resp = generalApi.ready();
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
