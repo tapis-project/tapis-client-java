@@ -34,8 +34,30 @@ tags:
     description: The indexes for a collection
   - name: aggregation
     description: The aggregations available in the database.
+  - name: general
+    description: informational endpoints
 
 paths:
+  /meta/healthcheck:
+    get:
+      tags:
+        - general
+      description: Health check for liveness. No authorization required.
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Message received.
+          content:
+            application/json:
+              schema:
+                type: object
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                type: object
+
   /meta/:
     get:
       tags:
