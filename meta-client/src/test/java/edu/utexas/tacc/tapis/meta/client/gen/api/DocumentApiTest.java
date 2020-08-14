@@ -59,7 +59,7 @@ public class DocumentApiTest {
         String collection = null;
         String docId = null;
         Boolean np = null;
-        Object response = api.getDocument(db, collection, docId, np);
+        Object response = api.getDocument(db, collection, docId);
 
         // TODO: test validations
     }

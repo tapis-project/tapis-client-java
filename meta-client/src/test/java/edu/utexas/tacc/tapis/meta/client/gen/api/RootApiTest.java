@@ -55,7 +55,7 @@ public void setUp() throws Exception {
     public void listDBNamesTest() throws ApiException {
         Boolean np = null;
         
-        List<String> response = api.listDBNames(np);
+        List<String> response = api.listDBNames();
 
         // TODO: test validations
     }
