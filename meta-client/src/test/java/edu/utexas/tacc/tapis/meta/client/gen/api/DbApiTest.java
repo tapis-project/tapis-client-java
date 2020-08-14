@@ -40,7 +40,7 @@ public class DbApiTest {
     public void createDBTest() throws ApiException {
         String db = null;
         Boolean np = null;
-        api.createDB(db, np);
+        api.createDB(db);
 
         // TODO: test validations
     }
@@ -74,7 +74,7 @@ public class DbApiTest {
     public void listCollectionNamesTest() throws ApiException {
         String db = null;
         Boolean np = null;
-        List<String> response = api.listCollectionNames(db, np);
+        List<String> response = api.listCollectionNames(db);
 
         // TODO: test validations
     }
