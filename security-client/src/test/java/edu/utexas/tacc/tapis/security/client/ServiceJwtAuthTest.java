@@ -12,7 +12,7 @@ import edu.utexas.tacc.tapis.security.client.gen.model.SkRole;
 /** This test uses two clients, each initialized with different JWT identities,
  * to test the owner authorization enforcement.  Several calls that require
  * role ownership are made to validate that the calls are rejected by SK
- * for authorization reasons.  
+ * for authorization reasons as part of the test.  
  * 
  * When this test completes successfully, the SK database tables are restored
  * to their original state.
