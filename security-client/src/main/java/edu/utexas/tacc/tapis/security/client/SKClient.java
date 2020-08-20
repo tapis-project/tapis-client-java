@@ -293,13 +293,12 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* createRole:                                                                  */
     /* ---------------------------------------------------------------------------- */
-    public String createRole(String tenant, String user, String roleName, String description)
+    public String createRole(String roleTenant, String roleName, String description)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqCreateRole();
-        body.setTenant(tenant);
-        body.setUser(user);
+        body.setRoleTenant(roleTenant);
         body.setRoleName(roleName);
         body.setDescription(description);
         
@@ -320,7 +319,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* deleteRoleByName:                                                            */
     /* ---------------------------------------------------------------------------- */
-    public int deleteRoleByName(String tenant, String user, String roleName)
+    public int deleteRoleByName(String tenant, String roleName)
      throws TapisClientException
     {
         // Make the REST call.
@@ -328,7 +327,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             RoleApi roleApi = new RoleApi(_apiClient);
-            resp = roleApi.deleteRoleByName(roleName, tenant, user, false);
+            resp = roleApi.deleteRoleByName(roleName, tenant, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -341,14 +340,12 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* updateRoleName:                                                              */
     /* ---------------------------------------------------------------------------- */
-    public void updateRoleName(String tenant, String user, String roleName, 
-                               String newRoleName)
+    public void updateRoleName(String roleTenant, String roleName, String newRoleName)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqUpdateRoleName();
-        body.setTenant(tenant);
-        body.setUser(user);
+        body.setRoleTenant(roleTenant);
         body.setNewRoleName(newRoleName);
         
         // Make the REST call.
@@ -366,14 +363,12 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* updateRoleOwner:                                                             */
     /* ---------------------------------------------------------------------------- */
-    public void updateRoleOwner(String tenant, String user, String roleName, 
-                                String newOwner)
+    public void updateRoleOwner(String tenant, String roleName, String newOwner)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqUpdateRoleOwner();
-        body.setTenant(tenant);
-        body.setUser(user);
+        body.setRoleTenant(tenant);
         body.setNewOwner(newOwner);
         
         // Make the REST call.
@@ -391,15 +386,13 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* updateRoleDescription:                                                       */
     /* ---------------------------------------------------------------------------- */
-    public void updateRoleDescription(String tenant, String user, String roleName, 
-                                      String description)
+    public void updateRoleDescription(String roleTenant, String roleName, String newDescription)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqUpdateRoleDescription();
-        body.setTenant(tenant);
-        body.setUser(user);
-        body.setDescription(description);
+        body.setRoleTenant(roleTenant);
+        body.setNewDescription(newDescription);
         
         // Make the REST call.
         @SuppressWarnings("unused")
@@ -414,16 +407,35 @@ public class SKClient
     }
     
     /* ---------------------------------------------------------------------------- */
+    /* getRolePermissions:                                                          */
+    /* ---------------------------------------------------------------------------- */
+    public List<String> getRolePermissions(String roleTenant, String roleName, boolean immediate)
+     throws TapisClientException
+    {
+        // Make the REST call.
+    	RespNameArray resp = null;
+        try {
+            // Get the API object using default networking.
+            RoleApi roleApi = new RoleApi(_apiClient);
+            resp = roleApi.getRolePermissions(roleName, roleTenant, immediate, false);
+        }
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+        
+        // Return result value.
+        // Return result value.
+        return resp.getResult().getNames();
+    }
+    
+   /* ---------------------------------------------------------------------------- */
     /* addRolePermission:                                                           */
     /* ---------------------------------------------------------------------------- */
-    public int addRolePermission(String tenant, String user, String roleName, 
-                                 String permSpec)
+    public int addRolePermission(String roleTenant, String roleName, String permSpec)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqAddRolePermission();
-        body.setTenant(tenant);
-        body.setUser(user);
+        body.setRoleTenant(roleTenant);
         body.setRoleName(roleName);
         body.setPermSpec(permSpec);
         
@@ -445,14 +457,12 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* removeRolePermission:                                                        */
     /* ---------------------------------------------------------------------------- */
-    public int removeRolePermission(String tenant, String user, String roleName, 
-                                    String permSpec)
+    public int removeRolePermission(String roleTenant, String roleName, String permSpec)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqRemoveRolePermission();
-        body.setTenant(tenant);
-        body.setUser(user);
+        body.setRoleTenant(roleTenant);
         body.setRoleName(roleName);
         body.setPermSpec(permSpec);
         
@@ -474,14 +484,12 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* addChildRole:                                                                */
     /* ---------------------------------------------------------------------------- */
-    public int addChildRole(String tenant, String user, String parentRoleName, 
-                            String childRoleName)
+    public int addChildRole(String roleTenant, String parentRoleName, String childRoleName)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqAddChildRole();
-        body.setTenant(tenant);
-        body.setUser(user);
+        body.setRoleTenant(roleTenant);
         body.setParentRoleName(parentRoleName);
         body.setChildRoleName(childRoleName);
         
@@ -503,14 +511,12 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* removeChildRole:                                                             */
     /* ---------------------------------------------------------------------------- */
-    public int removeChildRole(String tenant, String user, String parentRoleName, 
-                               String childRoleName)
+    public int removeChildRole(String roleTenant, String parentRoleName, String childRoleName)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqRemoveChildRole();
-        body.setTenant(tenant);
-        body.setUser(user);
+        body.setRoleTenant(roleTenant);
         body.setParentRoleName(parentRoleName);
         body.setChildRoleName(childRoleName);
         
@@ -532,8 +538,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* previewPathPrefix:                                                           */
     /* ---------------------------------------------------------------------------- */
-    public List<Transformation> previewPathPrefix(String tenant, String user, 
-                                                  String schema, String roleName,
+    public List<Transformation> previewPathPrefix(String tenant, String schema, String roleName,
                                                   String oldSystemId, String newSystemId,
                                                   String oldPrefix, String newPrefix)
      throws TapisClientException
@@ -541,7 +546,6 @@ public class SKClient
         // Assign input body.
         var body = new ReqPreviewPathPrefix();
         body.setTenant(tenant);
-        body.setUser(user);
         body.setSchema(schema);
         body.setRoleName(roleName);
         body.setOldSystemId(oldSystemId);
@@ -566,15 +570,14 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* replacePathPrefix:                                                           */
     /* ---------------------------------------------------------------------------- */
-    public int replacePathPrefix(String tenant, String user, String schema, 
-                                 String roleName, String oldSystemId, String newSystemId,
+    public int replacePathPrefix(String tenant, String schema, String roleName,
+                                 String oldSystemId, String newSystemId,
                                  String oldPrefix, String newPrefix)
      throws TapisClientException
     {
         // Assign input body.
         var body = new ReqReplacePathPrefix();
         body.setTenant(tenant);
-        body.setUser(user);
         body.setSchema(schema);
         body.setRoleName(roleName);
         body.setOldSystemId(oldSystemId);
@@ -621,7 +624,7 @@ public class SKClient
     }
     
     /* ---------------------------------------------------------------------------- */
-    /* getUserNames:                                                                */
+    /* getUserRoles:                                                                */
     /* ---------------------------------------------------------------------------- */
     public List<String> getUserRoles(String tenant, String user)
      throws TapisClientException
@@ -754,7 +757,7 @@ public class SKClient
     }
     
     /* ---------------------------------------------------------------------------- */
-    /* grantRoleWithPermission:                                                     */
+    /* grantUserPermission:                                                         */
     /* ---------------------------------------------------------------------------- */
     public int grantUserPermission(String tenant, String user, String permSpec)
      throws TapisClientException

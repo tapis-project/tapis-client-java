@@ -24,7 +24,7 @@ public class SKVaultTest
     /* ---------------------------------------------------------------------- */
     /* testRole:                                                              */
     /* ---------------------------------------------------------------------- */
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void testRole() throws TapisClientException
     {
         SKClient skClient = new SKClient(null, JWT);
