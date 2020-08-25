@@ -92,6 +92,26 @@ else
   exit 1
 fi
 
+# If running against local service make sure we have env vars required
+# Make sure we have the service password, db password and db URL
+if [ "$RUN_SVC" = "local" ]; then
+  if [ -z "$TAPIS_SERVICE_PASSWORD" ]; then
+    echo "ERROR: Please set env variable TAPIS_SERVICE_PASSWORD to the systems service password"
+    echo $USAGE1
+    exit 1
+  fi
+  if [ -z "$TAPIS_DB_PASSWORD" ]; then
+    echo "ERROR: Please set env variable TAPIS_DB_PASSWORD"
+    echo $USAGE1
+    exit 1
+  fi
+  if [ -z "$TAPIS_DB_JDBC_URL" ]; then
+    echo "ERROR: Please set env variable TAPIS_DB_JDBC_URL"
+    echo $USAGE1
+    exit 1
+  fi
+fi
+
 # If running against k8s and not locally set an env
 #   var to let the client test program know. Default is
 #   to look for systems service locally.
@@ -124,8 +144,8 @@ if [ "$RUN_SVC" = "local" ]; then
  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
  echo "Docker container ID: $DOCK_RUN_ID"
  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
- echo "Pausing 10 seconds ... "
- sleep 10
+ echo "Pausing 5 seconds to allow container to start ... "
+ sleep 5
  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
  echo "DOCKER PS"
  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -133,8 +153,8 @@ if [ "$RUN_SVC" = "local" ]; then
  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
  docker logs "$DOCK_RUN_ID"
  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
- echo "Pausing 10 seconds ... "
- sleep 10
+ echo "Pausing 5 seconds to allow local service to start ... "
+ sleep 5
  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
  docker logs "$DOCK_RUN_ID"
  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
