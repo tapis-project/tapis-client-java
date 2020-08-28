@@ -10,7 +10,7 @@ Please see the script file for information on how to run the script and which
 environment variables must be set prior to running the script.
 Note that running against the k8s PROD environment is not currently supported
 because the script uses SQL to cleanup DB artifacts and that seems too risky
-at this point.
+for PROD at this point.
 
 When running against the local service the script docker_run_sys_svc.sh is used
 to start the service and the script delete_client_test_data.sh is used to
