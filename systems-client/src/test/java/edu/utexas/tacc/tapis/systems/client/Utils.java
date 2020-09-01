@@ -22,10 +22,19 @@ package edu.utexas.tacc.tapis.systems.client;
  *  NOTE that service port is ignored if TAPIS_SVC_URL_SYSTEMS is set
  */
 
+import com.google.gson.JsonObject;
+import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
+import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
+import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
+import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,8 +46,14 @@ public final class Utils
 {
   // Test data
   public static final String tenantName = "dev";
-  public static final String ownerUser = "testuser2";
-  public static final String adminUser = "testSystemsAdminUsr";
+  public static final String testUser1 = "testuser1";
+  public static final String testUser2 = "testuser2";
+  public static final String testUser3 = "testuser3";
+  public static final String testUser4 = "testuser4";
+  public static final String testUser9 = "testuser9";
+  public static final String adminUser = testUser9;
+  public static final String ownerUser1 = testUser1;
+  public static final String ownerUser2 = testUser2;
   public static final String masterTenantName = "master";
   public static final String filesSvcName = "files";
   public static final String sysType = ReqCreateSystem.SystemTypeEnum.LINUX.name();
@@ -56,8 +71,40 @@ public final class Utils
   public static final String TAPIS_ENV_FILES_SVC_PASSWORD = "TAPIS_FILES_SERVICE_PASSWORD";
   public static final String TAPIS_ENV_SVC_PORT = "TAPIS_SERVICE_PORT";
 
-  public static final String ownerUser2 = "owner2";
-  public static final String apiUser = "testApiUser";
+  public static final int prot1Port = 22, prot1ProxyPort = 0, prot2Port = 0, prot2ProxyPort = 2222;
+  public static final boolean prot1UseProxy = false, prot2UseProxy = true;
+  public static final String prot1ProxyHost = "proxyhost1", prot2ProxyHost = "proxyhost2";
+
+  public static final List<ReqCreateSystem.TransferMethodsEnum> prot1TxfrMethodsC =
+          Arrays.asList(ReqCreateSystem.TransferMethodsEnum.SFTP, ReqCreateSystem.TransferMethodsEnum.S3);
+  public static final List<TSystem.TransferMethodsEnum> prot1TxfrMethodsT =
+          Arrays.asList(TSystem.TransferMethodsEnum.SFTP, TSystem.TransferMethodsEnum.S3);
+  public static final List<ReqUpdateSystem.TransferMethodsEnum> prot2TxfrMethodsU =
+          Collections.singletonList(ReqUpdateSystem.TransferMethodsEnum.SFTP);
+  public static final List<TSystem.TransferMethodsEnum> prot2TxfrMethodsT =
+          Collections.singletonList(TSystem.TransferMethodsEnum.SFTP);
+  public static final SystemsClient.AccessMethod prot1AccessMethod = SystemsClient.AccessMethod.PKI_KEYS;
+  public static final SystemsClient.AccessMethod prot2AccessMethod = SystemsClient.AccessMethod.ACCESS_KEY;
+
+  public static final List<String> tags1 = Arrays.asList("value1", "value2", "a",
+          "a long tag with spaces and numbers (1 3 2) and special characters [_ $ - & * % @ + = ! ^ ? < > , . ( ) { } / \\ | ]. Backslashes must be escaped.");
+  public static final List<String> tags2 = Arrays.asList("value3", "value4");
+  public static final JsonObject notes1JO =
+          ClientTapisGsonUtils.getGson().fromJson("{\"project\":\"myproj1\", \"testdata\":\"abc1\"}", JsonObject.class);
+  public static final JsonObject notes2JO =
+          ClientTapisGsonUtils.getGson().fromJson("{\"project\":\"myproj2\", \"testdata\":\"abc2\"}", JsonObject.class);
+  public static final List<String> testPerms = new ArrayList<>(List.of("READ", "MODIFY"));
+
+  private static final Capability capA1 = SystemsClient.buildCapability(Capability.CategoryEnum.SCHEDULER, "Type", "Slurm");
+  private static final Capability capB1 = SystemsClient.buildCapability(Capability.CategoryEnum.HARDWARE, "CoresPerNode", "4");
+  private static final Capability capC1 = SystemsClient.buildCapability(Capability.CategoryEnum.SOFTWARE, "OpenMP", "4.5");
+  public static final List<Capability> jobCaps1 = new ArrayList<>(List.of(capA1, capB1, capC1));
+  private static final Capability capA2 = SystemsClient.buildCapability(Capability.CategoryEnum.SCHEDULER, "Type", "Condor");
+  private static final Capability capB2 = SystemsClient.buildCapability(Capability.CategoryEnum.HARDWARE, "CoresPerNode", "128");
+  private static final Capability capC2 = SystemsClient.buildCapability(Capability.CategoryEnum.SOFTWARE, "OpenMP", "3.1");
+  private static final Capability capD2 = SystemsClient.buildCapability(Capability.CategoryEnum.CONTAINER, "Singularity", null);
+  public static final List<Capability> jobCaps2 = new ArrayList<>(List.of(capA2, capB2, capC2, capD2));
+
   public static final String sysNamePrefix = "CSys";
 
   /**
@@ -77,7 +124,7 @@ public final class Utils
       String suffix = key + "_" + String.format("%03d", i);
       String name = sysNamePrefix + "_" + suffix;
       // Constructor initializes all attributes except for JobCapabilities and Credential
-      String[] sys0 = {tenantName, name, "description " + suffix, sysType, ownerUser, "host"+suffix, "effUser"+suffix,
+      String[] sys0 = {tenantName, name, "description " + suffix, sysType, ownerUser1, "host"+suffix, "effUser"+suffix,
               "fakePassword"+suffix,"bucket"+suffix, "/root"+suffix, "jobLocalWorkDir"+suffix, "jobLocalArchDir"+suffix,
               "jobRemoteArchSystem"+suffix, "jobRemoteArchDir"+suffix};
       systems.put(i, sys0);
@@ -114,5 +161,48 @@ public final class Utils
     String s = System.getenv(TAPIS_ENV_BASE_URL);
     if (StringUtils.isBlank(s)) s = DEFAULT_BASE_URL;
     return s;
+  }
+
+  public static String createSystem(SystemsClient clt, String[] sys, int port, SystemsClient.AccessMethod accessMethod, Credential credential,
+                             List<ReqCreateSystem.TransferMethodsEnum> txfrMethods)
+          throws TapisClientException
+  {
+    var accMethod = accessMethod != null ? accessMethod : prot1AccessMethod;
+    var tMethods = txfrMethods != null ? txfrMethods : prot1TxfrMethodsC;
+    ReqCreateSystem rSys = new ReqCreateSystem();
+    rSys.setName(sys[1]);
+    rSys.description(sys[2]);
+    rSys.setSystemType(ReqCreateSystem.SystemTypeEnum.valueOf(sys[3]));
+    rSys.owner(sys[4]);
+    rSys.setHost(sys[5]);
+    rSys.enabled(true);
+    rSys.effectiveUserId(sys[6]);
+    rSys.defaultAccessMethod(ReqCreateSystem.DefaultAccessMethodEnum.valueOf(accMethod.name()));
+    rSys.accessCredential(credential);
+    rSys.bucketName(sys[8]);
+    rSys.rootDir(sys[9]);
+    rSys.setTransferMethods(tMethods);
+//    rSys.port(prot1Port).useProxy(prot1UseProxy).proxyHost(prot1ProxyHost).proxyPort(prot1ProxyPort);
+    rSys.port(port).useProxy(prot1UseProxy).proxyHost(prot1ProxyHost).proxyPort(prot1ProxyPort);
+    rSys.jobCanExec(true);
+    rSys.jobLocalWorkingDir(sys[10]).jobLocalArchiveDir(sys[11]).jobRemoteArchiveSystem(sys[12]).jobRemoteArchiveDir(sys[13]);
+    rSys.jobCapabilities(jobCaps1);
+    rSys.tags(tags1);
+    rSys.notes(notes1JO);
+    // Convert list of TransferMethod enums to list of strings
+//    List<String> transferMethods = Stream.of(txfrMethodsStrList).map(TransferMethodsEnum::name).collect(Collectors.toList());
+    // Create the system
+    return clt.createSystem(rSys);
+  }
+  public static SystemsClient getClientUsr(String serviceURL, String userJWT)
+  {
+    // Create the client each time due to issue with setting different headers needed by svc vs usr client
+
+    // Creating a separate client for svc is not working because headers end up being used for all clients.
+    // Underlying defaultHeaderMap is static so adding headers impacts all clients.
+//    sysClientSvc = new SystemsClient(systemsURL, svcJWT);
+//    sysClientSvc.addDefaultHeader("X-Tapis-User", sysOwner);
+//    sysClientSvc.addDefaultHeader("X-Tapis-Tenant", tenantName);
+    return new SystemsClient(serviceURL, userJWT);
   }
 }
