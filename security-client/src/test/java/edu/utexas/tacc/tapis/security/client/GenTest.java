@@ -34,7 +34,7 @@ public class GenTest
     /* ---------------------------------------------------------------------- */
     /* testRole:                                                              */
     /* ---------------------------------------------------------------------- */
-    @Test
+    @Test(enabled=false)
     public void testRole() throws ApiException
     {
         // Get the API object using default networking.
@@ -44,17 +44,16 @@ public class GenTest
         
         // Create a role.
         ReqCreateRole body = new ReqCreateRole();
-        body.setTenant("dev");
-        body.setUser("testuser2");
+        body.setRoleTenant("dev");
         body.setRoleName("peachy");
         body.setDescription("This is a peachy description.");
         RespResourceUrl urlResp = roleApi.createRole(body,true);
         System.out.println("createRole: " + urlResp + "\n");
         System.out.println("createRole: " + urlResp.getResult().getUrl() + "\n");
         
-        
-        RespChangeCount countResp = roleApi.deleteRoleByName("peachy", body.getTenant(),
-                                                             body.getUser(), true);
+        final String user = "testuser2";
+        RespChangeCount countResp = roleApi.deleteRoleByName("peachy", body.getRoleTenant(),
+                                                             true);
         System.out.println("deleteRoleByName: " + countResp + "\n");
         
         System.out.println(ClientTapisGsonUtils.getGson(true).toJson(countResp));

@@ -24,14 +24,14 @@ public class SKClientTest
     /* ---------------------------------------------------------------------- */
     /* testRole:                                                              */
     /* ---------------------------------------------------------------------- */
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void testRole() throws TapisClientException
     {
         SKClient skClient = new SKClient(null, JWT);
         
         // Create a role.
         String resp1;
-        try {resp1 = skClient.createRole("dev", "testuser2", "peachy", 
+        try {resp1 = skClient.createRole("dev", "peachy", 
                                          "This is a peachy description.");}
             catch (Exception e) {
                 System.out.println(e.toString());
@@ -41,7 +41,8 @@ public class SKClientTest
         
         // Delete a role.
         Integer resp2;
-        try {resp2 = skClient.deleteRoleByName("dev", "testuser2", "peachy");}
+        final String user = "testuser2";
+        try {resp2 = skClient.deleteRoleByName("dev", "peachy");}
         catch (Exception e) {
             System.out.println(e.toString());
             throw e;
@@ -52,7 +53,7 @@ public class SKClientTest
     /* ---------------------------------------------------------------------- */
     /* testGetUsersWithRole:                                                  */
     /* ---------------------------------------------------------------------- */
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void testGetUsersWithRole() throws TapisClientException
     {
         SKClient skClient = new SKClient(null, JWT);
@@ -62,7 +63,7 @@ public class SKClientTest
         
         // Create a role.
         String resp1;
-        try {resp1 = skClient.createRole(tenant, user, roleName, "you little piggy.");}
+        try {resp1 = skClient.createRole(tenant, roleName, "you little piggy.");}
             catch (Exception e) {
                 System.out.println(e.toString());
                 throw e;
@@ -98,7 +99,7 @@ public class SKClientTest
         
         // Delete a role.
         Integer resp5;
-        try {resp5 = skClient.deleteRoleByName(tenant, user, roleName);}
+        try {resp5 = skClient.deleteRoleByName(tenant, roleName);}
         catch (Exception e) {
             System.out.println(e.toString());
             throw e;

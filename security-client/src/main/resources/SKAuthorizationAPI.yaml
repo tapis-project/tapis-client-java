@@ -33,7 +33,7 @@ paths:
       description: |-
         Get the names of all roles in the tenant in alphabetic order.  Future enhancements will include search filtering.
 
-        A valid tenant must be specified as a query parameter.
+        A valid tenant must be specified as a query parameter.  This request is authorized if the requestor is a user that has access to the specified tenant or if the requestor is a service.
       operationId: getRoleNames
       parameters:
         - name: tenant
@@ -78,11 +78,7 @@ paths:
       description: |-
         Create a role using a request body.  Role names are case sensitive, alpha-numeric strings that can also contain underscores.  Role names must start with an alphbetic character and can be no more than 58 characters in length.  The desciption can be no more than 2048 characters long.  If the role already exists, this request has no effect.
 
-        A valid tenant and user must be specified in the request body.  The user@tenant in the request payload is authorized and becomes the new role's owner only if:
-
-        - the user@tenant in a user JWT is the same as the user@tenant in the request payload, or
-        - the user@tenant in the JWT represents a tenant administrator,  or
-        - the user@tenant in a service JWT is allowed to act on behalf of the request tenant.
+        For the request to be authorized, the requestor must be either an administrator or a service allowed to perform updates in the new role's tenant.
       operationId: createRole
       parameters:
         - name: pretty
@@ -133,7 +129,7 @@ paths:
     get:
       tags:
         - role
-      description: Get the named role's definition.  A valid tenant must be specified as a query parameter.
+      description: Get the named role's definition.  A valid tenant must be specified as a query parameter.  This request is authorized if the requestor is a user that has access to the specified tenant or if the requestor is a service.
       operationId: getRoleByName
       parameters:
         - name: roleName
@@ -189,12 +185,7 @@ paths:
       description: |-
         Delete the named role. A valid tenant and user must be specified as query parameters.
 
-        The user@tenant specified in the request query parameters is authorized to delete the role only if:
-
-        - the user@tenant in the JWT represents the user that owns the role, or
-        - the user@tenant in the JWT represents a tenant administrator,  or
-        - the user@tenant in a service JWT is acting on behalf of the role owner, or
-        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
+        This request is authorized only if the authenticated user is either the role owner or an administrator.
       operationId: deleteRoleByName
       parameters:
         - name: roleName
@@ -203,10 +194,6 @@ paths:
           schema:
             type: string
         - name: tenant
-          in: query
-          schema:
-            type: string
-        - name: user
           in: query
           schema:
             type: string
@@ -246,7 +233,10 @@ paths:
     get:
       tags:
         - role
-      description: 'Get the named role''s permissions.  By default, all permissions assigned to the role, whether directly and transitively through child roles, are returned.  Set the immediate query parameter to only retrieve permissions directly assigned to the role.  A valid tenant must be specified.'
+      description: |-
+        Get the named role's permissions.  By default, all permissions assigned to the role, whether directly and transitively through child roles, are returned.  Set the immediate query parameter to only retrieve permissions directly assigned to the role.  A valid tenant must be specified.
+
+        This request is authorized if the requestor is a user that has access to the specified tenant or if the requestor is a service.
       operationId: getRolePermissions
       parameters:
         - name: roleName
@@ -274,7 +264,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RespRole'
+                $ref: '#/components/schemas/RespNameArray'
         '400':
           description: Input error.
           content:
@@ -308,12 +298,7 @@ paths:
       description: |-
         Update an existing role's name using a request body.  Role names are case sensitive, alphanumeric strings that can contain underscores but must begin with an alphabetic character.  The limit on role name is 58 characters.
 
-        The user@tenant specified in the request payload is authorized to update the role name only if:
-
-        - the user@tenant in the JWT represents the user that owns the role, or
-        - the user@tenant in the JWT represents a tenant administrator,  or
-        - the user@tenant in a service JWT is acting on behalf of the role owner, or
-        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
+        This request is authorized if the requestor is the role owner or an administrator.
       operationId: updateRoleName
       parameters:
         - name: roleName
@@ -370,14 +355,9 @@ paths:
       tags:
         - role
       description: |-
-        Update an existing role's owner using a request body.
+        Update an existing role's owner using a request body. Required parameters in the payload are the *roleTenant*, which is the tenant of named role, and *newOwner*, which is the user to which role ownership is being transferred. The *newTenant* payload parameter is optional and only needed when the new owner resides in a different tenant than that of the current owner.
 
-        The user@tenant specified in the request payload is authorized to update the role owner only if:
-
-        - the user@tenant in the JWT represents the user that owns the role, or
-        - the user@tenant in the JWT represents a tenant administrator,  or
-        - the user@tenant in a service JWT is acting on behalf of the role owner, or
-        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
+        This request is authorized if the requestor is the role owner or an administrator. If a new tenant is specified, then the requestor must also be allowed to act in the new tenant.
       operationId: updateRoleOwner
       parameters:
         - name: roleName
@@ -436,12 +416,7 @@ paths:
       description: |-
         Update an existing role's decription using a request body.  The size limit on a description is 2048 characters.
 
-        The user@tenant specified in the request payload is authorized to update the role description only if:
-
-        - the user@tenant in the JWT represents the user that owns the role, or
-        - the user@tenant in the JWT represents a tenant administrator,  or
-        - the user@tenant in a service JWT is acting on behalf of the role owner, or
-        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
+        This request is authorized if the requestor is the role owner or an administrator.
       operationId: updateRoleDescription
       parameters:
         - name: roleName
@@ -505,12 +480,7 @@ paths:
 
         See the Shiro documentation for further details.  Note that the three reserved characters, [: * ,], cannot appear in the text of any part.  It's the application's responsibility to escape those characters in a manner that is safe in the application's domain.
 
-        The user@tenant specified in the request payload is authorized to add a permission to the role only if:
-
-        - the user@tenant in the JWT represents the user that owns the role, or
-        - the user@tenant in the JWT represents a tenant administrator,  or
-        - the user@tenant in a service JWT is acting on behalf of the role owner, or
-        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
+        This request is authorized only if the authenticated user is either the role owner or an administrator.
       operationId: addRolePermission
       parameters:
         - name: pretty
@@ -562,14 +532,9 @@ paths:
       tags:
         - role
       description: |-
-        Remove a permission from a role using a request body.  A valid tenant and user must be specified in the request body.
+        Remove a permission from a role using a request body.  A valid role, roleTenant and permission must be specified in the request body.
 
-        The user@tenant specified in the request payload is authorized to remove a permission from the role only if:
-
-        - the user@tenant in the JWT represents the user that owns the role, or
-        - the user@tenant in the JWT represents a tenant administrator,  or
-        - the user@tenant in a service JWT is acting on behalf of the role owner, or
-        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
+        Only the role owner or administrators are authorized to make this call.
       operationId: removeRolePermission
       parameters:
         - name: pretty
@@ -623,12 +588,7 @@ paths:
       description: |-
         Add a child role to another role using a request body.  If the child already exists, then the request has no effect and the change count returned is zero. Otherwise, the child is added and the change count is one.
 
-        The user@tenant specified in the request payload is authorized to a child role to the parent role only if:
-
-        - the user@tenant in the JWT represents the user that owns the role, or
-        - the user@tenant in the JWT represents a tenant administrator,  or
-        - the user@tenant in a service JWT is acting on behalf of the owner of both roles, or
-        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
+        The user@tenant identity specified in JWT is authorized to make this request only if that user is an administrator or if the user owns both the parent and child roles.
       operationId: addChildRole
       parameters:
         - name: pretty
@@ -682,12 +642,7 @@ paths:
       description: |-
         Remove a child role from a parent role using a request body.  A valid tenant and user must be specified in the request body.
 
-        The user@tenant specified in the request payload is authorized to remove a permission from the role only if:
-
-        - the user@tenant in the JWT represents the user that owns the role, or
-        - the user@tenant in the JWT represents a tenant administrator,  or
-        - the user@tenant in a service JWT is acting on behalf of the parent role owner, or
-        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
+        The user@tenant identity specified in JWT is authorized to make this request only if that user is an administrator or if they own the parent role.
       operationId: removeChildRole
       parameters:
         - name: pretty
@@ -751,7 +706,7 @@ paths:
 
         The result object contains an array of transformation objects, each of which contains the unique permission sequence number, the existing permission that matched the search criteria and the new permission if the specified transformations were applied.
 
-        A valid tenant and user must be specified in the request body.
+        A valid tenant and user must be specified in the request body.  This request is authorized if the requestor is a user that has access to the specified tenant or if the requestor is a service.
       operationId: previewPathPrefix
       parameters:
         - name: pretty
@@ -821,10 +776,7 @@ paths:
 
         The input parameters are passed in the payload of this request.  The response indicates the number of changed permission specifications.
 
-        The path prefix replacement operation is authorized only if:
-
-        - the user@tenant in the JWT represents a tenant administrator, or
-        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
+        The path prefix replacement operation is authorized if the user@tenant in the JWT represents a tenant administrator or the Files service.
       operationId: replacePathPrefix
       parameters:
         - name: pretty
@@ -917,25 +869,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  /security/ready:
-    get:
-      tags:
-        - general
-      description: Lightwieght readiness check. No authorization required.
-      operationId: ready
-      responses:
-        '200':
-          description: Service ready.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespProbe'
-        '503':
-          description: Service unavailable.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespProbe'
   /security/hello:
     get:
       tags:
@@ -976,11 +909,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespProbe'
+  /security/ready:
+    get:
+      tags:
+        - general
+      description: Lightwieght readiness check. No authorization required.
+      operationId: ready
+      responses:
+        '200':
+          description: Service ready.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespProbe'
+        '503':
+          description: Service unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespProbe'
   /security/user/hasRole:
     post:
       tags:
         - user
-      description: 'Check whether a user in a tenant has been assigned the specified role, either directly or transitively.'
+      description: |-
+        Check whether a user in a tenant has been assigned the specified role, either directly or transitively.
+
+        This request is authorized if the requestor is a user that has access to the specified tenant or if the requestor is a service.
       operationId: hasRole
       parameters:
         - name: pretty
@@ -1021,347 +976,11 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
       security:
         - TapisJWT: []
-  '/security/user/defaultRole/{user}':
-    get:
-      tags:
-        - user
-      description: |-
-        Get a user's default role. The default role is implicitly created by the system when needed if it doesn't already exist. No authorization required.
-
-        A user's default role is constructed by prepending '$$' to the user's name.  This implies the maximum length of a user name is 58 since role names are limited to 60 characters.
-      operationId: getDefaultUserRole_1
-      parameters:
-        - name: user
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      responses:
-        '200':
-          description: The user's default role name.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespName'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-  /security/user:
-    get:
-      tags:
-        - user
-      description: Get the names of all users in the tenant that have been granted a role or permission.
-      operationId: getUserNames
-      parameters:
-        - name: tenant
-          in: query
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      responses:
-        '200':
-          description: Sorted list of user names.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespNameArray'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-      security:
-        - TapisJWT: []
-  '/security/user/roles/{user}':
-    get:
-      tags:
-        - user
-      description: 'Get the roles assigned to a user in the specified tenant, including those assigned transively.'
-      operationId: getUserRoles
-      parameters:
-        - name: user
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: tenant
-          in: query
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      responses:
-        '200':
-          description: List of roles names assigned to the user.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespNameArray'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-      security:
-        - TapisJWT: []
-  '/security/user/perms/{user}':
-    get:
-      tags:
-        - user
-      description: |+
-        Get the permissions assigned to a user in a tenant, including those assigned transively.  The result list can be optionally filtered by the one or both of the query parameters: implies and impliedBy.
-
-        The implied parameter removes permissions from the result list that the specified permission do not imply. The impliedBy parameter removes permissions from the result list that the specified permission are not implied by. Below are some examples.Consider a user that is assigned these permissions:
-
-            stream:dev:read:project1
-            stream:dev:read,write:project1
-            stream:dev:read,write,exec:project1
-
-        **Using the *implies* Query Parameter**
-
-        When _implies=stream:dev:*:project1_, this endpoint returns:
-
-            stream:dev:read:project1
-            stream:dev:read,write:project1
-            stream:dev:read,write,exec:project1
-
-        When _implies=stream:dev:write:project1_, this endpoint returns an empty list.
-
-        **Using the *impliedBy* Query Parameter**
-
-        When _impliedBy=stream:dev:*:project1_, this endpoint returns an empty list.
-
-        When _impliedBy=stream:dev:write:project1_, this endpoint returns:
-
-            stream:dev:read,write:project1
-            stream:dev:read,write,exec:project1
-
-      operationId: getUserPerms
-      parameters:
-        - name: user
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: tenant
-          in: query
-          schema:
-            type: string
-        - name: implies
-          in: query
-          schema:
-            type: string
-            default: ''
-        - name: impliedBy
-          in: query
-          schema:
-            type: string
-            default: ''
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      responses:
-        '200':
-          description: List of permissions assigned to the user.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespNameArray'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-      security:
-        - TapisJWT: []
-  /security/user/grantRole:
-    post:
-      tags:
-        - user
-      description: |-
-        Grant a user the specified role.  A valid tenant and user must be specified in the request body.
-
-        The user@tenant specified in the request payload is authorized to grant the role only if:
-
-        - the user@tenant in the JWT represents the user that owns the role, or
-        - the user@tenant in the JWT represents a tenant administrator,  or
-        - the user@tenant in a service JWT is acting on behalf of the role owner, or
-        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
-      operationId: grantRole
-      parameters:
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqGrantUserRole'
-        required: true
-      responses:
-        '200':
-          description: Role assigned to user.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespChangeCount'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '404':
-          description: Named role not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespName'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-      security:
-        - TapisJWT: []
-  /security/user/revokeUserRole:
-    post:
-      tags:
-        - user
-      description: |-
-        Revoke a previously granted role from a user. No action is taken if the user is not currently assigned the role. This request is idempotent.
-
-        The user@tenant specified in the request payload is authorized to revoke the role only if:
-
-        - the user@tenant in the JWT represents the user that owns the role, or
-        - the user@tenant in the JWT represents a tenant administrator,  or
-        - the user@tenant in a service JWT is acting on behalf of the role owner, or
-        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.
-      operationId: revokeUserRole
-      parameters:
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqRevokeUserRole'
-        required: true
-      responses:
-        '200':
-          description: Role removed from user.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespChangeCount'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-      security:
-        - TapisJWT: []
   /security/user/grantAdminRole:
     post:
       tags:
         - user
-      description: |-
-        Grant a user the tenant administrator role.  A valid tenant and user must be specified in the request body.  The user specified in the JWT must themselves be an administrator.
-
-        A valid tenant and user must be specified in the request body.
+      description: Grant a user the tenant administrator role.  A valid tenant and user must be specified in the request body.  The user specified in the JWT must be an administrator in the tenant specified in the request body.
       operationId: grantAdminRole
       parameters:
         - name: pretty
@@ -1460,7 +1079,10 @@ paths:
     post:
       tags:
         - user
-      description: 'Check whether a user in a tenant has been assigned the tenant administrator role, either directly or transitively.'
+      description: |-
+        Check whether a user in a tenant has been assigned the tenant administrator role, either directly or transitively.
+
+        This request is authorized if the requestor is a user that has access to the specified tenant or if the requestor is a service.
       operationId: isAdmin
       parameters:
         - name: pretty
@@ -1505,7 +1127,10 @@ paths:
     get:
       tags:
         - user
-      description: Get all users assigned the tenant administrator role ($!tenant_admin).
+      description: |-
+        Get all users assigned the tenant administrator role ($!tenant_admin).
+
+        This request is authorized if the requestor is a user that has access to the specified tenant or if the requestor is a service.
       operationId: getAdmins
       parameters:
         - name: tenant
@@ -1555,7 +1180,10 @@ paths:
     get:
       tags:
         - user
-      description: Get all users assigned a role.  The role must exist in the tenant.
+      description: |-
+        Get all users assigned a role.  The role must exist in the tenant.
+
+        This request is authorized if the requestor is a user that has access to the specified tenant or if the requestor is a service.
       operationId: getUsersWithRole
       parameters:
         - name: roleName
@@ -1616,7 +1244,7 @@ paths:
 
         The change count returned can range from zero to three depending on how many insertions and updates were actually required
 
-        The caller must be an administrator or service.
+        The caller must be an administrator or service allowed to perform updates in the user's tenant.
       operationId: grantUserPermission
       parameters:
         - name: pretty
@@ -1649,65 +1277,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-      security:
-        - TapisJWT: []
-  /security/user/grantRoleWithPerm:
-    post:
-      tags:
-        - user
-      description: |-
-        Grant a user the specified role containing the specified permission.  This compound request first adds the permission to the role if it is not already a member of the role and then assigns the role to the user.  The change count returned can range from zero to two depending on how many insertions were actually required.
-
-        The user@tenant specified in the request payload is authorized to grant the role only if:
-
-        - the user@tenant in the JWT represents the user that owns the role, or
-        - the user@tenant in the JWT represents a tenant administrator,  or
-        - the user@tenant in a service JWT is acting on behalf of the role owner, or
-        - the user@tenant in a service JWT is acting on behalf of a tenant administrator.A valid tenant and user must be specified in the request body.
-      operationId: grantRoleWithPermission
-      parameters:
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqGrantUserRoleWithPermission'
-        required: true
-      responses:
-        '200':
-          description: Permission assigned to user.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespChangeCount'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '404':
-          description: Role not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespName'
         '500':
           description: Server error.
           content:
@@ -1766,11 +1335,68 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
       security:
         - TapisJWT: []
+  /security/user/grantRoleWithPerm:
+    post:
+      tags:
+        - user
+      description: |-
+        Grant a user the specified role containing the specified permission.  This compound request first adds the permission to the role if it is not already a member of the role and then assigns the role to the user.  The change count returned can range from zero to two depending on how many insertions were actually required.
+
+        Only the role owner or an administrator is authorized to make this request.  The user and the role must be in the same tenant.
+      operationId: grantRoleWithPermission
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqGrantUserRoleWithPermission'
+        required: true
+      responses:
+        '200':
+          description: Permission assigned to user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Role not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   /security/user/hasRoleAny:
     post:
       tags:
         - user
-      description: Check whether a user in a tenant has been assigned any of the roles specified in the request body.
+      description: |-
+        Check whether a user in a tenant has been assigned any of the roles specified in the request body.
+
+        This request is authorized if the requestor is a user that has access to the specified tenant or if the requestor is a service.
       operationId: hasRoleAny
       parameters:
         - name: pretty
@@ -1815,7 +1441,10 @@ paths:
     post:
       tags:
         - user
-      description: Check whether a user in a tenant has been assigned all of the roles specified in the request body.
+      description: |-
+        Check whether a user in a tenant has been assigned all of the roles specified in the request body.
+
+        This request is authorized if the requestor is a user that has access to the specified tenant or if the requestor is a service.
       operationId: hasRoleAll
       parameters:
         - name: pretty
@@ -1860,7 +1489,10 @@ paths:
     post:
       tags:
         - user
-      description: 'Check whether specified permission matches a permission assigned to the user, either directly or transitively.'
+      description: |-
+        Check whether specified permission matches a permission assigned to the user, either directly or transitively.
+
+        This request is authorized if the requestor is a user that has access to the specified tenant or if the requestor is a service.
       operationId: isPermitted
       parameters:
         - name: pretty
@@ -1905,7 +1537,10 @@ paths:
     post:
       tags:
         - user
-      description: Check whether a user's permissions satisfy any of the permission specifications contained in the request body.
+      description: |-
+        Check whether a user's permissions satisfy any of the permission specifications contained in the request body.
+
+        This request is authorized if the requestor is a user that has access to the specified tenant or if the requestor is a service.
       operationId: isPermittedAny
       parameters:
         - name: pretty
@@ -1950,7 +1585,10 @@ paths:
     post:
       tags:
         - user
-      description: Check whether a user's permissions satisfy all of the permission specifications contained in the request body.
+      description: |-
+        Check whether a user's permissions satisfy all of the permission specifications contained in the request body.
+
+        This request is authorized if the requestor is a user that has access to the specified tenant or if the requestor is a service.
       operationId: isPermittedAll
       parameters:
         - name: pretty
@@ -2007,6 +1645,8 @@ paths:
             system:mytenant:%
 
         The wildcard character cannot appear as the first character in the permSpec.
+
+        This request is authorized if the requestor is a user that has access to the specified tenant or if the requestor is a service.
       operationId: getUsersWithPermission
       parameters:
         - name: permSpec
@@ -2030,6 +1670,336 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespNameArray'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  '/security/user/defaultRole/{user}':
+    get:
+      tags:
+        - user
+      description: |-
+        Get a user's default role. The default role is implicitly created by the system when needed if it doesn't already exist. No authorization required.
+
+        A user's default role is constructed by prepending '$$' to the user's name.  This implies the maximum length of a user name is 58 since role names are limited to 60 characters.
+      operationId: getDefaultUserRole_1
+      parameters:
+        - name: user
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: The user's default role name.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  /security/user:
+    get:
+      tags:
+        - user
+      description: |-
+        Get the names of all users in the tenant that have been granted a role or permission.
+
+        This request is authorized if the requestor is a user that has access to the specified tenant or if the requestor is a service.
+      operationId: getUserNames
+      parameters:
+        - name: tenant
+          in: query
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Sorted list of user names.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespNameArray'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  '/security/user/roles/{user}':
+    get:
+      tags:
+        - user
+      description: |-
+        Get the roles assigned to a user in the specified tenant, including those assigned transively.
+
+        This request is authorized if the requestor is a user that has access to the specified tenant or if the requestor is a service.
+      operationId: getUserRoles
+      parameters:
+        - name: user
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: List of roles names assigned to the user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespNameArray'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  '/security/user/perms/{user}':
+    get:
+      tags:
+        - user
+      description: |-
+        Get the permissions assigned to a user in a tenant, including those assigned transively.  The result list can be optionally filtered by the one or both of the query parameters: implies and impliedBy.
+
+        The implied parameter removes permissions from the result list that the specified permission do not imply. The impliedBy parameter removes permissions from the result list that the specified permission are not implied by. Below are some examples.Consider a user that is assigned these permissions:
+
+            stream:dev:read:project1
+            stream:dev:read,write:project1
+            stream:dev:read,write,exec:project1
+
+        **Using the *implies* Query Parameter**
+
+        When _implies=stream:dev:*:project1_, this endpoint returns:
+
+            stream:dev:read:project1
+            stream:dev:read,write:project1
+            stream:dev:read,write,exec:project1
+
+        When _implies=stream:dev:write:project1_, this endpoint returns an empty list.
+
+        **Using the *impliedBy* Query Parameter**
+
+        When _impliedBy=stream:dev:*:project1_, this endpoint returns an empty list.
+
+        When _impliedBy=stream:dev:write:project1_, this endpoint returns:
+
+            stream:dev:read,write:project1
+            stream:dev:read,write,exec:project1
+
+        This request is authorized if the requestor is a user that has access to the specified tenant or if the requestor is a service.
+      operationId: getUserPerms
+      parameters:
+        - name: user
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: tenant
+          in: query
+          schema:
+            type: string
+        - name: implies
+          in: query
+          schema:
+            type: string
+            default: ''
+        - name: impliedBy
+          in: query
+          schema:
+            type: string
+            default: ''
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: List of permissions assigned to the user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespNameArray'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  /security/user/grantRole:
+    post:
+      tags:
+        - user
+      description: |-
+        Grant a user the specified role.  A valid tenant and user must be specified in the request body.
+
+        This request is authorized only if the requestor is the role owner or an administrator.  The user and the role must be in the same tenant.
+      operationId: grantRole
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqGrantUserRole'
+        required: true
+      responses:
+        '200':
+          description: Role assigned to user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Named role not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  /security/user/revokeUserRole:
+    post:
+      tags:
+        - user
+      description: |-
+        Revoke a previously granted role from a user. No action is taken if the user is not currently assigned the role. This request is idempotent.
+
+        This request is authorized only if the requestor is the role owner or an administrator.
+      operationId: revokeUserRole
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqRevokeUserRole'
+        required: true
+      responses:
+        '200':
+          description: Role removed from user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
         '400':
           description: Input error.
           content:
@@ -3144,9 +3114,7 @@ components:
     ReqCreateRole:
       type: object
       properties:
-        tenant:
-          type: string
-        user:
+        roleTenant:
           type: string
         roleName:
           type: string
@@ -3193,15 +3161,21 @@ components:
           type: string
         description:
           type: string
+        owner:
+          type: string
+        ownerTenant:
+          type: string
         created:
           type: string
         createdby:
+          type: string
+        createdbyTenant:
           type: string
         updated:
           type: string
         updatedby:
           type: string
-        owner:
+        updatedbyTenant:
           type: string
     RespName:
       type: object
@@ -3239,36 +3213,30 @@ components:
     ReqUpdateRoleName:
       type: object
       properties:
-        tenant:
-          type: string
-        user:
+        roleTenant:
           type: string
         newRoleName:
           type: string
     ReqUpdateRoleOwner:
       type: object
       properties:
-        tenant:
-          type: string
-        user:
+        roleTenant:
           type: string
         newOwner:
+          type: string
+        newTenant:
           type: string
     ReqUpdateRoleDescription:
       type: object
       properties:
-        tenant:
+        roleTenant:
           type: string
-        user:
-          type: string
-        description:
+        newDescription:
           type: string
     ReqAddRolePermission:
       type: object
       properties:
-        tenant:
-          type: string
-        user:
+        roleTenant:
           type: string
         roleName:
           type: string
@@ -3277,9 +3245,7 @@ components:
     ReqRemoveRolePermission:
       type: object
       properties:
-        tenant:
-          type: string
-        user:
+        roleTenant:
           type: string
         roleName:
           type: string
@@ -3288,9 +3254,7 @@ components:
     ReqAddChildRole:
       type: object
       properties:
-        tenant:
-          type: string
-        user:
+        roleTenant:
           type: string
         parentRoleName:
           type: string
@@ -3299,9 +3263,7 @@ components:
     ReqRemoveChildRole:
       type: object
       properties:
-        tenant:
-          type: string
-        user:
+        roleTenant:
           type: string
         parentRoleName:
           type: string
@@ -3335,8 +3297,6 @@ components:
       properties:
         tenant:
           type: string
-        user:
-          type: string
         schema:
           type: string
         roleName:
@@ -3353,8 +3313,6 @@ components:
       type: object
       properties:
         tenant:
-          type: string
-        user:
           type: string
         schema:
           type: string
@@ -3418,24 +3376,6 @@ components:
           type: string
         orAdmin:
           type: boolean
-    ReqGrantUserRole:
-      type: object
-      properties:
-        tenant:
-          type: string
-        user:
-          type: string
-        roleName:
-          type: string
-    ReqRevokeUserRole:
-      type: object
-      properties:
-        tenant:
-          type: string
-        user:
-          type: string
-        roleName:
-          type: string
     ReqGrantAdminRole:
       type: object
       properties:
@@ -3466,6 +3406,15 @@ components:
           type: string
         permSpec:
           type: string
+    ReqRevokeUserPermission:
+      type: object
+      properties:
+        tenant:
+          type: string
+        user:
+          type: string
+        permSpec:
+          type: string
     ReqGrantUserRoleWithPermission:
       type: object
       properties:
@@ -3474,15 +3423,6 @@ components:
         user:
           type: string
         roleName:
-          type: string
-        permSpec:
-          type: string
-    ReqRevokeUserPermission:
-      type: object
-      properties:
-        tenant:
-          type: string
-        user:
           type: string
         permSpec:
           type: string
@@ -3523,6 +3463,24 @@ components:
             type: string
         orAdmin:
           type: boolean
+    ReqGrantUserRole:
+      type: object
+      properties:
+        tenant:
+          type: string
+        user:
+          type: string
+        roleName:
+          type: string
+    ReqRevokeUserRole:
+      type: object
+      properties:
+        tenant:
+          type: string
+        user:
+          type: string
+        roleName:
+          type: string
     RespSecretMeta:
       type: object
       properties:
@@ -3565,6 +3523,26 @@ components:
           type: object
           additionalProperties:
             type: string
+    RespSecret:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          $ref: '#/components/schemas/SkSecret'
+    SkSecret:
+      type: object
+      properties:
+        secretMap:
+          type: object
+          additionalProperties:
+            type: string
+        metadata:
+          $ref: '#/components/schemas/SkSecretMetadata'
     RespVersions:
       type: object
       properties:
@@ -3591,26 +3569,6 @@ components:
           items:
             type: integer
             format: int32
-    RespSecret:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        result:
-          $ref: '#/components/schemas/SkSecret'
-    SkSecret:
-      type: object
-      properties:
-        secretMap:
-          type: object
-          additionalProperties:
-            type: string
-        metadata:
-          $ref: '#/components/schemas/SkSecretMetadata'
     RespSecretVersionMetadata:
       type: object
       properties:

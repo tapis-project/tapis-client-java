@@ -231,6 +231,8 @@ public class SystemsClient
   /**
    * Get a system by name returning credentials for specified access method.
    * If accessMethod is null then default access method for the system is used.
+   * Use of this method is highly restricted. Only certain Tapis services are
+   * authorized to call this method.
    *
    * @param name System name
    * @param accessMethod - Desired access method used when fetching credentials,
@@ -251,12 +253,24 @@ public class SystemsClient
   /**
    * Get list of systems
    */
-  public List<TSystem> getSystems() throws TapisClientException
+  public List<TSystem> getSystems(String searchStr) throws TapisClientException
   {
     RespSystemArray resp = null;
-    try { resp = sysApi.getSystems(false); }
+    try { resp = sysApi.getSystems(false, searchStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
+  }
+
+  /**
+   * Search for systems using query parameter to specify search conditions
+   */
+  public List<TSystem> searchSystems(String searchStr) throws TapisClientException
+  {
+    RespSystemArray resp = null;
+//    try { resp = sysApi.searchSystemsQueryParameters(false, searchStr); }
+//    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+//    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
   }
 
