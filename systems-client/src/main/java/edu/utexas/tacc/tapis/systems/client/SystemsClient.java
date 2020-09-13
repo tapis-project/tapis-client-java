@@ -20,6 +20,7 @@ import edu.utexas.tacc.tapis.systems.client.gen.api.SystemsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqSearchSystems;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespChangeCount;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespCredential;
@@ -263,14 +264,14 @@ public class SystemsClient
   }
 
   /**
-   * Search for systems using query parameter to specify search conditions
+   * Search for systems using an array of strings that represent an SQL-like WHERE clause
    */
-  public List<TSystem> searchSystems(String searchStr) throws TapisClientException
+  public List<TSystem> searchSystems(ReqSearchSystems req) throws TapisClientException
   {
     RespSystemArray resp = null;
-//    try { resp = sysApi.searchSystemsQueryParameters(false, searchStr); }
-//    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-//    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    try { resp = sysApi.searchSystemsRequestBody(req, false); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
   }
 

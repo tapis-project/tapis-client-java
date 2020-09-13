@@ -2,7 +2,7 @@ package edu.utexas.tacc.tapis.systems.client;
 
 /* Shared data and methods for running the systems client tests.
  *
- * Notes on enviornment required to run the tests:
+ * Notes on environment required to run the tests:
  *  - Systems service base URL comes from the env or the default hard coded base URL.
  *  - Auth and tokens base URL comes from the env or the default hard coded base URL.
  *  - Auth service is used to get a short term JWT.
@@ -106,6 +106,15 @@ public final class Utils
   public static final List<Capability> jobCaps2 = new ArrayList<>(List.of(capA2, capB2, capC2, capD2));
 
   public static final String sysNamePrefix = "CSys";
+
+  // Strings for searches involving special characters
+  public static final String specialChar7Str = ",()~*!\\"; // These 7 may need escaping
+  public static final String specialChar7LikeSearchStr = "\\,\\(\\)\\~\\*\\!\\\\"; // All need escaping for LIKE/NLIKE
+  public static final String specialChar7EqSearchStr = "\\,\\(\\)\\~*!\\"; // All but *! need escaping for other operators
+
+  // String for search involving an escaped comma in a list of values
+  public static final String escapedCommaInListValue = "abc\\,def";
+
 
   /**
    * Create an array of TSystem objects in memory
