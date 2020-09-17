@@ -5,17 +5,19 @@ import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.meta.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.meta.client.gen.ApiException;
 import edu.utexas.tacc.tapis.meta.client.gen.Configuration;
+import edu.utexas.tacc.tapis.meta.client.gen.api.GeneralApi;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 
 public class MetaClient
 {
-  /* **************************************************************************** */
-  /*                                   Constants                                  */
-  /* **************************************************************************** */
+  /*-------------------------------------------------------
+   *                    Constants
+   * ------------------------------------------------------*/
   // Response status.
   public static final String STATUS_SUCCESS = "success";
   
@@ -28,24 +30,14 @@ public class MetaClient
   // Configuration defaults.
   private static final String MetaClient_USER_AGENT = "MetaClient";
   
-  /* **************************************************************************** */
-  /*                                     Enums                                    */
-  /* **************************************************************************** */
 
-  /* **************************************************************************** */
-  /*                                    Fields                                    */
-  /* **************************************************************************** */
-
-  /* **************************************************************************** */
-  /*                                 Constructors                                 */
-  /* **************************************************************************** */
   /* ---------------------------------------------------------------------------- */
   /* constructor:                                                                 */
   /* ---------------------------------------------------------------------------- */
   /** Constructor that uses the compiled-in basePath value in ApiClient.  This
    * constructor is only appropriate for test code.
    */
-  public MetaClient() {this(null, null);}
+  // public MetaClient() {this(null, null);}
   
   /* ---------------------------------------------------------------------------- */
   /* constructor:                                                                 */
@@ -53,20 +45,10 @@ public class MetaClient
   /** Constructor that overrides the compiled-in basePath value in ApiClient.  This
    * constructor typically used in production.
    *
-   * The path includes the URL prefix up to and including the service root.  By
-   * default this value is http://localhost:8080/v3.  In more production-like
-   * environments the protocol will be https and the host/port will be specific to
-   * that environment.  For example, a development environment might define its
-   * base url as https://tenant1.develop.tapis.io/v3.
-   *
    * The jwt is the base64url representation of a Tapis JWT.  If not null or empty,
    * the TAPIS_JWT_HEADER key will be set to the jwt value.
    *
    * The user-agent is automatically set to MetaClient.
-   *
-   * Instances of this class are currently limited to using the default ApiClient.
-   * This implies that the RoleApi, UserApi and GeneralApi implementations also
-   * are expected to be using the same default ApiClient object.
    *
    * @param path the base path
    */
@@ -222,28 +204,49 @@ public class MetaClient
   }
   
   /* ---------------------------------------------------------------------------- */
-  /* checkHealth:                                                                 */
+  /* healthCheck:
   /* ---------------------------------------------------------------------------- */
-  public String checkHealth()
+  public String healthCheck()
       throws TapisClientException
   {
     // Make the REST call.
     Object resp = null;
-//    try {
-//      // Get the API object using default networking.
-//      var generalApi = new GeneralApi();
-//      resp = generalApi.checkHealth();
-//    }
-//    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-//    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    try {
+      var generalApi = new GeneralApi();
+      resp = generalApi.healthCheck();
+    }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     
     // Return result value as a string.
     Object obj = resp.toString();
     return obj == null ? null : obj.toString();
   }
   
-  /* **************************************************************************** */
+  /* ---------------------------------------------------------------------------- */
+  /* listDBNames:
+  /* ---------------------------------------------------------------------------- */
+  public List<String> listDBNames(String tenant)
+      throws TapisClientException {
+    // Make the REST call.
+    Object resp = null;
+    
+    // Return result value.
+    return new ArrayList<String>();
+  }
+  
+    /* **************************************************************************** */
   /*                               Private Methods                                */
   /* **************************************************************************** */
+    public static void main(String[] args) {
+      String jwt = System.getenv("jwt");
+      MetaClient metaClient = new MetaClient("http://dev.develop.tapis.io/v3",jwt);
+      //metaClient.
+      try {
+        metaClient.healthCheck();
+      } catch (TapisClientException e) {
+        e.printStackTrace();
+      }
+    }
 }
 
