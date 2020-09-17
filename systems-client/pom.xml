@@ -43,24 +43,6 @@
     <sourceDirectory>src/main/java</sourceDirectory>
 
     <plugins>
-      <!-- Run script to download latest openapi yaml from tapis-java dev branch  -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>${exec-maven-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>Generate bundled openapi json file</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>${basedir}/get_spec.sh</executable>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
       <!-- Build generated client code using openapi-generator -->
       <plugin>
         <groupId>org.openapitools</groupId>
@@ -73,7 +55,7 @@
             </goals>
             <configuration>
               <!-- Use the openapi spec here. Tapis live-docs website should also get spec from here -->
-              <inputSpec>${project.basedir}/target/SystemsAPI.yaml</inputSpec>
+              <inputSpec>${project.basedir}/SystemsAPI.yaml</inputSpec>
               <enablePostProcessFile>true</enablePostProcessFile>
               <output>${project.build.directory}/generated-sources/openapi</output>
               <generatorName>java</generatorName>
