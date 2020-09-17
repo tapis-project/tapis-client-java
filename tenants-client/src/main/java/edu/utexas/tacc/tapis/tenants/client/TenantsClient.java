@@ -9,12 +9,11 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
-import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.tenants.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.tenants.client.gen.ApiException;
-import edu.utexas.tacc.tapis.tenants.client.gen.Configuration;
 import edu.utexas.tacc.tapis.tenants.client.gen.api.TenantsApi;
 import edu.utexas.tacc.tapis.tenants.client.gen.model.Tenant;
 
@@ -29,7 +28,8 @@ public class TenantsClient
   // ************************************************************************
   // *********************** Constants **************************************
   // ************************************************************************
-
+  private static final String TENANTS_CLIENT_USER_AGENT = "TenantsClient";
+	
   // ************************************************************************
   // ************************* Enums ****************************************
   // ************************************************************************
@@ -39,12 +39,15 @@ public class TenantsClient
   // ************************************************************************
   // Response serializer.
   private static final Gson _gson = ClientTapisGsonUtils.getGson();
+  
+  // This instance's underlying client.
+  private final ApiClient _apiClient;
 
   // ************************************************************************
   // *********************** Constructors ***********************************
   // ************************************************************************
 
-  public TenantsClient() { }
+  public TenantsClient() {this(null);}
 
   /**
    * Constructor that overrides the compiled-in basePath value in ApiClient.  This
@@ -58,8 +61,11 @@ public class TenantsClient
    */
   public TenantsClient(String path)
   {
-    ApiClient apiClient = Configuration.getDefaultApiClient();
-    if (!StringUtils.isBlank(path)) apiClient.setBasePath(path);
+    _apiClient = new ApiClient();
+    if (!StringUtils.isBlank(path)) _apiClient.setBasePath(path);
+    
+    // Other defaults.
+    _apiClient.setUserAgent(TENANTS_CLIENT_USER_AGENT);
   }
 
   // ************************************************************************
@@ -68,14 +74,14 @@ public class TenantsClient
   /**
    * getApiClient: Return underlying ApiClient
    */
-  public ApiClient getApiClient() { return Configuration.getDefaultApiClient(); }
+  public ApiClient getApiClient() { return _apiClient; }
 
   /**
    * addDefaultHeader: Add http header to client
    */
   public ApiClient addDefaultHeader(String key, String val)
   {
-    return Configuration.getDefaultApiClient().addDefaultHeader(key, val);
+    return _apiClient.addDefaultHeader(key, val);
   }
 
   /**
@@ -96,7 +102,7 @@ public class TenantsClient
     // Make the service call.
     Map resp = null;
     try { 
-        var tenantsApi = new TenantsApi();
+        var tenantsApi = new TenantsApi(_apiClient);
         resp = (Map) tenantsApi.getTenant(tenantName); 
     }
     catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
@@ -124,7 +130,7 @@ public class TenantsClient
     // Make the service call.
     Map resp = null;
     try { 
-        var tenantsApi = new TenantsApi();
+        var tenantsApi = new TenantsApi(_apiClient);
         resp = (Map) tenantsApi.listTenants(limit, offset); 
     }
     catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
