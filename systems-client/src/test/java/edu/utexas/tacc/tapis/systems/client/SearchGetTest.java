@@ -1,6 +1,7 @@
 package edu.utexas.tacc.tapis.systems.client;
 
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
+import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
@@ -21,7 +22,7 @@ import static org.testng.Assert.assertEquals;
 /*
  * Test the Systems API client acting as a user fetching systems using getSystems() with search conditions.
  * 
- * See IntegrationUtils in this package for information on environment required to run the tests.
+ * See Utils in this package for information on environment required to run the tests.
  */
 @Test(groups={"integration"})
 public class SearchGetTest
@@ -29,11 +30,6 @@ public class SearchGetTest
   // Test data
   private static final String testKey = "CltSrchGet";
   private static final String sysNameLikeAll = "*CltSrchGet*";
-
-  // Strings for searches involving special characters
-  private static final String specialChar7Str = ",()~*!\\"; // These 7 may need escaping
-  private static final String specialChar7LikeSearchStr = "\\,\\(\\)\\~\\*\\!\\\\"; // All need escaping for LIKE/NLIKE
-  private static final String specialChar7EqSearchStr = "\\,\\(\\)\\~*!\\"; // All but *! need escaping for other operators
 
   // Timestamps in various formats
   private static final String longPast1 =   "1800-01-01T00:00:00.123456Z";
@@ -52,9 +48,6 @@ public class SearchGetTest
   private static final String farFuture13 = "2200-04";
   private static final String farFuture14 = "2200Z";
   private static final String farFuture15 = "2200";
-
-  // String for search involving an escaped comma in a list of values
-  private static final String escapedCommaInListValue = "abc\\,def";
 
   // Strings for char relational testings
   private static final String hostName1 = "host" + testKey + "_001";
@@ -117,29 +110,47 @@ public class SearchGetTest
     // Create all the systems in the dB using the in-memory objects, recording start and end times
     createBegin = LocalDateTime.now(ZoneId.of(ZoneOffset.UTC.getId()));
     Thread.sleep(500);
-    for (int i = 1; i <= numSystems; i++)
+    // Check for a system. If it is there assume data is already properly seeded.
+    // This seems like a reasonable approach since there is not a way to clean up (i.e., hard delete
+    // systems and other resources) using the client.
+    TSystem tmpSys;
+    try {
+      tmpSys = getClientUsr(serviceURL, ownerUser1JWT).getSystemByName(systems.get(1)[1]);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      tmpSys = null;
+    }
+    if (tmpSys == null)
     {
-      String[] sys0 = systems.get(i);
-      int port = i;
-      TSystem tmpSys;
-      if (i <= numSystems/2)
+      System.out.println("Test data not found. Test systems will be created.");
+      for (int i = 1; i <= numSystems; i++)
       {
-        // For rapid manual testing skip create after first time
-        // Manually comment/uncomment the createSystem call.
-        // Vary port # for checking numeric relational searches
-//        Utils.createSystem(getClientUsr(serviceURL, ownerUser1JWT), sys0, port, prot1AccessMethod, null, prot1TxfrMethodsC);
-        tmpSys = getClientUsr(serviceURL, ownerUser1JWT).getSystemByName(sys0[1]);
+        String[] sys0 = systems.get(i);
+        int port = i;
+        if (i <= numSystems / 2)
+        {
+          // Vary port # for checking numeric relational searches
+          Utils.createSystem(getClientUsr(serviceURL, ownerUser1JWT), sys0, port, prot1AccessMethod, null, prot1TxfrMethodsC);
+          tmpSys = getClientUsr(serviceURL, ownerUser1JWT).getSystemByName(sys0[1]);
+        } else
+        {
+          Utils.createSystem(getClientUsr(serviceURL, ownerUser2JWT), sys0, port, prot1AccessMethod, null, prot1TxfrMethodsC);
+          tmpSys = getClientUsr(serviceURL, ownerUser2JWT).getSystemByName(sys0[1]);
+        }
+        Assert.assertNotNull(tmpSys);
+        systemsMap.put(i, tmpSys);
       }
-      else
-      {
-//        Utils.createSystem(getClientUsr(serviceURL, ownerUser2JWT), sys0, port, prot1AccessMethod, null, prot1TxfrMethodsC);
-        tmpSys = getClientUsr(serviceURL, ownerUser2JWT).getSystemByName(sys0[1]);
-      }
-      Assert.assertNotNull(tmpSys);
-      systemsMap.put(i, tmpSys);
+    } else {
+      System.out.println("Test data found. Test systems will not be created.");
     }
     Thread.sleep(500);
     createEnd = LocalDateTime.now(ZoneId.of(ZoneOffset.UTC.getId()));
+  }
+
+  @AfterSuite
+  public void tearDown()
+  {
+    // Currently no way to hard delete from client (by design)
   }
 
   /*
@@ -240,28 +251,6 @@ public class SearchGetTest
       List<TSystem> searchResults = getClientUsr(serviceURL, adminUserJWT).getSystems(cd.searchStr);
       assertEquals(searchResults.size(), cd.count);
     }
-  }
-
-  @AfterSuite
-  public void tearDown() {
-// Currently no way to hard delete from client (by design)
-//    System.out.println("Executing AfterSuite teardown method");
-//    System.out.println("****** Executing AfterSuite teardown method for class: " + this.getClass().getSimpleName());
-//    // TODO: Run SQL to hard delete objects
-//    //Remove all objects created by tests, ignore any exceptions
-//    for (int i = 1; i <= numSystems; i++)
-//    {
-//      try
-//      {
-//        if (i <= numSystems/2)
-//          getClientUsr(serviceURL, ownerUser1JWT).deleteSystemByName(systems.get(i)[1]);
-//        else
-//          getClientUsr(serviceURL, ownerUser2JWT).deleteSystemByName(systems.get(i)[1]);
-//
-//      } catch (Exception e)
-//      {
-//      }
-//    }
   }
 }
 
