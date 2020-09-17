@@ -236,7 +236,7 @@ public class UserTest
 // TODO Does work in systems service integration test. Parameters to SK appear to be the same so not clear why it fails here
 // TODO: Figure out why this works using getUserCred and when called directly from svc but not when getting system using client  
 // Cred retrieved should be for effectiveUserId = effUser2, so far now as a test retrieve cred directly which does work
-    cred = getClientFilesSvc().getUserCredential(sys0[1], sys0[6], AccessMethod.PKI_KEYS);
+//    cred = getClientFilesSvc().getUserCredential(sys0[1], sys0[6], AccessMethod.PKI_KEYS);
     Assert.assertEquals(cred.getPrivateKey(), cred0.getPrivateKey());
     Assert.assertEquals(cred.getPublicKey(), cred0.getPublicKey());
     Assert.assertNull(cred.getPassword(), "AccessCredential password should be null");
