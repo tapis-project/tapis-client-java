@@ -1,0 +1,61 @@
+# This workflow will build a Java project with Maven
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Cache local Maven repository
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - uses: actions/checkout@v2
+      with:
+        path: tapis-files
+
+    - uses: actions/checkout@v2
+      with:
+        repository: tapis-project/tapis-shared-java
+        ref: dev
+        path: tapis-shared-java
+
+    - uses: actions/checkout@v2
+      with:
+        repository: tapis-project/tapis-bom
+        ref: dev
+        path: tapis-bom
+
+    - uses: actions/checkout@v2
+      with:
+        repository: tapis-project/tapis-client-java
+        ref: dev
+        path: tapis-client-java
+
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: 13
+#    - name: SonarCloud Scan
+#      uses: SonarSource/sonarcloud-github-action@v1.3
+#      with:
+#        # Set the sonar.projectBaseDir analysis property
+#        projectBaseDir: # optional, default is .
+    - name: Build with Maven
+      run: |
+        mvn -B install -f tapis-bom/pom.xml
+        mvn -B -Possrh -f tapis-client-java/pom.xml clean install -DskipTests
+
