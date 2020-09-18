@@ -2,6 +2,7 @@ package edu.utexas.tacc.tapis.tokens.client;
 
 import java.util.Map;
 
+import edu.utexas.tacc.tapis.tokens.client.gen.model.RefreshTokenRequest;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.Gson;
@@ -13,10 +14,8 @@ import edu.utexas.tacc.tapis.tokens.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.tokens.client.gen.ApiException;
 import edu.utexas.tacc.tapis.tokens.client.gen.Configuration;
 import edu.utexas.tacc.tapis.tokens.client.gen.api.TokensApi;
-import edu.utexas.tacc.tapis.tokens.client.gen.model.InlineObject1;
+import edu.utexas.tacc.tapis.tokens.client.gen.model.NewTokenRequest;
 import edu.utexas.tacc.tapis.tokens.client.gen.model.NewTokenResponse;
-import edu.utexas.tacc.tapis.tokens.client.model.CreateTokenParms;
-import edu.utexas.tacc.tapis.tokens.client.model.RefreshTokenParms;
 import edu.utexas.tacc.tapis.tokens.client.model.TapisAccessToken;
 import edu.utexas.tacc.tapis.tokens.client.model.TapisRefreshToken;
 import edu.utexas.tacc.tapis.tokens.client.model.TokenResponsePackage;
@@ -110,7 +109,7 @@ public class TokensClient
    * @return a non-null package that contains zero, one or two tokens
    * @throws TapisClientException on error
    */
-  public TokenResponsePackage createToken(CreateTokenParms parms) 
+  public TokenResponsePackage createToken(NewTokenRequest parms)
    throws TapisClientException
   {
       // Make the call and return the result
@@ -163,7 +162,7 @@ public class TokensClient
    * @return a non-null package that contains zero, one or two tokens
    * @throws TapisClientException on error
    */
-  public TokenResponsePackage refreshToken(RefreshTokenParms parms) 
+  public TokenResponsePackage refreshToken(RefreshTokenRequest parms)
    throws TapisClientException
   {
       // Make the call and return the result
@@ -215,7 +214,7 @@ public class TokensClient
    */
   public String getSvcToken(String tenant, String serviceName) throws Exception
   {
-    return getToken(tenant, serviceName, InlineObject1.AccountTypeEnum.SERVICE);
+    return getToken(tenant, serviceName, NewTokenRequest.AccountTypeEnum.SERVICE);
   }
 
   /**
@@ -223,18 +222,18 @@ public class TokensClient
    */
   public String getUsrToken(String tenant, String userName) throws Exception
   {
-    return getToken(tenant, userName, InlineObject1.AccountTypeEnum.USER);
+    return getToken(tenant, userName, NewTokenRequest.AccountTypeEnum.USER);
   }
   
   /**
    * Convenience method to get a JWT token of USER or SERVICE type
    */
   private String getToken(String tenant, String name, 
-                          InlineObject1.AccountTypeEnum tokType) 
+                          NewTokenRequest.AccountTypeEnum tokType)
    throws TapisClientException
   {
     // Build the request
-    var req = new CreateTokenParms();
+    var req = new NewTokenRequest();
     req.accountType(tokType);
     req.tokenTenantId(tenant);
     req.tokenUsername(name);

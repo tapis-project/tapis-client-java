@@ -6,7 +6,7 @@ import edu.utexas.tacc.tapis.auth.client.gen.ApiException;
 import edu.utexas.tacc.tapis.auth.client.gen.api.TokensApi;
 import edu.utexas.tacc.tapis.auth.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.auth.client.gen.Configuration;
-import edu.utexas.tacc.tapis.auth.client.model.GetTokenParms;
+import edu.utexas.tacc.tapis.auth.client.gen.model.NewToken;
 import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 
@@ -92,7 +92,7 @@ public class AuthClient
   {
     String result = null;
     // Build the request
-    var req = new GetTokenParms();
+    var req = new NewToken();
     req.setGrantType(GRANT_TYPE);
     req.setUsername(userName);
     req.setPassword(userPassword);
@@ -108,7 +108,7 @@ public class AuthClient
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
 
     // If response came back null return null
-    if (resp == null) return result;
+    if (resp == null) return null;
 
     // Marshal only the result from the map.
     String json = _gson.toJson(resp.get("result"));

@@ -22,27 +22,7 @@
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
 
-    <!-- NOTE: THE CALLED SCRIPT INTRODUCES HIDDEN DEPENDENCIES -->
-    <!--       These dependencies include Docker and curl.      -->
     <plugins>
-      <!-- Run script to download latest tenants openapi_v3.yml and generate bundled json file  -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>${exec-maven-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>Generate bundled openapi json file</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>${basedir}/gen_spec.sh</executable>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
       <!-- Build generated client code using openapi-generator -->
       <plugin>
         <groupId>org.openapitools</groupId>
@@ -54,7 +34,7 @@
               <goal>generate</goal>
             </goals>
             <configuration>
-              <inputSpec>${project.basedir}/target/tenants.json</inputSpec>
+              <inputSpec>https://raw.githubusercontent.com/tapis-project/tenants-api/dev/service/resources/openapi_v3.yml</inputSpec>
               <enablePostProcessFile>true</enablePostProcessFile>
               <generateAliasAsModel>true</generateAliasAsModel>
               <output>${project.build.directory}/generated-sources/openapi</output>
@@ -67,6 +47,7 @@
               <generateApiDocumentation>false</generateApiDocumentation>
               <generateModelTests>false</generateModelTests>
               <generateModelDocumentation>false</generateModelDocumentation>
+              <skipValidateSpec>true</skipValidateSpec>
               <configOptions>
                 <sourceFolder>src/gen/java/main</sourceFolder>
                 <dateLibrary>java8</dateLibrary>

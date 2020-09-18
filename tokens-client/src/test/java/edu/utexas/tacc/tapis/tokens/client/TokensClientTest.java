@@ -2,15 +2,15 @@ package edu.utexas.tacc.tapis.tokens.client;
 
 import static org.testng.Assert.assertNotNull;
 
+import edu.utexas.tacc.tapis.tokens.client.gen.model.NewTokenRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
-import edu.utexas.tacc.tapis.tokens.client.gen.model.InlineObject1.AccountTypeEnum;
-import edu.utexas.tacc.tapis.tokens.client.model.CreateTokenParms;
-import edu.utexas.tacc.tapis.tokens.client.model.RefreshTokenParms;
+import edu.utexas.tacc.tapis.tokens.client.gen.model.NewTokenRequest.AccountTypeEnum;
+import edu.utexas.tacc.tapis.tokens.client.gen.model.RefreshTokenRequest;
 
 
 /**
@@ -67,7 +67,7 @@ public class TokensClientTest
   public void testNewAndRefreshToken() throws Exception
   {
       // Populate the parameters object to configure a refresh token.
-      var createParms = new CreateTokenParms();
+      var createParms = new NewTokenRequest();
       createParms.setTokenTenantId(tenantName);
       createParms.setTokenUsername(serviceName);
       createParms.setAccountType(AccountTypeEnum.SERVICE);
@@ -87,7 +87,7 @@ public class TokensClientTest
       Assert.assertNotNull(tokpkg.getRefreshToken().getExpiresIn(), "Null refresh token expiresIn.");
   
       // Issue the refresh call.
-      var refreshParms = new RefreshTokenParms();
+      var refreshParms = new RefreshTokenRequest();
       refreshParms.setRefreshToken(tokpkg.getRefreshToken().getRefreshToken());
       var tokpkg2 = tokensClient.refreshToken(refreshParms);
       
