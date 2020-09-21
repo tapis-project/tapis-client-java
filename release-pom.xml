@@ -3,12 +3,12 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.utexas.tacc.tapis</groupId>
-  <artifactId>tapis-client-java-tst</artifactId>
-  <version>1.11.4</version>
+  <artifactId>tapis-client-java</artifactId>
+  <version>1.11.1</version>
   <packaging>pom</packaging>
   <name>Tapis Client</name>
   <description>Top level java client</description>
-  <url>https://github.com/tapis-project/tapis-client-java-tst</url>
+  <url>https://github.com/tapis-project/tapis-client-java</url>
   <organization>
     <name>TACC</name>
     <url>http://tacc.utexas.edu</url>
@@ -128,18 +128,18 @@
     </developer>
   </developers>
   <modules>
-    <module>shared-tst</module>
-    <module>auth-client-tst</module>
-    <module>security-client-tst</module>
-    <module>tokens-client-tst</module>
-    <module>tenants-client-tst</module>
-    <module>systems-client-tst</module>
-    <module>files-client-tst</module>
-    <module>meta-client-tst</module>
+    <module>shared</module>
+    <module>auth-client</module>
+    <module>security-client</module>
+    <module>tokens-client</module>
+    <module>tenants-client</module>
+    <module>systems-client</module>
+    <module>files-client</module>
+    <module>meta-client</module>
   </modules>
   <scm>
-    <connection>scm:git:git@github.com:tapis-project/tapis-client-java-tst.git</connection>
-    <url>https://github.com/tapis-project/tapis-client-java-tst</url>
+    <connection>scm:git:git@github.com:tapis-project/tapis-client-java.git</connection>
+    <url>https://github.com/tapis-project/tapis-client-java</url>
   </scm>
   <distributionManagement>
     <repository>
@@ -213,7 +213,7 @@
     <javax.xml.bind.jaxb-core.version>2.3.0.1</javax.xml.bind.jaxb-core.version>
     <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
     <mockito-core.version>3.0.0</mockito-core.version>
-    <build.timestamp>2020-09-20T23:24:56Z</build.timestamp>
+    <build.timestamp>2020-09-21T19:01:47Z</build.timestamp>
     <statefulj.version>3.0</statefulj.version>
     <java-source.version>1.13</java-source.version>
     <google-maven-replacer-plugin.version>1.5.3</google-maven-replacer-plugin.version>
@@ -386,7 +386,7 @@
   </pluginRepositories>
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
-    <scriptSourceDirectory>/var/lib/jenkins/jobs/Tapis/jobs/DEV/jobs/release-client-java-tst/workspace/src/main/scripts</scriptSourceDirectory>
+    <scriptSourceDirectory>/home/scblack/src_git/github/main/tapis-client-java/src/main/scripts</scriptSourceDirectory>
     <testSourceDirectory>src/test/java</testSourceDirectory>
     <outputDirectory>target/classes</outputDirectory>
     <testOutputDirectory>target/test-classes</testOutputDirectory>
@@ -401,7 +401,7 @@
       </testResource>
     </testResources>
     <directory>target</directory>
-    <finalName>tapis-client-java-tst-1.11.4</finalName>
+    <finalName>tapis-client-java-1.11.1</finalName>
   </build>
   <reporting>
     <outputDirectory>target/site</outputDirectory>
