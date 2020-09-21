@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.utexas.tacc.tapis</groupId>
   <artifactId>tapis-client-java</artifactId>
-  <version>1.11.4</version>
+  <version>1.11.5</version>
   <packaging>pom</packaging>
   <name>Tapis Client</name>
   <description>Top level java client</description>
@@ -213,7 +213,7 @@
     <javax.xml.bind.jaxb-core.version>2.3.0.1</javax.xml.bind.jaxb-core.version>
     <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
     <mockito-core.version>3.0.0</mockito-core.version>
-    <build.timestamp>2020-09-21T23:21:38Z</build.timestamp>
+    <build.timestamp>2020-09-21T23:26:58Z</build.timestamp>
     <statefulj.version>3.0</statefulj.version>
     <java-source.version>1.13</java-source.version>
     <google-maven-replacer-plugin.version>1.5.3</google-maven-replacer-plugin.version>
@@ -382,7 +382,7 @@
       </testResource>
     </testResources>
     <directory>target</directory>
-    <finalName>tapis-client-java-1.11.4</finalName>
+    <finalName>tapis-client-java-1.11.5</finalName>
   </build>
   <reporting>
     <outputDirectory>target/site</outputDirectory>
