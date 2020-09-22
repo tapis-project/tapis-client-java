@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.utexas.tacc.tapis</groupId>
   <artifactId>files-client</artifactId>
-  <version>1.11.9</version>
+  <version>1.11.10</version>
   <name>Tapis Files Client</name>
   <description>Java client for Files Service</description>
   <url>https://github.com/tapis-project/tapis-client-java/files-client</url>
@@ -135,10 +135,6 @@
       <id>ossrh</id>
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
-    <snapshotRepository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
   </distributionManagement>
   <properties>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
@@ -202,7 +198,7 @@
     <javax.xml.bind.jaxb-core.version>2.3.0.1</javax.xml.bind.jaxb-core.version>
     <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
     <mockito-core.version>3.0.0</mockito-core.version>
-    <build.timestamp>2020-09-22T02:29:51Z</build.timestamp>
+    <build.timestamp>2020-09-22T16:12:12Z</build.timestamp>
     <statefulj.version>3.0</statefulj.version>
     <java-source.version>1.13</java-source.version>
     <google-maven-replacer-plugin.version>1.5.3</google-maven-replacer-plugin.version>
