@@ -139,7 +139,6 @@ public class TokensClient
           var wrapper = new TapisAccessToken();
           wrapper.setAccessToken(tokRespAccess.getAccessToken());
           wrapper.setExpiresAt(tokRespAccess.getExpiresAt());
-          wrapper.setExpiresIn(tokRespAccess.getExpiresIn());
           tokenPkg.setAccessToken(wrapper);
       }
       
@@ -149,7 +148,6 @@ public class TokensClient
           var wrapper = new TapisRefreshToken();
           wrapper.setRefreshToken(tokRespRefresh.getRefreshToken());
           wrapper.setExpiresAt(tokRespRefresh.getExpiresAt());
-          wrapper.setExpiresIn(tokRespRefresh.getExpiresIn());
           tokenPkg.setRefreshToken(wrapper);
       }
       
@@ -192,7 +190,6 @@ public class TokensClient
           var wrapper = new TapisAccessToken();
           wrapper.setAccessToken(tokRespAccess.getAccessToken());
           wrapper.setExpiresAt(tokRespAccess.getExpiresAt());
-          wrapper.setExpiresIn(tokRespAccess.getExpiresIn());
           tokenPkg.setAccessToken(wrapper);
       }
       
@@ -202,7 +199,6 @@ public class TokensClient
           var wrapper = new TapisRefreshToken();
           wrapper.setRefreshToken(tokRespRefresh.getRefreshToken());
           wrapper.setExpiresAt(tokRespRefresh.getExpiresAt());
-          wrapper.setExpiresIn(tokRespRefresh.getExpiresIn());
           tokenPkg.setRefreshToken(wrapper);
       }
       
