@@ -93,6 +93,7 @@
         <module>systems-client</module>
         <module>files-client</module>
         <module>meta-client</module>
+        <module>apps-client</module>
     </modules>
 
 </project>
