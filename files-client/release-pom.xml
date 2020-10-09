@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.utexas.tacc.tapis</groupId>
   <artifactId>files-client</artifactId>
-  <version>1.11.10</version>
+  <version>1.11.11</version>
   <name>Tapis Files Client</name>
   <description>Java client for Files Service</description>
   <url>https://github.com/tapis-project/tapis-client-java/files-client</url>
@@ -135,6 +135,10 @@
       <id>ossrh</id>
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
   </distributionManagement>
   <properties>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
@@ -198,7 +202,7 @@
     <javax.xml.bind.jaxb-core.version>2.3.0.1</javax.xml.bind.jaxb-core.version>
     <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
     <mockito-core.version>3.0.0</mockito-core.version>
-    <build.timestamp>2020-09-22T16:12:12Z</build.timestamp>
+    <build.timestamp>2020-10-09T14:23:26Z</build.timestamp>
     <statefulj.version>3.0</statefulj.version>
     <java-source.version>1.13</java-source.version>
     <google-maven-replacer-plugin.version>1.5.3</google-maven-replacer-plugin.version>
@@ -223,6 +227,7 @@
     <hikariCP.version>3.3.1</hikariCP.version>
     <swagger-ui.version>3.23.8</swagger-ui.version>
     <swagger-annotations.version>2.1.4</swagger-annotations.version>
+    <gitflow-maven-plugin.version>1.14.0</gitflow-maven-plugin.version>
     <swagger-annotations1.version>1.5.24</swagger-annotations1.version>
   </properties>
   <dependencies>
@@ -325,8 +330,27 @@
   </dependencies>
   <repositories>
     <repository>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <id>oss.sonatype.org-snapshot</id>
+      <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+    </repository>
+    <repository>
+      <id>oss.sonatype.org-releases</id>
+      <url>https://oss.sonatype.org/content/repositories/releases/</url>
+    </repository>
+    <repository>
       <id>jitpack.io</id>
       <url>https://jitpack.io</url>
+    </repository>
+    <repository>
+      <id>tacc-snapshot</id>
+      <name>TACC ACI Maven repository</name>
+      <url>https://maven.tacc.utexas.edu/nexus/content/repositories/snapshots</url>
     </repository>
     <repository>
       <snapshots>
@@ -352,7 +376,7 @@
   </pluginRepositories>
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
-    <scriptSourceDirectory>/var/lib/jenkins/jobs/Tapis/jobs/DEV/jobs/release-client-java/workspace/files-client/src/main/scripts</scriptSourceDirectory>
+    <scriptSourceDirectory>/var/lib/jenkins/jobs/TapisJava/jobs/2_Release/jobs/Shared/jobs/release-client-java/workspace/files-client/src/main/scripts</scriptSourceDirectory>
     <testSourceDirectory>src/test/java</testSourceDirectory>
     <outputDirectory>target/classes</outputDirectory>
     <testOutputDirectory>target/test-classes</testOutputDirectory>
