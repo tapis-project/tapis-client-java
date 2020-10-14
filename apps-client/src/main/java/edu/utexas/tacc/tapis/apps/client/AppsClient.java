@@ -15,7 +15,7 @@ import edu.utexas.tacc.tapis.apps.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.apps.client.gen.ApiException;
 import edu.utexas.tacc.tapis.apps.client.gen.Configuration;
 import edu.utexas.tacc.tapis.apps.client.gen.api.PermissionsApi;
-import edu.utexas.tacc.tapis.apps.client.gen.api.AppsApi;
+import edu.utexas.tacc.tapis.apps.client.gen.api.ApplicationsApi;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqCreateApp;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqPerms;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqSearchApps;
@@ -55,7 +55,7 @@ public class AppsClient
   // ************************************************************************
   // Response body serializer
   private static final Gson gson = ClientTapisGsonUtils.getGson();
-  private final AppsApi appApi;
+  private final ApplicationsApi appApi;
   private final PermissionsApi permsApi;
   private final GeneralApi generalApi;
 
@@ -65,7 +65,7 @@ public class AppsClient
 
   public AppsClient()
   {
-    appApi = new AppsApi();
+    appApi = new ApplicationsApi();
     permsApi = new PermissionsApi();
     generalApi = new GeneralApi();
   }
@@ -86,7 +86,7 @@ public class AppsClient
     ApiClient apiClient = Configuration.getDefaultApiClient();
     if (!StringUtils.isBlank(path)) apiClient.setBasePath(path);
     if (!StringUtils.isBlank(jwt)) apiClient.addDefaultHeader(TAPIS_JWT_HEADER, jwt);
-    appApi = new AppsApi();
+    appApi = new ApplicationsApi();
     permsApi = new PermissionsApi();
     generalApi = new GeneralApi();
   }
