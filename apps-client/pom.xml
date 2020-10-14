@@ -6,10 +6,10 @@
     <version>1.11.12-SNAPSHOT</version>
   </parent>
 
-  <artifactId>systems-client</artifactId>
+  <artifactId>apps-client</artifactId>
 
-  <name>Tapis Systems Client</name>
-  <description>Java client for Systems Service</description>
+  <name>Tapis Apps Client</name>
+  <description>Java client for Apps Service</description>
 
   <properties>
     <!-- Skip integration tests by default -->
@@ -55,14 +55,14 @@
             </goals>
             <configuration>
               <!-- Use the openapi spec here. Tapis live-docs website should also get spec from here -->
-              <inputSpec>${project.basedir}/SystemsAPI.yaml</inputSpec>
+              <inputSpec>${project.basedir}/AppsAPI.yaml</inputSpec>
               <enablePostProcessFile>true</enablePostProcessFile>
               <output>${project.build.directory}/generated-sources/openapi</output>
               <generatorName>java</generatorName>
               <groupId>edu.utexas.tacc.tapis</groupId>
-              <invokerPackage>edu.utexas.tacc.tapis.systems.client.gen</invokerPackage>
-              <apiPackage>edu.utexas.tacc.tapis.systems.client.gen.api</apiPackage>
-              <modelPackage>edu.utexas.tacc.tapis.systems.client.gen.model</modelPackage>
+              <invokerPackage>edu.utexas.tacc.tapis.apps.client.gen</invokerPackage>
+              <apiPackage>edu.utexas.tacc.tapis.apps.client.gen.api</apiPackage>
+              <modelPackage>edu.utexas.tacc.tapis.apps.client.gen.model</modelPackage>
               <!-- Turn off generation of stuff we do not need -->
               <generateApiTests>false</generateApiTests>
               <generateApiDocumentation>false</generateApiDocumentation>
@@ -106,7 +106,7 @@
       </plugin>
     </plugins>
 
-    <finalName>systems-client</finalName>
+    <finalName>apps-client</finalName>
   </build>
 
 </project>

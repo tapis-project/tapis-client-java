@@ -1,16 +1,16 @@
 #!/bin/sh
-# Use mvn to run tests for the systems client
-#   against the systems service running either locally or in k8s
+# Use mvn to run tests for the apps client
+#   against the apps service running either locally or in k8s
 #   and other services (tenants, sk, auth, tokens) running in DEV, STAGING, or PROD
 # NOTE: For safety, for now do not allow running against PROD
-# If requested use docker to start up the systems service locally using an image
-#   - image used is based on TAPIS_RUN_ENV, for example tapis/systems:dev
-# Use mvn to run the systems-client integration tests.
+# If requested use docker to start up the apps service locally using an image
+#   - image used is based on TAPIS_RUN_ENV, for example tapis/apps:dev
+# Use mvn to run the apps-client integration tests.
 #
 # The Tapis environment we are running in must be set to one of: dev, staging, prod
 # It can be set using env var TAPIS_RUN_ENV or by passing in as first arg, but not both.
 #
-# To start up the systems service locally the following env variables must be set:
+# To start up the apps service locally the following env variables must be set:
 #     TAPIS_DB_PASSWORD
 #     TAPIS_DB_JDBC_URL
 #     TAPIS_SERVICE_PASSWORD
@@ -23,7 +23,7 @@
 PrgName=$(basename "$0")
 
 USAGE1="Usage: $PrgName { local | k8s } { dev | staging }"
-USAGE2="Usage: Run systems client tests against service running locally or in K8S."
+USAGE2="Usage: Run apps client tests against service running locally or in K8S."
 #USAGE2="Usage: Set tapis run env by passing in or set using TAPIS_RUN_ENV, but not both"
 
 # Check number of arguments
@@ -96,7 +96,7 @@ fi
 # Make sure we have the service password, db password and db URL
 if [ "$RUN_SVC" = "local" ]; then
   if [ -z "$TAPIS_SERVICE_PASSWORD" ]; then
-    echo "ERROR: Please set env variable TAPIS_SERVICE_PASSWORD to the systems service password"
+    echo "ERROR: Please set env variable TAPIS_SERVICE_PASSWORD to the apps service password"
     echo $USAGE1
     exit 1
   fi
@@ -114,9 +114,9 @@ fi
 
 # If running against k8s and not locally set an env
 #   var to let the client test program know. Default is
-#   to look for systems service locally.
+#   to look for apps service locally.
 if [ "$RUN_SVC" = "k8s" ]; then
-  export TAPIS_SVC_URL_SYSTEMS="$TAPIS_BASE_URL"
+  export TAPIS_SVC_URL_APPS="$TAPIS_BASE_URL"
 fi
 
 # Determine absolute path to location from which we are running
@@ -126,16 +126,16 @@ export PRG_RELPATH=$(dirname "$0")
 cd "$PRG_RELPATH"/. || exit
 export PRG_PATH=$(pwd)
 
-echo "****** Running client tests for Systmes service. Target service = $RUN_SVC, TAPIS_RUN_ENV = $RUN_ENV"
+echo "****** Running client tests for Apps service. Target service = $RUN_SVC, TAPIS_RUN_ENV = $RUN_ENV"
 
-# if requested start up the systems service locally
+# if requested start up the apps service locally
 if [ "$RUN_SVC" = "local" ]; then
- echo "Staring systems service locally"
+ echo "Staring apps service locally"
  DOCK_RUN_ID=$(./docker_run_svc.sh "${RUN_ENV}")
  RET_CODE=$?
  if [ $RET_CODE -ne 0 ]; then
    echo "======================================================================"
-   echo "Error starting Systems service locally."
+   echo "Error starting Apps service locally."
    echo "Exiting ..."
    echo "======================================================================"
    exit $RET_CODE
@@ -165,9 +165,9 @@ echo "Running client integration tests"
 mvn verify -DskipIntegrationTests=false
 RET_CODE=$?
 
-# If local then stop local systems service
+# If local then stop local apps service
 if [ "$RUN_SVC" = "local" ]; then
- echo "Stopping local systems service using docker container ID: $DOCK_RUN_ID"
+ echo "Stopping local apps service using docker container ID: $DOCK_RUN_ID"
  docker stop "$DOCK_RUN_ID"
 fi
 
