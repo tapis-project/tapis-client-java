@@ -1,11 +1,11 @@
 openapi: 3.0.3
 info:
-  title: Tapis Apps API
-  description: The Tapis Apps API provides for management of Tapis Apps including permissions.
+  title: Tapis Applications API
+  description: The Tapis Applications API provides for management of Tapis Applications including permissions.
   version: '0.0.1'
   termsOfService: "https://tapis-project.org"
   contact:
-    name: "Apps API - CICSupport"
+    name: "Applications API - CICSupport"
     url: "https://tapis-project.org"
     email: "cicsupport@tacc.utexas.edu"
   license:
@@ -24,8 +24,8 @@ servers:
 security:
   - TapisJWT: []
 tags:
-  - name: apps
-    description: manage apps
+  - name: Applications
+    description: manage Applications
 
 # ------------------------------------------------------------------------------
 # --- Paths -------------------------------------------------------------------
@@ -35,7 +35,7 @@ paths:
   '/v3/apps/healthcheck':
     get:
       tags:
-        - general
+        - General
       description: Health check.
       operationId: healthCheck
       responses:
@@ -50,7 +50,7 @@ paths:
   '/v3/apps/readycheck':
     get:
       tags:
-        - general
+        - General
       description: Ready check.
       operationId: readyCheck
       responses:
@@ -66,9 +66,9 @@ paths:
   '/v3/apps':
     get:
       tags:
-        - apps
-      summary: Retrieve apps
-      description: Retrieve details for apps. Use search and select query parameters to limit results.
+        - Applications
+      summary: Retrieve Applications
+      description: Retrieve details for Applications. Use search and select query parameters to limit results.
       operationId: getApps
       parameters:
         - name: pretty
@@ -108,7 +108,7 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
     post:
       tags:
-        - apps
+        - Applications
       summary: Create an app
       description: Create an app using a request body. App name must be unique within a tenant and can be composed of alphanumeric characters and the following special characters [-._~]. Name must begin with an alphabetic character and can be no more than 256 characters in length. Description is optional with a maximum length of 2048 characters.'
       operationId: createApp
@@ -153,9 +153,9 @@ paths:
   '/v3/apps/search/apps':
     get:
       tags:
-        - apps
-      summary: Retrieve apps matching search conditions specified as query parameters
-      description: Retrieve details for apps. Use query parameters to specify search conditions. For example ?owner.eq=jdoe&port.gt=1024
+        - Applications
+      summary: Retrieve Applications matching search conditions specified as query parameters
+      description: Retrieve details for Applications. Use query parameters to specify search conditions. For example ?owner.eq=jdoe&port.gt=1024
       operationId: searchAppsQueryParameters
       parameters:
         - name: pretty
@@ -190,9 +190,9 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
     post:
       tags:
-        - apps
-      summary: Retrieve apps matching search conditions
-      description: Retrieve details for apps. Use request body to specify SQL-like search conditions.
+        - Applications
+      summary: Retrieve Applications matching search conditions
+      description: Retrieve details for Applications. Use request body to specify SQL-like search conditions.
       operationId: searchAppsRequestBody
       requestBody:
         required: true
@@ -238,7 +238,7 @@ paths:
   '/v3/apps/{appName}':
     get:
       tags:
-        - apps
+        - Applications
       summary: Retrieve app details
       description: Retrieve information for an app given the app name.
       operationId: getAppByName
@@ -281,7 +281,7 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
     delete:
       tags:
-        - apps
+        - Applications
       summary: Soft delete an app
       description: Soft delete an app given the app name.
       operationId: deleteAppByName
@@ -318,7 +318,7 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
     patch:
       tags:
-        - apps
+        - Applications
       summary: Update an app
       description: Update attributes for an app. Attributes that may be updated are description, enabled, jobCapabilities, tags, notes.
       operationId: updateApp
@@ -369,7 +369,7 @@ paths:
   '/v3/apps/{appName}/changeOwner/{userName}':
     post:
       tags:
-        - apps
+        - Applications
       summary: Change app owner
       description: Change owner of an app.
       operationId: changeAppOwner
@@ -414,7 +414,7 @@ paths:
   '/v3/apps/perms/{appName}/user/{userName}':
     get:
       tags:
-        - permissions
+        - Permissions
       summary: Retrieve app user permissions
       description: Retrieve all app related permissions for a given app and user.
       operationId: getUserPerms
@@ -462,7 +462,7 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
     post:
       tags:
-        - permissions
+        - Permissions
       summary: Create app user permissions
       description: Create permissions in the Security Kernel for a user. Requester must be owner of the app. Permissions are READ, MODIFY or ALL.
       operationId: grantUserPerms
@@ -513,7 +513,7 @@ paths:
   '/v3/apps/perms/{appName}/user/{userName}/revoke':
     post:
       tags:
-        - permissions
+        - Permissions
       summary: Revoke app user permissions
       description: Revoke permissions in the Security Kernel for a user. Requester must be owner of the app. Permissions are READ, MODIFY or ALL.
       operationId: revokeUserPerms
@@ -558,7 +558,7 @@ paths:
   '/v3/apps/perms/{appName}/user/{userName}/{permission}':
     delete:
       tags:
-        - permissions
+        - Permissions
       summary: Revoke app user permission
       description: Revoke app user permission in the Security Kernel. Requester must be owner of the app. Permissions are READ, MODIFY or ALL.
       operationId: revokeUserPerm
