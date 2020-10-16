@@ -14,9 +14,7 @@ mkdir -p $PRG_PATH/target
 # Master yaml
 # curl -o target/openapi_v3.yml https://raw.githubusercontent.com/tapis-project/tenants-api/master/service/resources/openapi_v3.yml
 # Dev yaml
-#curl -o target/openapi_v3.yml https://raw.githubusercontent.com/tapis-project/tenants-api/dev/service/resources/openapi_v3.yml
-# Sites yaml in Julia's branch
-curl -o target/openapi_v3.yml https://raw.githubusercontent.com/tapis-project/tenants-api/sites_changes/service/resources/openapi_v3.yml
+curl -o target/openapi_v3.yml https://raw.githubusercontent.com/tapis-project/tenants-api/dev/service/resources/openapi_v3.yml
 
 # Run swagger-cli from docker image to generate bundled json file from openapi yaml file
 set -xv
