@@ -112,10 +112,6 @@ public class SKClient
      * 
      * The user-agent is automatically set to SKClient.
      * 
-     * Instances of this class are currently limited to using the default ApiClient.
-     * This implies that the RoleApi, UserApi and GeneralApi implementations also
-     * are expected to be using the same default ApiClient object.
-     * 
      * @param path the base path 
      */
     public SKClient(String path, String jwt) 
