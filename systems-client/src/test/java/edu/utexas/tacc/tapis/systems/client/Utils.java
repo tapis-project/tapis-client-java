@@ -87,7 +87,7 @@ public final class Utils
   public static final SystemsClient.AccessMethod prot2AccessMethod = SystemsClient.AccessMethod.ACCESS_KEY;
 
   public static final List<String> tags1 = Arrays.asList("value1", "value2", "a",
-          "a long tag with spaces and numbers (1 3 2) and special characters [_ $ - & * % @ + = ! ^ ? < > , . ( ) { } / \\ | ]. Backslashes must be escaped.");
+          "Long tag (1 3 2) special chars [_ $ - & * % @ + = ! ^ ? < > , . ( ) { } / \\ | ]. Backslashes must be escaped.");
   public static final List<String> tags2 = Arrays.asList("value3", "value4");
   public static final JsonObject notes1JO =
           ClientTapisGsonUtils.getGson().fromJson("{\"project\":\"myproj1\", \"testdata\":\"abc1\"}", JsonObject.class);
@@ -131,7 +131,7 @@ public final class Utils
     {
       // Suffix which should be unique for each system within each integration test
       String suffix = key + "_" + String.format("%03d", i);
-      String name = sysNamePrefix + "_" + suffix;
+      String name = getSysName(key, i);
       // Constructor initializes all attributes except for JobCapabilities and Credential
       String[] sys0 = {tenantName, name, "description " + suffix, sysType, ownerUser1, "host"+suffix, "effUser"+suffix,
               "fakePassword"+suffix,"bucket"+suffix, "/root"+suffix, "jobLocalWorkDir"+suffix, "jobLocalArchDir"+suffix,
@@ -213,5 +213,11 @@ public final class Utils
 //    sysClientSvc.addDefaultHeader("X-Tapis-User", sysOwner);
 //    sysClientSvc.addDefaultHeader("X-Tapis-Tenant", tenantName);
     return new SystemsClient(serviceURL, userJWT);
+  }
+
+  public static String getSysName(String key, int idx)
+  {
+    String suffix = key + "_" + String.format("%03d", idx);
+    return sysNamePrefix + "_" + suffix;
   }
 }

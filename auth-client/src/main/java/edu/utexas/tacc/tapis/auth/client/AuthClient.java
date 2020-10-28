@@ -80,7 +80,7 @@ public class AuthClient
 
   /**
    * The create_token request handler that gets a token from the authenticator service based on
-   * the parameters provided. Null is return if invlalid information is returned by the
+   * the parameters provided. Null is return if invalid information is returned by the
    * authenticator service.
    *
    * @param userName

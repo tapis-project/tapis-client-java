@@ -20,6 +20,7 @@ import edu.utexas.tacc.tapis.auth.client.AuthClient;
 import edu.utexas.tacc.tapis.tokens.client.TokensClient;
 
 import static edu.utexas.tacc.tapis.apps.client.Utils.*;
+import static edu.utexas.tacc.tapis.client.shared.Utils.*;
 
 /**
  * Test the Apps API client acting as a user calling the apps service.
@@ -62,7 +63,7 @@ public class UserTest
     try {
       ownerUserJWT = authClient.getToken(ownerUser1, ownerUser1);
       newOwnerUserJWT = authClient.getToken(newOwnerUser, newOwnerUser);
-      filesServiceJWT = tokClient.getSvcToken(masterTenantName, filesSvcName);
+      filesServiceJWT = tokClient.getSvcToken(masterTenantName, filesSvcName, DEFAULT_TARGET_SITE);
     } catch (Exception e) {
       throw new Exception("Exception while creating tokens or auth service", e);
     }

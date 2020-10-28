@@ -1,5 +1,6 @@
 package edu.utexas.tacc.tapis.tokens.client;
 
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_TARGET_SITE;
 import static org.testng.Assert.assertNotNull;
 
 import org.apache.commons.lang3.StringUtils;
@@ -57,7 +58,7 @@ public class TokensClientTest
   @Test(enabled=true)
   public void testGetSvcToken() throws Exception
   {
-    String svcToken = tokensClient.getSvcToken(tenantName, serviceName);
+    String svcToken = tokensClient.getSvcToken(tenantName, serviceName, DEFAULT_TARGET_SITE);
     System.out.println("Got token for service: " + serviceName);
     System.out.println("Token: " + svcToken);
     Assert.assertFalse(StringUtils.isBlank(svcToken), "Service token should not be blank");

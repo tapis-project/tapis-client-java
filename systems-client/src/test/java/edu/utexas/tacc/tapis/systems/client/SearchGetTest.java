@@ -16,11 +16,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static edu.utexas.tacc.tapis.client.shared.Utils.*;
 import static edu.utexas.tacc.tapis.systems.client.Utils.*;
 import static org.testng.Assert.assertEquals;
 
 /*
- * Test the Systems API client acting as a user fetching systems using getSystems() with search conditions.
+ * Test the Systems API client acting as a user fetching systems using getSystems()
+ *  with search conditions and sort options.
  * 
  * See Utils in this package for information on environment required to run the tests.
  */
@@ -252,5 +254,83 @@ public class SearchGetTest
       assertEquals(searchResults.size(), cd.count);
     }
   }
-}
 
+  /*
+   * Test sorting: limit, sort_by, offset
+   */
+  @Test(groups={"integration"})
+  public void testSortingOffset() throws Exception
+  {
+    String searchStr = "name.like." + sysNameLikeAll;
+    List<TSystem> searchResults;
+
+    String sortBy;
+    int limit;
+    int offset;
+    // Sort and check order with no limit or offset
+    sortBy = "name(asc)";
+    searchResults = getClientUsr(serviceURL, adminUserJWT).getSystems(searchStr, DEFAULT_LIMIT, sortBy, DEFAULT_OFFSET, DEFAULT_START_AFTER);
+    assertEquals(searchResults.size(), numSystems, "Incorrect result count");
+    checkOrder(searchResults, 1, numSystems);
+    sortBy = "name(desc)";
+    searchResults = getClientUsr(serviceURL, adminUserJWT).getSystems(searchStr, DEFAULT_LIMIT, sortBy, DEFAULT_OFFSET, DEFAULT_START_AFTER);
+    assertEquals(searchResults.size(), numSystems, "Incorrect result count");
+    checkOrder(searchResults, numSystems, 1);
+    // Sort and check order with limit and no offset
+    sortBy = "name(asc)";
+    limit = 4;
+    searchResults = getClientUsr(serviceURL, adminUserJWT).getSystems(searchStr, limit, sortBy, DEFAULT_OFFSET, DEFAULT_START_AFTER);
+    assertEquals(searchResults.size(), limit, "Incorrect result count");
+    checkOrder(searchResults, 1, limit);
+    sortBy = "name(desc)";
+    limit = 19;
+    searchResults = getClientUsr(serviceURL, adminUserJWT).getSystems(searchStr, limit, sortBy, DEFAULT_OFFSET, DEFAULT_START_AFTER);
+    assertEquals(searchResults.size(), limit, "Incorrect result count");
+    checkOrder(searchResults, numSystems, numSystems - (limit-1));
+    // Sort and check order with limit and offset
+    sortBy = "name(asc)";
+    limit = 2;
+    offset = 5;
+    searchResults = getClientUsr(serviceURL, adminUserJWT).getSystems(searchStr, limit, sortBy, offset, DEFAULT_START_AFTER);
+    assertEquals(searchResults.size(), limit, "Incorrect result count");
+    // Should get systems named SrchGet_006 to SrchGet_007
+    checkOrder(searchResults, offset + 1, offset + limit);
+    sortBy = "name(desc)";
+    limit = 4;
+    offset = 3;
+    searchResults = getClientUsr(serviceURL, adminUserJWT).getSystems(searchStr, limit, sortBy, offset, DEFAULT_START_AFTER);
+    assertEquals(searchResults.size(), limit, "Incorrect result count");
+    // Should get systems named SrchGet_017 to SrchGet_014
+    checkOrder(searchResults, numSystems - offset, numSystems - limit);
+  }
+  /* ********************************************************************** */
+  /*                             Private Methods                            */
+  /* ********************************************************************** */
+
+  /**
+   * Check that results were sorted in correct order when sorting on system name
+   */
+  private void checkOrder(List<TSystem> searchResults, int start, int end)
+  {
+    int idx = 0; // Position in result
+    // Name should match for loop counter i
+    if (start < end)
+    {
+      for (int i = start; i <= end; i++)
+      {
+        String sysName = getSysName(testKey, i);
+        assertEquals(searchResults.get(idx).getName(), sysName, "Incorrect system name at position: " + (idx+1));
+        idx++;
+      }
+    }
+    else
+    {
+      for (int i = start; i >= end; i--)
+      {
+        String sysName = getSysName(testKey, i);
+        assertEquals(searchResults.get(idx).getName(), sysName, "Incorrect system name at position: " + (idx+1));
+        idx++;
+      }
+    }
+  }
+}
