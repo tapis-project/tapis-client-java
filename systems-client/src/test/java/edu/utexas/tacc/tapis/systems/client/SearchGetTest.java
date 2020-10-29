@@ -256,7 +256,7 @@ public class SearchGetTest
   }
 
   /*
-   * Test sorting: limit, sort_by, skip
+   * Test sorting: limit, sortBy, skip
    */
   @Test(groups={"integration"})
   public void testSortingSkip() throws Exception
@@ -269,36 +269,36 @@ public class SearchGetTest
     int skip;
     // Sort and check order with no limit or skip
     sortBy = "name(asc)";
-    searchResults = getClientUsr(serviceURL, adminUserJWT).getSystems(searchStr, DEFAULT_LIMIT, sortBy, DEFAULT_SKIP, DEFAULT_START_AFTER);
+    searchResults = getClientUsr(serviceURL, adminUserJWT).getSystems(searchStr, DEFAULT_LIMIT, sortBy, DEFAULT_SKIP, DEFAULT_STARTAFTER);
     assertEquals(searchResults.size(), numSystems, "Incorrect result count");
     checkOrder(searchResults, 1, numSystems);
     sortBy = "name(desc)";
-    searchResults = getClientUsr(serviceURL, adminUserJWT).getSystems(searchStr, DEFAULT_LIMIT, sortBy, DEFAULT_SKIP, DEFAULT_START_AFTER);
+    searchResults = getClientUsr(serviceURL, adminUserJWT).getSystems(searchStr, DEFAULT_LIMIT, sortBy, DEFAULT_SKIP, DEFAULT_STARTAFTER);
     assertEquals(searchResults.size(), numSystems, "Incorrect result count");
     checkOrder(searchResults, numSystems, 1);
     // Sort and check order with limit and no skip
     sortBy = "name(asc)";
     limit = 4;
-    searchResults = getClientUsr(serviceURL, adminUserJWT).getSystems(searchStr, limit, sortBy, DEFAULT_SKIP, DEFAULT_START_AFTER);
+    searchResults = getClientUsr(serviceURL, adminUserJWT).getSystems(searchStr, limit, sortBy, DEFAULT_SKIP, DEFAULT_STARTAFTER);
     assertEquals(searchResults.size(), limit, "Incorrect result count");
     checkOrder(searchResults, 1, limit);
     sortBy = "name(desc)";
     limit = 19;
-    searchResults = getClientUsr(serviceURL, adminUserJWT).getSystems(searchStr, limit, sortBy, DEFAULT_SKIP, DEFAULT_START_AFTER);
+    searchResults = getClientUsr(serviceURL, adminUserJWT).getSystems(searchStr, limit, sortBy, DEFAULT_SKIP, DEFAULT_STARTAFTER);
     assertEquals(searchResults.size(), limit, "Incorrect result count");
     checkOrder(searchResults, numSystems, numSystems - (limit-1));
     // Sort and check order with limit and skip
     sortBy = "name(asc)";
     limit = 2;
     skip = 5;
-    searchResults = getClientUsr(serviceURL, adminUserJWT).getSystems(searchStr, limit, sortBy, skip, DEFAULT_START_AFTER);
+    searchResults = getClientUsr(serviceURL, adminUserJWT).getSystems(searchStr, limit, sortBy, skip, DEFAULT_STARTAFTER);
     assertEquals(searchResults.size(), limit, "Incorrect result count");
     // Should get systems named SrchGet_006 to SrchGet_007
     checkOrder(searchResults, skip + 1, skip + limit);
     sortBy = "name(desc)";
     limit = 4;
     skip = 3;
-    searchResults = getClientUsr(serviceURL, adminUserJWT).getSystems(searchStr, limit, sortBy, skip, DEFAULT_START_AFTER);
+    searchResults = getClientUsr(serviceURL, adminUserJWT).getSystems(searchStr, limit, sortBy, skip, DEFAULT_STARTAFTER);
     assertEquals(searchResults.size(), limit, "Incorrect result count");
     // Should get systems named SrchGet_017 to SrchGet_014
     checkOrder(searchResults, numSystems - skip, numSystems - limit);

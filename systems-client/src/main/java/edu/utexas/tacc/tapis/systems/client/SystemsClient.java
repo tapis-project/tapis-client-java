@@ -35,8 +35,8 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SEARCH;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SORT_BY;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_START_AFTER;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SORTBY;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
 
 /**
  * Class providing a convenient front-end to the automatically generated client code
@@ -263,7 +263,7 @@ public class SystemsClient
   public List<TSystem> getSystems() throws TapisClientException
   {
     RespSystemArray resp = null;
-    try { resp = sysApi.getSystems(false, DEFAULT_SEARCH, DEFAULT_LIMIT, DEFAULT_SORT_BY, DEFAULT_SKIP, DEFAULT_START_AFTER); }
+    try { resp = sysApi.getSystems(false, DEFAULT_SEARCH, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
@@ -275,7 +275,7 @@ public class SystemsClient
   public List<TSystem> getSystems(String searchStr) throws TapisClientException
   {
     RespSystemArray resp = null;
-    try { resp = sysApi.getSystems(false, searchStr, DEFAULT_LIMIT, DEFAULT_SORT_BY, DEFAULT_SKIP, DEFAULT_START_AFTER); }
+    try { resp = sysApi.getSystems(false, searchStr, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
@@ -283,7 +283,7 @@ public class SystemsClient
 
   /**
    * Get list of systems using search and sort.
-   * For example search=(name.like.MySys*)~(enabled.eq.true)&limit=10&sort_by=id(asc)&start_after=101
+   * For example search=(name.like.MySys*)~(enabled.eq.true)&limit=10&sortBy=id(asc)&startAfter=101
    * Use only one of skip or startAfter
    * When using startAfter sortBy must be specified.
    */
@@ -302,7 +302,7 @@ public class SystemsClient
   public List<TSystem> searchSystems(ReqSearchSystems req) throws TapisClientException
   {
     RespSystemArray resp = null;
-    try { resp = sysApi.searchSystemsRequestBody(req, false, DEFAULT_LIMIT, DEFAULT_SORT_BY, DEFAULT_SKIP, DEFAULT_START_AFTER); }
+    try { resp = sysApi.searchSystemsRequestBody(req, false, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
@@ -311,7 +311,7 @@ public class SystemsClient
   /**
    * Search for systems using an array of strings that represent an SQL-like WHERE clause
    * and using query parameters for sorting.
-   * For example limit=10&sort_by=id(asc)&start_after=101
+   * For example limit=10&sortBy=id(asc)&startAfter=101
    * Use only one of skip or startAfter
    * When using startAfter sortBy must be specified.
    */
