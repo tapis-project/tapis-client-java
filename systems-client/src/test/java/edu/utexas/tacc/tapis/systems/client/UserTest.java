@@ -371,11 +371,18 @@ public class UserTest
     TSystem tmpSys = usrClient.getSystemByName(sys0[1]);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
     usrClient.changeSystemOwner(sys0[1], newOwnerUser);
-    // Now that owner has given away ownership we should no longer be able to modify.
+    // Now that owner has given away ownership they should no longer be able to modify or read.
     try {
       usrClient.deleteSystemByName(sys0[1]);
       Assert.fail("Original owner should not have permission to update system after change of ownership. System name: " +
                   sys0[1] + " Old owner: " + ownerUser1 + " New Owner: " + newOwnerUser);
+    } catch (TapisClientException e) {
+      Assert.assertTrue(e.getMessage().contains("HTTP 401 Unauthorized"));
+    }
+    try {
+      usrClient.getSystemByName(sys0[1]);
+      Assert.fail("Original owner should not have permission to read system after change of ownership. System name: " +
+              sys0[1] + " Old owner: " + ownerUser1 + " New Owner: " + newOwnerUser);
     } catch (TapisClientException e) {
       Assert.assertTrue(e.getMessage().contains("HTTP 401 Unauthorized"));
     }
