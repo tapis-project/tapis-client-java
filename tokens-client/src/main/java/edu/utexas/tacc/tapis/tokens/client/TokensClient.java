@@ -209,9 +209,9 @@ public class TokensClient
   /**
    * Convenience method to get a JWT token for a service call
    */
-  public String getSvcToken(String tenant, String serviceName) throws Exception
+  public String getSvcToken(String tenant, String serviceName, String targetSite) throws Exception
   {
-    return getToken(tenant, serviceName, InlineObject1.AccountTypeEnum.SERVICE);
+    return getToken(tenant, serviceName, targetSite, InlineObject1.AccountTypeEnum.SERVICE);
   }
 
   /**
@@ -219,13 +219,13 @@ public class TokensClient
    */
   public String getUsrToken(String tenant, String userName) throws Exception
   {
-    return getToken(tenant, userName, InlineObject1.AccountTypeEnum.USER);
+    return getToken(tenant, userName, null, InlineObject1.AccountTypeEnum.USER);
   }
   
   /**
    * Convenience method to get a JWT token of USER or SERVICE type
    */
-  private String getToken(String tenant, String name, 
+  private String getToken(String tenant, String name, String targetSite,
                           InlineObject1.AccountTypeEnum tokType) 
    throws TapisClientException
   {
@@ -234,6 +234,7 @@ public class TokensClient
     req.accountType(tokType);
     req.tokenTenantId(tenant);
     req.tokenUsername(name);
+    req.setTargetSiteId(targetSite);
     
     // Make the call and return the result.
     var tokenPkg = createToken(req);

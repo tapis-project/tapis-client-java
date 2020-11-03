@@ -73,12 +73,32 @@ paths:
       parameters:
         - name: pretty
           in: query
-          description: Pretty print the response
+          description: Pretty print the response. For example pretty=true. Default is false.
           schema:
             type: boolean
         - name: search
           in: query
           description: Search conditions as a single query paramter. For example search=(name.like.MySys*)~(enabled.eq.true)
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Limit number of items returned. For example limit=10. Use -1 for unlimited. Default is unlimited.
+          schema:
+            type: integer
+        - name: sortBy
+          in: query
+          description: Attribute for sorting. Direction may be included. For example sortBy=name(desc). Default direction is (asc).
+          schema:
+            type: string
+        - name: skip
+          in: query
+          description: Number of items to skip. Use one of skip or startAfter. For example skip=10. Default is 0.
+          schema:
+            type: integer
+        - name: startAfter
+          in: query
+          description: Where to start when sorting. Use one of skip or startAfter. Must also specify sortBy. For example, limit=10&sortBy=id(asc)&startAfter=101
           schema:
             type: string
       responses:
@@ -155,14 +175,34 @@ paths:
       tags:
         - Systems
       summary: Retrieve systems matching search conditions specified as query parameters
-      description: Retrieve details for systems. Use query parameters to specify search conditions. For example ?owner.eq=jdoe&port.gt=1024
+      description: Retrieve details for systems. Use query parameters to specify search conditions. For example owner.eq=jdoe&port.gt=1024
       operationId: searchSystemsQueryParameters
       parameters:
         - name: pretty
           in: query
-          description: Pretty print the response
+          description: Pretty print the response. For example pretty=true. Default is false.
           schema:
             type: boolean
+        - name: limit
+          in: query
+          description: Limit number of items returned. For example limit=10. Use -1 for unlimited. Default is unlimited.
+          schema:
+            type: integer
+        - name: sortBy
+          in: query
+          description: Attribute for sorting. Direction may be included. For example sortBy=name(desc). Default direction is (asc).
+          schema:
+            type: string
+        - name: skip
+          in: query
+          description: Number of items to skip. Use one of skip or startAfter. For example skip=10. Default is 0.
+          schema:
+            type: integer
+        - name: startAfter
+          in: query
+          description: Where to start when sorting. Use one of skip or startAfter. Must also specify sortBy. For example, limit=10&sortBy=id(asc)&startAfter=101
+          schema:
+            type: string
       responses:
         '200':
           description: Success.
@@ -207,9 +247,29 @@ paths:
       parameters:
         - name: pretty
           in: query
-          description: Pretty print the response
+          description: Pretty print the response. For example pretty=true. Default is false.
           schema:
             type: boolean
+        - name: limit
+          in: query
+          description: Limit number of items returned. For example limit=10. Use -1 for unlimited. Default is unlimited.
+          schema:
+            type: integer
+        - name: sortBy
+          in: query
+          description: Attribute for sorting. Direction may be included. For example sortBy=name(desc). Default direction is (asc).
+          schema:
+            type: string
+        - name: skip
+          in: query
+          description: Number of items to skip. Use one of skip or startAfter. For example skip=10. Default is 0.
+          schema:
+            type: integer
+        - name: startAfter
+          in: query
+          description: Where to start when sorting. Use one of skip or startAfter. Must also specify sortBy. For example, limit=10&sortBy=id(asc)&startAfter=101
+          schema:
+            type: string
       responses:
         '200':
           description: Success.

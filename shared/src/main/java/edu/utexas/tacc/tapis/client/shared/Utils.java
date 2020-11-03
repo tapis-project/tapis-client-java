@@ -13,6 +13,17 @@ public class Utils
   // ************************************************************************
   // *********************** Constants **************************************
   // ************************************************************************
+
+  // Defaults for searching and sorting
+  public static final String DEFAULT_SEARCH = "";
+  public static final int DEFAULT_LIMIT = -1;
+  public static final String DEFAULT_SORTBY = "";
+  public static final int DEFAULT_SKIP = -1;
+  public static final String DEFAULT_STARTAFTER = "";
+  
+  // Default target site for service JWTs
+  public static final String DEFAULT_TARGET_SITE = "tacc";
+
   // Error msg to use in unlikely event we are unable to extract one from underlying exception
   private static final String ERR_MSG = "Exception encountered but unable to extract message from response or underlying exception";
 

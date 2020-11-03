@@ -94,6 +94,7 @@
         </executions>
       </plugin>
       <!-- failsafe plugin is for running integration tests -->
+      <!-- NOTE: reuseForks=false because clients have static variables for headers and cannot be shared within a JVM -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
@@ -102,6 +103,10 @@
           <environmentVariables>
             <APP_ENV>test</APP_ENV>
           </environmentVariables>
+            <forkCount>3</forkCount>
+            <reuseForks>false</reuseForks>
+            <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
+            <workingDirectory>FORK_DIRECTORY_${surefire.forkNumber}</workingDirectory>
         </configuration>
       </plugin>
     </plugins>
