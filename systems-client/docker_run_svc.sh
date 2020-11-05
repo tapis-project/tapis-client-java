@@ -30,7 +30,12 @@ if [ $# -ne 1 ]; then
   exit 1
 fi
 
-# Make sure we have the service password, db password and db URL
+# Make sure we have the siteId, service password, db password and db URL
+if [ -z "$TAPIS_SITE_ID" ]; then
+  echo "ERROR: Please set env variable TAPIS_SITE_ID"
+  echo $USAGE1
+  exit 1
+fi
 if [ -z "$TAPIS_SERVICE_PASSWORD" ]; then
   echo "ERROR: Please set env variable TAPIS_SERVICE_PASSWORD to the systems service password"
   echo $USAGE1
@@ -72,4 +77,5 @@ docker run -e TAPIS_SERVICE_PASSWORD="${TAPIS_SERVICE_PASSWORD}" \
            -e TAPIS_TENANT_SVC_BASEURL="${BASE_URL}" \
            -e TAPIS_DB_PASSWORD="${TAPIS_DB_PASSWORD}" \
            -e TAPIS_DB_JDBC_URL="${TAPIS_DB_JDBC_URL}" \
-           -d --rm --network="host" "${TAG}"
+           -e TAPIS_SITE_ID="${TAPIS_SITE_ID}" \
+           -d  --network="host" "${TAG}"

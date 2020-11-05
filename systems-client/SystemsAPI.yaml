@@ -225,7 +225,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RespSystemArray'
+                $ref: '#/components/schemas/RespSystems'
         '400':
           description: Input error.
           content:
@@ -297,7 +297,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RespSystemArray'
+                $ref: '#/components/schemas/RespSystems'
         '400':
           description: Input error.
           content:
@@ -1430,6 +1430,37 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TSystem'
+    RespSystems:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        result:
+          type: object
+          properties:
+            metadata:
+              type: object
+              properties:
+                recordCount:
+                  type: integer
+                recordLimit:
+                  type: integer
+                recordsSkipped:
+                  type: integer
+                sortBy:
+                  type: string
+                startAfter:
+                  type: string
+                totalCount:
+                  type: integer
+            search:
+              type: array
+              items:
+                $ref: '#/components/schemas/TSystem'
     RespCredential:
       type: object
       properties:

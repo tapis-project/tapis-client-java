@@ -3,8 +3,6 @@ package edu.utexas.tacc.tapis.systems.client;
 import java.util.List;
 
 import edu.utexas.tacc.tapis.systems.client.gen.api.GeneralApi;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespBasic;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystemArray;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.Gson;
 
@@ -22,11 +20,14 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqSearchSystems;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespBasic;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespChangeCount;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespNameArray;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespResourceUrl;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystemArray;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystems;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability.CategoryEnum;
@@ -319,18 +320,20 @@ public class SystemsClient
   }
 
   /**
+   * Dedicated search endpoint
    * Search for systems using an array of strings that represent an SQL-like WHERE clause
    */
   public List<TSystem> searchSystems(ReqSearchSystems req) throws TapisClientException
   {
-    RespSystemArray resp = null;
+    RespSystems resp = null;
     try { resp = sysApi.searchSystemsRequestBody(req, false, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_COMPUTETOTAL); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
+    if (resp != null && resp.getResult() != null) return resp.getResult().getSearch(); else return null;
   }
 
   /**
+   * Dedicated search endpoint
    * Search for systems using an array of strings that represent an SQL-like WHERE clause
    * and using query parameters for sorting.
    * For example limit=10&sortBy=id(asc)&startAfter=101
@@ -339,11 +342,11 @@ public class SystemsClient
    */
   public List<TSystem> searchSystems(ReqSearchSystems req, int limit, String sortBy, int skip, String startAfter) throws TapisClientException
   {
-    RespSystemArray resp = null;
+    RespSystems resp = null;
     try { resp = sysApi.searchSystemsRequestBody(req, false, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
+    if (resp != null && resp.getResult() != null) return resp.getResult().getSearch(); else return null;
   }
 
   /**
