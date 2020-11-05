@@ -43,6 +43,9 @@ public class AppsClient
   // Header key for JWT
   public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
 
+  // Default required permssions
+  public static final String DEFAULT_REQUIRED_PERMS = "READ";
+
   // ************************************************************************
   // *********************** Enums ******************************************
   // ************************************************************************
@@ -167,7 +170,7 @@ public class AppsClient
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
-    try { resp = appApi.createApp(req); }
+    try { resp = appApi.createApp(req, false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
@@ -183,7 +186,7 @@ public class AppsClient
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
-    try { resp = appApi.updateApp(name, req); }
+    try { resp = appApi.updateApp(name, req, false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
@@ -199,7 +202,7 @@ public class AppsClient
   public int changeAppOwner(String name, String newOwnerName) throws TapisClientException
   {
     RespChangeCount resp = null;
-    try { resp = appApi.changeAppOwner(name, newOwnerName); }
+    try { resp = appApi.changeAppOwner(name, newOwnerName, false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
@@ -213,10 +216,10 @@ public class AppsClient
    * @return The app or null if app not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public App getAppByName(String name) throws TapisClientException
+  public App getApp(String name) throws TapisClientException
   {
     RespApp resp = null;
-    try {resp = appApi.getAppByName(name); }
+    try {resp = appApi.getApp(name, false, DEFAULT_REQUIRED_PERMS); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null) return resp.getResult(); else return null;
@@ -255,10 +258,10 @@ public class AppsClient
    * @return number of records modified as a result of the action
    * @throws TapisClientException - If api call throws an exception
    */
-  public int deleteAppByName(String name) throws TapisClientException
+  public int deleteApp(String name) throws TapisClientException
   {
     RespChangeCount resp = null;
-    try { resp = appApi.deleteAppByName(name); }
+    try { resp = appApi.deleteApp(name, false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
@@ -281,7 +284,7 @@ public class AppsClient
     var req = new ReqPerms();
     req.setPermissions(permissions);
     // Submit the request
-    try { permsApi.grantUserPerms(appName, userName, req); }
+    try { permsApi.grantUserPerms(appName, userName, req, false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
   }
@@ -292,7 +295,7 @@ public class AppsClient
   public List<String> getAppPermissions(String appName, String userName) throws TapisClientException
   {
     RespNameArray resp = null;
-    try { resp = permsApi.getUserPerms(appName, userName); }
+    try { resp = permsApi.getUserPerms(appName, userName, false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getNames(); else return null;
@@ -310,7 +313,7 @@ public class AppsClient
     var req = new ReqPerms();
     req.setPermissions(permissions);
     // Submit the request
-    try { permsApi.revokeUserPerms(appName, userName, req); }
+    try { permsApi.revokeUserPerms(appName, userName, req, false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
   }
@@ -324,7 +327,7 @@ public class AppsClient
           throws TapisClientException
   {
     // Submit the request
-    try { permsApi.revokeUserPerm(appName, userName, permission); }
+    try { permsApi.revokeUserPerm(appName, userName, permission, false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
   }

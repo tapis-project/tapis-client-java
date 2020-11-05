@@ -20,6 +20,7 @@ public class Utils
   public static final String DEFAULT_SORTBY = "";
   public static final int DEFAULT_SKIP = -1;
   public static final String DEFAULT_STARTAFTER = "";
+  public static final boolean DEFAULT_COMPUTETOTAL = false;
   
   // Default target site for service JWTs
   public static final String DEFAULT_TARGET_SITE = "tacc";

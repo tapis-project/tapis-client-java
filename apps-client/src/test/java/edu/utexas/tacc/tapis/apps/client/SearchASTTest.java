@@ -99,7 +99,7 @@ public class SearchASTTest
     // apps and other resources) using the client.
     App tmpApp;
     try {
-      tmpApp = getClientUsr(serviceURL, ownerUser1JWT).getAppByName(apps.get(1)[1]);
+      tmpApp = getClientUsr(serviceURL, ownerUser1JWT).getApp(apps.get(1)[1]);
     } catch (TapisClientException e) {
       assertEquals(e.getCode(), 404);
       tmpApp = null;
@@ -115,12 +115,12 @@ public class SearchASTTest
         {
           // Vary port # for checking numeric relational searches
           Utils.createApp(getClientUsr(serviceURL, ownerUser1JWT), app0);
-          tmpApp = getClientUsr(serviceURL, ownerUser1JWT).getAppByName(app0[1]);
+          tmpApp = getClientUsr(serviceURL, ownerUser1JWT).getApp(app0[1]);
         }
         else
         {
           Utils.createApp(getClientUsr(serviceURL, ownerUser2JWT), app0);
-          tmpApp = getClientUsr(serviceURL, ownerUser2JWT).getAppByName(app0[1]);
+          tmpApp = getClientUsr(serviceURL, ownerUser2JWT).getApp(app0[1]);
         }
         Assert.assertNotNull(tmpApp);
         appsMap.put(i, tmpApp);
@@ -132,7 +132,7 @@ public class SearchASTTest
       for (int i = 1; i <= numApps; i++)
       {
         String[] app0 = apps.get(i);
-        tmpApp = getClientUsr(serviceURL, adminUserJWT).getAppByName(app0[1]);
+        tmpApp = getClientUsr(serviceURL, adminUserJWT).getApp(app0[1]);
         Assert.assertNotNull(tmpApp);
         appsMap.put(i, tmpApp);
       }

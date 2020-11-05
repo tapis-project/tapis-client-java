@@ -101,6 +101,11 @@ paths:
           description: Where to start when sorting. Use one of skip or startAfter. Must also specify sortBy. For example, limit=10&sortBy=id(asc)&startAfter=101
           schema:
             type: string
+        - name: computeTotal
+          in: query
+          description: Compute total number of results that would have been returned if unlimited. Default is false.
+          schema:
+            type: boolean
       responses:
         '200':
           description: Success.
@@ -132,6 +137,12 @@ paths:
       summary: Create a system
       description: Create a system using a request body. System name must be unique within a tenant and can be composed of alphanumeric characters and the following special characters [-._~]. Name must begin with an alphabetic character and can be no more than 256 characters in length. Description is optional with a maximum length of 2048 characters.'
       operationId: createSystem
+      parameters:
+        - name: pretty
+          in: query
+          description: Pretty print the response. For example pretty=true. Default is false.
+          schema:
+            type: boolean
       requestBody:
         required: true
         description: A JSON object specifying information for the system to be created.
@@ -203,6 +214,11 @@ paths:
           description: Where to start when sorting. Use one of skip or startAfter. Must also specify sortBy. For example, limit=10&sortBy=id(asc)&startAfter=101
           schema:
             type: string
+        - name: computeTotal
+          in: query
+          description: Compute total number of results that would have been returned if unlimited. Default is false.
+          schema:
+            type: boolean
       responses:
         '200':
           description: Success.
@@ -234,16 +250,6 @@ paths:
       summary: Retrieve systems matching search conditions
       description: Retrieve details for systems. Use request body to specify SQL-like search conditions.
       operationId: searchSystemsRequestBody
-      requestBody:
-        required: true
-        description: A JSON object specifying SQL-like search conditions as an array of strings. Strings are concatenated to form full search query.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqSearchSystems'
-#          text/plain:
-#            schema:
-#              $ref: '#/components/schemas/ReqSearchSystemsText'
       parameters:
         - name: pretty
           in: query
@@ -270,6 +276,21 @@ paths:
           description: Where to start when sorting. Use one of skip or startAfter. Must also specify sortBy. For example, limit=10&sortBy=id(asc)&startAfter=101
           schema:
             type: string
+        - name: computeTotal
+          in: query
+          description: Compute total number of results that would have been returned if unlimited. Default is false.
+          schema:
+            type: boolean
+      requestBody:
+        required: true
+        description: A JSON object specifying SQL-like search conditions as an array of strings. Strings are concatenated to form full search query.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqSearchSystems'
+      #          text/plain:
+      #            schema:
+      #              $ref: '#/components/schemas/ReqSearchSystemsText'
       responses:
         '200':
           description: Success.
@@ -302,6 +323,12 @@ paths:
       summary: Import an SGCI resource.
       description: Create a system based on attributes from resource in SGCI catalog. SGCI resource ID required. Optional attributes are name, description, owner, enabled, effectiveUserId, accessCredential, jobRemoteArchiveSystem, jobRemoteArchiveDir, jobCapabilities, tags, notes.
       operationId: importSGCIResource
+      parameters:
+        - name: pretty
+          in: query
+          description: Pretty print the response. For example pretty=true. Default is false.
+          schema:
+            type: boolean
       requestBody:
         required: true
         description: A JSON object specifying information for the system to be created from an SGCI resource.
@@ -353,6 +380,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response. For example pretty=true. Default is false.
+          schema:
+            type: boolean
       requestBody:
         required: true
         description: A JSON object specifying SGCI resource ID and changes to be applied.
@@ -398,13 +430,18 @@ paths:
         - Systems
       summary: Retrieve system details
       description: Retrieve information for a system given the system name. Use query parameter returnCredentials=true to have effectiveUserId access credentials included in the response. Use query parameter accessMethod=<method> to override default access method.
-      operationId: getSystemByName
+      operationId: getSystem
       parameters:
         - name: systemName
           in: path
           required: true
           schema:
             type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response. For example pretty=true. Default is false.
+          schema:
+            type: boolean
         - name: returnCredentials
           in: query
           description: Highly restricted. Only certain Tapis services are authorized to get credentials.
@@ -417,6 +454,12 @@ paths:
           schema:
             type: string
             default: ''
+        - name: requiredPerms
+          in: query
+          description: Comma separated list of required permissions. Can be used to perform an additional permissions check with one call. For example requiredPerms=EXECUTE. Deault is READ.
+          schema:
+            type: string
+            default: 'READ'
       responses:
         '200':
           description: System found.
@@ -453,13 +496,18 @@ paths:
         - Systems
       summary: Soft delete a system
       description: Soft delete a system given the system name.
-      operationId: deleteSystemByName
+      operationId: deleteSystem
       parameters:
         - name: systemName
           in: path
           required: true
           schema:
             type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response. For example pretty=true. Default is false.
+          schema:
+            type: boolean
       responses:
         '200':
           description: System deleted.
@@ -497,6 +545,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response. For example pretty=true. Default is false.
+          schema:
+            type: boolean
       requestBody:
         required: true
         description: A JSON object specifying changes to be applied.
@@ -553,6 +606,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response. For example pretty=true. Default is false.
+          schema:
+            type: boolean
       responses:
         '200':
           description: System owner updated.
@@ -598,6 +656,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response. For example pretty=true. Default is false.
+          schema:
+            type: boolean
         - name: accessMethod
           in: query
           description: Desired access method to use when fetching credentials, default access method used if not provided.
@@ -652,6 +715,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response. For example pretty=true. Default is false.
+          schema:
+            type: boolean
       requestBody:
         required: true
         description: A JSON object specifying a credential.
@@ -701,6 +769,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response. For example pretty=true. Default is false.
+          schema:
+            type: boolean
       responses:
         '200':
           description: Credential removed.
@@ -746,6 +819,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response. For example pretty=true. Default is false.
+          schema:
+            type: boolean
       responses:
         '200':
           description: Success.
@@ -794,6 +872,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response. For example pretty=true. Default is false.
+          schema:
+            type: boolean
       requestBody:
         required: true
         description: A JSON object specifying a list of permissions.
@@ -845,6 +928,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response. For example pretty=true. Default is false.
+          schema:
+            type: boolean
       requestBody:
         required: true
         description: A JSON object specifying a list of permissions.
@@ -895,6 +983,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response. For example pretty=true. Default is false.
+          schema:
+            type: boolean
       responses:
         '200':
           description: Permission revoked.
