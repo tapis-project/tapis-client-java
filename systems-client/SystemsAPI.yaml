@@ -454,12 +454,12 @@ paths:
           schema:
             type: string
             default: ''
-        - name: requiredPerms
+        - name: requireExecPerm
           in: query
-          description: Comma separated list of required permissions. Can be used to perform an additional permissions check with one call. For example requiredPerms=EXECUTE. Deault is READ.
+          description: check for EXECUTE permission as well as READ permission.
           schema:
-            type: string
-            default: 'READ'
+            type: boolean
+            default: false
       responses:
         '200':
           description: System found.

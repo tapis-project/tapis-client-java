@@ -55,9 +55,6 @@ public class SystemsClient
   // Header key for JWT
   public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
 
-  // Default required permssions
-  public static final String DEFAULT_REQUIRED_PERMS = "READ";
-
   // ************************************************************************
   // *********************** Enums ******************************************
   // ************************************************************************
@@ -234,25 +231,23 @@ public class SystemsClient
   public TSystem getSystem(String name) throws TapisClientException
   {
     RespSystem resp = null;
-    try {resp = sysApi.getSystem(name, false, false, null, DEFAULT_REQUIRED_PERMS); }
+    try {resp = sysApi.getSystem(name, false, false, null, false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null) return resp.getResult(); else return null;
   }
 
   /**
-   * Get a system by name without returning credentials but with required permissions
+   * Get a system by name without returning credentials but with require EXECUTE+READ permissions.
    *
    * @param name System name
-   * @param requiredPerms required permissions, READ by default
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public TSystem getSystemRequiredPerms(String name, String requiredPerms) throws TapisClientException
+  public TSystem getSystemRequireExecPerm(String name) throws TapisClientException
   {
-    if (StringUtils.isBlank(requiredPerms)) requiredPerms = DEFAULT_REQUIRED_PERMS;
     RespSystem resp = null;
-    try {resp = sysApi.getSystem(name, false, false, null, requiredPerms); }
+    try {resp = sysApi.getSystem(name, false, false, null, true); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null) return resp.getResult(); else return null;
@@ -274,7 +269,7 @@ public class SystemsClient
   {
     RespSystem resp = null;
     String accessMethodStr = (accessMethod==null ? null : accessMethod.name());
-    try {resp = sysApi.getSystem(name, false, true, accessMethodStr, DEFAULT_REQUIRED_PERMS); }
+    try {resp = sysApi.getSystem(name, false, true, accessMethodStr, false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null) return resp.getResult(); else return null;
