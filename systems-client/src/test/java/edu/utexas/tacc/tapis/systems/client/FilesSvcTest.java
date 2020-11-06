@@ -48,6 +48,10 @@ import static edu.utexas.tacc.tapis.systems.client.Utils.tenantName;
  * See IntegrationUtils in this package for information on environment required to run the tests.
  * 
  * Create all systems in setup as user client before switching to files service client for running the tests.
+ *
+ *    TODO: Add tests for getSystemRequireExecPerm()
+ *    TODO: Add tests for getSystemWithCredential() retrieving various user credentials for the effectiveUserId,
+ *          including effectiveUserId = ${apiUserId}
  */
 @Test(groups={"integration"})
 public class FilesSvcTest
