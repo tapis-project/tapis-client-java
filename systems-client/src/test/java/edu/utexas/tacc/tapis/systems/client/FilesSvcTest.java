@@ -3,11 +3,9 @@ package edu.utexas.tacc.tapis.systems.client;
 import com.google.gson.JsonObject;
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
-import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.systems.client.SystemsClient.AccessMethod;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
 import edu.utexas.tacc.tapis.tokens.client.TokensClient;
 import org.apache.commons.lang3.StringUtils;
@@ -21,14 +19,11 @@ import java.util.List;
 import java.util.Map;
 
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_TARGET_SITE;
-import static edu.utexas.tacc.tapis.systems.client.Utils.createSystem;
 import static edu.utexas.tacc.tapis.systems.client.Utils.filesSvcName;
 import static edu.utexas.tacc.tapis.systems.client.Utils.getClientUsr;
 import static edu.utexas.tacc.tapis.systems.client.Utils.jobCaps1;
-import static edu.utexas.tacc.tapis.systems.client.Utils.jobCaps2;
 import static edu.utexas.tacc.tapis.systems.client.Utils.masterTenantName;
 import static edu.utexas.tacc.tapis.systems.client.Utils.notes1JO;
-import static edu.utexas.tacc.tapis.systems.client.Utils.notes2JO;
 import static edu.utexas.tacc.tapis.systems.client.Utils.ownerUser1;
 import static edu.utexas.tacc.tapis.systems.client.Utils.prot1AccessMethod;
 import static edu.utexas.tacc.tapis.systems.client.Utils.prot1Port;
@@ -37,19 +32,8 @@ import static edu.utexas.tacc.tapis.systems.client.Utils.prot1ProxyPort;
 import static edu.utexas.tacc.tapis.systems.client.Utils.prot1TxfrMethodsC;
 import static edu.utexas.tacc.tapis.systems.client.Utils.prot1TxfrMethodsT;
 import static edu.utexas.tacc.tapis.systems.client.Utils.prot1UseProxy;
-import static edu.utexas.tacc.tapis.systems.client.Utils.prot2AccessMethod;
-import static edu.utexas.tacc.tapis.systems.client.Utils.prot2Port;
-import static edu.utexas.tacc.tapis.systems.client.Utils.prot2ProxyHost;
-import static edu.utexas.tacc.tapis.systems.client.Utils.prot2ProxyPort;
-import static edu.utexas.tacc.tapis.systems.client.Utils.prot2TxfrMethodsT;
-import static edu.utexas.tacc.tapis.systems.client.Utils.prot2TxfrMethodsU;
-import static edu.utexas.tacc.tapis.systems.client.Utils.prot2UseProxy;
 import static edu.utexas.tacc.tapis.systems.client.Utils.tags1;
-import static edu.utexas.tacc.tapis.systems.client.Utils.tags2;
 import static edu.utexas.tacc.tapis.systems.client.Utils.tenantName;
-import static edu.utexas.tacc.tapis.systems.client.Utils.testPerms;
-import static edu.utexas.tacc.tapis.systems.client.Utils.testUser3;
-import static edu.utexas.tacc.tapis.systems.client.Utils.testUser4;
 
 /**
  * Test the Systems API client acting as the files service calling the systems service.
@@ -64,6 +48,10 @@ import static edu.utexas.tacc.tapis.systems.client.Utils.testUser4;
  * See IntegrationUtils in this package for information on environment required to run the tests.
  * 
  * Create all systems in setup as user client before switching to files service client for running the tests.
+ *
+ *    TODO: Add tests for getSystemRequireExecPerm()
+ *    TODO: Add tests for getSystemWithCredential() retrieving various user credentials for the effectiveUserId,
+ *          including effectiveUserId = ${apiUserId}
  */
 @Test(groups={"integration"})
 public class FilesSvcTest
@@ -139,9 +127,9 @@ public class FilesSvcTest
   //   and test retrieving for specified access method.
   // NOTE: Credential is created for effectiveUserId
   @Test
-  public void testGetSystemByName() throws Exception {
+  public void testGetSystem() throws Exception {
     String[] sys0 = systems.get(1);
-    TSystem tmpSys = sysClient.getSystemByName(sys0[1], null);
+    TSystem tmpSys = sysClient.getSystemWithCredentials(sys0[1], null);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
     System.out.println("Found item: " + sys0[1]);
     Assert.assertEquals(tmpSys.getName(), sys0[1]);
@@ -216,7 +204,7 @@ public class FilesSvcTest
     Assert.assertEquals(tmpNotes.get("testdata").getAsString(), testdataStr);
 
     // Test retrieval using specified access method
-    tmpSys = sysClient.getSystemByName(sys0[1], AccessMethod.PASSWORD);
+    tmpSys = sysClient.getSystemWithCredentials(sys0[1], AccessMethod.PASSWORD);
     // Verify credentials. Only cred for default accessMethod is returned. In this case PASSWORD.
     cred = tmpSys.getAccessCredential();
     Assert.assertNotNull(cred, "AccessCredential should not be null");
@@ -322,7 +310,7 @@ public class FilesSvcTest
 //    {
 //      try
 //      {
-//        getClientUsr(serviceURL, ownerUserJWT).deleteSystemByName(systems.get(i)[1]);
+//        getClientUsr(serviceURL, ownerUserJWT).deleteSystem(systems.get(i)[1]);
 //      } catch (Exception e)
 //      {
 //      }

@@ -156,12 +156,12 @@ public class UserTest
 
   // Test retrieving a app by name.
   @Test
-  public void testGetAppByName() throws Exception {
+  public void testGetApp() throws Exception {
     String[] app0 = apps.get(2);
     String respUrl = Utils.createApp(getClientUsr(serviceURL, ownerUserJWT), app0);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
-    App tmpApp = getClientFilesSvc().getAppByName(app0[1]);
+    App tmpApp = getClientFilesSvc().getApp(app0[1]);
     Assert.assertNotNull(tmpApp, "Failed to create item: " + app0[1]);
     System.out.println("Found item: " + app0[1]);
     Assert.assertEquals(tmpApp.getName(), app0[1]);
@@ -221,7 +221,7 @@ public class UserTest
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
       // Verify attributes
       app0 = appF2;
-      App tmpApp = getClientUsr(serviceURL, ownerUserJWT).getAppByName(app0[1]);
+      App tmpApp = getClientUsr(serviceURL, ownerUserJWT).getApp(app0[1]);
       Assert.assertNotNull(tmpApp, "Failed to create item: " + app0[1]);
       System.out.println("Found item: " + app0[1]);
       Assert.assertEquals(tmpApp.getName(), app0[1]);
@@ -268,11 +268,11 @@ public class UserTest
     String[] app0 = apps.get(16);
     String respUrl = Utils.createApp(getClientUsr(serviceURL, ownerUserJWT), app0);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
-    App tmpApp = getClientUsr(serviceURL, ownerUserJWT).getAppByName(app0[1]);
+    App tmpApp = getClientUsr(serviceURL, ownerUserJWT).getApp(app0[1]);
     Assert.assertNotNull(tmpApp, "Failed to create item: " + app0[1]);
     getClientUsr(serviceURL, ownerUserJWT).changeAppOwner(app0[1], newOwnerUser);
     // Now that owner has given away ownership we need to be newOwnerUser or admin to get the app
-    tmpApp = Utils.getClientUsr(serviceURL, newOwnerUserJWT).getAppByName(app0[1]);
+    tmpApp = Utils.getClientUsr(serviceURL, newOwnerUserJWT).getApp(app0[1]);
     Assert.assertNotNull(tmpApp, "Unable to get app after change of owner. App: " + app0[1]);
     System.out.println("Found item: " + app0[1]);
     Assert.assertEquals(tmpApp.getOwner(), newOwnerUser);
@@ -309,9 +309,9 @@ public class UserTest
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Delete the app
-    getClientUsr(serviceURL, ownerUserJWT).deleteAppByName(app0[1]);
+    getClientUsr(serviceURL, ownerUserJWT).deleteApp(app0[1]);
     try {
-      App tmpApp2 = getClientUsr(serviceURL, ownerUserJWT).getAppByName(app0[1]);
+      App tmpApp2 = getClientUsr(serviceURL, ownerUserJWT).getApp(app0[1]);
       Assert.fail("App not deleted. App name: " + app0[1]);
     } catch (TapisClientException e) {
       Assert.assertEquals(e.getCode(), 404);
@@ -368,7 +368,7 @@ public class UserTest
 //    {
 //      try
 //      {
-//        getClientUsr(serviceURL, ownerUserJWT).deleteAppByName(apps.get(i)[1]);
+//        getClientUsr(serviceURL, ownerUserJWT).deleteApp(apps.get(i)[1]);
 //      } catch (Exception e)
 //      {
 //      }

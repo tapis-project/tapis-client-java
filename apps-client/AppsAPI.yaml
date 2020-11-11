@@ -112,6 +112,12 @@ paths:
       summary: Create an app
       description: Create an app using a request body. App name must be unique within a tenant and can be composed of alphanumeric characters and the following special characters [-._~]. Name must begin with an alphabetic character and can be no more than 256 characters in length. Description is optional with a maximum length of 2048 characters.'
       operationId: createApp
+      parameters:
+        - name: pretty
+          in: query
+          description: Pretty print the response
+          schema:
+            type: boolean
       requestBody:
         required: true
         description: A JSON object specifying information for the app to be created.
@@ -194,6 +200,12 @@ paths:
       summary: Retrieve Applications matching search conditions
       description: Retrieve details for Applications. Use request body to specify SQL-like search conditions.
       operationId: searchAppsRequestBody
+      parameters:
+        - name: pretty
+          in: query
+          description: Pretty print the response
+          schema:
+            type: boolean
       requestBody:
         required: true
         description: A JSON object specifying SQL-like search conditions as an array of strings. Strings are concatenated to form full search query.
@@ -201,15 +213,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ReqSearchApps'
-#          text/plain:
-#            schema:
-#              $ref: '#/components/schemas/ReqSearchAppsText'
-      parameters:
-        - name: pretty
-          in: query
-          description: Pretty print the response
-          schema:
-            type: boolean
+      #          text/plain:
+      #            schema:
+      #              $ref: '#/components/schemas/ReqSearchAppsText'
       responses:
         '200':
           description: Success.
@@ -241,13 +247,24 @@ paths:
         - Applications
       summary: Retrieve app details
       description: Retrieve information for an app given the app name.
-      operationId: getAppByName
+      operationId: getApp
       parameters:
         - name: appName
           in: path
           required: true
           schema:
             type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response
+          schema:
+            type: boolean
+        - name: requiredPerms
+          in: query
+          description: Comma separated list of required permissions. Can be used to perform an additional permissions check with one call. For example requiredPerms=EXECUTE. Deault is READ.
+          schema:
+            type: string
+            default: 'READ'
       responses:
         '200':
           description: App found.
@@ -284,13 +301,18 @@ paths:
         - Applications
       summary: Soft delete an app
       description: Soft delete an app given the app name.
-      operationId: deleteAppByName
+      operationId: deleteApp
       parameters:
         - name: appName
           in: path
           required: true
           schema:
             type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response
+          schema:
+            type: boolean
       responses:
         '200':
           description: App deleted.
@@ -328,6 +350,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response
+          schema:
+            type: boolean
       requestBody:
         required: true
         description: A JSON object specifying changes to be applied.
@@ -384,6 +411,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response
+          schema:
+            type: boolean
       responses:
         '200':
           description: App owner updated.
@@ -429,6 +461,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response
+          schema:
+            type: boolean
       responses:
         '200':
           description: Success.
@@ -477,6 +514,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response
+          schema:
+            type: boolean
       requestBody:
         required: true
         description: A JSON object specifying a list of permissions.
@@ -528,6 +570,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response
+          schema:
+            type: boolean
       requestBody:
         required: true
         description: A JSON object specifying a list of permissions.
@@ -578,6 +625,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response
+          schema:
+            type: boolean
       responses:
         '200':
           description: Permission revoked.

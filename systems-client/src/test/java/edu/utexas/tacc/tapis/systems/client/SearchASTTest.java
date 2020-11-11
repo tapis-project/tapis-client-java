@@ -101,7 +101,7 @@ public class SearchASTTest
     // systems and other resources) using the client.
     TSystem tmpSys;
     try {
-      tmpSys = getClientUsr(serviceURL, ownerUser1JWT).getSystemByName(systems.get(1)[1]);
+      tmpSys = getClientUsr(serviceURL, ownerUser1JWT).getSystem(systems.get(1)[1]);
     } catch (TapisClientException e) {
       assertEquals(e.getCode(), 404);
       tmpSys = null;
@@ -117,12 +117,12 @@ public class SearchASTTest
         {
           // Vary port # for checking numeric relational searches
           Utils.createSystem(getClientUsr(serviceURL, ownerUser1JWT), sys0, port, prot1AccessMethod, null, prot1TxfrMethodsC);
-          tmpSys = getClientUsr(serviceURL, ownerUser1JWT).getSystemByName(sys0[1]);
+          tmpSys = getClientUsr(serviceURL, ownerUser1JWT).getSystem(sys0[1]);
         }
         else
         {
           Utils.createSystem(getClientUsr(serviceURL, ownerUser2JWT), sys0, port, prot1AccessMethod, null, prot1TxfrMethodsC);
-          tmpSys = getClientUsr(serviceURL, ownerUser2JWT).getSystemByName(sys0[1]);
+          tmpSys = getClientUsr(serviceURL, ownerUser2JWT).getSystem(sys0[1]);
         }
         Assert.assertNotNull(tmpSys);
         systemsMap.put(i, tmpSys);
@@ -134,7 +134,7 @@ public class SearchASTTest
       for (int i = 1; i <= numSystems; i++)
       {
         String[] sys0 = systems.get(i);
-        tmpSys = getClientUsr(serviceURL, adminUserJWT).getSystemByName(sys0[1]);
+        tmpSys = getClientUsr(serviceURL, adminUserJWT).getSystem(sys0[1]);
         Assert.assertNotNull(tmpSys);
         systemsMap.put(i, tmpSys);
       }
