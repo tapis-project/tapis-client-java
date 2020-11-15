@@ -18,6 +18,7 @@ import edu.utexas.tacc.tapis.systems.client.gen.api.SystemsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqSearchSystems;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespBasic;
@@ -25,9 +26,9 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.RespChangeCount;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespNameArray;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespResourceUrl;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystemArray;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystemsArray;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystems;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystemsSearch;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability.CategoryEnum;
@@ -280,7 +281,7 @@ public class SystemsClient
    */
   public List<TSystem> getSystems() throws TapisClientException
   {
-    RespSystemArray resp = null;
+    RespSystemsArray resp = null;
     try { resp = sysApi.getSystems(false, DEFAULT_SEARCH, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_COMPUTETOTAL); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -292,7 +293,7 @@ public class SystemsClient
    */
   public List<TSystem> getSystems(String searchStr) throws TapisClientException
   {
-    RespSystemArray resp = null;
+    RespSystemsArray resp = null;
     try { resp = sysApi.getSystems(false, searchStr, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_COMPUTETOTAL); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -307,7 +308,7 @@ public class SystemsClient
    */
   public List<TSystem> getSystems(String searchStr, int limit, String sortBy, int skip, String startAfter) throws TapisClientException
   {
-    RespSystemArray resp = null;
+    RespSystemsArray resp = null;
     try { resp = sysApi.getSystems(false, searchStr, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -320,7 +321,7 @@ public class SystemsClient
    */
   public List<TSystem> searchSystems(ReqSearchSystems req) throws TapisClientException
   {
-    RespSystems resp = null;
+    RespSystemsSearch resp = null;
     try { resp = sysApi.searchSystemsRequestBody(req, false, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_COMPUTETOTAL); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -337,11 +338,24 @@ public class SystemsClient
    */
   public List<TSystem> searchSystems(ReqSearchSystems req, int limit, String sortBy, int skip, String startAfter) throws TapisClientException
   {
-    RespSystems resp = null;
+    RespSystemsSearch resp = null;
     try { resp = sysApi.searchSystemsRequestBody(req, false, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getSearch(); else return null;
+  }
+
+  /**
+   * Dedicated search endpoint for retrieving systems that match a list of constraint conditions
+   * The constraint conditions are passed in as an array of strings that represent an SQL-like WHERE clause
+   */
+  public List<TSystem> matchConstraints(ReqMatchConstraints req) throws TapisClientException
+  {
+    RespSystemsArray resp = null;
+    try { resp = sysApi.matchConstraints(req, false); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
   }
 
   /**

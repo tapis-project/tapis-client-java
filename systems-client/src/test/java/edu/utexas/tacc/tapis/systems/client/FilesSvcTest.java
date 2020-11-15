@@ -150,13 +150,13 @@ public class FilesSvcTest
     Assert.assertEquals(tmpSys.getProxyPort().intValue(), prot1ProxyPort);
     Assert.assertEquals(tmpSys.getDefaultAccessMethod().name(), prot1AccessMethod.name());
     // Verify credentials. Only cred for default accessMethod is returned. In this case PKI_KEYS.
-//    Credential cred = tmpSys.getAccessCredential();
+    Credential cred = tmpSys.getAccessCredential();
 //    Assert.assertNotNull(cred, "AccessCredential should not be null");
 // TODO: Getting cred along with system is currently broken when called from client.
 // TODO Does work in systems service integration test. Parameters to SK appear to be the same so not clear why it fails here
 // TODO: Figure out why this works using getUserCred and when called directly from svc but not when getting system using client
 // Cred retrieved should be for effectiveUserId = effUser2, so far now as a test retrieve cred directly which does work
-    Credential cred = sysClient.getUserCredential(sys0[1], sys0[6], AccessMethod.PKI_KEYS);
+//    Credential cred = sysClient.getUserCredential(sys0[1], sys0[6], AccessMethod.PKI_KEYS);
 // TODO
     Assert.assertEquals(cred.getPrivateKey(), cred0.getPrivateKey());
     Assert.assertEquals(cred.getPublicKey(), cred0.getPublicKey());

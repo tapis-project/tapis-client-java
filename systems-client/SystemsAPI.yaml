@@ -112,7 +112,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RespSystemArray'
+                $ref: '#/components/schemas/RespSystemsArray'
         '400':
           description: Input error.
           content:
@@ -225,7 +225,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RespSystems'
+                $ref: '#/components/schemas/RespSystemsSearch'
         '400':
           description: Input error.
           content:
@@ -288,16 +288,58 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ReqSearchSystems'
-      #          text/plain:
-      #            schema:
-      #              $ref: '#/components/schemas/ReqSearchSystemsText'
       responses:
         '200':
           description: Success.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RespSystems'
+                $ref: '#/components/schemas/RespSystemsSearch'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  '/v3/systems/match/constraints':
+    post:
+      tags:
+        - Systems
+      summary: Retrieve systems satisfying specified constraint conditions
+      description: Retrieve details for systems. Use request body to specify constraint conditions as an SQL-like WHERE clause.
+      operationId: matchConstraints
+      parameters:
+        - name: pretty
+          in: query
+          description: Pretty print the response. For example pretty=true. Default is false.
+          schema:
+            type: boolean
+      requestBody:
+        required: true
+        description: A JSON object specifying SQL-like constraint conditions as an array of strings. Strings are concatenated to form full query.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqMatchConstraints'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSystemsArray'
         '400':
           description: Input error.
           content:
@@ -1341,6 +1383,13 @@ components:
           type: array
           items:
             type: string
+    ReqMatchConstraints:
+      type: object
+      properties:
+        match:
+          type: array
+          items:
+            type: string
 
     # --- Response objects ----------------------------------------------------
     RespBasic:
@@ -1417,7 +1466,7 @@ components:
           type: string
         result:
           $ref: '#/components/schemas/TSystem'
-    RespSystemArray:
+    RespSystemsArray:
       type: object
       properties:
         status:
@@ -1430,7 +1479,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TSystem'
-    RespSystems:
+    RespSystemsSearch:
       type: object
       properties:
         status:
