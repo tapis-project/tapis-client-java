@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gson.JsonObject;
+import com.google.gson.internal.LinkedTreeMap;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
@@ -262,9 +263,14 @@ public class UserTest
       System.out.println("Found tag: " + tagStr);
     }
     // Verify notes
-    String tmpNotesStr = (String) tmpSys.getNotes();
+    // TODO: Currently comes back as gson LinkedTreeMap and needs some work to convert to a Json string.
+    //       Fix this? Do this in the client?
+    LinkedTreeMap lmap = (LinkedTreeMap) tmpSys.getNotes();
+//    String tmpNotesStr = (String) tmpSys.getNotes();
+    String tmpNotesStr = lmap.toString();
     System.out.println("Found notes: " + tmpNotesStr);
-    JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(tmpNotesStr, JsonObject.class);
+//    JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(tmpNotesStr, JsonObject.class);
+    JsonObject tmpNotes = ClientTapisGsonUtils.getGson().toJsonTree(lmap).getAsJsonObject();
     Assert.assertNotNull(tmpNotes, "Fetched Notes should not be null");
     JsonObject origNotes = notes1JO;
     Assert.assertTrue(tmpNotes.has("project"));
@@ -343,8 +349,14 @@ public class UserTest
         System.out.println("Found tag: " + tagStr);
       }
       // Verify notes
-      String tmpNotesStr = (String) tmpSys.getNotes();
-      JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(tmpNotesStr, JsonObject.class);
+      // TODO: Currently comes back as gson LinkedTreeMap and needs some work to convert to a Json string.
+      //       Fix this? Do this in the client?
+      LinkedTreeMap lmap = (LinkedTreeMap) tmpSys.getNotes();
+//    String tmpNotesStr = (String) tmpSys.getNotes();
+      String tmpNotesStr = lmap.toString();
+      System.out.println("Found notes: " + tmpNotesStr);
+//    JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(tmpNotesStr, JsonObject.class);
+      JsonObject tmpNotes = ClientTapisGsonUtils.getGson().toJsonTree(lmap).getAsJsonObject();
       Assert.assertNotNull(tmpNotes);
       System.out.println("Found notes: " + tmpNotesStr);
       Assert.assertTrue(tmpNotes.has("project"));

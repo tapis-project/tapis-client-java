@@ -192,6 +192,8 @@ public class FilesSvcTest
       System.out.println("Found tag: " + tagStr);
     }
     // Verify notes
+    // TODO: Currently comes back as gson LinkedTreeMap and needs some work to convert to a Json string.
+    //       Fix this? Do this in the client?
     LinkedTreeMap lmap = (LinkedTreeMap) tmpSys.getNotes();
 //    String tmpNotesStr = (String) tmpSys.getNotes();
     String tmpNotesStr = lmap.toString();
