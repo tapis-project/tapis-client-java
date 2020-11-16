@@ -1,6 +1,7 @@
 package edu.utexas.tacc.tapis.systems.client;
 
 import com.google.gson.JsonObject;
+import com.google.gson.internal.LinkedTreeMap;
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.systems.client.SystemsClient.AccessMethod;
@@ -191,9 +192,12 @@ public class FilesSvcTest
       System.out.println("Found tag: " + tagStr);
     }
     // Verify notes
-    String tmpNotesStr = (String) tmpSys.getNotes();
+    LinkedTreeMap lmap = (LinkedTreeMap) tmpSys.getNotes();
+//    String tmpNotesStr = (String) tmpSys.getNotes();
+    String tmpNotesStr = lmap.toString();
     System.out.println("Found notes: " + tmpNotesStr);
-    JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(tmpNotesStr, JsonObject.class);
+//    JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(tmpNotesStr, JsonObject.class);
+    JsonObject tmpNotes = ClientTapisGsonUtils.getGson().toJsonTree(lmap).getAsJsonObject();
     Assert.assertNotNull(tmpNotes, "Fetched Notes should not be null");
     JsonObject origNotes = notes1JO;
     Assert.assertTrue(tmpNotes.has("project"));

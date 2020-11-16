@@ -32,6 +32,7 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystemsSearch;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability.CategoryEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.Capability.DatatypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
@@ -518,11 +519,15 @@ public class SystemsClient
   /**
    * Utility method to build a Capability object given category, name and value
    */
-  public static Capability buildCapability(CategoryEnum category, String name, String value)
+  public static Capability buildCapability(CategoryEnum category, String subcategory, String name,
+                                           Capability.DatatypeEnum datatype, int precedence, String value)
   {
     var cap = new Capability();
     cap.setCategory(category);
+    cap.setSubcategory(subcategory);
     cap.setName(name);
+    cap.setDatatype(datatype);
+    cap.setPrecedence(precedence);
     cap.setValue(value);
     return cap;
   }

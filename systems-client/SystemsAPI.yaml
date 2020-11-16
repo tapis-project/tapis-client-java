@@ -1164,8 +1164,20 @@ components:
             - CONTAINER
             - MISC
             - CUSTOM
+        subcategory:
+          type: string
         name:
           type: string
+        datatype:
+          type: string
+          enum:
+            - STRING
+            - INTEGER
+            - BOOLEAN
+            - NUMBER
+            - TIMESTAMP
+        precedence:
+          type: integer
         value:
           type: string
     Credential:

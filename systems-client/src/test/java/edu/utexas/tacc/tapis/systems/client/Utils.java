@@ -26,6 +26,8 @@ import com.google.gson.JsonObject;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
+import edu.utexas.tacc.tapis.systems.client.gen.model.Capability.CategoryEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.Capability.DatatypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
@@ -95,14 +97,23 @@ public final class Utils
           ClientTapisGsonUtils.getGson().fromJson("{\"project\":\"myproj2\", \"testdata\":\"abc2\"}", JsonObject.class);
   public static final List<String> testPerms = new ArrayList<>(List.of("READ", "MODIFY"));
 
-  private static final Capability capA1 = SystemsClient.buildCapability(Capability.CategoryEnum.SCHEDULER, "Type", "Slurm");
-  private static final Capability capB1 = SystemsClient.buildCapability(Capability.CategoryEnum.HARDWARE, "CoresPerNode", "4");
-  private static final Capability capC1 = SystemsClient.buildCapability(Capability.CategoryEnum.SOFTWARE, "OpenMP", "4.5");
+  private static final int precedence = 100;
+  private static final String subcategory = "";
+  private static final Capability capA1 = SystemsClient.buildCapability(CategoryEnum.SCHEDULER, subcategory,  "Type",
+                                                                        DatatypeEnum.STRING, precedence, "Slurm");
+  private static final Capability capB1 = SystemsClient.buildCapability(CategoryEnum.HARDWARE, subcategory, "CoresPerNode",
+                                                                        DatatypeEnum.INTEGER, precedence, "4");
+  private static final Capability capC1 = SystemsClient.buildCapability(CategoryEnum.SOFTWARE, subcategory, "OpenMP",
+                                                                        DatatypeEnum.STRING, precedence,"4.5");
   public static final List<Capability> jobCaps1 = new ArrayList<>(List.of(capA1, capB1, capC1));
-  private static final Capability capA2 = SystemsClient.buildCapability(Capability.CategoryEnum.SCHEDULER, "Type", "Condor");
-  private static final Capability capB2 = SystemsClient.buildCapability(Capability.CategoryEnum.HARDWARE, "CoresPerNode", "128");
-  private static final Capability capC2 = SystemsClient.buildCapability(Capability.CategoryEnum.SOFTWARE, "OpenMP", "3.1");
-  private static final Capability capD2 = SystemsClient.buildCapability(Capability.CategoryEnum.CONTAINER, "Singularity", null);
+  private static final Capability capA2 = SystemsClient.buildCapability(CategoryEnum.SCHEDULER, subcategory, "Type",
+                                                                        DatatypeEnum.STRING, precedence, "Condor");
+  private static final Capability capB2 = SystemsClient.buildCapability(CategoryEnum.HARDWARE, subcategory, "CoresPerNode",
+                                                                        DatatypeEnum.INTEGER, precedence, "128");
+  private static final Capability capC2 = SystemsClient.buildCapability(CategoryEnum.SOFTWARE, subcategory, "OpenMP",
+                                                                        DatatypeEnum.STRING, precedence, "3.1");
+  private static final Capability capD2 = SystemsClient.buildCapability(CategoryEnum.CONTAINER, subcategory, "Singularity",
+                                                                        DatatypeEnum.STRING, precedence, null);
   public static final List<Capability> jobCaps2 = new ArrayList<>(List.of(capA2, capB2, capC2, capD2));
 
   public static final String sysNamePrefix = "CSys";
