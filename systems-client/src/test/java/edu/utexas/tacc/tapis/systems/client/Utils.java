@@ -33,6 +33,7 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
 import org.apache.commons.lang3.StringUtils;
+import org.testng.Assert;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -230,5 +231,73 @@ public final class Utils
   {
     String suffix = key + "_" + String.format("%03d", idx);
     return sysNamePrefix + "_" + suffix;
+  }
+
+  /**
+   * Verify most attributes for a TSystem using default create data for following attriubtes:
+   *     port, useProxy, proxyHost, proxyPort, defaultAccessMethod, transferMethods, capabilities, tags, notes
+   * @param tmpSys - system retrieved from the service
+   * @param sys0 - Data used to create the system
+   */
+  public static void verifySystemAttributes(TSystem tmpSys, String[] sys0)
+  {
+    Assert.assertEquals(tmpSys.getName(), sys0[1]);
+    Assert.assertEquals(tmpSys.getDescription(), sys0[2]);
+    Assert.assertEquals(tmpSys.getSystemType().name(), sys0[3]);
+    Assert.assertEquals(tmpSys.getOwner(), sys0[4]);
+    Assert.assertEquals(tmpSys.getHost(), sys0[5]);
+    Assert.assertEquals(tmpSys.getEffectiveUserId(), sys0[6]);
+    Assert.assertEquals(tmpSys.getBucketName(), sys0[8]);
+    Assert.assertEquals(tmpSys.getRootDir(), sys0[9]);
+    Assert.assertEquals(tmpSys.getJobLocalWorkingDir(), sys0[10]);
+    Assert.assertEquals(tmpSys.getJobLocalArchiveDir(), sys0[11]);
+    Assert.assertEquals(tmpSys.getJobRemoteArchiveSystem(), sys0[12]);
+    Assert.assertEquals(tmpSys.getJobRemoteArchiveDir(), sys0[13]);
+    Assert.assertEquals(tmpSys.getPort().intValue(), prot1Port);
+    Assert.assertEquals(tmpSys.getUseProxy().booleanValue(), prot1UseProxy);
+    Assert.assertEquals(tmpSys.getProxyHost(), prot1ProxyHost);
+    Assert.assertEquals(tmpSys.getProxyPort().intValue(), prot1ProxyPort);
+    Assert.assertEquals(tmpSys.getDefaultAccessMethod().name(), prot1AccessMethod.name());
+    // Verify transfer methods
+    List<TSystem.TransferMethodsEnum> tMethodsList = tmpSys.getTransferMethods();
+    Assert.assertNotNull(tMethodsList, "TransferMethods list should not be null");
+    for (TSystem.TransferMethodsEnum txfrMethod : prot1TxfrMethodsT)
+    {
+      Assert.assertTrue(tMethodsList.contains(txfrMethod), "List of transfer methods did not contain: " + txfrMethod.name());
+    }
+    // Verify capabilities
+    List<Capability> jobCaps = tmpSys.getJobCapabilities();
+    Assert.assertNotNull(jobCaps);
+    Assert.assertEquals(jobCaps.size(), jobCaps1.size());
+    var capNamesFound = new ArrayList<String>();
+    for (Capability capFound : jobCaps) {capNamesFound.add(capFound.getName());}
+    for (Capability capSeed : jobCaps1)
+    {
+      Assert.assertTrue(capNamesFound.contains(capSeed.getName()), "List of capabilities did not contain a capability named: " + capSeed.getName());
+    }
+    // Verify tags
+    List<String> tmpTags = tmpSys.getTags();
+    Assert.assertNotNull(tmpTags, "Tags value was null");
+    Assert.assertEquals(tmpTags.size(), tags1.size(), "Wrong number of tags");
+    for (String tagStr : tags1)
+    {
+      Assert.assertTrue(tmpTags.contains(tagStr));
+      System.out.println("Found tag: " + tagStr);
+    }
+    // Verify notes
+    // TODO: Currently the client converts notes from a gson LinkedTreeMap to a string of json so we cast it to String here.
+    // TODO/TBD: Can we update jsonschema and model on server to make it a String instead of Object?
+    //           Previously this caused issues with json serialization.
+    String tmpNotesStr = (String) tmpSys.getNotes();
+    System.out.println("Found notes: " + tmpNotesStr);
+    JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(tmpNotesStr, JsonObject.class);
+    Assert.assertNotNull(tmpNotes, "Fetched Notes should not be null");
+    JsonObject origNotes = notes1JO;
+    Assert.assertTrue(tmpNotes.has("project"));
+    String projStr = origNotes.get("project").getAsString();
+    Assert.assertEquals(tmpNotes.get("project").getAsString(), projStr);
+    Assert.assertTrue(tmpNotes.has("testdata"));
+    String testdataStr = origNotes.get("testdata").getAsString();
+    Assert.assertEquals(tmpNotes.get("testdata").getAsString(), testdataStr);
   }
 }

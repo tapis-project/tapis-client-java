@@ -2,13 +2,14 @@ package edu.utexas.tacc.tapis.systems.client;
 
 import java.util.List;
 
+import com.google.gson.JsonObject;
+import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.systems.client.gen.api.GeneralApi;
 import org.apache.commons.lang3.StringUtils;
-import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 
 import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
-import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.systems.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.systems.client.gen.ApiException;
 import edu.utexas.tacc.tapis.systems.client.gen.Configuration;
@@ -67,8 +68,6 @@ public class SystemsClient
   // ************************************************************************
   // *********************** Fields *****************************************
   // ************************************************************************
-  // Response body serializer
-  private static final Gson gson = ClientTapisGsonUtils.getGson();
   private final SystemsApi sysApi;
   private final PermissionsApi permsApi;
   private final CredentialsApi credsApi;
@@ -236,7 +235,10 @@ public class SystemsClient
     try {resp = sysApi.getSystem(name, false, false, null, false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null) return resp.getResult(); else return null;
+    if (resp == null || resp.getResult() == null) return null;
+    // Postprocess the TSystem
+    TSystem tSys = postProcessSystem(resp.getResult());
+    return tSys;
   }
 
   /**
@@ -252,7 +254,10 @@ public class SystemsClient
     try {resp = sysApi.getSystem(name, false, false, null, true); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null) return resp.getResult(); else return null;
+    if (resp == null || resp.getResult() == null) return null;
+    // Postprocess the TSystem
+    TSystem tSys = postProcessSystem(resp.getResult());
+    return tSys;
   }
 
   /**
@@ -274,7 +279,10 @@ public class SystemsClient
     try {resp = sysApi.getSystem(name, false, true, accessMethodStr, false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null) return resp.getResult(); else return null;
+    if (resp == null || resp.getResult() == null) return null;
+    // Postprocess the TSystem
+    TSystem tSys = postProcessSystem(resp.getResult());
+    return tSys;
   }
 
   /**
@@ -286,7 +294,10 @@ public class SystemsClient
     try { resp = sysApi.getSystems(false, DEFAULT_SEARCH, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_COMPUTETOTAL); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
+    if (resp == null || resp.getResult() == null) return null;
+    // Postprocess TSystems in the result
+    for (TSystem tSys : resp.getResult()) postProcessSystem(tSys);
+    return resp.getResult();
   }
 
   /**
@@ -298,7 +309,10 @@ public class SystemsClient
     try { resp = sysApi.getSystems(false, searchStr, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_COMPUTETOTAL); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
+    if (resp == null || resp.getResult() == null) return null;
+    // Postprocess TSystems in the result
+    for (TSystem tSys : resp.getResult()) postProcessSystem(tSys);
+    return resp.getResult();
   }
 
   /**
@@ -313,7 +327,10 @@ public class SystemsClient
     try { resp = sysApi.getSystems(false, searchStr, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
+    if (resp == null || resp.getResult() == null) return null;
+    // Postprocess TSystems in the result
+    for (TSystem tSys : resp.getResult()) postProcessSystem(tSys);
+    return resp.getResult();
   }
 
   /**
@@ -326,7 +343,10 @@ public class SystemsClient
     try { resp = sysApi.searchSystemsRequestBody(req, false, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_COMPUTETOTAL); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null) return resp.getResult().getSearch(); else return null;
+    if (resp == null || resp.getResult() == null || resp.getResult().getSearch() == null) return null;
+    // Postprocess TSystems in the result
+    for (TSystem tSys : resp.getResult().getSearch()) postProcessSystem(tSys);
+    return resp.getResult().getSearch();
   }
 
   /**
@@ -343,7 +363,10 @@ public class SystemsClient
     try { resp = sysApi.searchSystemsRequestBody(req, false, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null) return resp.getResult().getSearch(); else return null;
+    if (resp == null || resp.getResult() == null || resp.getResult().getSearch() == null) return null;
+    // Postprocess TSystems in the result
+    for (TSystem tSys : resp.getResult().getSearch()) postProcessSystem(tSys);
+    return resp.getResult().getSearch();
   }
 
   /**
@@ -356,7 +379,10 @@ public class SystemsClient
     try { resp = sysApi.matchConstraints(req, false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
+    if (resp == null || resp.getResult() == null) return null;
+    // Postprocess TSystems in the result
+    for (TSystem tSys : resp.getResult()) postProcessSystem(tSys);
+    return resp.getResult();
   }
 
   /**
@@ -520,7 +546,7 @@ public class SystemsClient
    * Utility method to build a Capability object given category, name and value
    */
   public static Capability buildCapability(CategoryEnum category, String subcategory, String name,
-                                           Capability.DatatypeEnum datatype, int precedence, String value)
+                                           DatatypeEnum datatype, int precedence, String value)
   {
     var cap = new Capability();
     cap.setCategory(category);
@@ -536,4 +562,21 @@ public class SystemsClient
   // *********************** Private Methods ********************************
   // ************************************************************************
 
+  /**
+   * Do any client side postprocessing of a returned system.
+   * Currently this just involves transforming the notes attribute into a json string
+   * @param tSys - TSystem to process
+   * @return - Resulting TSystem
+   */
+  TSystem postProcessSystem(TSystem tSys)
+  {
+    // If we have a notes attribute convert it from a LinkedTreeMap to a string with json.
+    if (tSys != null && tSys.getNotes() != null)
+    {
+      LinkedTreeMap lmap = (LinkedTreeMap) tSys.getNotes();
+      JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(lmap.toString(), JsonObject.class);
+      tSys.setNotes(tmpNotes.toString());
+    }
+    return tSys;
+  }
 }

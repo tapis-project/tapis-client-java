@@ -1,11 +1,7 @@
 package edu.utexas.tacc.tapis.systems.client;
 
-import com.google.gson.JsonObject;
-import com.google.gson.internal.LinkedTreeMap;
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
-import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.systems.client.SystemsClient.AccessMethod;
-import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
 import edu.utexas.tacc.tapis.tokens.client.TokensClient;
@@ -15,26 +11,18 @@ import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_TARGET_SITE;
 import static edu.utexas.tacc.tapis.systems.client.Utils.filesSvcName;
 import static edu.utexas.tacc.tapis.systems.client.Utils.getClientUsr;
-import static edu.utexas.tacc.tapis.systems.client.Utils.jobCaps1;
 import static edu.utexas.tacc.tapis.systems.client.Utils.masterTenantName;
-import static edu.utexas.tacc.tapis.systems.client.Utils.notes1JO;
 import static edu.utexas.tacc.tapis.systems.client.Utils.ownerUser1;
 import static edu.utexas.tacc.tapis.systems.client.Utils.prot1AccessMethod;
 import static edu.utexas.tacc.tapis.systems.client.Utils.prot1Port;
-import static edu.utexas.tacc.tapis.systems.client.Utils.prot1ProxyHost;
-import static edu.utexas.tacc.tapis.systems.client.Utils.prot1ProxyPort;
 import static edu.utexas.tacc.tapis.systems.client.Utils.prot1TxfrMethodsC;
-import static edu.utexas.tacc.tapis.systems.client.Utils.prot1TxfrMethodsT;
-import static edu.utexas.tacc.tapis.systems.client.Utils.prot1UseProxy;
-import static edu.utexas.tacc.tapis.systems.client.Utils.tags1;
 import static edu.utexas.tacc.tapis.systems.client.Utils.tenantName;
+import static edu.utexas.tacc.tapis.systems.client.Utils.verifySystemAttributes;
 
 /**
  * Test the Systems API client acting as the files service calling the systems service.
@@ -133,23 +121,8 @@ public class FilesSvcTest
     TSystem tmpSys = sysClient.getSystemWithCredentials(sys0[1], null);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
     System.out.println("Found item: " + sys0[1]);
-    Assert.assertEquals(tmpSys.getName(), sys0[1]);
-    Assert.assertEquals(tmpSys.getDescription(), sys0[2]);
-    Assert.assertEquals(tmpSys.getSystemType().name(), sys0[3]);
-    Assert.assertEquals(tmpSys.getOwner(), sys0[4]);
-    Assert.assertEquals(tmpSys.getHost(), sys0[5]);
-    Assert.assertEquals(tmpSys.getEffectiveUserId(), sys0[6]);
-    Assert.assertEquals(tmpSys.getBucketName(), sys0[8]);
-    Assert.assertEquals(tmpSys.getRootDir(), sys0[9]);
-    Assert.assertEquals(tmpSys.getJobLocalWorkingDir(), sys0[10]);
-    Assert.assertEquals(tmpSys.getJobLocalArchiveDir(), sys0[11]);
-    Assert.assertEquals(tmpSys.getJobRemoteArchiveSystem(), sys0[12]);
-    Assert.assertEquals(tmpSys.getJobRemoteArchiveDir(), sys0[13]);
-    Assert.assertEquals(tmpSys.getPort().intValue(), prot1Port);
-    Assert.assertEquals(tmpSys.getUseProxy().booleanValue(), prot1UseProxy);
-    Assert.assertEquals(tmpSys.getProxyHost(), prot1ProxyHost);
-    Assert.assertEquals(tmpSys.getProxyPort().intValue(), prot1ProxyPort);
-    Assert.assertEquals(tmpSys.getDefaultAccessMethod().name(), prot1AccessMethod.name());
+    // Verify most attributes
+    verifySystemAttributes(tmpSys, sys0);
     // Verify credentials. Only cred for default accessMethod is returned. In this case PKI_KEYS.
     Credential cred = tmpSys.getAccessCredential();
 //    Assert.assertNotNull(cred, "AccessCredential should not be null");
@@ -165,52 +138,11 @@ public class FilesSvcTest
     Assert.assertNull(cred.getAccessKey(), "AccessCredential access key should be null");
     Assert.assertNull(cred.getAccessSecret(), "AccessCredential access secret should be null");
     Assert.assertNull(cred.getCertificate(), "AccessCredential certificate should be null");
-    // Verify transfer methods
-    List<TSystem.TransferMethodsEnum> tMethodsList = tmpSys.getTransferMethods();
-    Assert.assertNotNull(tMethodsList, "TransferMethods list should not be null");
-    for (TSystem.TransferMethodsEnum txfrMethod : prot1TxfrMethodsT)
-    {
-      Assert.assertTrue(tMethodsList.contains(txfrMethod), "List of transfer methods did not contain: " + txfrMethod.name());
-    }
-    // Verify capabilities
-    List<Capability> jobCaps = tmpSys.getJobCapabilities();
-    Assert.assertNotNull(jobCaps);
-    Assert.assertEquals(jobCaps.size(), jobCaps1.size());
-    var capNamesFound = new ArrayList<String>();
-    for (Capability capFound : jobCaps) {capNamesFound.add(capFound.getName());}
-    for (Capability capSeed : jobCaps1)
-    {
-      Assert.assertTrue(capNamesFound.contains(capSeed.getName()), "List of capabilities did not contain a capability named: " + capSeed.getName());
-    }
-    // Verify tags
-    List<String> tmpTags = tmpSys.getTags();
-    Assert.assertNotNull(tmpTags, "Tags value was null");
-    Assert.assertEquals(tmpTags.size(), tags1.size(), "Wrong number of tags");
-    for (String tagStr : tags1)
-    {
-      Assert.assertTrue(tmpTags.contains(tagStr));
-      System.out.println("Found tag: " + tagStr);
-    }
-    // Verify notes
-    // TODO: Currently comes back as gson LinkedTreeMap and needs some work to convert to a Json string.
-    //       Fix this? Do this in the client?
-    LinkedTreeMap lmap = (LinkedTreeMap) tmpSys.getNotes();
-//    String tmpNotesStr = (String) tmpSys.getNotes();
-    String tmpNotesStr = lmap.toString();
-    System.out.println("Found notes: " + tmpNotesStr);
-//    JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(tmpNotesStr, JsonObject.class);
-    JsonObject tmpNotes = ClientTapisGsonUtils.getGson().toJsonTree(lmap).getAsJsonObject();
-    Assert.assertNotNull(tmpNotes, "Fetched Notes should not be null");
-    JsonObject origNotes = notes1JO;
-    Assert.assertTrue(tmpNotes.has("project"));
-    String projStr = origNotes.get("project").getAsString();
-    Assert.assertEquals(tmpNotes.get("project").getAsString(), projStr);
-    Assert.assertTrue(tmpNotes.has("testdata"));
-    String testdataStr = origNotes.get("testdata").getAsString();
-    Assert.assertEquals(tmpNotes.get("testdata").getAsString(), testdataStr);
 
     // Test retrieval using specified access method
     tmpSys = sysClient.getSystemWithCredentials(sys0[1], AccessMethod.PASSWORD);
+    // Verify most attributes
+    verifySystemAttributes(tmpSys, sys0);
     // Verify credentials. Only cred for default accessMethod is returned. In this case PASSWORD.
     cred = tmpSys.getAccessCredential();
     Assert.assertNotNull(cred, "AccessCredential should not be null");
