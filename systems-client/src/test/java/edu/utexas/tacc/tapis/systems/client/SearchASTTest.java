@@ -168,10 +168,9 @@ public class SearchASTTest
     validCaseInputs.put( 3,new CaseData(1, "host = " + sys0.getHost()));
     validCaseInputs.put( 4,new CaseData(1, "bucket_name = " + sys0.getBucketName()));
 //    validCaseInputs.put( 5,new CaseData(1, "root_dir = " + sys0.getRootDir())); // TODO underscore
-    validCaseInputs.put( 6,new CaseData(1, "job_local_working_dir = " + sys0.getJobLocalWorkingDir()));
-    validCaseInputs.put( 7,new CaseData(1, "job_local_archive_dir = " + sys0.getJobLocalArchiveDir()));
-    validCaseInputs.put( 8,new CaseData(1, "job_remote_archive_system = " + sys0.getJobRemoteArchiveSystem()));
-    validCaseInputs.put( 9,new CaseData(1, "job_remote_archive_dir = " + sys0.getJobRemoteArchiveDir()));
+    validCaseInputs.put( 6,new CaseData(1, "job_working_dir = " + sys0.getJobWorkingDir()));
+    validCaseInputs.put( 7,new CaseData(1, "batch_scheduler = " + sys0.getBatchScheduler()));
+    validCaseInputs.put( 8,new CaseData(1, "batch_default_logical_queue = " + sys0.getBatchDefaultLogicalQueue()));
     validCaseInputs.put(10,new CaseData(numSystems/2, "name LIKE " + sysNameLikeAll + " AND owner = " + sq(ownerUser1)));  // Half owned by one user
     validCaseInputs.put(11,new CaseData(numSystems/2, "name LIKE " + sysNameLikeAll + " AND owner = " + sq(ownerUser2))); // and half owned by another
     validCaseInputs.put(12,new CaseData(numSystems, "name LIKE " + sysNameLikeAll + " AND enabled = true"));  // All are enabled

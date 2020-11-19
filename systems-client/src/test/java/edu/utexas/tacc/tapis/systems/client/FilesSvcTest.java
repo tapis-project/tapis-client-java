@@ -34,7 +34,7 @@ import static edu.utexas.tacc.tapis.systems.client.Utils.verifySystemAttributes;
  *       So instead have user client tests in one program and service client tests in another.
  * Note: Tests that retrieve credentials must act as a files service client calling the systems service.
  * 
- * See IntegrationUtils in this package for information on environment required to run the tests.
+ * See Utils in this package for information on environment required to run the tests.
  * 
  * Create all systems in setup as user client before switching to files service client for running the tests.
  *

@@ -33,7 +33,7 @@ import static edu.utexas.tacc.tapis.systems.client.Utils.*;
 
  * Note: Tests that retrieve credentials must act as a files service client calling the systems service.
  *
- * See IntegrationUtils in this package for information on environment required to run the tests.
+ * See Utils in this package for information on environment required to run the tests.
  * 
  */
 @Test(groups={"integration"})
@@ -124,30 +124,6 @@ public class UserTest
     }
   }
 
-  // Create a system using minimal attributes:
-  //   name, systemType, host, defaultAccessMethod, jobCanExec
-  @Test
-  public void testCreateSystemMinimal()
-  {
-    // Create a system
-    String[] sys0 = systems.get(2);
-    System.out.println("Creating system with name: " + sys0[1]);
-    // Set optional attributes to null
-//    private static final String[] sysE = {tenantName, "CsysE", null, sysType, null, "hostE", null, null,
-//            null, null, null, null, null, null};
-    sys0[2] = null; sys0[4] = null; sys0[6] = null; sys0[7] = null; sys0[9] = null;
-    sys0[10] = null; sys0[11] = null; sys0[12] = null; sys0[13] = null;
-
-    try {
-      String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, prot1AccessMethod, null, null);
-      System.out.println("Created system: " + respUrl);
-      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
-    } catch (Exception e) {
-      System.out.println("Caught exception: " + e);
-      Assert.fail();
-    }
-  }
-
   @Test(expectedExceptions = {TapisClientException.class}, expectedExceptionsMessageRegExp = "^SYSAPI_SYS_EXISTS.*")
   public void testCreateSystemAlreadyExists() throws Exception {
     // Create a system
@@ -221,6 +197,30 @@ public class UserTest
     verifySystemAttributes(tmpSys, sys0);
   }
 
+  // Create a system using minimal attributes:
+  //   name, systemType, host, defaultAccessMethod, jobCanExec
+  // Confirm that defaults are as expected
+  @Test
+  public void testCreateAndGetSystemMinimal() throws Exception
+  {
+    // Create a system
+    String[] sys0 = systems.get(2);
+    System.out.println("Creating system with name: " + sys0[1]);
+    try {
+      String respUrl = Utils.createSystemMinimal(usrClient, sys0);
+      System.out.println("Created system: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
+    // Get the system and check the defaults
+    TSystem tmpSys = usrClient.getSystem(sys0[1]);
+    Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
+    System.out.println("Found item: " + sys0[1]);
+    Utils.verifySystemDefaults(tmpSys, sys0);
+  }
+
   @Test
   public void testUpdateSystem() {
     String[] sys0 = systems.get(8);
@@ -253,10 +253,10 @@ public class UserTest
       Assert.assertEquals(tmpSys.getEffectiveUserId(), sys0[6]);
       Assert.assertEquals(tmpSys.getBucketName(), sys0[8]);
       Assert.assertEquals(tmpSys.getRootDir(), sys0[9]);
-      Assert.assertEquals(tmpSys.getJobLocalWorkingDir(), sys0[10]);
-      Assert.assertEquals(tmpSys.getJobLocalArchiveDir(), sys0[11]);
-      Assert.assertEquals(tmpSys.getJobRemoteArchiveSystem(), sys0[12]);
-      Assert.assertEquals(tmpSys.getJobRemoteArchiveDir(), sys0[13]);
+      Assert.assertEquals(tmpSys.getJobWorkingDir(), sys0[10]);
+      Assert.assertEquals(tmpSys.getBatchScheduler(), sys0[11]);
+      Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), sys0[12]);
+// TODO logical queues?      Assert.assertEquals(tmpSys.getJobRemoteArchiveDir(), sys0[13]);
       Assert.assertEquals(tmpSys.getPort().intValue(), prot2Port);
       Assert.assertEquals(tmpSys.getUseProxy().booleanValue(), prot2UseProxy);
       Assert.assertEquals(tmpSys.getProxyHost(), prot2ProxyHost);

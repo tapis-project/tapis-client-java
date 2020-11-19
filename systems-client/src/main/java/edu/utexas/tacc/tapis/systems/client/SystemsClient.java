@@ -5,6 +5,7 @@ import java.util.List;
 import com.google.gson.JsonObject;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.systems.client.gen.api.GeneralApi;
+import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.internal.LinkedTreeMap;
 
@@ -524,6 +525,23 @@ public class SystemsClient
     try { credsApi.removeUserCredential(systemName, userName, false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+  }
+
+  /**
+   * Utility method to build a batch LogicalQueue
+   */
+  public static LogicalQueue buildLogicalQueue(String name, int maxJobs, int maxJobsPerUser, int maxNodeCount,
+                                               int maxCoresPerNode, int maxMemoryMB, int maxMinutes)
+  {
+    var q = new LogicalQueue();
+    q.setName(name);
+    q.setMaxJobs(maxJobs);
+    q.setMaxJobsPerUser(maxJobsPerUser);
+    q.setMaxNodeCount(maxNodeCount);
+    q.setMaxCoresPerNode(maxCoresPerNode);
+    q.setMaxMemoryMB(maxMemoryMB);
+    q.setMaxMinutes(maxMinutes);
+    return q;
   }
 
   /**

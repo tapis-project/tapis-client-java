@@ -103,10 +103,10 @@
           <environmentVariables>
             <APP_ENV>test</APP_ENV>
           </environmentVariables>
-            <forkCount>3</forkCount>
-            <reuseForks>false</reuseForks>
-            <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
-            <workingDirectory>FORK_DIRECTORY_${surefire.forkNumber}</workingDirectory>
+          <forkCount>3</forkCount>
+          <reuseForks>false</reuseForks>
+          <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
+          <workingDirectory>FORK_DIRECTORY_${surefire.forkNumber}</workingDirectory>
         </configuration>
       </plugin>
     </plugins>

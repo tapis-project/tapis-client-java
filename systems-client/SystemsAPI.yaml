@@ -1122,15 +1122,27 @@ components:
         proxyPort:
           type: integer
           format: int32
-        jobCanExec:
+        canExec:
           type: boolean
-        jobLocalWorkingDir:
+        jobWorkingDir:
           type: string
-        jobLocalArchiveDir:
+        jobEnvVariables:
+          type: array
+          items:
+            type: string
+        jobMaxJobs:
+          type: integer
+        jobMaxJobsPerUser:
+          type: integer
+        jobIsBatch:
+          type: boolean
+        batchScheduler:
           type: string
-        jobRemoteArchiveSystem:
-          type: string
-        jobRemoteArchiveDir:
+        batchLogicalQueues:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogicalQueue'
+        batchDefaultLogicalQueue:
           type: string
         jobCapabilities:
           type: array
@@ -1150,6 +1162,23 @@ components:
           type: string
         updated:
           type: string
+    LogicalQueue:
+      type: object
+      properties:
+        name:
+          type: string
+        maxJobs:
+          type: integer
+        maxJobsPerUser:
+          type: integer
+        maxNodeCount:
+          type: integer
+        maxCoresPerNode:
+          type: integer
+        maxMemoryMB:
+          type: integer
+        maxMinutes:
+          type: integer
     Capability:
       type: object
       properties:
@@ -1247,15 +1276,27 @@ components:
         proxyPort:
           type: integer
           format: int32
-        jobCanExec:
+        canExec:
           type: boolean
-        jobLocalWorkingDir:
+        jobWorkingDir:
           type: string
-        jobLocalArchiveDir:
+        jobEnvVariables:
+          type: array
+          items:
+            type: string
+        jobMaxJobs:
+          type: integer
+        jobMaxJobsPerUser:
+          type: integer
+        jobIsBatch:
+          type: boolean
+        batchScheduler:
           type: string
-        jobRemoteArchiveSystem:
-          type: string
-        jobRemoteArchiveDir:
+        batchLogicalQueues:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogicalQueue'
+        batchDefaultLogicalQueue:
           type: string
         jobCapabilities:
           type: array
