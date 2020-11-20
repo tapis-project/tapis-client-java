@@ -134,6 +134,8 @@ public final class Utils
   public static final JsonObject notes2JO =
           ClientTapisGsonUtils.getGson().fromJson("{\"project\":\"myproj2\", \"testdata\":\"abc2\"}", JsonObject.class);
   public static final List<String> testPerms = new ArrayList<>(List.of("READ", "MODIFY"));
+  public static final List<String> testREADPerm = new ArrayList<>(List.of("READ"));
+  public static final List<String> testREAD_EXECUTEPerms = new ArrayList<>(List.of("READ", "EXECUTE"));
 
   private static final int precedence = 100;
   private static final String subcategory = "";
