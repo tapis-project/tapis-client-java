@@ -114,8 +114,8 @@ public final class Utils
           Collections.singletonList(ReqUpdateSystem.TransferMethodsEnum.SFTP);
   public static final List<TSystem.TransferMethodsEnum> prot2TxfrMethodsT =
           Collections.singletonList(TSystem.TransferMethodsEnum.SFTP);
-  public static final SystemsClient.AccessMethod prot1AccessMethod = SystemsClient.AccessMethod.PKI_KEYS;
-  public static final SystemsClient.AccessMethod prot2AccessMethod = SystemsClient.AccessMethod.ACCESS_KEY;
+  public static final SystemsClient.AuthnMethod prot1AuthnMethod = SystemsClient.AuthnMethod.PKI_KEYS;
+  public static final SystemsClient.AuthnMethod prot2AuthnMethod = SystemsClient.AuthnMethod.ACCESS_KEY;
   public static final boolean canExec = true;
   public static final List<String> jobEnvVariables = Arrays.asList("a=b", "HOME=/home/testuser2", "TMP=/tmp");
   public static final boolean jobIsBatch = true;
@@ -237,11 +237,11 @@ public final class Utils
   /*
    * Make client call to create a system given most attributes for the system.
    */
-  public static String createSystem(SystemsClient clt, String[] sys, int port, SystemsClient.AccessMethod accessMethod, Credential credential,
+  public static String createSystem(SystemsClient clt, String[] sys, int port, SystemsClient.AuthnMethod authnMethod, Credential credential,
                              List<ReqCreateSystem.TransferMethodsEnum> txfrMethods)
           throws TapisClientException
   {
-    var accMethod = accessMethod != null ? accessMethod : prot1AccessMethod;
+    var accMethod = authnMethod != null ? authnMethod : prot1AuthnMethod;
     var tMethods = txfrMethods != null ? txfrMethods : prot1TxfrMethodsC;
     ReqCreateSystem rSys = new ReqCreateSystem();
     rSys.setName(sys[1]);
@@ -251,8 +251,8 @@ public final class Utils
     rSys.setHost(sys[5]);
     rSys.enabled(true);
     rSys.effectiveUserId(sys[6]);
-    rSys.defaultAccessMethod(ReqCreateSystem.DefaultAccessMethodEnum.valueOf(accMethod.name()));
-    rSys.accessCredential(credential);
+    rSys.defaultAuthnMethod(ReqCreateSystem.DefaultAuthnMethodEnum.valueOf(accMethod.name()));
+    rSys.authnCredential(credential);
     rSys.bucketName(sys[8]);
     rSys.rootDir(sys[9]);
     rSys.setTransferMethods(tMethods);
@@ -281,12 +281,12 @@ public final class Utils
   public static String createSystemMinimal(SystemsClient clt, String[] sys)
           throws TapisClientException
   {
-    SystemsClient.AccessMethod accMethod = prot1AccessMethod;
+    SystemsClient.AuthnMethod accMethod = prot1AuthnMethod;
     ReqCreateSystem rSys = new ReqCreateSystem();
     rSys.setName(sys[1]);
     rSys.setSystemType(ReqCreateSystem.SystemTypeEnum.valueOf(sys[3]));
     rSys.setHost(sys[5]);
-    rSys.defaultAccessMethod(ReqCreateSystem.DefaultAccessMethodEnum.valueOf(accMethod.name()));
+    rSys.defaultAuthnMethod(ReqCreateSystem.DefaultAuthnMethodEnum.valueOf(accMethod.name()));
     rSys.canExec(canExec);
     // If systemType is LINUX then rootDir is required
     if (sys[3].equals(TSystem.SystemTypeEnum.LINUX.name())) rSys.rootDir(sys[9]);
@@ -315,7 +315,7 @@ public final class Utils
 
   /**
    * Verify most attributes for a TSystem using default create data for following attributes:
-   *     port, useProxy, proxyHost, proxyPort, defaultAccessMethod, transferMethods,
+   *     port, useProxy, proxyHost, proxyPort, defaultAuthnMethod, transferMethods,
    *     canExec, jobWorkingDir, jobMaxJobs, jobMaxJobsPerUser, jobIsBatch, batchScheduler, batchDefaultLogicalQueue,
    *     jobEnvVariables, jobLogicalQueues, capabilities, tags, notes
    * @param tmpSys - system retrieved from the service
@@ -330,7 +330,7 @@ public final class Utils
     Assert.assertEquals(tmpSys.getHost(), sys0[5]);
     Assert.assertEquals(tmpSys.getEnabled(), Boolean.valueOf(defaultIsEnabled));
     Assert.assertEquals(tmpSys.getEffectiveUserId(), sys0[6]);
-    Assert.assertEquals(tmpSys.getDefaultAccessMethod().name(), prot1AccessMethod.name());
+    Assert.assertEquals(tmpSys.getDefaultAuthnMethod().name(), prot1AuthnMethod.name());
     Assert.assertEquals(tmpSys.getBucketName(), sys0[8]);
     Assert.assertEquals(tmpSys.getRootDir(), sys0[9]);
     Assert.assertEquals(tmpSys.getPort().intValue(), prot1Port);
@@ -419,7 +419,7 @@ public final class Utils
     Assert.assertEquals(tmpSys.getName(), sys0[1]);
     Assert.assertEquals(tmpSys.getSystemType().name(), sys0[3]);
     Assert.assertEquals(tmpSys.getHost(), sys0[5]);
-    Assert.assertEquals(tmpSys.getDefaultAccessMethod().name(), prot1AccessMethod.name());
+    Assert.assertEquals(tmpSys.getDefaultAuthnMethod().name(), prot1AuthnMethod.name());
     Assert.assertEquals(tmpSys.getCanExec(), Boolean.valueOf(canExec));
 
     // If systemType is LINUX then rootDir is required

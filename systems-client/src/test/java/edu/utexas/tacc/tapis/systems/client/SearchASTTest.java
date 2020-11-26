@@ -21,7 +21,7 @@ import static edu.utexas.tacc.tapis.systems.client.Utils.adminUser;
 import static edu.utexas.tacc.tapis.systems.client.Utils.getClientUsr;
 import static edu.utexas.tacc.tapis.systems.client.Utils.ownerUser1;
 import static edu.utexas.tacc.tapis.systems.client.Utils.ownerUser2;
-import static edu.utexas.tacc.tapis.systems.client.Utils.prot1AccessMethod;
+import static edu.utexas.tacc.tapis.systems.client.Utils.prot1AuthnMethod;
 import static edu.utexas.tacc.tapis.systems.client.Utils.prot1TxfrMethodsC;
 
 import static edu.utexas.tacc.tapis.systems.client.Utils.*;
@@ -116,12 +116,12 @@ public class SearchASTTest
         if (i <= numSystems / 2)
         {
           // Vary port # for checking numeric relational searches
-          Utils.createSystem(getClientUsr(serviceURL, ownerUser1JWT), sys0, port, prot1AccessMethod, null, prot1TxfrMethodsC);
+          Utils.createSystem(getClientUsr(serviceURL, ownerUser1JWT), sys0, port, prot1AuthnMethod, null, prot1TxfrMethodsC);
           tmpSys = getClientUsr(serviceURL, ownerUser1JWT).getSystem(sys0[1]);
         }
         else
         {
-          Utils.createSystem(getClientUsr(serviceURL, ownerUser2JWT), sys0, port, prot1AccessMethod, null, prot1TxfrMethodsC);
+          Utils.createSystem(getClientUsr(serviceURL, ownerUser2JWT), sys0, port, prot1AuthnMethod, null, prot1TxfrMethodsC);
           tmpSys = getClientUsr(serviceURL, ownerUser2JWT).getSystem(sys0[1]);
         }
         Assert.assertNotNull(tmpSys);

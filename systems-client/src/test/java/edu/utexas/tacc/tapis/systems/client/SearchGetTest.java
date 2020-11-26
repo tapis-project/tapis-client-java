@@ -129,11 +129,11 @@ public class SearchGetTest
         if (i <= numSystems / 2)
         {
           // Vary port # for checking numeric relational searches
-          Utils.createSystem(getClientUsr(serviceURL, ownerUser1JWT), sys0, port, prot1AccessMethod, null, prot1TxfrMethodsC);
+          Utils.createSystem(getClientUsr(serviceURL, ownerUser1JWT), sys0, port, prot1AuthnMethod, null, prot1TxfrMethodsC);
           tmpSys = getClientUsr(serviceURL, ownerUser1JWT).getSystem(sys0[1]);
         } else
         {
-          Utils.createSystem(getClientUsr(serviceURL, ownerUser2JWT), sys0, port, prot1AccessMethod, null, prot1TxfrMethodsC);
+          Utils.createSystem(getClientUsr(serviceURL, ownerUser2JWT), sys0, port, prot1AuthnMethod, null, prot1TxfrMethodsC);
           tmpSys = getClientUsr(serviceURL, ownerUser2JWT).getSystem(sys0[1]);
         }
         Assert.assertNotNull(tmpSys);

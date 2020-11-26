@@ -63,9 +63,9 @@ public class SystemsClient
   // ************************************************************************
   // *********************** Enums ******************************************
   // ************************************************************************
-  // Define AccessMethod here to be used in place of the auto-generated model enum
-  //   because the auto-generated enum is named DefaultAccessMethodEnum which is misleading.
-  public enum AccessMethod {PASSWORD, PKI_KEYS, ACCESS_KEY, CERT}
+  // Define AuthnMethod here to be used in place of the auto-generated model enum
+  //   because the auto-generated enum is named DefaultAuthnMethodEnum which is misleading.
+  public enum AuthnMethod {PASSWORD, PKI_KEYS, ACCESS_KEY, CERT}
 
   // ************************************************************************
   // *********************** Fields *****************************************
@@ -251,22 +251,22 @@ public class SystemsClient
   }
 
   /**
-   * Get a system by name returning credentials for specified access method.
-   * If accessMethod is null then default access method for the system is used.
+   * Get a system by name returning credentials for specified authn method.
+   * If authnMethod is null then default authn method for the system is used.
    * Use of this method is highly restricted. Only certain Tapis services are
    * authorized to call this method.
    *
    * @param name System name
-   * @param accessMethod - Desired access method used when fetching credentials,
-   *                    default access method used if this is null
+   * @param authnMethod - Desired authn method used when fetching credentials,
+   *                    default authn method used if this is null
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public TSystem getSystemWithCredentials(String name, AccessMethod accessMethod) throws TapisClientException
+  public TSystem getSystemWithCredentials(String name, AuthnMethod authnMethod) throws TapisClientException
   {
     RespSystem resp = null;
-    String accessMethodStr = (accessMethod==null ? null : accessMethod.name());
-    try {resp = sysApi.getSystem(name, false, true, accessMethodStr, false); }
+    String authnMethodStr = (authnMethod==null ? null : authnMethod.name());
+    try {resp = sysApi.getSystem(name, false, true, authnMethodStr, false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
@@ -476,24 +476,24 @@ public class SystemsClient
   }
 
   /**
-   * Retrieve credential for given system, user and access method.
-   * If access method is null return credential for default access method defined for the system.
+   * Retrieve credential for given system, user and authn method.
+   * If authn method is null return credential for default authn method defined for the system.
    *
    * @throws TapisClientException - If api call throws an exception
    */
-  public Credential getUserCredential(String systemName, String userName, AccessMethod accessMethod)
+  public Credential getUserCredential(String systemName, String userName, AuthnMethod authnMethod)
           throws TapisClientException
   {
     RespCredential resp = null;
-    String accessMethodStr = (accessMethod==null ? null : accessMethod.name());
-    try {resp = credsApi.getUserCredential(systemName, userName, false, accessMethodStr); }
+    String authnMethodStr = (authnMethod==null ? null : authnMethod.name());
+    try {resp = credsApi.getUserCredential(systemName, userName, false, authnMethodStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null) return resp.getResult(); else return null;
   }
 
   /**
-   * Retrieve a credential for given system and user for the default access method defined for the system
+   * Retrieve a credential for given system and user for the default authn method defined for the system
    *
    * @throws TapisClientException - If api call throws an exception
    */

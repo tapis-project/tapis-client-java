@@ -2,7 +2,7 @@ package edu.utexas.tacc.tapis.systems.client;
 
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
-import edu.utexas.tacc.tapis.systems.client.SystemsClient.AccessMethod;
+import edu.utexas.tacc.tapis.systems.client.SystemsClient.AuthnMethod;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
 import edu.utexas.tacc.tapis.tokens.client.TokensClient;
@@ -91,7 +91,7 @@ public class FilesSvcTest
       String[] sys0 = systems.get(i);
       System.out.println("Creating system with name: " + sys0[1]);
       try {
-        String respUrl = Utils.createSystem(sysClient, sys0, prot1Port, prot1AccessMethod, cred0, prot1TxfrMethodsC);
+        String respUrl = Utils.createSystem(sysClient, sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
         System.out.println("Created system: " + respUrl);
         Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
       } catch (Exception e) {
@@ -114,8 +114,8 @@ public class FilesSvcTest
 
   /*
    * Test
-   *   1. retrieving a system including default access method
-   *   2. retrieving for a specified access method.
+   *   1. retrieving a system including default authn method
+   *   2. retrieving for a specified authn method.
    *      NOTE: Credential is created for effectiveUserId
    *   3. retrieving a system with a call that adds a check for EXECUTE permission - succeed
    *   4. retrieving a system with a call that adds a check for EXECUTE permission - fail
@@ -124,46 +124,46 @@ public class FilesSvcTest
    */
   @Test
   public void testAllTests() throws Exception {
-    // Test 1. retrieving a system including default access method
+    // Test 1. retrieving a system including default authn method
     String[] sys0 = systems.get(1);
     TSystem tmpSys = sysClient.getSystemWithCredentials(sys0[1], null);
     Assert.assertNotNull(tmpSys, "Failed to find item: " + sys0[1]);
     System.out.println("Found item: " + sys0[1]);
     // Verify most attributes
     verifySystemAttributes(tmpSys, sys0);
-    // Verify credentials. Only cred for default accessMethod is returned. In this case PKI_KEYS.
-    Credential cred = tmpSys.getAccessCredential();
-//    Assert.assertNotNull(cred, "AccessCredential should not be null");
+    // Verify credentials. Only cred for default authnMethod is returned. In this case PKI_KEYS.
+    Credential cred = tmpSys.getAuthnCredential();
+//    Assert.assertNotNull(cred, "AuthnCredential should not be null");
 // TODO: Getting cred along with system is currently broken when called from client.
 // TODO Does work in systems service integration test. Parameters to SK appear to be the same so not clear why it fails here
 // TODO: Figure out why this works using getUserCred and when called directly from svc but not when getting system using client
 // Cred retrieved should be for effectiveUserId = effUser2, so far now as a test retrieve cred directly which does work
-//    Credential cred = sysClient.getUserCredential(sys0[1], sys0[6], AccessMethod.PKI_KEYS);
+//    Credential cred = sysClient.getUserCredential(sys0[1], sys0[6], AuthnMethod.PKI_KEYS);
 // TODO
     Assert.assertEquals(cred.getPrivateKey(), cred0.getPrivateKey());
     Assert.assertEquals(cred.getPublicKey(), cred0.getPublicKey());
-    Assert.assertNull(cred.getPassword(), "AccessCredential password should be null");
-    Assert.assertNull(cred.getAccessKey(), "AccessCredential access key should be null");
-    Assert.assertNull(cred.getAccessSecret(), "AccessCredential access secret should be null");
-    Assert.assertNull(cred.getCertificate(), "AccessCredential certificate should be null");
+    Assert.assertNull(cred.getPassword(), "AuthnCredential password should be null");
+    Assert.assertNull(cred.getAccessKey(), "AuthnCredential access key should be null");
+    Assert.assertNull(cred.getAccessSecret(), "AuthnCredential access secret should be null");
+    Assert.assertNull(cred.getCertificate(), "AuthnCredential certificate should be null");
 
-    // Test 2. retrieval using specified access method
-    tmpSys = sysClient.getSystemWithCredentials(sys0[1], AccessMethod.PASSWORD);
+    // Test 2. retrieval using specified authn method
+    tmpSys = sysClient.getSystemWithCredentials(sys0[1], AuthnMethod.PASSWORD);
     // Verify most attributes
     verifySystemAttributes(tmpSys, sys0);
-    // Verify credentials. Only cred for default accessMethod is returned. In this case PASSWORD.
-    cred = tmpSys.getAccessCredential();
-    Assert.assertNotNull(cred, "AccessCredential should not be null");
+    // Verify credentials. Only cred for default authnMethod is returned. In this case PASSWORD.
+    cred = tmpSys.getAuthnCredential();
+    Assert.assertNotNull(cred, "AuthnCredential should not be null");
 // TODO Not working as described above. For now test by getting cred directly
 // TODO fix it
-    cred = sysClient.getUserCredential(sys0[1], sys0[6], AccessMethod.PASSWORD);
+    cred = sysClient.getUserCredential(sys0[1], sys0[6], AuthnMethod.PASSWORD);
 // TODO
     Assert.assertEquals(cred.getPassword(), cred0.getPassword());
-    Assert.assertNull(cred.getPrivateKey(), "AccessCredential private key should be null");
-    Assert.assertNull(cred.getPublicKey(), "AccessCredential public key should be null");
-    Assert.assertNull(cred.getAccessKey(), "AccessCredential access key should be null");
-    Assert.assertNull(cred.getAccessSecret(), "AccessCredential access secret should be null");
-    Assert.assertNull(cred.getCertificate(), "AccessCredential certificate should be null");
+    Assert.assertNull(cred.getPrivateKey(), "AuthnCredential private key should be null");
+    Assert.assertNull(cred.getPublicKey(), "AuthnCredential public key should be null");
+    Assert.assertNull(cred.getAccessKey(), "AuthnCredential access key should be null");
+    Assert.assertNull(cred.getAccessSecret(), "AuthnCredential access secret should be null");
+    Assert.assertNull(cred.getCertificate(), "AuthnCredential certificate should be null");
 
     // Test 3. retrieving a system with a call that adds a check for READ+EXECUTE permission - succeed
     sys0 = systems.get(2);
@@ -194,25 +194,25 @@ public class FilesSvcTest
 //    String[] sys0 = systems.get(2);
 //    System.out.println("Creating system with name: " + sys0[1]);
 //    try {
-//      String respUrl = Utils.createSystem(getClientUsr(serviceURL, ownerUserJWT), sys0, prot1Port, prot1AccessMethod, null, prot1TxfrMethodsC);
+//      String respUrl = Utils.createSystem(getClientUsr(serviceURL, ownerUserJWT), sys0, prot1Port, prot1AuthnMethod, null, prot1TxfrMethodsC);
 //      System.out.println("Created system: " + respUrl);
 //      System.out.println("Testing credentials for user: " + newPermsUser);
 //      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 //      ReqCreateCredential reqCred = new ReqCreateCredential();
 //      reqCred.password(sys0[7]).privateKey("fakePrivateKey").publicKey("fakePublicKey")
-//           .accessKey("fakeAccessKey").accessSecret("fakeAccessSecret").certificate("fakeCert");
+//           .authnKey("fakeAccessKey").accessSecret("fakeAccessSecret").certificate("fakeCert");
 //      // Store and retrieve multiple secret types: password, ssh keys, access key and secret
 //      getClientUsr(serviceURL, ownerUserJWT).updateUserCredential(sys0[1], newPermsUser, reqCred);
-//      Credential cred1 = getClientFilesSvc().getUserCredential(sys0[1], newPermsUser, AccessMethod.PASSWORD);
+//      Credential cred1 = getClientFilesSvc().getUserCredential(sys0[1], newPermsUser, AuthnMethod.PASSWORD);
 //      // Verify credentials
 //      Assert.assertEquals(cred1.getPassword(), reqCred.getPassword());
-//      cred1 = getClientFilesSvc().getUserCredential(sys0[1], newPermsUser, AccessMethod.PKI_KEYS);
+//      cred1 = getClientFilesSvc().getUserCredential(sys0[1], newPermsUser, AuthnMethod.PKI_KEYS);
 //      Assert.assertEquals(cred1.getPublicKey(), reqCred.getPublicKey());
 //      Assert.assertEquals(cred1.getPrivateKey(), reqCred.getPrivateKey());
-//      cred1 = getClientFilesSvc().getUserCredential(sys0[1], newPermsUser, AccessMethod.ACCESS_KEY);
+//      cred1 = getClientFilesSvc().getUserCredential(sys0[1], newPermsUser, AuthnMethod.ACCESS_KEY);
 //      Assert.assertEquals(cred1.getAccessKey(), reqCred.getAccessKey());
 //      Assert.assertEquals(cred1.getAccessSecret(), reqCred.getAccessSecret());
-//      // Verify we get credentials for default accessMethod if we do not specify an access method
+//      // Verify we get credentials for default authnMethod if we do not specify an authn method
 //      cred1 = getClientFilesSvc().getUserCredential(sys0[1], newPermsUser);
 //      Assert.assertEquals(cred1.getPublicKey(), reqCred.getPublicKey());
 //      Assert.assertEquals(cred1.getPrivateKey(), reqCred.getPrivateKey());
@@ -220,7 +220,7 @@ public class FilesSvcTest
 //      // Delete credentials and verify they were destroyed
 //      getClientUsr(serviceURL, ownerUserJWT).deleteUserCredential(sys0[1], newPermsUser);
 //      try {
-//        cred1 = getClientFilesSvc().getUserCredential(sys0[1], newPermsUser, AccessMethod.PASSWORD);
+//        cred1 = getClientFilesSvc().getUserCredential(sys0[1], newPermsUser, AuthnMethod.PASSWORD);
 //      } catch (TapisClientException tce) {
 //        Assert.assertTrue(tce.getTapisMessage().startsWith("SYSAPI_CRED_NOT_FOUND"), "Wrong exception message: " + tce.getTapisMessage());
 //        cred1 = null;
@@ -233,12 +233,12 @@ public class FilesSvcTest
 //      // Set just ACCESS_KEY only and test
 //      reqCred = new ReqCreateCredential().accessKey("fakeAccessKey2").accessSecret("fakeAccessSecret2");
 //      getClientUsr(serviceURL, ownerUserJWT).updateUserCredential(sys0[1], newPermsUser, reqCred);
-//      cred1 = getClientFilesSvc().getUserCredential(sys0[1], newPermsUser, AccessMethod.ACCESS_KEY);
+//      cred1 = getClientFilesSvc().getUserCredential(sys0[1], newPermsUser, AuthnMethod.ACCESS_KEY);
 //      Assert.assertEquals(cred1.getAccessKey(), reqCred.getAccessKey());
 //      Assert.assertEquals(cred1.getAccessSecret(), reqCred.getAccessSecret());
 //      // Attempt to retrieve secret that has not been set
 //      try {
-//        cred1 = getClientFilesSvc().getUserCredential(sys0[1], newPermsUser, AccessMethod.PKI_KEYS);
+//        cred1 = getClientFilesSvc().getUserCredential(sys0[1], newPermsUser, AuthnMethod.PKI_KEYS);
 //      } catch (TapisClientException tce) {
 //        Assert.assertTrue(tce.getTapisMessage().startsWith("SYSAPI_CRED_NOT_FOUND"), "Wrong exception message: " + tce.getTapisMessage());
 //        cred1 = null;
@@ -247,7 +247,7 @@ public class FilesSvcTest
 //      // Delete credentials and verify they were destroyed
 //      getClientUsr(serviceURL, ownerUserJWT).deleteUserCredential(sys0[1], newPermsUser);
 //      try {
-//        cred1 = getClientFilesSvc().getUserCredential(sys0[1], newPermsUser, AccessMethod.ACCESS_KEY);
+//        cred1 = getClientFilesSvc().getUserCredential(sys0[1], newPermsUser, AuthnMethod.ACCESS_KEY);
 //      } catch (TapisClientException tce) {
 //        Assert.assertTrue(tce.getTapisMessage().startsWith("SYSAPI_CRED_NOT_FOUND"), "Wrong exception message: " + tce.getTapisMessage());
 //        cred1 = null;
@@ -255,7 +255,7 @@ public class FilesSvcTest
 //      Assert.assertNull(cred1, "Credential not deleted. System name: " + sys0[1] + " User name: " + newPermsUser);
 //      // Attempt to retrieve secret from non-existent system
 //      try {
-//        cred1 = getClientFilesSvc().getUserCredential("AMissingSystemName", newPermsUser, AccessMethod.PKI_KEYS);
+//        cred1 = getClientFilesSvc().getUserCredential("AMissingSystemName", newPermsUser, AuthnMethod.PKI_KEYS);
 //      } catch (TapisClientException tce) {
 //        Assert.assertTrue(tce.getTapisMessage().startsWith("SYSAPI_NOSYSTEM"), "Wrong exception message: " + tce.getTapisMessage());
 //        cred1 = null;

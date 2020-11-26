@@ -17,7 +17,7 @@ import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
-import edu.utexas.tacc.tapis.systems.client.SystemsClient.AccessMethod;
+import edu.utexas.tacc.tapis.systems.client.SystemsClient.AuthnMethod;
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
 
 import static edu.utexas.tacc.tapis.systems.client.Utils.*;
@@ -115,7 +115,7 @@ public class UserTest
     Credential cred0 = null;
     System.out.println("Creating system with name: " + sys0[1]);
     try {
-      String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, prot1AccessMethod, cred0, prot1TxfrMethodsC);
+      String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
@@ -131,7 +131,7 @@ public class UserTest
     Credential cred0 = null;
     System.out.println("Creating system with name: " + sys0[1]);
     try {
-      String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, prot1AccessMethod, cred0, prot1TxfrMethodsC);
+      String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
@@ -140,7 +140,7 @@ public class UserTest
     }
     // Now attempt to create it again, should throw exception
     System.out.println("Creating system with name: " + sys0[1]);
-    Utils.createSystem(usrClient, sys0, prot1Port, prot1AccessMethod, cred0, prot1TxfrMethodsC);
+    Utils.createSystem(usrClient, sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
     Assert.fail("Exception should have been thrown");
   }
 
@@ -153,18 +153,18 @@ public class UserTest
     sys0[8] = "";
     Credential cred0 = null;
     System.out.println("Creating system with name: " + sys0[1]);
-    Utils.createSystem(usrClient, sys0, prot1Port, prot1AccessMethod, cred0, prot1TxfrMethodsC);
+    Utils.createSystem(usrClient, sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
     Assert.fail("Exception should have been thrown");
   }
 
-  // Test that access method of CERT and static owner is not allowed
+  // Test that authn method of CERT and static owner is not allowed
   @Test(expectedExceptions = {TapisClientException.class}, expectedExceptionsMessageRegExp = ".*SYSAPI_INVALID_EFFECTIVEUSERID_INPUT.*")
   public void testCreateSystemInvalidEffUserId() throws Exception {
     // Create a system
     String[] sys0 = systems.get(5);
     Credential cred0 = null;
     System.out.println("Creating system with name: " + sys0[1]);
-    Utils.createSystem(usrClient, sys0, prot1Port, AccessMethod.CERT, cred0, prot1TxfrMethodsC);
+    Utils.createSystem(usrClient, sys0, prot1Port, AuthnMethod.CERT, cred0, prot1TxfrMethodsC);
     Assert.fail("Exception should have been thrown");
   }
 
@@ -178,17 +178,17 @@ public class UserTest
     Credential cred0 = SystemsClient.buildCredential(sys0[7], "fakePrivateKey", "fakePublicKey",
                                            "fakeAccessKey", "fakeAccessSecret", "fakeCert");
     System.out.println("Creating system with name: " + sys0[1]);
-    Utils.createSystem(usrClient, sys0, prot1Port, prot1AccessMethod, cred0, prot1TxfrMethodsC);
+    Utils.createSystem(usrClient, sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
     Assert.fail("Exception should have been thrown");
   }
 
-  // Test retrieving a system including default access method
-  //   and test retrieving for specified access method.
+  // Test retrieving a system including default authn method
+  //   and test retrieving for specified authn method.
   @Test
   public void testGetSystem() throws Exception {
     String[] sys0 = systems.get(7);
     Credential cred0 = null;
-    String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, AccessMethod.PKI_KEYS, cred0, prot1TxfrMethodsC);
+    String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, AuthnMethod.PKI_KEYS, cred0, prot1TxfrMethodsC);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     TSystem tmpSys = usrClient.getSystem(sys0[1]);
@@ -198,7 +198,7 @@ public class UserTest
   }
 
   // Create a system using minimal attributes:
-  //   name, systemType, host, defaultAccessMethod, jobCanExec
+  //   name, systemType, host, defaultAuthnMethod, jobCanExec
   // Confirm that defaults are as expected
   @Test
   public void testCreateAndGetSystemMinimal() throws Exception
@@ -233,7 +233,7 @@ public class UserTest
     System.out.println("Creating and updating system with name: " + sys0[1]);
     try {
       // Create a system
-      String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, prot1AccessMethod, cred0, prot1TxfrMethodsC);
+      String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
       // Update the system
@@ -261,7 +261,7 @@ public class UserTest
       Assert.assertEquals(tmpSys.getUseProxy().booleanValue(), prot2UseProxy);
       Assert.assertEquals(tmpSys.getProxyHost(), prot2ProxyHost);
       Assert.assertEquals(tmpSys.getProxyPort().intValue(), prot2ProxyPort);
-      Assert.assertEquals(tmpSys.getDefaultAccessMethod().name(), prot2AccessMethod.name());
+      Assert.assertEquals(tmpSys.getDefaultAuthnMethod().name(), prot2AuthnMethod.name());
       // Verify transfer methods
       List<TSystem.TransferMethodsEnum> tMethodsList = tmpSys.getTransferMethods();
       Assert.assertNotNull(tMethodsList, "TransferMethods list should not be null");
@@ -313,7 +313,7 @@ public class UserTest
   public void testChangeOwner() throws Exception {
     // Create the system
     String[] sys0 = systems.get(9);
-    String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, prot1AccessMethod, null, prot1TxfrMethodsC);
+    String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, prot1AuthnMethod, null, prot1TxfrMethodsC);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     TSystem tmpSys = usrClient.getSystem(sys0[1]);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
@@ -342,10 +342,10 @@ public class UserTest
     // Create 2 systems
     String[] sys1 = systems.get(10);
     Credential cred0 = null;
-    String respUrl = Utils.createSystem(usrClient, sys1, prot1Port, prot1AccessMethod, cred0, prot1TxfrMethodsC);
+    String respUrl = Utils.createSystem(usrClient, sys1, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     String[] sys2 = systems.get(11);
-    respUrl = Utils.createSystem(usrClient, sys2, prot1Port, prot1AccessMethod, cred0, prot1TxfrMethodsC);
+    respUrl = Utils.createSystem(usrClient, sys2, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Get list of all systems
@@ -370,7 +370,7 @@ public class UserTest
     // Create the system
     String[] sys0 = systems.get(12);
     Credential cred0 = null;
-    String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, prot1AccessMethod, cred0, prot1TxfrMethodsC);
+    String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Delete the system
@@ -391,7 +391,7 @@ public class UserTest
     // Create a system
     System.out.println("Creating system with name: " + sys0[1]);
     try {
-      String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, prot1AccessMethod, cred0, prot1TxfrMethodsC);
+      String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
       System.out.println("Created system: " + respUrl);
       System.out.println("Testing perms for user: " + newPermsUser);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
@@ -448,7 +448,7 @@ public class UserTest
     pSys.host(sys[5]);
     pSys.enabled(false);
     pSys.effectiveUserId(sys[6]);
-    pSys.defaultAccessMethod(ReqUpdateSystem.DefaultAccessMethodEnum.valueOf(prot2AccessMethod.name()));
+    pSys.defaultAuthnMethod(ReqUpdateSystem.DefaultAuthnMethodEnum.valueOf(prot2AuthnMethod.name()));
     pSys.transferMethods(prot2TxfrMethodsU);
     pSys.port(prot2Port).useProxy(prot2UseProxy).proxyHost(prot2ProxyHost).proxyPort(prot2ProxyPort);
     pSys.jobCapabilities(jobCaps2);
