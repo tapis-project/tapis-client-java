@@ -2,7 +2,7 @@ package edu.utexas.tacc.tapis.systems.client;
 
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqSearchSystems;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
@@ -18,30 +18,32 @@ import java.util.List;
 import java.util.Map;
 
 import static edu.utexas.tacc.tapis.systems.client.Utils.adminUser;
+import static edu.utexas.tacc.tapis.systems.client.Utils.escapedCommaInListValue;
 import static edu.utexas.tacc.tapis.systems.client.Utils.getClientUsr;
 import static edu.utexas.tacc.tapis.systems.client.Utils.ownerUser1;
 import static edu.utexas.tacc.tapis.systems.client.Utils.ownerUser2;
 import static edu.utexas.tacc.tapis.systems.client.Utils.prot1AuthnMethod;
 import static edu.utexas.tacc.tapis.systems.client.Utils.prot1TxfrMethodsC;
-
-import static edu.utexas.tacc.tapis.systems.client.Utils.*;
+import static edu.utexas.tacc.tapis.systems.client.Utils.specialChar7Str;
 import static org.testng.Assert.assertEquals;
 
 /**
- * Test the Systems API client acting as a user fetching systems using searchSystems() with search conditions.
+ * TODO Code copied from SearchASTTest. Update to test constraint matching
+ * Test the Systems API client acting as a user fetching systems using matchConstraints().
  * 
  * See Utils in this package for information on environment required to run the tests.
  */
 @Test(groups={"integration"})
-public class SearchASTTest
+public class MatchConstraintsTest
 {
   // Test data
-  private static final String testKey = "CltSrchAst";
+  private static final String testKey = "CltMatch";
   private static final String sysNameLikeAll = sq("%" + testKey + "%");
 
   private String serviceURL, ownerUser1JWT, ownerUser2JWT, adminUserJWT;
 
-  private final int numSystems = 20;
+  // Keep numSystems even since some data is modified for half the systems.
+  private final int numSystems = 4;
   private final Map<Integer, String[]> systems = Utils.makeSystems(numSystems, testKey);
   private final Map<Integer, TSystem> systemsMap = new HashMap<>();
 
@@ -79,11 +81,6 @@ public class SearchASTTest
 
     // Cleanup anything leftover from previous failed run
     tearDown();
-
-//    String[] tenantName = 0, name = 1, "description " + suffix = 2, sysType = 3, ownerUser = 4, "host"+suffix = 5,
-//             "effUser"+suffix = 6, "fakePassword"+suffix = 7,"bucket"+suffix = 8, "/root"+suffix = 9,
-//             "jobLocalWorkDir"+suffix = 10, "jobLocalArchDir"+suffix = 11,
-//            "jobRemoteArchSystem"+suffix = 12, "jobRemoteArchDir"+suffix = 13};
 
     // For half the systems change the owner
     for (int i = numSystems/2 + 1; i <= numSystems; i++) { systems.get(i)[4] = ownerUser2; }
@@ -160,41 +157,46 @@ public class SearchASTTest
     // Create all input and validation data for tests
     // NOTE: Some cases require "name.like." + sysNameLikeAll in the list of conditions since maven runs the tests in
     //       parallel and not all attribute names are unique across integration tests
-    class CaseData {public final int count; public final String searchStr; CaseData(int c, String s) { count = c; searchStr = s; }}
+    class CaseData {public final int count; public final String matchStr; CaseData(int c, String s) { count = c; matchStr = s; }}
     var validCaseInputs = new HashMap<Integer, CaseData>();
-    // Test basic types and operators
-    validCaseInputs.put( 1,new CaseData(1, "name = " + sys0Name)); // 1 has specific name
-//    validCaseInputs.put( 2,new CaseData(1, "description = " + sys0.getDescription())); // TODO handle underscore character properly. how?
-    validCaseInputs.put( 3,new CaseData(1, "host = " + sys0.getHost()));
-    validCaseInputs.put( 4,new CaseData(1, "bucket_name = " + sys0.getBucketName()));
-//    validCaseInputs.put( 5,new CaseData(1, "root_dir = " + sys0.getRootDir())); // TODO underscore
-    validCaseInputs.put( 6,new CaseData(1, "job_working_dir = " + sys0.getJobWorkingDir()));
-    validCaseInputs.put( 7,new CaseData(1, "batch_scheduler = " + sys0.getBatchScheduler()));
-    validCaseInputs.put( 8,new CaseData(1, "batch_default_logical_queue = " + sys0.getBatchDefaultLogicalQueue()));
-    validCaseInputs.put(10,new CaseData(numSystems/2, "name LIKE " + sysNameLikeAll + " AND owner = " + sq(ownerUser1)));  // Half owned by one user
-    validCaseInputs.put(11,new CaseData(numSystems/2, "name LIKE " + sysNameLikeAll + " AND owner = " + sq(ownerUser2))); // and half owned by another
-    validCaseInputs.put(12,new CaseData(numSystems, "name LIKE " + sysNameLikeAll + " AND enabled = true"));  // All are enabled
-    validCaseInputs.put(13,new CaseData(numSystems, "name LIKE " + sysNameLikeAll + " AND deleted = false")); // none are deleted
-    validCaseInputs.put(14,new CaseData(numSystems, "name LIKE " + sysNameLikeAll + " AND deleted <> true")); // none are deleted
-    validCaseInputs.put(15,new CaseData(0, "name LIKE " + sysNameLikeAll + " AND deleted = true"));           // none are deleted
-    validCaseInputs.put(16,new CaseData(1, "name LIKE " + sq(sys0Name)));
-    validCaseInputs.put(17,new CaseData(0, "name LIKE 'NOSUCHSYSTEMxFM2c29bc8RpKWeE2sht7aZrJzQf3s'"));
-    validCaseInputs.put(18,new CaseData(numSystems, "name LIKE " + sysNameLikeAll));
 
-    // TODO Add more test cases, see SearchASTDaoTest in tapis-java
+    // TODO Test simple match
+    //  Currently matchConstraints is a WIP since it should always return all systems
+    validCaseInputs.put( 1,new CaseData(numSystems, "Scheduler.Type = 'Slurm'")); // TODO: All are Slurm?
+
+//    // Test basic types and operators
+//    validCaseInputs.put( 1,new CaseData(1, "name = " + sys0Name)); // 1 has specific name
+////    validCaseInputs.put( 2,new CaseData(1, "description = " + sys0.getDescription())); // TODO handle underscore character properly. how?
+//    validCaseInputs.put( 3,new CaseData(1, "host = " + sys0.getHost()));
+//    validCaseInputs.put( 4,new CaseData(1, "bucket_name = " + sys0.getBucketName()));
+////    validCaseInputs.put( 5,new CaseData(1, "root_dir = " + sys0.getRootDir())); // TODO underscore
+//    validCaseInputs.put( 6,new CaseData(1, "job_local_working_dir = " + sys0.getJobLocalWorkingDir()));
+//    validCaseInputs.put( 7,new CaseData(1, "job_local_archive_dir = " + sys0.getJobLocalArchiveDir()));
+//    validCaseInputs.put( 8,new CaseData(1, "job_remote_archive_system = " + sys0.getJobRemoteArchiveSystem()));
+//    validCaseInputs.put( 9,new CaseData(1, "job_remote_archive_dir = " + sys0.getJobRemoteArchiveDir()));
+//    validCaseInputs.put(10,new CaseData(numSystems/2, "name LIKE " + sysNameLikeAll + " AND owner = " + sq(ownerUser1)));  // Half owned by one user
+//    validCaseInputs.put(11,new CaseData(numSystems/2, "name LIKE " + sysNameLikeAll + " AND owner = " + sq(ownerUser2))); // and half owned by another
+//    validCaseInputs.put(12,new CaseData(numSystems, "name LIKE " + sysNameLikeAll + " AND enabled = true"));  // All are enabled
+//    validCaseInputs.put(13,new CaseData(numSystems, "name LIKE " + sysNameLikeAll + " AND deleted = false")); // none are deleted
+//    validCaseInputs.put(14,new CaseData(numSystems, "name LIKE " + sysNameLikeAll + " AND deleted <> true")); // none are deleted
+//    validCaseInputs.put(15,new CaseData(0, "name LIKE " + sysNameLikeAll + " AND deleted = true"));           // none are deleted
+//    validCaseInputs.put(16,new CaseData(1, "name LIKE " + sq(sys0Name)));
+//    validCaseInputs.put(17,new CaseData(0, "name LIKE 'NOSUCHSYSTEMxFM2c29bc8RpKWeE2sht7aZrJzQf3s'"));
+//    validCaseInputs.put(18,new CaseData(numSystems, "name LIKE " + sysNameLikeAll));
 
     // Iterate over valid cases
     for (Map.Entry<Integer,CaseData> item : validCaseInputs.entrySet())
     {
       CaseData cd = item.getValue();
       int caseNum = item.getKey();
-      System.out.println("Checking case # " + caseNum + " Input: " + cd.searchStr);
+      System.out.println("Checking case # " + caseNum + " Input: " + cd.matchStr);
       // Build request
-      ReqSearchSystems req = new ReqSearchSystems();
-      req.addSearchItem(cd.searchStr);
-      // Submit search request
-      List<TSystem> searchResults = getClientUsr(serviceURL, adminUserJWT).searchSystems(req);
-      assertEquals(searchResults.size(), cd.count);
+      ReqMatchConstraints req = new ReqMatchConstraints();
+      req.addMatchItem(cd.matchStr);
+      // Submit match request
+      List<TSystem> matchResults = getClientUsr(serviceURL, adminUserJWT).matchConstraints(req);
+// TODO: re-enable when this is actually implemented
+//      assertEquals(matchResults.size(), cd.count);
     }
   }
 

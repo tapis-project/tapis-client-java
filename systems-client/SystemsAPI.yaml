@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Tapis Systems API
-  description: The Tapis Systems API provides for management of Tapis Systems including access and transfer methods, permissions and credentials.
+  description: The Tapis Systems API provides for management of Tapis Systems including transfer methods, permissions and credentials.
   version: '0.0.1'
   termsOfService: "https://tapis-project.org"
   contact:
@@ -112,7 +112,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RespSystemArray'
+                $ref: '#/components/schemas/RespSystemsArray'
         '400':
           description: Input error.
           content:
@@ -225,7 +225,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RespSystems'
+                $ref: '#/components/schemas/RespSystemsSearch'
         '400':
           description: Input error.
           content:
@@ -288,16 +288,58 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ReqSearchSystems'
-      #          text/plain:
-      #            schema:
-      #              $ref: '#/components/schemas/ReqSearchSystemsText'
       responses:
         '200':
           description: Success.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RespSystems'
+                $ref: '#/components/schemas/RespSystemsSearch'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  '/v3/systems/match/constraints':
+    post:
+      tags:
+        - Systems
+      summary: Retrieve systems satisfying specified constraint conditions
+      description: Retrieve details for systems. Use request body to specify constraint conditions as an SQL-like WHERE clause.
+      operationId: matchConstraints
+      parameters:
+        - name: pretty
+          in: query
+          description: Pretty print the response. For example pretty=true. Default is false.
+          schema:
+            type: boolean
+      requestBody:
+        required: true
+        description: A JSON object specifying SQL-like constraint conditions as an array of strings. Strings are concatenated to form full query.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqMatchConstraints'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSystemsArray'
         '400':
           description: Input error.
           content:
@@ -321,7 +363,7 @@ paths:
       tags:
         - Systems
       summary: Import an SGCI resource.
-      description: Create a system based on attributes from resource in SGCI catalog. SGCI resource ID required. Optional attributes are name, description, owner, enabled, effectiveUserId, accessCredential, jobRemoteArchiveSystem, jobRemoteArchiveDir, jobCapabilities, tags, notes.
+      description: Create a system based on attributes from resource in SGCI catalog. SGCI resource ID required. Optional attributes are name, description, owner, enabled, effectiveUserId, authnCredential, jobRemoteArchiveSystem, jobRemoteArchiveDir, jobCapabilities, tags, notes.
       operationId: importSGCIResource
       parameters:
         - name: pretty
@@ -429,7 +471,7 @@ paths:
       tags:
         - Systems
       summary: Retrieve system details
-      description: Retrieve information for a system given the system name. Use query parameter returnCredentials=true to have effectiveUserId access credentials included in the response. Use query parameter accessMethod=<method> to override default access method.
+      description: Retrieve information for a system given the system name. Use query parameter returnCredentials=true to have effectiveUserId credentials included in the response. Use query parameter authnMethod=<method> to override default authn method.
       operationId: getSystem
       parameters:
         - name: systemName
@@ -448,9 +490,9 @@ paths:
           schema:
             type: boolean
             default: false
-        - name: accessMethod
+        - name: authnMethod
           in: query
-          description: Desired access method to use when fetching credentials, default access method used if this is null.
+          description: Desired authn method to use when fetching credentials, default authn method used if this is null.
           schema:
             type: string
             default: ''
@@ -537,7 +579,7 @@ paths:
       tags:
         - Systems
       summary: Update a system
-      description: Update attributes for a system. Attributes that may be updated are description, host, enabled, effectiveUserId, defaultAccessMethod, transferMethods, port, useProxy, proxyHost, proxyPort, jobCapabilities, tags, notes.
+      description: Update attributes for a system. Attributes that may be updated are description, host, enabled, effectiveUserId, defaultAuthnMethod, transferMethods, port, useProxy, proxyHost, proxyPort, jobCapabilities, tags, notes.
       operationId: updateSystem
       parameters:
         - name: systemName
@@ -643,7 +685,7 @@ paths:
       tags:
         - Credentials
       summary: Retrieve system user credentials
-      description: Highly restricted. Only certain Tapis services authorized. Retrieve credentials for given system and user. Use query parameter accessMethod=<method> to override default access method.
+      description: Highly restricted. Only certain Tapis services authorized. Retrieve credentials for given system and user. Use query parameter authnMethod=<method> to override default authn method.
       operationId: getUserCredential
       parameters:
         - name: systemName
@@ -661,9 +703,9 @@ paths:
           description: Pretty print the response. For example pretty=true. Default is false.
           schema:
             type: boolean
-        - name: accessMethod
+        - name: authnMethod
           in: query
-          description: Desired access method to use when fetching credentials, default access method used if not provided.
+          description: Desired authn method to use when fetching credentials, default authn method used if not provided.
           schema:
             type: string
             default: ''
@@ -702,7 +744,7 @@ paths:
       tags:
         - Credentials
       summary: Create or update system user credentials
-      description: Create or update access credentials in the Security Kernel for given system and user using a request body. Requester must be owner of the system.
+      description: Create or update credentials in the Security Kernel for given system and user using a request body. Requester must be owner of the system.
       operationId: createUserCredential
       parameters:
         - name: systemName
@@ -1050,14 +1092,14 @@ components:
           type: boolean
         effectiveUserId:
           type: string
-        defaultAccessMethod:
+        defaultAuthnMethod:
           type: string
           enum:
             - PASSWORD
             - PKI_KEYS
             - ACCESS_KEY
             - CERT
-        accessCredential:
+        authnCredential:
           $ref: '#/components/schemas/Credential'
         bucketName:
           type: string
@@ -1080,15 +1122,27 @@ components:
         proxyPort:
           type: integer
           format: int32
-        jobCanExec:
+        canExec:
           type: boolean
-        jobLocalWorkingDir:
+        jobWorkingDir:
           type: string
-        jobLocalArchiveDir:
+        jobEnvVariables:
+          type: array
+          items:
+            type: string
+        jobMaxJobs:
+          type: integer
+        jobMaxJobsPerUser:
+          type: integer
+        jobIsBatch:
+          type: boolean
+        batchScheduler:
           type: string
-        jobRemoteArchiveSystem:
-          type: string
-        jobRemoteArchiveDir:
+        batchLogicalQueues:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogicalQueue'
+        batchDefaultLogicalQueue:
           type: string
         jobCapabilities:
           type: array
@@ -1108,6 +1162,23 @@ components:
           type: string
         updated:
           type: string
+    LogicalQueue:
+      type: object
+      properties:
+        name:
+          type: string
+        maxJobs:
+          type: integer
+        maxJobsPerUser:
+          type: integer
+        maxNodeCount:
+          type: integer
+        maxCoresPerNode:
+          type: integer
+        maxMemoryMB:
+          type: integer
+        maxMinutes:
+          type: integer
     Capability:
       type: object
       properties:
@@ -1122,8 +1193,20 @@ components:
             - CONTAINER
             - MISC
             - CUSTOM
+        subcategory:
+          type: string
         name:
           type: string
+        datatype:
+          type: string
+          enum:
+            - STRING
+            - INTEGER
+            - BOOLEAN
+            - NUMBER
+            - TIMESTAMP
+        precedence:
+          type: integer
         value:
           type: string
     Credential:
@@ -1163,14 +1246,14 @@ components:
           type: boolean
         effectiveUserId:
           type: string
-        defaultAccessMethod:
+        defaultAuthnMethod:
           type: string
           enum:
             - PASSWORD
             - PKI_KEYS
             - ACCESS_KEY
             - CERT
-        accessCredential:
+        authnCredential:
           $ref: '#/components/schemas/Credential'
         bucketName:
           type: string
@@ -1193,15 +1276,27 @@ components:
         proxyPort:
           type: integer
           format: int32
-        jobCanExec:
+        canExec:
           type: boolean
-        jobLocalWorkingDir:
+        jobWorkingDir:
           type: string
-        jobLocalArchiveDir:
+        jobEnvVariables:
+          type: array
+          items:
+            type: string
+        jobMaxJobs:
+          type: integer
+        jobMaxJobsPerUser:
+          type: integer
+        jobIsBatch:
+          type: boolean
+        batchScheduler:
           type: string
-        jobRemoteArchiveSystem:
-          type: string
-        jobRemoteArchiveDir:
+        batchLogicalQueues:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogicalQueue'
+        batchDefaultLogicalQueue:
           type: string
         jobCapabilities:
           type: array
@@ -1224,7 +1319,7 @@ components:
           type: boolean
         effectiveUserId:
           type: string
-        defaultAccessMethod:
+        defaultAuthnMethod:
           type: string
           enum:
             - PASSWORD
@@ -1274,7 +1369,7 @@ components:
           type: boolean
         effectiveUserId:
           type: string
-        accessCredential:
+        authnCredential:
           $ref: '#/components/schemas/Credential'
         jobRemoteArchiveSystem:
           type: string
@@ -1338,6 +1433,13 @@ components:
       type: object
       properties:
         search:
+          type: array
+          items:
+            type: string
+    ReqMatchConstraints:
+      type: object
+      properties:
+        match:
           type: array
           items:
             type: string
@@ -1417,7 +1519,7 @@ components:
           type: string
         result:
           $ref: '#/components/schemas/TSystem'
-    RespSystemArray:
+    RespSystemsArray:
       type: object
       properties:
         status:
@@ -1430,7 +1532,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TSystem'
-    RespSystems:
+    RespSystemsSearch:
       type: object
       properties:
         status:

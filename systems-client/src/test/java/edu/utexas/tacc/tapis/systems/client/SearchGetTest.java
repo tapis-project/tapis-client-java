@@ -96,18 +96,15 @@ public class SearchGetTest
     // Cleanup anything leftover from previous failed run
     tearDown();
 
-//    String[] tenantName = 0, name = 1, "description " + suffix = 2, sysType = 3, ownerUser = 4, "host"+suffix = 5,
-//             "effUser"+suffix = 6, "fakePassword"+suffix = 7,"bucket"+suffix = 8, "/root"+suffix = 9,
-//             "jobLocalWorkDir"+suffix = 10, "jobLocalArchDir"+suffix = 11,
-//            "jobRemoteArchSystem"+suffix = 12, "jobRemoteArchDir"+suffix = 13};
-
+// String[] sys0 = 0=tenantName, 1=name, 2=description, 3=sysType, 4=ownerUser1, 5=host, 6=effUser, 7=password,
+//                 8=bucketName, 9=rootDir, 10=jobWorkingDir, 11=batchScheduler, 12=batchDefaultLogicalQueue
     // For half the systems change the owner
     for (int i = numSystems/2 + 1; i <= numSystems; i++) { systems.get(i)[4] = ownerUser2; }
 
     // For one system update description to have some special characters. 7 special chars in value: ,()~*!\
-    //   and update archiveLocalDir for testing an escaped comma in a list value
+    //   and update jobWorkingDir for testing an escaped comma in a list value
     systems.get(numSystems-1)[2] = specialChar7Str;
-    systems.get(numSystems-1)[11] = escapedCommaInListValue;
+    systems.get(numSystems-1)[10] = escapedCommaInListValue;
 
     // Create all the systems in the dB using the in-memory objects, recording start and end times
     createBegin = LocalDateTime.now(ZoneId.of(ZoneOffset.UTC.getId()));
@@ -132,11 +129,11 @@ public class SearchGetTest
         if (i <= numSystems / 2)
         {
           // Vary port # for checking numeric relational searches
-          Utils.createSystem(getClientUsr(serviceURL, ownerUser1JWT), sys0, port, prot1AccessMethod, null, prot1TxfrMethodsC);
+          Utils.createSystem(getClientUsr(serviceURL, ownerUser1JWT), sys0, port, prot1AuthnMethod, null, prot1TxfrMethodsC);
           tmpSys = getClientUsr(serviceURL, ownerUser1JWT).getSystem(sys0[1]);
         } else
         {
-          Utils.createSystem(getClientUsr(serviceURL, ownerUser2JWT), sys0, port, prot1AccessMethod, null, prot1TxfrMethodsC);
+          Utils.createSystem(getClientUsr(serviceURL, ownerUser2JWT), sys0, port, prot1AuthnMethod, null, prot1TxfrMethodsC);
           tmpSys = getClientUsr(serviceURL, ownerUser2JWT).getSystem(sys0[1]);
         }
         Assert.assertNotNull(tmpSys);
@@ -175,10 +172,9 @@ public class SearchGetTest
     validCaseInputs.put( 3,new CaseData(1, "host.eq." + sys0.getHost()));
     validCaseInputs.put( 4,new CaseData(1, "bucket_name.eq." + sys0.getBucketName()));
     validCaseInputs.put( 5,new CaseData(1, "root_dir.eq." + sys0.getRootDir()));
-    validCaseInputs.put( 6,new CaseData(1, "job_local_working_dir.eq." + sys0.getJobLocalWorkingDir()));
-    validCaseInputs.put( 7,new CaseData(1, "job_local_archive_dir.eq." + sys0.getJobLocalArchiveDir()));
-    validCaseInputs.put( 8,new CaseData(1, "job_remote_archive_system.eq." + sys0.getJobRemoteArchiveSystem()));
-    validCaseInputs.put( 9,new CaseData(1, "job_remote_archive_dir.eq." + sys0.getJobRemoteArchiveDir()));
+    validCaseInputs.put( 6,new CaseData(1, "job_working_dir.eq." + sys0.getJobWorkingDir()));
+    validCaseInputs.put( 7,new CaseData(1, "batch_scheduler.eq." + sys0.getBatchScheduler()));
+    validCaseInputs.put( 8,new CaseData(1, "batch_default_logical_queue.eq." + sys0.getBatchDefaultLogicalQueue()));
     validCaseInputs.put(10,new CaseData(numSystems/2, "(name.like." + sysNameLikeAll + ")~(owner.eq." + ownerUser1 + ")"));  // Half owned by one user
     validCaseInputs.put(11,new CaseData(numSystems/2, "(name.like." + sysNameLikeAll + ")~(owner.eq." + ownerUser2 + ")")); // and half owned by another
     validCaseInputs.put(12,new CaseData(numSystems, "(name.like." + sysNameLikeAll + ")~(enabled.eq.true)"));  // All are enabled
@@ -242,7 +238,7 @@ public class SearchGetTest
     validCaseInputs.put(103,new CaseData(1, "(name.like." + sysNameLikeAll + ")~(description.eq." + specialChar7EqSearchStr+")"));
     validCaseInputs.put(104,new CaseData(numSystems-1, "(name.like." + sysNameLikeAll + ")~(description.neq." + specialChar7EqSearchStr+")"));
     // Escaped comma in a list of values
-    validCaseInputs.put(110,new CaseData(1, "(name.like." + sysNameLikeAll + ")~(job_local_archive_dir.in.noSuchDir," + escapedCommaInListValue +")"));
+    validCaseInputs.put(110,new CaseData(1, "(name.like." + sysNameLikeAll + ")~(job_working_dir.in.noSuchDir," + escapedCommaInListValue +")"));
 
     // Iterate over valid cases
     for (Map.Entry<Integer,CaseData> item : validCaseInputs.entrySet())
