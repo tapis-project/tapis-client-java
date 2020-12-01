@@ -241,15 +241,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/v3/apps/{appName}':
+  '/v3/apps/{appName}/{version}':
     get:
       tags:
         - Applications
       summary: Retrieve app details
-      description: Retrieve information for an app given the app name.
+      description: Retrieve information for an app given the app name and version.
       operationId: getApp
       parameters:
         - name: appName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: version
           in: path
           required: true
           schema:
@@ -261,7 +266,7 @@ paths:
             type: boolean
         - name: requiredPerms
           in: query
-          description: Comma separated list of required permissions. Can be used to perform an additional permissions check with one call. For example requiredPerms=EXECUTE. Deault is READ.
+          description: Comma separated list of permissions. Used to perform additional permissions check with one call. For example requiredPerms=EXECUTE. READ is always required.
           schema:
             type: string
             default: 'READ'
@@ -296,56 +301,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-    delete:
+    patch:
       tags:
         - Applications
-      summary: Soft delete an app
-      description: Soft delete an app given the app name.
-      operationId: deleteApp
+      summary: Update an app creating a new version
+      description: Create a new version of an app with updated attributes. Attributes that may be updated are description, enabled, jobCapabilities, tags, notes.
+      operationId: updateApp
       parameters:
         - name: appName
           in: path
           required: true
           schema:
             type: string
-        - name: pretty
-          in: query
-          description: Pretty print the response
-          schema:
-            type: boolean
-      responses:
-        '200':
-          description: App deleted.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespChangeCount'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-    patch:
-      tags:
-        - Applications
-      summary: Update an app
-      description: Update attributes for an app. Attributes that may be updated are description, enabled, jobCapabilities, tags, notes.
-      operationId: updateApp
-      parameters:
-        - name: appName
+        - name: version
           in: path
           required: true
           schema:
@@ -383,6 +351,49 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
         '404':
           description: App not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  '/v3/apps/{appName}':
+    delete:
+      tags:
+        - Applications
+      summary: Soft delete an app
+      description: Soft delete an app given the app name.
+      operationId: deleteApp
+      parameters:
+        - name: appName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: App deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
           content:
             application/json:
               schema:

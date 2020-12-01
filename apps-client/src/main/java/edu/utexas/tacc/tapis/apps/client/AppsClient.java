@@ -13,7 +13,6 @@ import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.apps.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.apps.client.gen.ApiException;
-import edu.utexas.tacc.tapis.apps.client.gen.Configuration;
 import edu.utexas.tacc.tapis.apps.client.gen.api.PermissionsApi;
 import edu.utexas.tacc.tapis.apps.client.gen.api.ApplicationsApi;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqCreateApp;
@@ -170,11 +169,11 @@ public class AppsClient
    * @return url pointing to updated resource
    * @throws TapisClientException - If api call throws an exception
    */
-  public String updateApp(String name, ReqUpdateApp req) throws TapisClientException
+  public String updateApp(String name, String version, ReqUpdateApp req) throws TapisClientException
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
-    try { resp = appApi.updateApp(name, req, false); }
+    try { resp = appApi.updateApp(name, version, req, false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
@@ -198,16 +197,34 @@ public class AppsClient
   }
 
   /**
-   * Get an app by name
+   * Get an app
    *
    * @param name App name
+   * @param version App version
    * @return The app or null if app not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public App getApp(String name) throws TapisClientException
+  public App getApp(String name, String version) throws TapisClientException
+  {
+    return getApp(name, version, null);
+  }
+
+  /**
+   * Get an app
+   *
+   * @param name App name
+   * @param version App version
+   * @param requiredPermissions Additional permissions required. READ is always required.
+   * @return The app or null if app not found
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public App getApp(String name, String version, String requiredPermissions) throws TapisClientException
   {
     RespApp resp = null;
-    try {resp = appApi.getApp(name, false, DEFAULT_REQUIRED_PERMS); }
+    String perms = DEFAULT_REQUIRED_PERMS;
+    if (!StringUtils.isBlank(requiredPermissions)) perms = requiredPermissions;
+    String appName = name + "-" + version;
+    try {resp = appApi.getApp(appName, version, false, perms); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null) return resp.getResult(); else return null;

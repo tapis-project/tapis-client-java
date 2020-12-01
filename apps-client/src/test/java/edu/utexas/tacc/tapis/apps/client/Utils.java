@@ -90,6 +90,7 @@ public final class Utils
   public static final List<Capability> jobCaps2 = new ArrayList<>(List.of(capA2, capB2, capC2, capD2));
 
   public static final String appNamePrefix = "CApp";
+  public static final String appVersion = "0.0.1";
 
   // Strings for searches involving special characters
   public static final String specialChar7Str = ",()~*!\\"; // These 7 may need escaping
@@ -117,7 +118,7 @@ public final class Utils
       String suffix = key + "_" + String.format("%03d", i);
       String name = appNamePrefix + "_" + suffix;
       // Constructor initializes all attributes except for JobCapabilities
-      String[] app0 = {tenantName, name, "description " + suffix, appType, ownerUser1};
+      String[] app0 = {tenantName, name, appVersion, "description " + suffix, appType, ownerUser1};
       apps.put(i, app0);
     }
     return apps;
@@ -157,11 +158,12 @@ public final class Utils
   public static String createApp(AppsClient clt, String[] app)
           throws TapisClientException
   {
+    String appName = app[1] + "-" + app[2];
     ReqCreateApp rApp = new ReqCreateApp();
-    rApp.setName(app[1]);
-    rApp.description(app[2]);
-    rApp.setAppType(ReqCreateApp.AppTypeEnum.valueOf(app[3]));
-    rApp.owner(app[4]);
+    rApp.setName(appName);
+    rApp.description(app[3]);
+    rApp.setAppType(ReqCreateApp.AppTypeEnum.valueOf(app[4]));
+    rApp.owner(app[5]);
     rApp.enabled(true);
     rApp.jobCapabilities(jobCaps1);
     rApp.tags(tags1);
