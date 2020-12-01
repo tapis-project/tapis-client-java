@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.utexas.tacc.tapis</groupId>
   <artifactId>files-client</artifactId>
-  <version>1.11.17</version>
+  <version>1.11.18</version>
   <name>Tapis Files Client</name>
   <description>Java client for Files Service</description>
   <url>https://github.com/tapis-project/tapis-client-java/files-client</url>
@@ -208,7 +208,7 @@
     <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
     <mockito-core.version>3.0.0</mockito-core.version>
     <javax.websocket-api.version>1.1</javax.websocket-api.version>
-    <build.timestamp>2020-11-30T21:34:56Z</build.timestamp>
+    <build.timestamp>2020-12-01T17:04:01Z</build.timestamp>
     <statefulj.version>3.0</statefulj.version>
     <java-source.version>1.13</java-source.version>
     <reactor-rabbitmq.version>1.4.4.RELEASE</reactor-rabbitmq.version>
