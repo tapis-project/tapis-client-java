@@ -158,9 +158,9 @@ public final class Utils
   public static String createApp(AppsClient clt, String[] app)
           throws TapisClientException
   {
-    String appName = app[1] + "-" + app[2];
+    String appName = app[1];
+    String appVersion = app[2];
     ReqCreateApp rApp = new ReqCreateApp();
-    rApp.setName(appName);
     rApp.description(app[3]);
     rApp.setAppType(ReqCreateApp.AppTypeEnum.valueOf(app[4]));
     rApp.owner(app[5]);
@@ -171,7 +171,7 @@ public final class Utils
     // Convert list of TransferMethod enums to list of strings
 //    List<String> transferMethods = Stream.of(txfrMethodsStrList).map(TransferMethodsEnum::name).collect(Collectors.toList());
     // Create the app
-    return clt.createApp(rApp);
+    return clt.createApp(appName, appVersion, rApp);
   }
   public static AppsClient getClientUsr(String serviceURL, String userJWT)
   {

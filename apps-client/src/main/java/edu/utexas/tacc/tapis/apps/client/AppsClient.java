@@ -150,14 +150,17 @@ public class AppsClient
   /**
    * Create an app
    *
+   * @param name Name of the application
+   * @param version New version of the application
+   * @param req Request body specifying attributes
    * @return url pointing to created resource
    * @throws TapisClientException - If api call throws an exception
    */
-  public String createApp(ReqCreateApp req) throws TapisClientException
+  public String createApp(String name, String version, ReqCreateApp req) throws TapisClientException
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
-    try { resp = appApi.createApp(req, false); }
+    try { resp = appApi.createAppVersion(name, version, req, false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
@@ -166,6 +169,9 @@ public class AppsClient
   /**
    * Update an app
    *
+   * @param name Name of the application
+   * @param version Version of the application
+   * @param req Request body specifying attributes
    * @return url pointing to updated resource
    * @throws TapisClientException - If api call throws an exception
    */
@@ -183,6 +189,7 @@ public class AppsClient
    * Change app owner given the app name and new owner name.
    *
    * @param name App name
+   * @param newOwnerName New owner name
    * @return number of records modified as a result of the action
    * @throws TapisClientException - If api call throws an exception
    */
@@ -197,10 +204,10 @@ public class AppsClient
   }
 
   /**
-   * Get an app
+   * Get an app using default requiredPerms=READ
    *
-   * @param name App name
-   * @param version App version
+   * @param name Name of the application
+   * @param version Version of the application
    * @return The app or null if app not found
    * @throws TapisClientException - If api call throws an exception
    */
@@ -210,40 +217,47 @@ public class AppsClient
   }
 
   /**
-   * Get an app
+   * Get an app using specified requiredPerms
    *
-   * @param name App name
-   * @param version App version
-   * @param requiredPermissions Additional permissions required. READ is always required.
+   * @param name Name of the application
+   * @param version Version of the application
+   * @param requiredPerms Additional permissions required. READ is always required.
    * @return The app or null if app not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public App getApp(String name, String version, String requiredPermissions) throws TapisClientException
+  public App getApp(String name, String version, String requiredPerms) throws TapisClientException
   {
     RespApp resp = null;
     String perms = DEFAULT_REQUIRED_PERMS;
-    if (!StringUtils.isBlank(requiredPermissions)) perms = requiredPermissions;
-    String appName = name + "-" + version;
-    try {resp = appApi.getApp(appName, version, false, perms); }
+    if (!StringUtils.isBlank(requiredPerms)) perms = requiredPerms;
+    try {resp = appApi.getApp(name, version, false, perms); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null) return resp.getResult(); else return null;
   }
 
   /**
-   * Get list of apps
+   * Get all versions of all apps using search. For example search=(name.like.MyApp*)~(enabled.eq.true)
+   *
+   * @param searchStr Search string. Empty or null to return all apps.
+   * @return All versions of all apps accessible to the caller
+   * @throws TapisClientException - If api call throws an exception
    */
   public List<App> getApps(String searchStr) throws TapisClientException
   {
     RespAppArray resp = null;
-    try { resp = appApi.getApps(false, searchStr); }
+    try { resp = appApi.getAllAppsAllVersions(false, searchStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
   }
 
   /**
-   * Search for apps using an array of strings that represent an SQL-like WHERE clause
+   * Get all versions of all apps using search based on an array of strings representing an SQL-like WHERE clause
+   *
+   * @param req Request body specifying SQL-like search strings.
+   * @return All versions of all apps accessible to the caller
+   * @throws TapisClientException - If api call throws an exception
    */
   public List<App> searchApps(ReqSearchApps req) throws TapisClientException
   {
@@ -280,6 +294,9 @@ public class AppsClient
   /**
    * Grant permissions for given app and user.
    *
+   * @param appName name of app
+   * @param userName Name of user
+   * @param permissions list of permissions to grant.
    * @throws TapisClientException - If api call throws an exception
    */
   public void grantUserPermissions(String appName, String userName, List<String> permissions)
@@ -296,6 +313,10 @@ public class AppsClient
 
   /**
    * Get list of permissions for given app and user.
+   *
+   * @param appName name of app
+   * @param userName Name of user
+   * @throws TapisClientException - If api call throws an exception
    */
   public List<String> getAppPermissions(String appName, String userName) throws TapisClientException
   {
@@ -309,7 +330,10 @@ public class AppsClient
   /**
    * Revoke permissions for given app and user.
    *
-   * @throws TapisClientException - if api call throws an exception
+   * @param appName name of app
+   * @param userName name of user
+   * @param permissions list of permissions to revoke.
+   * @throws TapisClientException - If api call throws an exception
    */
   public void revokeUserPermissions(String appName, String userName, List<String> permissions)
           throws TapisClientException
@@ -326,6 +350,9 @@ public class AppsClient
   /**
    * Revoke single permission for given app and user.
    *
+   * @param appName name of app
+   * @param userName name of user
+   * @param permission permission to revoke
    * @throws TapisClientException - if api call throws an exception
    */
   public void revokeUserPermission(String appName, String userName, String permission)
@@ -337,6 +364,9 @@ public class AppsClient
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
   }
 
+  // -----------------------------------------------------------------------
+  // --------------------------- Utility Methods ---------------------------
+  // -----------------------------------------------------------------------
 
   /**
    * Utility method to build a Capability object given category, name and value
@@ -349,11 +379,6 @@ public class AppsClient
     cap.setValue(value);
     return cap;
   }
-
-  // -----------------------------------------------------------------------
-  // --------------------------- Utility Methods ---------------------------
-  // -----------------------------------------------------------------------
-
 
   // ************************************************************************
   // *********************** Private Methods ********************************
