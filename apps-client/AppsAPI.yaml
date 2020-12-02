@@ -774,35 +774,25 @@ components:
           type: boolean
         useDTNIfAvailable:
           type: boolean
-        envVariables:
-          type: array
-          items:
-            type: string
-        parameters:
-          type: array
-          items:
-            type: string
+        parameterSet:
+          $ref: '#/components/schemas/ParameterSet'
         dataInputs:
           type: array
           items:
-            type: string
-        dataOutputs:
-          type: array
-          items:
-            type: string
+            $ref: '#/components/schemas/InputSpec'
         jobDescription:
           type: string
-        jobMaxJobs:
-          type: integer
-        jobMaxJobsPerUser:
-          type: integer
         nodeCount:
           type: integer
         coresPerNode:
           type: integer
         memoryMB:
           type: integer
-        runMinutes:
+        maxMinutes:
+          type: integer
+        maxJobs:
+          type: integer
+        maxJobsPerUser:
           type: integer
         tags:
           type: array
@@ -817,6 +807,70 @@ components:
         created:
           type: string
         updated:
+          type: string
+    InputSpec:
+      type: object
+      properties:
+        sourceUrl:
+          type: string
+        targetPath:
+          type: string
+        meta:
+          $ref: '#/components/schemas/ArgMetaSpec'
+    ParameterSet:
+      type: object
+      properties:
+        appArgs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArgSpec'
+        containerArgs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArgSpec'
+        schedulerOptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArgSpec'
+        envVariables:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValue'
+        archiveFilter:
+          type: object
+          properties:
+            archiveList:
+              type: array
+              items:
+                type: string
+            doNotArchiveList:
+              type: array
+              items:
+                type: string
+    ArgSpec:
+      type: object
+      properties:
+        arg:
+          type: string
+        meta:
+          $ref: '#/components/schemas/ArgMetaSpec'
+    ArgMetaSpec:
+      type: object
+      properties:
+        name:
+          type: string
+        required:
+          type: boolean
+        kv:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValue'
+    KeyValue:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
           type: string
 
     # --- Request objects -----------------------------------------------------
