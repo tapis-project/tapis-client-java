@@ -48,9 +48,9 @@ public class AppsClient
   // ************************************************************************
   // *********************** Enums ******************************************
   // ************************************************************************
-  // Define AccessMethod here to be used in place of the auto-generated model enum
-  //   because the auto-generated enum is named DefaultAccessMethodEnum which is misleading.
-  public enum AccessMethod {PASSWORD, PKI_KEYS, ACCESS_KEY, CERT}
+  // Define AuthnMethod here to be used in place of the auto-generated model enum
+  //   because the auto-generated enum is named DefaultAuthnMethodEnum which is misleading.
+//  public enum AuthnMethod {PASSWORD, PKI_KEYS, ACCESS_KEY, CERT}
 
   // ************************************************************************
   // *********************** Fields *****************************************
@@ -204,20 +204,7 @@ public class AppsClient
   }
 
   /**
-   * Get an app using default requiredPerms=READ
-   *
-   * @param name Name of the application
-   * @param version Version of the application
-   * @return The app or null if app not found
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public App getApp(String name, String version) throws TapisClientException
-  {
-    return getApp(name, version, null);
-  }
-
-  /**
-   * Get an app using specified requiredPerms
+   * Get an app using all supported parameters requiredPerms
    *
    * @param name Name of the application
    * @param version Version of the application
@@ -234,6 +221,19 @@ public class AppsClient
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null) return resp.getResult(); else return null;
+  }
+
+  /**
+   * Get an app using default requiredPerms=READ
+   *
+   * @param name Name of the application
+   * @param version Version of the application
+   * @return The app or null if app not found
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public App getApp(String name, String version) throws TapisClientException
+  {
+    return getApp(name, version, null);
   }
 
   /**

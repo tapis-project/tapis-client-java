@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.systems.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
-import io.swagger.annotations.Api;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.internal.LinkedTreeMap;
 
@@ -14,7 +13,6 @@ import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.systems.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.systems.client.gen.ApiException;
-import edu.utexas.tacc.tapis.systems.client.gen.Configuration;
 import edu.utexas.tacc.tapis.systems.client.gen.api.CredentialsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.PermissionsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.SystemsApi;
@@ -213,16 +211,23 @@ public class SystemsClient
   }
 
   /**
-   * Get a system by name without returning credentials
+   * Get a system using all supported parameters.
+   * Fetching of credentials is highly restricted. Only certain Tapis services are authorized.
+   * If authnMethod is null then default authn method for the system is used.
+   * Use of this method is highly restricted.
    *
    * @param name System name
+   * @param returnCredentials - Include credentials in returned system object
+   * @param authnMethod - Desired authn method used when fetching credentials, for default pass in null.
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public TSystem getSystem(String name) throws TapisClientException
+  public TSystem getSystem(String name, Boolean returnCredentials, AuthnMethod authnMethod, Boolean requireExecPerm)
+          throws TapisClientException
   {
     RespSystem resp = null;
-    try {resp = sysApi.getSystem(name, false, false, null, false); }
+    String authnMethodStr = (authnMethod==null ? null : authnMethod.name());
+    try {resp = sysApi.getSystem(name, false, returnCredentials, authnMethodStr, requireExecPerm); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
@@ -232,22 +237,15 @@ public class SystemsClient
   }
 
   /**
-   * Get a system by name without returning credentials but with require EXECUTE+READ permissions.
+   * Get a system by name without returning credentials
    *
    * @param name System name
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public TSystem getSystemRequireExecPerm(String name) throws TapisClientException
+  public TSystem getSystem(String name) throws TapisClientException
   {
-    RespSystem resp = null;
-    try {resp = sysApi.getSystem(name, false, false, null, true); }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null) return null;
-    // Postprocess the TSystem
-    TSystem tSys = postProcessSystem(resp.getResult());
-    return tSys;
+    return getSystem(name, false, null, false);
   }
 
   /**
@@ -258,55 +256,17 @@ public class SystemsClient
    *
    * @param name System name
    * @param authnMethod - Desired authn method used when fetching credentials,
-   *                    default authn method used if this is null
+   *                      default authn method used if this is null
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
   public TSystem getSystemWithCredentials(String name, AuthnMethod authnMethod) throws TapisClientException
   {
-    RespSystem resp = null;
-    String authnMethodStr = (authnMethod==null ? null : authnMethod.name());
-    try {resp = sysApi.getSystem(name, false, true, authnMethodStr, false); }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null) return null;
-    // Postprocess the TSystem
-    TSystem tSys = postProcessSystem(resp.getResult());
-    return tSys;
+    return getSystem(name, true, authnMethod, false);
   }
 
   /**
-   * Get list of all systems
-   */
-  public List<TSystem> getSystems() throws TapisClientException
-  {
-    RespSystemsArray resp = null;
-    try { resp = sysApi.getSystems(false, DEFAULT_SEARCH, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_COMPUTETOTAL); }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null) return null;
-    // Postprocess TSystems in the result
-    for (TSystem tSys : resp.getResult()) postProcessSystem(tSys);
-    return resp.getResult();
-  }
-
-  /**
-   * Get list of systems using search. For example search=(name.like.MySys*)~(enabled.eq.true)
-   */
-  public List<TSystem> getSystems(String searchStr) throws TapisClientException
-  {
-    RespSystemsArray resp = null;
-    try { resp = sysApi.getSystems(false, searchStr, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_COMPUTETOTAL); }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null) return null;
-    // Postprocess TSystems in the result
-    for (TSystem tSys : resp.getResult()) postProcessSystem(tSys);
-    return resp.getResult();
-  }
-
-  /**
-   * Get list of systems using search and sort.
+   * Get list of systems using all supported parameters: searchStr, limit, sortBy, sip, startAfter.
    * For example search=(name.like.MySys*)~(enabled.eq.true)&limit=10&sortBy=id(asc)&startAfter=101
    * Use only one of skip or startAfter
    * When using startAfter sortBy must be specified.
@@ -324,23 +284,23 @@ public class SystemsClient
   }
 
   /**
-   * Dedicated search endpoint
-   * Search for systems using an array of strings that represent an SQL-like WHERE clause
+   * Get list of systems using search. For example search=(name.like.MySys*)~(enabled.eq.true)
    */
-  public List<TSystem> searchSystems(ReqSearchSystems req) throws TapisClientException
+  public List<TSystem> getSystems(String searchStr) throws TapisClientException
   {
-    RespSystemsSearch resp = null;
-    try { resp = sysApi.searchSystemsRequestBody(req, false, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_COMPUTETOTAL); }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null || resp.getResult().getSearch() == null) return null;
-    // Postprocess TSystems in the result
-    for (TSystem tSys : resp.getResult().getSearch()) postProcessSystem(tSys);
-    return resp.getResult().getSearch();
+    return getSystems(searchStr, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER);
   }
 
   /**
-   * Dedicated search endpoint
+   * Get list of all systems
+   */
+  public List<TSystem> getSystems() throws TapisClientException
+  {
+    return getSystems(DEFAULT_SEARCH);
+  }
+
+  /**
+   * Dedicated search endpoint using all supported parameters
    * Search for systems using an array of strings that represent an SQL-like WHERE clause
    * and using query parameters for sorting.
    * For example limit=10&sortBy=id(asc)&startAfter=101
@@ -357,6 +317,15 @@ public class SystemsClient
     // Postprocess TSystems in the result
     for (TSystem tSys : resp.getResult().getSearch()) postProcessSystem(tSys);
     return resp.getResult().getSearch();
+  }
+
+  /**
+   * Dedicated search endpoint using requestBody only
+   * Search for systems using an array of strings that represent an SQL-like WHERE clause
+   */
+  public List<TSystem> searchSystems(ReqSearchSystems req) throws TapisClientException
+  {
+    return searchSystems(req, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER);
   }
 
   /**
