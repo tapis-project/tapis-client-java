@@ -14,7 +14,6 @@ import org.testng.annotations.Test;
 
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
-import edu.utexas.tacc.tapis.apps.client.gen.model.Capability;
 import edu.utexas.tacc.tapis.apps.client.gen.model.App;
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
 import edu.utexas.tacc.tapis.tokens.client.TokensClient;
@@ -164,20 +163,20 @@ public class UserTest
     App tmpApp = getClientFilesSvc().getApp(app0[1], app0[2]);
     Assert.assertNotNull(tmpApp, "Failed to create item: " + app0[1]);
     System.out.println("Found item: " + app0[1]);
-    Assert.assertEquals(tmpApp.getName(), app0[1]);
+    Assert.assertEquals(tmpApp.getId(), app0[1]);
     Assert.assertEquals(tmpApp.getDescription(), app0[2]);
     Assert.assertEquals(tmpApp.getAppType().name(), app0[3]);
     Assert.assertEquals(tmpApp.getOwner(), app0[4]);
-    // Verify capabilities
-    List<Capability> jobCaps = tmpApp.getJobCapabilities();
-    Assert.assertNotNull(jobCaps);
-    Assert.assertEquals(jobCaps.size(), jobCaps1.size());
-    var capNamesFound = new ArrayList<String>();
-    for (Capability capFound : jobCaps) {capNamesFound.add(capFound.getName());}
-    for (Capability capSeed : jobCaps1)
-    {
-      Assert.assertTrue(capNamesFound.contains(capSeed.getName()), "List of capabilities did not contain a capability named: " + capSeed.getName());
-    }
+//    // Verify capabilities
+//    List<Capability> jobCaps = tmpApp.getJobCapabilities();
+//    Assert.assertNotNull(jobCaps);
+//    Assert.assertEquals(jobCaps.size(), jobCaps1.size());
+//    var capNamesFound = new ArrayList<String>();
+//    for (Capability capFound : jobCaps) {capNamesFound.add(capFound.getName());}
+//    for (Capability capSeed : jobCaps1)
+//    {
+//      Assert.assertTrue(capNamesFound.contains(capSeed.getName()), "List of capabilities did not contain a capability named: " + capSeed.getName());
+//    }
     // Verify tags
     List<String> tmpTags = tmpApp.getTags();
     Assert.assertNotNull(tmpTags, "Tags value was null");
@@ -224,20 +223,20 @@ public class UserTest
       App tmpApp = getClientUsr(serviceURL, ownerUserJWT).getApp(app0[1], app0[2]);
       Assert.assertNotNull(tmpApp, "Failed to create item: " + app0[1]);
       System.out.println("Found item: " + app0[1]);
-      Assert.assertEquals(tmpApp.getName(), app0[1]);
+      Assert.assertEquals(tmpApp.getId(), app0[1]);
       Assert.assertEquals(tmpApp.getDescription(), app0[2]);
       Assert.assertEquals(tmpApp.getAppType().name(), app0[3]);
       Assert.assertEquals(tmpApp.getOwner(), app0[4]);
       // Verify capabilities
-      List<Capability> jobCaps = tmpApp.getJobCapabilities();
-      Assert.assertNotNull(jobCaps);
-      Assert.assertEquals(jobCaps.size(), jobCaps2.size());
-      var capNamesFound = new ArrayList<String>();
-      for (Capability capFound : jobCaps) {capNamesFound.add(capFound.getName());}
-      for (Capability capSeed : jobCaps2)
-      {
-        Assert.assertTrue(capNamesFound.contains(capSeed.getName()), "List of capabilities did not contain a capability named: " + capSeed.getName());
-      }
+//      List<Capability> jobCaps = tmpApp.getJobCapabilities();
+//      Assert.assertNotNull(jobCaps);
+//      Assert.assertEquals(jobCaps.size(), jobCaps2.size());
+//      var capNamesFound = new ArrayList<String>();
+//      for (Capability capFound : jobCaps) {capNamesFound.add(capFound.getName());}
+//      for (Capability capSeed : jobCaps2)
+//      {
+//        Assert.assertTrue(capNamesFound.contains(capSeed.getName()), "List of capabilities did not contain a capability named: " + capSeed.getName());
+//      }
       // Verify tags
       List<String> tmpTags = tmpApp.getTags();
       Assert.assertNotNull(tmpTags, "Tags value was null");
@@ -294,8 +293,8 @@ public class UserTest
     Assert.assertFalse(appsList.isEmpty());
     var appNames = new ArrayList<String>();
     for (App app : appsList) {
-      System.out.println("Found item: " + app.getName());
-      appNames.add(app.getName());
+      System.out.println("Found item: " + app.getId());
+      appNames.add(app.getId());
     }
     Assert.assertTrue(appNames.contains(apps.get(3)[1]), "List of apps did not contain app name: " + apps.get(3)[1]);
     Assert.assertTrue(appNames.contains(apps.get(4)[1]), "List of apps did not contain app name: " + apps.get(4)[1]);
@@ -380,7 +379,7 @@ public class UserTest
     ReqUpdateApp pApp = new ReqUpdateApp();
     pApp.description(app[2]);
     pApp.enabled(false);
-    pApp.jobCapabilities(jobCaps2);
+//    pApp.jobCapabilities(jobCaps2);
     pApp.tags(tags2);
     pApp.notes(notes2JO);
     return pApp;

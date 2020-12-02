@@ -397,7 +397,7 @@ paths:
       tags:
         - Applications
       summary: Update an existing version of an application
-      description: Update existing version of an application. Attributes that may be updated are description, enabled, jobCapabilities, tags, notes.
+      description: Update existing version of an application. Attributes that may be updated are description, enabled, TBD, tags, notes.
       operationId: updateApp
       parameters:
         - name: appName
@@ -730,12 +730,12 @@ components:
     App:
       type: object
       properties:
-        id:
+        seq_id:
           type: integer
           format: int32
         tenant:
           type: string
-        name:
+        id:
           type: string
         version:
           type: string
@@ -750,10 +750,60 @@ components:
           type: string
         enabled:
           type: boolean
-        jobCapabilities:
+        dynamicExecSystem:
+          type: boolean
+        execSystemConstraints:
           type: array
           items:
-            $ref: '#/components/schemas/Capability'
+            type: string
+        execSystemId:
+          type: string
+        execSystemExecDir:
+          type: string
+        execSystemInputDir:
+          type: string
+        execSystemOutputDir:
+          type: string
+        execSystemLogicalQueue:
+          type: string
+        archiveSystemId:
+          type: string
+        archiveSystemDir:
+          type: string
+        archiveOnAppError:
+          type: boolean
+        useDTNIfAvailable:
+          type: boolean
+        envVariables:
+          type: array
+          items:
+            type: string
+        parameters:
+          type: array
+          items:
+            type: string
+        dataInputs:
+          type: array
+          items:
+            type: string
+        dataOutputs:
+          type: array
+          items:
+            type: string
+        jobDescription:
+          type: string
+        jobMaxJobs:
+          type: integer
+        jobMaxJobsPerUser:
+          type: integer
+        nodeCount:
+          type: integer
+        coresPerNode:
+          type: integer
+        memoryMB:
+          type: integer
+        runMinutes:
+          type: integer
         tags:
           type: array
           items:
@@ -767,24 +817,6 @@ components:
         created:
           type: string
         updated:
-          type: string
-    Capability:
-      type: object
-      properties:
-        category:
-          type: string
-          enum:
-            - SCHEDULER
-            - OS
-            - HARDWARE
-            - SOFTWARE
-            - JOB
-            - CONTAINER
-            - MISC
-            - CUSTOM
-        name:
-          type: string
-        value:
           type: string
 
     # --- Request objects -----------------------------------------------------
@@ -802,10 +834,6 @@ components:
           type: string
         enabled:
           type: boolean
-        jobCapabilities:
-          type: array
-          items:
-            $ref: '#/components/schemas/Capability'
         tags:
           type: array
           items:
@@ -819,10 +847,6 @@ components:
           type: string
         enabled:
           type: boolean
-        jobCapabilities:
-          type: array
-          items:
-            $ref: '#/components/schemas/Capability'
         tags:
           type: array
           items:

@@ -24,8 +24,6 @@ import edu.utexas.tacc.tapis.apps.client.gen.model.RespNameArray;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespResourceUrl;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespApp;
 import edu.utexas.tacc.tapis.apps.client.gen.model.App;
-import edu.utexas.tacc.tapis.apps.client.gen.model.Capability;
-import edu.utexas.tacc.tapis.apps.client.gen.model.Capability.CategoryEnum;
 
 /**
  * Class providing a convenient front-end to the automatically generated client code
@@ -368,17 +366,17 @@ public class AppsClient
   // --------------------------- Utility Methods ---------------------------
   // -----------------------------------------------------------------------
 
-  /**
-   * Utility method to build a Capability object given category, name and value
-   */
-  public static Capability buildCapability(CategoryEnum category, String name, String value)
-  {
-    var cap = new Capability();
-    cap.setCategory(category);
-    cap.setName(name);
-    cap.setValue(value);
-    return cap;
-  }
+//  /**
+//   * Utility method to build a Capability object given category, name and value
+//   */
+//  public static Capability buildCapability(CategoryEnum category, String name, String value)
+//  {
+//    var cap = new Capability();
+//    cap.setCategory(category);
+//    cap.setName(name);
+//    cap.setValue(value);
+//    return cap;
+//  }
 
   // ************************************************************************
   // *********************** Private Methods ********************************

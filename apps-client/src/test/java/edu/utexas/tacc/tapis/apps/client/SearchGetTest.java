@@ -160,7 +160,7 @@ public class SearchGetTest
   public void testValidCases() throws Exception
   {
     App app0 = appsMap.get(1);
-    String app0Name = app0.getName();
+    String app0Name = app0.getId();
     String nameList = "noSuchName1,noSuchName2," + app0Name + ",noSuchName3";
     // Create all input and validation data for tests
     // NOTE: Some cases require "name.like." + appNameLikeAll in the list of conditions since maven runs the tests in
