@@ -98,7 +98,7 @@ paths:
             type: integer
         - name: startAfter
           in: query
-          description: Where to start when sorting. Use one of skip or startAfter. Must also specify sortBy. For example, limit=10&sortBy=id(asc)&startAfter=101
+          description: Where to start when sorting. Use one of skip or startAfter. Must also specify sortBy. For example, limit=10&sortBy=seqId(asc)&startAfter=101
           schema:
             type: string
         - name: computeTotal
@@ -409,7 +409,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/v3/systems/import/sgci/{systemName}':
+  '/v3/systems/import/sgci/{systemId}':
     patch:
       tags:
         - Systems
@@ -417,7 +417,7 @@ paths:
       description: Update attributes for a system based on an SGCI resource. SGCI resource ID required. Optional attributes are description, enabled, effectiveUserId, jobCapabilities, tags, notes.
       operationId: updateSGCIResource
       parameters:
-        - name: systemName
+        - name: systemId
           in: path
           required: true
           schema:
@@ -466,7 +466,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/RespBasic'
 
-  '/v3/systems/{systemName}':
+  '/v3/systems/{systemId}':
     get:
       tags:
         - Systems
@@ -474,7 +474,7 @@ paths:
       description: Retrieve information for a system given the system name. Use query parameter returnCredentials=true to have effectiveUserId credentials included in the response. Use query parameter authnMethod=<method> to override default authn method.
       operationId: getSystem
       parameters:
-        - name: systemName
+        - name: systemId
           in: path
           required: true
           schema:
@@ -540,7 +540,7 @@ paths:
       description: Soft delete a system given the system name.
       operationId: deleteSystem
       parameters:
-        - name: systemName
+        - name: systemId
           in: path
           required: true
           schema:
@@ -582,7 +582,7 @@ paths:
       description: Update attributes for a system. Attributes that may be updated are description, host, enabled, effectiveUserId, defaultAuthnMethod, transferMethods, port, useProxy, proxyHost, proxyPort, jobCapabilities, tags, notes.
       operationId: updateSystem
       parameters:
-        - name: systemName
+        - name: systemId
           in: path
           required: true
           schema:
@@ -630,7 +630,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/v3/systems/{systemName}/changeOwner/{userName}':
+  '/v3/systems/{systemId}/changeOwner/{userName}':
     post:
       tags:
         - Systems
@@ -638,7 +638,7 @@ paths:
       description: Change owner of a system.
       operationId: changeSystemOwner
       parameters:
-        - name: systemName
+        - name: systemId
           in: path
           required: true
           schema:
@@ -680,7 +680,7 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
 
   # --- Paths for /credentials ------------------------------------------------
-  '/v3/systems/credential/{systemName}/user/{userName}':
+  '/v3/systems/credential/{systemId}/user/{userName}':
     get:
       tags:
         - Credentials
@@ -688,7 +688,7 @@ paths:
       description: Highly restricted. Only certain Tapis services authorized. Retrieve credentials for given system and user. Use query parameter authnMethod=<method> to override default authn method.
       operationId: getUserCredential
       parameters:
-        - name: systemName
+        - name: systemId
           in: path
           required: true
           schema:
@@ -747,7 +747,7 @@ paths:
       description: Create or update credentials in the Security Kernel for given system and user using a request body. Requester must be owner of the system.
       operationId: createUserCredential
       parameters:
-        - name: systemName
+        - name: systemId
           in: path
           required: true
           schema:
@@ -801,7 +801,7 @@ paths:
       description: Remove credential from the Security Kernel for given system and user. Requester must be owner of the system.
       operationId: removeUserCredential
       parameters:
-        - name: systemName
+        - name: systemId
           in: path
           required: true
           schema:
@@ -843,7 +843,7 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
 
   # --- Paths for /perms -------------------------------------------------------
-  '/v3/systems/perms/{systemName}/user/{userName}':
+  '/v3/systems/perms/{systemId}/user/{userName}':
     get:
       tags:
         - Permissions
@@ -851,7 +851,7 @@ paths:
       description: Retrieve all system related permissions for a given system and user.
       operationId: getUserPerms
       parameters:
-        - name: systemName
+        - name: systemId
           in: path
           required: true
           schema:
@@ -904,7 +904,7 @@ paths:
       description: Create permissions in the Security Kernel for a user. Requester must be owner of the system. Permissions are READ, MODIFY or ALL.
       operationId: grantUserPerms
       parameters:
-        - name: systemName
+        - name: systemId
           in: path
           required: true
           schema:
@@ -952,7 +952,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/RespBasic'
 
-  '/v3/systems/perms/{systemName}/user/{userName}/revoke':
+  '/v3/systems/perms/{systemId}/user/{userName}/revoke':
     post:
       tags:
         - Permissions
@@ -960,7 +960,7 @@ paths:
       description: Revoke permissions in the Security Kernel for a user. Requester must be owner of the system. Permissions are READ, MODIFY or ALL.
       operationId: revokeUserPerms
       parameters:
-        - name: systemName
+        - name: systemId
           in: path
           required: true
           schema:
@@ -1002,7 +1002,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/RespBasic'
 
-  '/v3/systems/perms/{systemName}/user/{userName}/{permission}':
+  '/v3/systems/perms/{systemId}/user/{userName}/{permission}':
     delete:
       tags:
         - Permissions
@@ -1010,7 +1010,7 @@ paths:
       description: Revoke system user permission in the Security Kernel. Requester must be owner of the system. Permissions are READ, MODIFY or ALL.
       operationId: revokeUserPerm
       parameters:
-        - name: systemName
+        - name: systemId
           in: path
           required: true
           schema:
@@ -1070,12 +1070,12 @@ components:
     TSystem:
       type: object
       properties:
-        id:
+        seqId:
           type: integer
           format: int32
         tenant:
           type: string
-        name:
+        id:
           type: string
         description:
           type: string
@@ -1235,7 +1235,7 @@ components:
     ReqCreateSystem:
       type: object
       properties:
-        name:
+        id:
           type: string
         description:
           type: string
@@ -1371,7 +1371,7 @@ components:
       properties:
         sgciResourceId:
           type: string
-        name:
+        id:
           type: string
         description:
           type: string

@@ -159,7 +159,7 @@ public class SearchGetTest
   public void testValidCases() throws Exception
   {
     TSystem sys0 = systemsMap.get(1);
-    String sys0Name = sys0.getName();
+    String sys0Name = sys0.getId();
     String nameList = "noSuchName1,noSuchName2," + sys0Name + ",noSuchName3";
     // Create all input and validation data for tests
     // NOTE: Some cases require "name.like." + sysNameLikeAll in the list of conditions since maven runs the tests in
@@ -315,7 +315,7 @@ public class SearchGetTest
       for (int i = start; i <= end; i++)
       {
         String sysName = getSysName(testKey, i);
-        assertEquals(searchResults.get(idx).getName(), sysName, "Incorrect system name at position: " + (idx+1));
+        assertEquals(searchResults.get(idx).getId(), sysName, "Incorrect system name at position: " + (idx+1));
         idx++;
       }
     }
@@ -324,7 +324,7 @@ public class SearchGetTest
       for (int i = start; i >= end; i--)
       {
         String sysName = getSysName(testKey, i);
-        assertEquals(searchResults.get(idx).getName(), sysName, "Incorrect system name at position: " + (idx+1));
+        assertEquals(searchResults.get(idx).getId(), sysName, "Incorrect system name at position: " + (idx+1));
         idx++;
       }
     }

@@ -155,7 +155,7 @@ public class SearchASTTest
   public void testValidCases() throws Exception
   {
     TSystem sys0 = systemsMap.get(1);
-    String sys0Name = sys0.getName();
+    String sys0Name = sys0.getId();
     String nameList = "noSuchName1,noSuchName2," + sys0Name + ",noSuchName3";
     // Create all input and validation data for tests
     // NOTE: Some cases require "name.like." + sysNameLikeAll in the list of conditions since maven runs the tests in
