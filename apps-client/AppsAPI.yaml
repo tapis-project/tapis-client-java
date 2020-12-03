@@ -799,7 +799,7 @@ components:
           type: string
         archiveOnAppError:
           type: boolean
-        useDTNIfDefined:
+        useDtnIfDefined:
           type: boolean
         parameterSet:
           $ref: '#/components/schemas/ParameterSet'
@@ -847,11 +847,11 @@ components:
         archiveFilter:
           type: object
           properties:
-            archiveList:
+            includes:
               type: array
               items:
                 type: string
-            doNotArchiveList:
+            excludes:
               type: array
               items:
                 type: string

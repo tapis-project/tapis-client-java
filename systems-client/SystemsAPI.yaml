@@ -1122,6 +1122,12 @@ components:
         proxyPort:
           type: integer
           format: int32
+        dtnSystemId:
+          type: string
+        dtnMountPoint:
+          type: string
+        dtnSubDir:
+          type: string
         canExec:
           type: boolean
         jobWorkingDir:
@@ -1276,6 +1282,12 @@ components:
         proxyPort:
           type: integer
           format: int32
+        dtnSystemId:
+          type: string
+        dtnMountPoint:
+          type: string
+        dtnSubDir:
+          type: string
         canExec:
           type: boolean
         jobWorkingDir:
