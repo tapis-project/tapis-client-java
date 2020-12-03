@@ -78,7 +78,7 @@ paths:
             type: boolean
         - name: search
           in: query
-          description: Search conditions as a single query paramter. For example search=(name.like.MyApp*)~(enabled.eq.true)
+          description: Search conditions as a single query paramter. For example search=(id.like.MyApp*)~(enabled.eq.true)
           schema:
             type: string
       responses:
@@ -188,7 +188,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/v3/apps/{appName}':
+  '/v3/apps/{appId}':
     get:
       tags:
         - Applications
@@ -196,7 +196,7 @@ paths:
       description: Retrieve all versions of an application.
       operationId: getAppAllVersions
       parameters:
-        - name: appName
+        - name: appId
           in: path
           required: true
           schema:
@@ -238,7 +238,7 @@ paths:
       description: Soft delete an application given the app name.
       operationId: deleteApp
       parameters:
-        - name: appName
+        - name: appId
           in: path
           required: true
           schema:
@@ -273,15 +273,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/v3/apps/{appName}/{version}':
+  '/v3/apps/{appId}/{version}':
     post:
       tags:
         - Applications
       summary: Create a new version of an application
-      description: Create an application using a request body. App name+version must be unique within tenant and can be composed of alphanumeric characters and the following special characters [-._~]. Name must begin with an alphabetic character and can be no more than 256 characters in length.'
+      description: Create an application using a request body. App id+version must be unique within tenant and can be composed of alphanumeric characters and the following special characters [-._~]. Id must begin with an alphabetic character and can be no more than 256 characters in length.'
       operationId: createAppVersion
       parameters:
-        - name: appName
+        - name: appId
           in: path
           required: true
           schema:
@@ -338,10 +338,10 @@ paths:
       tags:
         - Applications
       summary: Retrieve details for specific version of an application
-      description: Retrieve information for an application given the app name and version.
+      description: Retrieve information for an application given the app Id and version.
       operationId: getApp
       parameters:
-        - name: appName
+        - name: appId
           in: path
           required: true
           schema:
@@ -400,7 +400,7 @@ paths:
       description: Update existing version of an application. Attributes that may be updated are description, enabled, TBD, tags, notes.
       operationId: updateApp
       parameters:
-        - name: appName
+        - name: appId
           in: path
           required: true
           schema:
@@ -453,7 +453,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/v3/apps/{appName}/changeOwner/{userName}':
+  '/v3/apps/{appId}/changeOwner/{userName}':
     post:
       tags:
         - Applications
@@ -461,7 +461,7 @@ paths:
       description: Change owner of an application. Applies to all versions.
       operationId: changeAppOwner
       parameters:
-        - name: appName
+        - name: appId
           in: path
           required: true
           schema:
@@ -503,7 +503,7 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
 
   # --- Paths for /perms -------------------------------------------------------
-  '/v3/apps/perms/{appName}/user/{userName}':
+  '/v3/apps/perms/{appId}/user/{userName}':
     get:
       tags:
         - Permissions
@@ -511,7 +511,7 @@ paths:
       description: Retrieve all application related permissions for a given app and user.
       operationId: getUserPerms
       parameters:
-        - name: appName
+        - name: appId
           in: path
           required: true
           schema:
@@ -564,7 +564,7 @@ paths:
       description: Create permissions in the Security Kernel for a user. Requester must be owner. Permissions are READ, MODIFY, EXECUTE or ALL.
       operationId: grantUserPerms
       parameters:
-        - name: appName
+        - name: appId
           in: path
           required: true
           schema:
@@ -612,7 +612,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/RespBasic'
 
-  '/v3/apps/perms/{appName}/user/{userName}/revoke':
+  '/v3/apps/perms/{appId}/user/{userName}/revoke':
     post:
       tags:
         - Permissions
@@ -620,7 +620,7 @@ paths:
       description: Revoke permissions in the Security Kernel for a user. Requester must be owner. Permissions are READ, MODIFY, EXECUTE or ALL.
       operationId: revokeUserPerms
       parameters:
-        - name: appName
+        - name: appId
           in: path
           required: true
           schema:
@@ -662,7 +662,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/RespBasic'
 
-  '/v3/apps/perms/{appName}/user/{userName}/{permission}':
+  '/v3/apps/perms/{appId}/user/{userName}/{permission}':
     delete:
       tags:
         - Permissions
@@ -670,7 +670,7 @@ paths:
       description: Revoke user permission in the Security Kernel. Requester must be owner. Permissions are READ, MODIFY, EXECUTE or ALL.
       operationId: revokeUserPerm
       parameters:
-        - name: appName
+        - name: appId
           in: path
           required: true
           schema:
@@ -726,7 +726,8 @@ components:
       name: X-Tapis-Token
       in: header
   schemas:
-    # --- Model objects ------------------------------------------------------------
+# --- Model objects ------------------------------------------------------------
+    # --- App ------------------------------------------------------------------
     App:
       type: object
       properties:
@@ -750,6 +751,32 @@ components:
           type: string
         enabled:
           type: boolean
+        jobAttributes:
+          $ref: '#/components/schemas/JobAttributes'
+        maxJobs:
+          type: integer
+        maxJobsPerUser:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+        notes:
+          type: object
+        importRefId:
+          type: string
+        deleted:
+          type: boolean
+        created:
+          type: string
+        updated:
+          type: string
+    # --- JobAttributes --------------------------------------------------------
+    JobAttributes:
+      type: object
+      properties:
+        description:
+          type: string
         dynamicExecSystem:
           type: boolean
         execSystemConstraints:
@@ -772,16 +799,14 @@ components:
           type: string
         archiveOnAppError:
           type: boolean
-        useDTNIfAvailable:
+        useDTNIfDefined:
           type: boolean
         parameterSet:
           $ref: '#/components/schemas/ParameterSet'
-        dataInputs:
+        fileInputs:
           type: array
           items:
-            $ref: '#/components/schemas/InputSpec'
-        jobDescription:
-          type: string
+            $ref: '#/components/schemas/FileInputSpec'
         nodeCount:
           type: integer
         coresPerNode:
@@ -790,25 +815,8 @@ components:
           type: integer
         maxMinutes:
           type: integer
-        maxJobs:
-          type: integer
-        maxJobsPerUser:
-          type: integer
-        tags:
-          type: array
-          items:
-            type: string
-        notes:
-          type: object
-        importRefId:
-          type: string
-        deleted:
-          type: boolean
-        created:
-          type: string
-        updated:
-          type: string
-    InputSpec:
+    # --- FileInputSpec --------------------------------------------------------
+    FileInputSpec:
       type: object
       properties:
         sourceUrl:
@@ -835,7 +843,7 @@ components:
         envVariables:
           type: array
           items:
-            $ref: '#/components/schemas/KeyValue'
+            $ref: '#/components/schemas/KeyValueString'
         archiveFilter:
           type: object
           properties:
@@ -847,6 +855,7 @@ components:
               type: array
               items:
                 type: string
+    # --- ArgSpec --------------------------------------------------------------
     ArgSpec:
       type: object
       properties:
@@ -854,6 +863,7 @@ components:
           type: string
         meta:
           $ref: '#/components/schemas/ArgMetaSpec'
+    # --- ArgMetaSpec ----------------------------------------------------------
     ArgMetaSpec:
       type: object
       properties:
@@ -864,8 +874,9 @@ components:
         kv:
           type: array
           items:
-            $ref: '#/components/schemas/KeyValue'
-    KeyValue:
+            $ref: '#/components/schemas/KeyValueString'
+    # --- KeyValueString -------------------------------------------------------
+    KeyValueString:
       type: object
       properties:
         key:
@@ -888,6 +899,12 @@ components:
           type: string
         enabled:
           type: boolean
+        jobAttributes:
+          $ref: '#/components/schemas/JobAttributes'
+        maxJobs:
+          type: integer
+        maxJobsPerUser:
+          type: integer
         tags:
           type: array
           items:
