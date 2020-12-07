@@ -169,7 +169,7 @@ public class FilesSvcTest
     sys0 = systems.get(2);
     // This should succeed
     sysClient = getClientFilesSvc(tenantName, testUser2, filesServiceJWT);
-    tmpSys = sysClient.getSystemRequireExecPerm(sys0[1]);
+    tmpSys = sysClient.getSystem(sys0[1], false, null, true);
     Assert.assertNotNull(tmpSys, "Failed to find item: " + sys0[1]);
     System.out.println("Found item: " + sys0[1]);
     // Verify most attributes
@@ -179,7 +179,7 @@ public class FilesSvcTest
     // this should fail
     sysClient = getClientFilesSvc(tenantName, testUser3, filesServiceJWT);
     try {
-      sysClient.getSystemRequireExecPerm(sys0[1]);
+      sysClient.getSystem(sys0[1], false, null, true);
       Assert.fail("Fetch of system did not require EXECUTE permission as expected");
     } catch (TapisClientException tce) {
       Assert.assertTrue(tce.getTapisMessage().contains("HTTP 401 Unauthorized"), "Wrong exception message: " + tce.getTapisMessage());

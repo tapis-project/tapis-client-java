@@ -115,7 +115,7 @@ public class SearchGetTest
     // apps and other resources) using the client.
     App tmpApp;
     try {
-      tmpApp = getClientUsr(serviceURL, ownerUser1JWT).getApp(apps.get(1)[1]);
+      tmpApp = getClientUsr(serviceURL, ownerUser1JWT).getApp(apps.get(1)[1], apps.get(1)[2]);
     } catch (TapisClientException e) {
       Assert.assertEquals(e.getCode(), 404);
       tmpApp = null;
@@ -131,11 +131,11 @@ public class SearchGetTest
         {
           // Vary port # for checking numeric relational searches
           Utils.createApp(getClientUsr(serviceURL, ownerUser1JWT), app0);
-          tmpApp = getClientUsr(serviceURL, ownerUser1JWT).getApp(app0[1]);
+          tmpApp = getClientUsr(serviceURL, ownerUser1JWT).getApp(app0[1], app0[2]);
         } else
         {
           Utils.createApp(getClientUsr(serviceURL, ownerUser2JWT), app0);
-          tmpApp = getClientUsr(serviceURL, ownerUser2JWT).getApp(app0[1]);
+          tmpApp = getClientUsr(serviceURL, ownerUser2JWT).getApp(app0[1], app0[2]);
         }
         Assert.assertNotNull(tmpApp);
         appsMap.put(i, tmpApp);
@@ -160,7 +160,7 @@ public class SearchGetTest
   public void testValidCases() throws Exception
   {
     App app0 = appsMap.get(1);
-    String app0Name = app0.getName();
+    String app0Name = app0.getId();
     String nameList = "noSuchName1,noSuchName2," + app0Name + ",noSuchName3";
     // Create all input and validation data for tests
     // NOTE: Some cases require "name.like." + appNameLikeAll in the list of conditions since maven runs the tests in

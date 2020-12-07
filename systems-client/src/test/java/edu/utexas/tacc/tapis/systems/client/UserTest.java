@@ -245,7 +245,7 @@ public class UserTest
       TSystem tmpSys = usrClient.getSystem(sys0[1]);
       Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
       System.out.println("Found item: " + sys0[1]);
-      Assert.assertEquals(tmpSys.getName(), sys0[1]);
+      Assert.assertEquals(tmpSys.getId(), sys0[1]);
       Assert.assertEquals(tmpSys.getDescription(), sys0[2]);
       Assert.assertEquals(tmpSys.getSystemType().name(), sys0[3]);
       Assert.assertEquals(tmpSys.getOwner(), sys0[4]);
@@ -354,8 +354,8 @@ public class UserTest
     Assert.assertFalse(systemsList.isEmpty());
     var systemNames = new ArrayList<String>();
     for (TSystem system : systemsList) {
-      System.out.println("Found item: " + system.getName());
-      systemNames.add(system.getName());
+      System.out.println("Found item: " + system.getId());
+      systemNames.add(system.getId());
     }
     TSystem tmpSys = usrClient.getSystem(sys1[1]);
     verifySystemAttributes(tmpSys, sys1);

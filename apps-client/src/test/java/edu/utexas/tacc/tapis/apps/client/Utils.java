@@ -25,7 +25,6 @@ package edu.utexas.tacc.tapis.apps.client;
 import com.google.gson.JsonObject;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
-import edu.utexas.tacc.tapis.apps.client.gen.model.Capability;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqCreateApp;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqUpdateApp;
 import edu.utexas.tacc.tapis.apps.client.gen.model.App;
@@ -79,17 +78,18 @@ public final class Utils
           ClientTapisGsonUtils.getGson().fromJson("{\"project\":\"myproj2\", \"testdata\":\"abc2\"}", JsonObject.class);
   public static final List<String> testPerms = new ArrayList<>(List.of("READ", "MODIFY"));
 
-  private static final Capability capA1 = AppsClient.buildCapability(Capability.CategoryEnum.SCHEDULER, "Type", "Slurm");
-  private static final Capability capB1 = AppsClient.buildCapability(Capability.CategoryEnum.HARDWARE, "CoresPerNode", "4");
-  private static final Capability capC1 = AppsClient.buildCapability(Capability.CategoryEnum.SOFTWARE, "OpenMP", "4.5");
-  public static final List<Capability> jobCaps1 = new ArrayList<>(List.of(capA1, capB1, capC1));
-  private static final Capability capA2 = AppsClient.buildCapability(Capability.CategoryEnum.SCHEDULER, "Type", "Condor");
-  private static final Capability capB2 = AppsClient.buildCapability(Capability.CategoryEnum.HARDWARE, "CoresPerNode", "128");
-  private static final Capability capC2 = AppsClient.buildCapability(Capability.CategoryEnum.SOFTWARE, "OpenMP", "3.1");
-  private static final Capability capD2 = AppsClient.buildCapability(Capability.CategoryEnum.CONTAINER, "Singularity", null);
-  public static final List<Capability> jobCaps2 = new ArrayList<>(List.of(capA2, capB2, capC2, capD2));
+//  private static final Capability capA1 = AppsClient.buildCapability(Capability.CategoryEnum.SCHEDULER, "Type", "Slurm");
+//  private static final Capability capB1 = AppsClient.buildCapability(Capability.CategoryEnum.HARDWARE, "CoresPerNode", "4");
+//  private static final Capability capC1 = AppsClient.buildCapability(Capability.CategoryEnum.SOFTWARE, "OpenMP", "4.5");
+//  public static final List<Capability> jobCaps1 = new ArrayList<>(List.of(capA1, capB1, capC1));
+//  private static final Capability capA2 = AppsClient.buildCapability(Capability.CategoryEnum.SCHEDULER, "Type", "Condor");
+//  private static final Capability capB2 = AppsClient.buildCapability(Capability.CategoryEnum.HARDWARE, "CoresPerNode", "128");
+//  private static final Capability capC2 = AppsClient.buildCapability(Capability.CategoryEnum.SOFTWARE, "OpenMP", "3.1");
+//  private static final Capability capD2 = AppsClient.buildCapability(Capability.CategoryEnum.CONTAINER, "Singularity", null);
+//  public static final List<Capability> jobCaps2 = new ArrayList<>(List.of(capA2, capB2, capC2, capD2));
 
   public static final String appNamePrefix = "CApp";
+  public static final String appVersion = "0.0.1";
 
   // Strings for searches involving special characters
   public static final String specialChar7Str = ",()~*!\\"; // These 7 may need escaping
@@ -117,7 +117,7 @@ public final class Utils
       String suffix = key + "_" + String.format("%03d", i);
       String name = appNamePrefix + "_" + suffix;
       // Constructor initializes all attributes except for JobCapabilities
-      String[] app0 = {tenantName, name, "description " + suffix, appType, ownerUser1};
+      String[] app0 = {tenantName, name, appVersion, "description " + suffix, appType, ownerUser1};
       apps.put(i, app0);
     }
     return apps;
@@ -157,19 +157,20 @@ public final class Utils
   public static String createApp(AppsClient clt, String[] app)
           throws TapisClientException
   {
+    String appName = app[1];
+    String appVersion = app[2];
     ReqCreateApp rApp = new ReqCreateApp();
-    rApp.setName(app[1]);
-    rApp.description(app[2]);
-    rApp.setAppType(ReqCreateApp.AppTypeEnum.valueOf(app[3]));
-    rApp.owner(app[4]);
+    rApp.description(app[3]);
+    rApp.setAppType(ReqCreateApp.AppTypeEnum.valueOf(app[4]));
+    rApp.owner(app[5]);
     rApp.enabled(true);
-    rApp.jobCapabilities(jobCaps1);
+///    rApp.jobCapabilities(jobCaps1);
     rApp.tags(tags1);
     rApp.notes(notes1JO);
     // Convert list of TransferMethod enums to list of strings
 //    List<String> transferMethods = Stream.of(txfrMethodsStrList).map(TransferMethodsEnum::name).collect(Collectors.toList());
     // Create the app
-    return clt.createApp(rApp);
+    return clt.createApp(appName, appVersion, rApp);
   }
   public static AppsClient getClientUsr(String serviceURL, String userJWT)
   {

@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Tapis Applications API
-  description: The Tapis Applications API provides for management of Tapis Applications including permissions.
+  description: The Tapis Applications API provides for management of Tapis applications including permissions.
   version: '0.0.1'
   termsOfService: "https://tapis-project.org"
   contact:
@@ -25,7 +25,7 @@ security:
   - TapisJWT: []
 tags:
   - name: Applications
-    description: manage Applications
+    description: manage applications
 
 # ------------------------------------------------------------------------------
 # --- Paths -------------------------------------------------------------------
@@ -67,9 +67,9 @@ paths:
     get:
       tags:
         - Applications
-      summary: Retrieve Applications
-      description: Retrieve details for Applications. Use search and select query parameters to limit results.
-      operationId: getApps
+      summary: Retrieve all applications
+      description: Retrieve all versions of all applications. Use search and select query parameters to limit results.
+      operationId: getAllAppsAllVersions
       parameters:
         - name: pretty
           in: query
@@ -78,9 +78,47 @@ paths:
             type: boolean
         - name: search
           in: query
-          description: Search conditions as a single query paramter. For example search=(name.like.MyApp*)~(enabled.eq.true)
+          description: Search conditions as a single query paramter. For example search=(id.like.MyApp*)~(enabled.eq.true)
           schema:
             type: string
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespAppArray'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  '/v3/apps/search/apps':
+    get:
+      tags:
+        - Applications
+      summary: Retrieve all versions of all applications matching search conditions specified as query parameters
+      description: Retrieve details for applications. Use query parameters to specify search conditions. For example ?owner.eq=jdoe&port.gt=1024
+      operationId: searchAppsQueryParameters
+      parameters:
+        - name: pretty
+          in: query
+          description: Pretty print the response
+          schema:
+            type: boolean
       responses:
         '200':
           description: Success.
@@ -109,10 +147,150 @@ paths:
     post:
       tags:
         - Applications
-      summary: Create an app
-      description: Create an app using a request body. App name must be unique within a tenant and can be composed of alphanumeric characters and the following special characters [-._~]. Name must begin with an alphabetic character and can be no more than 256 characters in length. Description is optional with a maximum length of 2048 characters.'
-      operationId: createApp
+      summary: Retrieve all versions of all applications matching search conditions
+      description: Retrieve details for applications. Use request body to specify SQL-like search conditions.
+      operationId: searchAppsRequestBody
       parameters:
+        - name: pretty
+          in: query
+          description: Pretty print the response
+          schema:
+            type: boolean
+      requestBody:
+        required: true
+        description: A JSON object specifying SQL-like search conditions as an array of strings. Strings are concatenated to form full search query.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqSearchApps'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespAppArray'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  '/v3/apps/{appId}':
+    get:
+      tags:
+        - Applications
+      summary: Retrieve all versions of an application
+      description: Retrieve all versions of an application.
+      operationId: getAppAllVersions
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespAppArray'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    delete:
+      tags:
+        - Applications
+      summary: Soft delete all versions of an application
+      description: Soft delete an application given the app name.
+      operationId: deleteApp
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          description: Pretty print the response
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: App deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+  '/v3/apps/{appId}/{version}':
+    post:
+      tags:
+        - Applications
+      summary: Create a new version of an application
+      description: Create an application using a request body. App id+version must be unique within tenant and can be composed of alphanumeric characters and the following special characters [-._~]. Id must begin with an alphabetic character and can be no more than 256 characters in length.'
+      operationId: createAppVersion
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
         - name: pretty
           in: query
           description: Pretty print the response
@@ -156,100 +334,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/v3/apps/search/apps':
     get:
       tags:
         - Applications
-      summary: Retrieve Applications matching search conditions specified as query parameters
-      description: Retrieve details for Applications. Use query parameters to specify search conditions. For example ?owner.eq=jdoe&port.gt=1024
-      operationId: searchAppsQueryParameters
-      parameters:
-        - name: pretty
-          in: query
-          description: Pretty print the response
-          schema:
-            type: boolean
-      responses:
-        '200':
-          description: Success.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespAppArray'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-    post:
-      tags:
-        - Applications
-      summary: Retrieve Applications matching search conditions
-      description: Retrieve details for Applications. Use request body to specify SQL-like search conditions.
-      operationId: searchAppsRequestBody
-      parameters:
-        - name: pretty
-          in: query
-          description: Pretty print the response
-          schema:
-            type: boolean
-      requestBody:
-        required: true
-        description: A JSON object specifying SQL-like search conditions as an array of strings. Strings are concatenated to form full search query.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqSearchApps'
-      #          text/plain:
-      #            schema:
-      #              $ref: '#/components/schemas/ReqSearchAppsText'
-      responses:
-        '200':
-          description: Success.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespAppArray'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-  '/v3/apps/{appName}':
-    get:
-      tags:
-        - Applications
-      summary: Retrieve app details
-      description: Retrieve information for an app given the app name.
+      summary: Retrieve details for specific version of an application
+      description: Retrieve information for an application given the app Id and version.
       operationId: getApp
       parameters:
-        - name: appName
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: version
           in: path
           required: true
           schema:
@@ -261,7 +358,7 @@ paths:
             type: boolean
         - name: requiredPerms
           in: query
-          description: Comma separated list of required permissions. Can be used to perform an additional permissions check with one call. For example requiredPerms=EXECUTE. Deault is READ.
+          description: Comma separated list of permissions. Used to perform additional permissions check with one call. For example requiredPerms=EXECUTE. READ is always required.
           schema:
             type: string
             default: 'READ'
@@ -296,56 +393,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-    delete:
+    patch:
       tags:
         - Applications
-      summary: Soft delete an app
-      description: Soft delete an app given the app name.
-      operationId: deleteApp
+      summary: Update an existing version of an application
+      description: Update existing version of an application. Attributes that may be updated are description, enabled, TBD, tags, notes.
+      operationId: updateApp
       parameters:
-        - name: appName
+        - name: appId
           in: path
           required: true
           schema:
             type: string
-        - name: pretty
-          in: query
-          description: Pretty print the response
-          schema:
-            type: boolean
-      responses:
-        '200':
-          description: App deleted.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespChangeCount'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-    patch:
-      tags:
-        - Applications
-      summary: Update an app
-      description: Update attributes for an app. Attributes that may be updated are description, enabled, jobCapabilities, tags, notes.
-      operationId: updateApp
-      parameters:
-        - name: appName
+        - name: version
           in: path
           required: true
           schema:
@@ -393,15 +453,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/v3/apps/{appName}/changeOwner/{userName}':
+  '/v3/apps/{appId}/changeOwner/{userName}':
     post:
       tags:
         - Applications
-      summary: Change app owner
-      description: Change owner of an app.
+      summary: Change application owner
+      description: Change owner of an application. Applies to all versions.
       operationId: changeAppOwner
       parameters:
-        - name: appName
+        - name: appId
           in: path
           required: true
           schema:
@@ -443,15 +503,15 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
 
   # --- Paths for /perms -------------------------------------------------------
-  '/v3/apps/perms/{appName}/user/{userName}':
+  '/v3/apps/perms/{appId}/user/{userName}':
     get:
       tags:
         - Permissions
-      summary: Retrieve app user permissions
-      description: Retrieve all app related permissions for a given app and user.
+      summary: Retrieve application user permissions
+      description: Retrieve all application related permissions for a given app and user.
       operationId: getUserPerms
       parameters:
-        - name: appName
+        - name: appId
           in: path
           required: true
           schema:
@@ -500,11 +560,11 @@ paths:
     post:
       tags:
         - Permissions
-      summary: Create app user permissions
-      description: Create permissions in the Security Kernel for a user. Requester must be owner of the app. Permissions are READ, MODIFY or ALL.
+      summary: Create application user permissions
+      description: Create permissions in the Security Kernel for a user. Requester must be owner. Permissions are READ, MODIFY, EXECUTE or ALL.
       operationId: grantUserPerms
       parameters:
-        - name: appName
+        - name: appId
           in: path
           required: true
           schema:
@@ -552,15 +612,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/RespBasic'
 
-  '/v3/apps/perms/{appName}/user/{userName}/revoke':
+  '/v3/apps/perms/{appId}/user/{userName}/revoke':
     post:
       tags:
         - Permissions
       summary: Revoke app user permissions
-      description: Revoke permissions in the Security Kernel for a user. Requester must be owner of the app. Permissions are READ, MODIFY or ALL.
+      description: Revoke permissions in the Security Kernel for a user. Requester must be owner. Permissions are READ, MODIFY, EXECUTE or ALL.
       operationId: revokeUserPerms
       parameters:
-        - name: appName
+        - name: appId
           in: path
           required: true
           schema:
@@ -602,15 +662,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/RespBasic'
 
-  '/v3/apps/perms/{appName}/user/{userName}/{permission}':
+  '/v3/apps/perms/{appId}/user/{userName}/{permission}':
     delete:
       tags:
         - Permissions
       summary: Revoke app user permission
-      description: Revoke app user permission in the Security Kernel. Requester must be owner of the app. Permissions are READ, MODIFY or ALL.
+      description: Revoke user permission in the Security Kernel. Requester must be owner. Permissions are READ, MODIFY, EXECUTE or ALL.
       operationId: revokeUserPerm
       parameters:
-        - name: appName
+        - name: appId
           in: path
           required: true
           schema:
@@ -666,16 +726,19 @@ components:
       name: X-Tapis-Token
       in: header
   schemas:
-    # --- Model objects ------------------------------------------------------------
+# --- Model objects ------------------------------------------------------------
+    # --- App ------------------------------------------------------------------
     App:
       type: object
       properties:
-        id:
+        seq_id:
           type: integer
           format: int32
         tenant:
           type: string
-        name:
+        id:
+          type: string
+        version:
           type: string
         description:
           type: string
@@ -688,10 +751,12 @@ components:
           type: string
         enabled:
           type: boolean
-        jobCapabilities:
-          type: array
-          items:
-            $ref: '#/components/schemas/Capability'
+        jobAttributes:
+          $ref: '#/components/schemas/JobAttributes'
+        maxJobs:
+          type: integer
+        maxJobsPerUser:
+          type: integer
         tags:
           type: array
           items:
@@ -706,21 +771,115 @@ components:
           type: string
         updated:
           type: string
-    Capability:
+    # --- JobAttributes --------------------------------------------------------
+    JobAttributes:
       type: object
       properties:
-        category:
+        description:
           type: string
-          enum:
-            - SCHEDULER
-            - OS
-            - HARDWARE
-            - SOFTWARE
-            - JOB
-            - CONTAINER
-            - MISC
-            - CUSTOM
+        dynamicExecSystem:
+          type: boolean
+        execSystemConstraints:
+          type: array
+          items:
+            type: string
+        execSystemId:
+          type: string
+        execSystemExecDir:
+          type: string
+        execSystemInputDir:
+          type: string
+        execSystemOutputDir:
+          type: string
+        execSystemLogicalQueue:
+          type: string
+        archiveSystemId:
+          type: string
+        archiveSystemDir:
+          type: string
+        archiveOnAppError:
+          type: boolean
+        useDtnIfDefined:
+          type: boolean
+        parameterSet:
+          $ref: '#/components/schemas/ParameterSet'
+        fileInputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileInputSpec'
+        nodeCount:
+          type: integer
+        coresPerNode:
+          type: integer
+        memoryMB:
+          type: integer
+        maxMinutes:
+          type: integer
+    # --- FileInputSpec --------------------------------------------------------
+    FileInputSpec:
+      type: object
+      properties:
+        sourceUrl:
+          type: string
+        targetPath:
+          type: string
+        meta:
+          $ref: '#/components/schemas/ArgMetaSpec'
+    ParameterSet:
+      type: object
+      properties:
+        appArgs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArgSpec'
+        containerArgs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArgSpec'
+        schedulerOptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArgSpec'
+        envVariables:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValueString'
+        archiveFilter:
+          type: object
+          properties:
+            includes:
+              type: array
+              items:
+                type: string
+            excludes:
+              type: array
+              items:
+                type: string
+    # --- ArgSpec --------------------------------------------------------------
+    ArgSpec:
+      type: object
+      properties:
+        arg:
+          type: string
+        meta:
+          $ref: '#/components/schemas/ArgMetaSpec'
+    # --- ArgMetaSpec ----------------------------------------------------------
+    ArgMetaSpec:
+      type: object
+      properties:
         name:
+          type: string
+        required:
+          type: boolean
+        kv:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValueString'
+    # --- KeyValueString -------------------------------------------------------
+    KeyValueString:
+      type: object
+      properties:
+        key:
           type: string
         value:
           type: string
@@ -729,8 +888,6 @@ components:
     ReqCreateApp:
       type: object
       properties:
-        name:
-          type: string
         description:
           type: string
         appType:
@@ -742,10 +899,12 @@ components:
           type: string
         enabled:
           type: boolean
-        jobCapabilities:
-          type: array
-          items:
-            $ref: '#/components/schemas/Capability'
+        jobAttributes:
+          $ref: '#/components/schemas/JobAttributes'
+        maxJobs:
+          type: integer
+        maxJobsPerUser:
+          type: integer
         tags:
           type: array
           items:
@@ -759,10 +918,6 @@ components:
           type: string
         enabled:
           type: boolean
-        jobCapabilities:
-          type: array
-          items:
-            $ref: '#/components/schemas/Capability'
         tags:
           type: array
           items:

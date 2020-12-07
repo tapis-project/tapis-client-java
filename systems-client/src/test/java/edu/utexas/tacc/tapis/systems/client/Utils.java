@@ -244,7 +244,7 @@ public final class Utils
     var accMethod = authnMethod != null ? authnMethod : prot1AuthnMethod;
     var tMethods = txfrMethods != null ? txfrMethods : prot1TxfrMethodsC;
     ReqCreateSystem rSys = new ReqCreateSystem();
-    rSys.setName(sys[1]);
+    rSys.setId(sys[1]);
     rSys.description(sys[2]);
     rSys.setSystemType(ReqCreateSystem.SystemTypeEnum.valueOf(sys[3]));
     rSys.owner(sys[4]);
@@ -283,7 +283,7 @@ public final class Utils
   {
     SystemsClient.AuthnMethod accMethod = prot1AuthnMethod;
     ReqCreateSystem rSys = new ReqCreateSystem();
-    rSys.setName(sys[1]);
+    rSys.setId(sys[1]);
     rSys.setSystemType(ReqCreateSystem.SystemTypeEnum.valueOf(sys[3]));
     rSys.setHost(sys[5]);
     rSys.defaultAuthnMethod(ReqCreateSystem.DefaultAuthnMethodEnum.valueOf(accMethod.name()));
@@ -323,7 +323,7 @@ public final class Utils
    */
   public static void verifySystemAttributes(TSystem tmpSys, String[] sys0)
   {
-    Assert.assertEquals(tmpSys.getName(), sys0[1]);
+    Assert.assertEquals(tmpSys.getId(), sys0[1]);
     Assert.assertEquals(tmpSys.getDescription(), sys0[2]);
     Assert.assertEquals(tmpSys.getSystemType().name(), sys0[3]);
     Assert.assertEquals(tmpSys.getOwner(), sys0[4]);
@@ -416,7 +416,7 @@ public final class Utils
   public static void verifySystemDefaults(TSystem tmpSys, String[] sys0)
   {
     // Verify required attributes
-    Assert.assertEquals(tmpSys.getName(), sys0[1]);
+    Assert.assertEquals(tmpSys.getId(), sys0[1]);
     Assert.assertEquals(tmpSys.getSystemType().name(), sys0[3]);
     Assert.assertEquals(tmpSys.getHost(), sys0[5]);
     Assert.assertEquals(tmpSys.getDefaultAuthnMethod().name(), prot1AuthnMethod.name());

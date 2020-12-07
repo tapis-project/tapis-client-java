@@ -99,7 +99,7 @@ public class SearchASTTest
     // apps and other resources) using the client.
     App tmpApp;
     try {
-      tmpApp = getClientUsr(serviceURL, ownerUser1JWT).getApp(apps.get(1)[1]);
+      tmpApp = getClientUsr(serviceURL, ownerUser1JWT).getApp(apps.get(1)[1], apps.get(1)[2]);
     } catch (TapisClientException e) {
       assertEquals(e.getCode(), 404);
       tmpApp = null;
@@ -115,12 +115,12 @@ public class SearchASTTest
         {
           // Vary port # for checking numeric relational searches
           Utils.createApp(getClientUsr(serviceURL, ownerUser1JWT), app0);
-          tmpApp = getClientUsr(serviceURL, ownerUser1JWT).getApp(app0[1]);
+          tmpApp = getClientUsr(serviceURL, ownerUser1JWT).getApp(app0[1], app0[2]);
         }
         else
         {
           Utils.createApp(getClientUsr(serviceURL, ownerUser2JWT), app0);
-          tmpApp = getClientUsr(serviceURL, ownerUser2JWT).getApp(app0[1]);
+          tmpApp = getClientUsr(serviceURL, ownerUser2JWT).getApp(app0[1], app0[2]);
         }
         Assert.assertNotNull(tmpApp);
         appsMap.put(i, tmpApp);
@@ -132,7 +132,7 @@ public class SearchASTTest
       for (int i = 1; i <= numApps; i++)
       {
         String[] app0 = apps.get(i);
-        tmpApp = getClientUsr(serviceURL, adminUserJWT).getApp(app0[1]);
+        tmpApp = getClientUsr(serviceURL, adminUserJWT).getApp(app0[1], app0[2]);
         Assert.assertNotNull(tmpApp);
         appsMap.put(i, tmpApp);
       }
@@ -153,7 +153,7 @@ public class SearchASTTest
   public void testValidCases() throws Exception
   {
     App app0 = appsMap.get(1);
-    String app0Name = app0.getName();
+    String app0Name = app0.getId();
     String nameList = "noSuchName1,noSuchName2," + app0Name + ",noSuchName3";
     // Create all input and validation data for tests
     // NOTE: Some cases require "name.like." + appNameLikeAll in the list of conditions since maven runs the tests in
