@@ -1135,7 +1135,7 @@ components:
         jobEnvVariables:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/KeyValueString'
         jobMaxJobs:
           type: integer
         jobMaxJobsPerUser:
@@ -1230,6 +1230,14 @@ components:
           type: string
         certificate:
           type: string
+    # --- KeyValueString -------------------------------------------------------
+    KeyValueString:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
 
     # --- Request objects -----------------------------------------------------
     ReqCreateSystem:
@@ -1295,7 +1303,7 @@ components:
         jobEnvVariables:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/KeyValueString'
         jobMaxJobs:
           type: integer
         jobMaxJobsPerUser:
