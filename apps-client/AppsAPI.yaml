@@ -803,8 +803,6 @@ components:
           type: string
         archiveOnAppError:
           type: boolean
-        useDtnIfDefined:
-          type: boolean
         parameterSet:
           $ref: '#/components/schemas/ParameterSet'
         fileInputs:

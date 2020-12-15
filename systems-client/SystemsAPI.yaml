@@ -1126,8 +1126,10 @@ components:
           type: string
         dtnMountPoint:
           type: string
-        dtnSubDir:
+        dtnMountSourcePath:
           type: string
+        isDtn:
+          type: boolean
         canExec:
           type: boolean
         jobWorkingDir:
@@ -1292,8 +1294,10 @@ components:
           type: string
         dtnMountPoint:
           type: string
-        dtnSubDir:
+        dtnMountSourcePath:
           type: string
+        isDtn:
+          type: boolean
         canExec:
           type: boolean
         jobWorkingDir:
