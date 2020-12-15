@@ -162,7 +162,7 @@ public class MatchConstraintsTest
 
     // TODO Test simple match
     //  Currently matchConstraints is a WIP since it should always return all systems
-    validCaseInputs.put( 1,new CaseData(numSystems, "Scheduler.Type = 'Slurm'")); // TODO: All are Slurm?
+    validCaseInputs.put( 1,new CaseData(numSystems, "Scheduler$Type = 'Slurm'")); // TODO: All are Slurm?
 
 //    // Test basic types and operators
 //    validCaseInputs.put( 1,new CaseData(1, "name = " + sys0Name)); // 1 has specific name

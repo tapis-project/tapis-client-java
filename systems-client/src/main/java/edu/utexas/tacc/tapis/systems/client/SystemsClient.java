@@ -521,12 +521,11 @@ public class SystemsClient
   /**
    * Utility method to build a Capability object given category, name and value
    */
-  public static Capability buildCapability(CategoryEnum category, String subcategory, String name,
+  public static Capability buildCapability(CategoryEnum category, String name,
                                            DatatypeEnum datatype, int precedence, String value)
   {
     var cap = new Capability();
     cap.setCategory(category);
-    cap.setSubcategory(subcategory);
     cap.setName(name);
     cap.setDatatype(datatype);
     cap.setPrecedence(precedence);

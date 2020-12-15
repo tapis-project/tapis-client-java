@@ -29,6 +29,6 @@ echo "Using DB Host:Port:Name = $DB_HOST:$DB_PORT:$DB_NAME"
 
 docker run -i --rm --network="host" bitnami/postgresql:latest /bin/bash << EOF
 PGPASSWORD=${TAPIS_DB_PASSWORD} psql --host=${DB_HOST} --port=${DB_PORT} --username=tapis_sys --dbname=${DB_NAME} -q -P pager << EOB
-DELETE FROM tapis_sys.systems WHERE NAME LIKE 'CSys\_Clt%'
+DELETE FROM tapis_sys.systems WHERE id LIKE 'CSys\_Clt%'
 EOB
 EOF

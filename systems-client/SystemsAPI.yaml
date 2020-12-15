@@ -1199,8 +1199,6 @@ components:
             - CONTAINER
             - MISC
             - CUSTOM
-        subcategory:
-          type: string
         name:
           type: string
         datatype:

@@ -52,7 +52,7 @@ public final class Utils
   public static final String adminUser = testUser9;
   public static final String ownerUser1 = testUser1;
   public static final String ownerUser2 = testUser2;
-  public static final String masterTenantName = "master";
+  public static final String adminTenantName = "admin";
   public static final String filesSvcName = "files";
   public static final String appType = ReqCreateApp.AppTypeEnum.BATCH.name();
   // TAPIS_BASE_URL_SUFFIX should be set according to the dev, staging or prod environment
