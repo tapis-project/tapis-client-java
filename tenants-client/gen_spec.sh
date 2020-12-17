@@ -14,8 +14,6 @@ mkdir -p $PRG_PATH/target
 TMP_DIR=$(mktemp -d)
 
 # Download latest openapi spec from repo
-# Master yaml
-# curl -o target/openapi_v3.yml https://raw.githubusercontent.com/tapis-project/tenants-api/master/service/resources/openapi_v3.yml
 # Dev yaml
 curl -o target/openapi_v3.yml https://raw.githubusercontent.com/tapis-project/tenants-api/dev/service/resources/openapi_v3.yml
 

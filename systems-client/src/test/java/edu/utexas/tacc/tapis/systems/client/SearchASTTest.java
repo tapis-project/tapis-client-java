@@ -80,7 +80,7 @@ public class SearchASTTest
     // Cleanup anything leftover from previous failed run
     tearDown();
 
-//    String[] tenantName = 0, name = 1, "description " + suffix = 2, sysType = 3, ownerUser = 4, "host"+suffix = 5,
+//    String[] tenantName = 0, id = 1, "description " + suffix = 2, sysType = 3, ownerUser = 4, "host"+suffix = 5,
 //             "effUser"+suffix = 6, "fakePassword"+suffix = 7,"bucket"+suffix = 8, "/root"+suffix = 9,
 //             "jobLocalWorkDir"+suffix = 10, "jobLocalArchDir"+suffix = 11,
 //            "jobRemoteArchSystem"+suffix = 12, "jobRemoteArchDir"+suffix = 13};
@@ -163,7 +163,7 @@ public class SearchASTTest
     class CaseData {public final int count; public final String searchStr; CaseData(int c, String s) { count = c; searchStr = s; }}
     var validCaseInputs = new HashMap<Integer, CaseData>();
     // Test basic types and operators
-    validCaseInputs.put( 1,new CaseData(1, "name = " + sys0Name)); // 1 has specific name
+    validCaseInputs.put( 1,new CaseData(1, "id = " + sys0Name)); // 1 has specific name
 //    validCaseInputs.put( 2,new CaseData(1, "description = " + sys0.getDescription())); // TODO handle underscore character properly. how?
     validCaseInputs.put( 3,new CaseData(1, "host = " + sys0.getHost()));
     validCaseInputs.put( 4,new CaseData(1, "bucket_name = " + sys0.getBucketName()));
@@ -171,15 +171,15 @@ public class SearchASTTest
     validCaseInputs.put( 6,new CaseData(1, "job_working_dir = " + sys0.getJobWorkingDir()));
     validCaseInputs.put( 7,new CaseData(1, "batch_scheduler = " + sys0.getBatchScheduler()));
     validCaseInputs.put( 8,new CaseData(1, "batch_default_logical_queue = " + sys0.getBatchDefaultLogicalQueue()));
-    validCaseInputs.put(10,new CaseData(numSystems/2, "name LIKE " + sysNameLikeAll + " AND owner = " + sq(ownerUser1)));  // Half owned by one user
-    validCaseInputs.put(11,new CaseData(numSystems/2, "name LIKE " + sysNameLikeAll + " AND owner = " + sq(ownerUser2))); // and half owned by another
-    validCaseInputs.put(12,new CaseData(numSystems, "name LIKE " + sysNameLikeAll + " AND enabled = true"));  // All are enabled
-    validCaseInputs.put(13,new CaseData(numSystems, "name LIKE " + sysNameLikeAll + " AND deleted = false")); // none are deleted
-    validCaseInputs.put(14,new CaseData(numSystems, "name LIKE " + sysNameLikeAll + " AND deleted <> true")); // none are deleted
-    validCaseInputs.put(15,new CaseData(0, "name LIKE " + sysNameLikeAll + " AND deleted = true"));           // none are deleted
-    validCaseInputs.put(16,new CaseData(1, "name LIKE " + sq(sys0Name)));
-    validCaseInputs.put(17,new CaseData(0, "name LIKE 'NOSUCHSYSTEMxFM2c29bc8RpKWeE2sht7aZrJzQf3s'"));
-    validCaseInputs.put(18,new CaseData(numSystems, "name LIKE " + sysNameLikeAll));
+    validCaseInputs.put(10,new CaseData(numSystems/2, "id LIKE " + sysNameLikeAll + " AND owner = " + sq(ownerUser1)));  // Half owned by one user
+    validCaseInputs.put(11,new CaseData(numSystems/2, "id LIKE " + sysNameLikeAll + " AND owner = " + sq(ownerUser2))); // and half owned by another
+    validCaseInputs.put(12,new CaseData(numSystems, "id LIKE " + sysNameLikeAll + " AND enabled = true"));  // All are enabled
+    validCaseInputs.put(13,new CaseData(numSystems, "id LIKE " + sysNameLikeAll + " AND deleted = false")); // none are deleted
+    validCaseInputs.put(14,new CaseData(numSystems, "id LIKE " + sysNameLikeAll + " AND deleted <> true")); // none are deleted
+    validCaseInputs.put(15,new CaseData(0, "id LIKE " + sysNameLikeAll + " AND deleted = true"));           // none are deleted
+    validCaseInputs.put(16,new CaseData(1, "id LIKE " + sq(sys0Name)));
+    validCaseInputs.put(17,new CaseData(0, "id LIKE 'NOSUCHSYSTEMxFM2c29bc8RpKWeE2sht7aZrJzQf3s'"));
+    validCaseInputs.put(18,new CaseData(numSystems, "id LIKE " + sysNameLikeAll));
 
     // TODO Add more test cases, see SearchASTDaoTest in tapis-java
 

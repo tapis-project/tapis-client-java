@@ -27,7 +27,7 @@ public class TokensClientTest
   private static final String TAPIS_ENV_SVC_URL_TOKENS = "TAPIS_SVC_URL_TOKENS";
 
   // Test data
-  private static final String tenantName = "master";
+  private static final String tenantName = "admin";
   private static final String userName = "testuser1";
   private static final String serviceName = "systems";
   private static final String servicePassword = "S4nUNjL6JCwmCw3QQWR7Lyx1J/ayV6BEnAwTBi5sJ8E=";

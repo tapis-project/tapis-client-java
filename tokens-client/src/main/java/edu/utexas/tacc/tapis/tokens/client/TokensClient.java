@@ -11,7 +11,6 @@ import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.tokens.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.tokens.client.gen.ApiException;
-import edu.utexas.tacc.tapis.tokens.client.gen.Configuration;
 import edu.utexas.tacc.tapis.tokens.client.gen.api.TokensApi;
 import edu.utexas.tacc.tapis.tokens.client.gen.model.InlineObject1;
 import edu.utexas.tacc.tapis.tokens.client.gen.model.NewTokenResponse;
@@ -172,8 +171,7 @@ public class TokensClient
       // Make the call and return the result
       Map resp = null;
       try { 
-          var tokApi = new TokensApi();
-          resp = (Map) tokApi.refreshToken(parms); 
+          resp = (Map) tokensApi.refreshToken(parms);
       }
       catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
       catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }

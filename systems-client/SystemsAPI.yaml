@@ -1126,8 +1126,10 @@ components:
           type: string
         dtnMountPoint:
           type: string
-        dtnSubDir:
+        dtnMountSourcePath:
           type: string
+        isDtn:
+          type: boolean
         canExec:
           type: boolean
         jobWorkingDir:
@@ -1199,8 +1201,6 @@ components:
             - CONTAINER
             - MISC
             - CUSTOM
-        subcategory:
-          type: string
         name:
           type: string
         datatype:
@@ -1294,8 +1294,10 @@ components:
           type: string
         dtnMountPoint:
           type: string
-        dtnSubDir:
+        dtnMountSourcePath:
           type: string
+        isDtn:
+          type: boolean
         canExec:
           type: boolean
         jobWorkingDir:

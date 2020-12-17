@@ -60,7 +60,7 @@ public final class Utils
   public static final String adminUser = testUser9;
   public static final String ownerUser1 = testUser1;
   public static final String ownerUser2 = testUser2;
-  public static final String masterTenantName = "master";
+  public static final String adminTenantName = "admin";
   public static final String filesSvcName = "files";
   public static final String sysType = ReqCreateSystem.SystemTypeEnum.LINUX.name();
   // TAPIS_BASE_URL_SUFFIX should be set according to the dev, staging or prod environment
@@ -118,7 +118,6 @@ public final class Utils
   public static final SystemsClient.AuthnMethod prot1AuthnMethod = SystemsClient.AuthnMethod.PKI_KEYS;
   public static final SystemsClient.AuthnMethod prot2AuthnMethod = SystemsClient.AuthnMethod.ACCESS_KEY;
   public static final boolean canExec = true;
-  // TODO: Finish init for jobEnvVariables
   public static final KeyValueString kv1 = new KeyValueString().key("a").value("b");
   public static final KeyValueString kv2 = new KeyValueString().key("HOME").value("/home/testuser2");
   public static final KeyValueString kv3 = new KeyValueString().key("TMP").value("/tmp");
@@ -144,20 +143,20 @@ public final class Utils
 
   private static final int precedence = 100;
   private static final String subcategory = "";
-  private static final Capability capA1 = SystemsClient.buildCapability(CategoryEnum.SCHEDULER, subcategory,  "Type",
+  private static final Capability capA1 = SystemsClient.buildCapability(CategoryEnum.SCHEDULER, "Type",
                                                                         DatatypeEnum.STRING, precedence, "Slurm");
-  private static final Capability capB1 = SystemsClient.buildCapability(CategoryEnum.HARDWARE, subcategory, "CoresPerNode",
+  private static final Capability capB1 = SystemsClient.buildCapability(CategoryEnum.HARDWARE, "CoresPerNode",
                                                                         DatatypeEnum.INTEGER, precedence, "4");
-  private static final Capability capC1 = SystemsClient.buildCapability(CategoryEnum.SOFTWARE, subcategory, "OpenMP",
+  private static final Capability capC1 = SystemsClient.buildCapability(CategoryEnum.SOFTWARE, "OpenMP",
                                                                         DatatypeEnum.STRING, precedence,"4.5");
   public static final List<Capability> jobCaps1 = new ArrayList<>(List.of(capA1, capB1, capC1));
-  private static final Capability capA2 = SystemsClient.buildCapability(CategoryEnum.SCHEDULER, subcategory, "Type",
+  private static final Capability capA2 = SystemsClient.buildCapability(CategoryEnum.SCHEDULER, "Type",
                                                                         DatatypeEnum.STRING, precedence, "Condor");
-  private static final Capability capB2 = SystemsClient.buildCapability(CategoryEnum.HARDWARE, subcategory, "CoresPerNode",
+  private static final Capability capB2 = SystemsClient.buildCapability(CategoryEnum.HARDWARE, "CoresPerNode",
                                                                         DatatypeEnum.INTEGER, precedence, "128");
-  private static final Capability capC2 = SystemsClient.buildCapability(CategoryEnum.SOFTWARE, subcategory, "OpenMP",
+  private static final Capability capC2 = SystemsClient.buildCapability(CategoryEnum.SOFTWARE, "OpenMP",
                                                                         DatatypeEnum.STRING, precedence, "3.1");
-  private static final Capability capD2 = SystemsClient.buildCapability(CategoryEnum.CONTAINER, subcategory, "Singularity",
+  private static final Capability capD2 = SystemsClient.buildCapability(CategoryEnum.CONTAINER, "Singularity",
                                                                         DatatypeEnum.STRING, precedence, null);
   public static final List<Capability> jobCaps2 = new ArrayList<>(List.of(capA2, capB2, capC2, capD2));
   public static final boolean isDeleted = false;

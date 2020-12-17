@@ -76,7 +76,7 @@ public class FilesSvcTest
     var tokClient = new TokensClient(baseURL, filesSvcName, filesSvcPasswd);
     try {
       userJWT = authClient.getToken(ownerUser1, ownerUser1);
-      filesServiceJWT = tokClient.getSvcToken(masterTenantName, filesSvcName, DEFAULT_TARGET_SITE);
+      filesServiceJWT = tokClient.getSvcToken(adminTenantName, filesSvcName, DEFAULT_TARGET_SITE);
     } catch (Exception e) {
       throw new Exception("Exception while creating tokens or auth service", e);
     }
