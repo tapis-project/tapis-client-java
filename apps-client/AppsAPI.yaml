@@ -755,6 +755,12 @@ components:
           type: string
         enabled:
           type: boolean
+        containerRuntime:
+          type: string
+        containerRuntimeVersion:
+          type: string
+        containerImage:
+          type: string
         jobAttributes:
           $ref: '#/components/schemas/JobAttributes'
         maxJobs:
@@ -817,16 +823,14 @@ components:
           type: integer
         maxMinutes:
           type: integer
-    # --- FileInputSpec --------------------------------------------------------
-    FileInputSpec:
-      type: object
-      properties:
-        sourceUrl:
-          type: string
-        targetPath:
-          type: string
-        meta:
-          $ref: '#/components/schemas/ArgMetaSpec'
+        subscriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationSubscription'
+        tags:
+          type: array
+          items:
+            type: string
     # --- ParameterSet --------------------------------------------------------
     ParameterSet:
       type: object
@@ -858,6 +862,18 @@ components:
               type: array
               items:
                 type: string
+    # --- FileInputSpec --------------------------------------------------------
+    FileInputSpec:
+      type: object
+      properties:
+        sourceUrl:
+          type: string
+        targetPath:
+          type: string
+        inPlace:
+          type: boolean
+        meta:
+          $ref: '#/components/schemas/ArgMetaSpec'
     # --- ArgSpec --------------------------------------------------------------
     ArgSpec:
       type: object
@@ -871,6 +887,8 @@ components:
       type: object
       properties:
         name:
+          type: string
+        description:
           type: string
         required:
           type: boolean
@@ -886,6 +904,31 @@ components:
           type: string
         value:
           type: string
+    # --- NotificationSubscription -------------------------------------------
+    NotificationSubscription:
+      type: object
+      properties:
+        filter:
+          type: string
+        notificationMechanims:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationMechanism'
+    # --- NotificationMechanism -------------------------------------------
+    NotificationMechanism:
+      type: object
+      properties:
+        mechanism:
+          type: string
+          enum:
+            - WEBHOOK
+            - EMAIL
+            - QUEUE
+            - ACTOR
+        webhookURL:
+          type: string
+        emailAddress:
+          type: string
 
     # -------------------------------------------------------------------------
     # --- Request objects -----------------------------------------------------
@@ -893,6 +936,10 @@ components:
     ReqCreateApp:
       type: object
       properties:
+        id:
+          type: string
+        version:
+          type: string
         description:
           type: string
         appType:
@@ -904,12 +951,18 @@ components:
           type: string
         enabled:
           type: boolean
-        jobAttributes:
-          $ref: '#/components/schemas/JobAttributes'
+        containerRuntime:
+          type: string
+        containerRuntimeVersion:
+          type: string
+        containerImage:
+          type: string
         maxJobs:
           type: integer
         maxJobsPerUser:
           type: integer
+        jobAttributes:
+          $ref: '#/components/schemas/JobAttributes'
         tags:
           type: array
           items:
