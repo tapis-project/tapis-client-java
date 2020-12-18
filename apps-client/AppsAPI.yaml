@@ -761,12 +761,12 @@ components:
           type: string
         containerImage:
           type: string
-        jobAttributes:
-          $ref: '#/components/schemas/JobAttributes'
         maxJobs:
           type: integer
         maxJobsPerUser:
           type: integer
+        jobAttributes:
+          $ref: '#/components/schemas/JobAttributes'
         tags:
           type: array
           items:
