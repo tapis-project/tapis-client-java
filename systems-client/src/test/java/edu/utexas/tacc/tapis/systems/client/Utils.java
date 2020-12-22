@@ -26,13 +26,16 @@ import com.google.gson.JsonObject;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
-import edu.utexas.tacc.tapis.systems.client.gen.model.Capability.CategoryEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.Capability.DatatypeEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.CategoryEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.DatatypeEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.AuthnEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
-import edu.utexas.tacc.tapis.systems.client.gen.model.KeyValueString;
+import edu.utexas.tacc.tapis.systems.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SystemTypeEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.TransferMethodEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
@@ -62,7 +65,7 @@ public final class Utils
   public static final String ownerUser2 = testUser2;
   public static final String adminTenantName = "admin";
   public static final String filesSvcName = "files";
-  public static final String sysType = ReqCreateSystem.SystemTypeEnum.LINUX.name();
+  public static final String sysType = SystemTypeEnum.LINUX.name();
   // TAPIS_BASE_URL_SUFFIX should be set according to the dev, staging or prod environment
   // dev     -> develop.tapis.io
   // staging -> staging.tapis.io
@@ -107,21 +110,21 @@ public final class Utils
   public static final int defaultQMinutes = -1;
   public static final int defaultCapPrecedence = 100;
 
-  public static final List<ReqCreateSystem.TransferMethodsEnum> prot1TxfrMethodsC =
-          Arrays.asList(ReqCreateSystem.TransferMethodsEnum.SFTP, ReqCreateSystem.TransferMethodsEnum.S3);
-  public static final List<TSystem.TransferMethodsEnum> prot1TxfrMethodsT =
-          Arrays.asList(TSystem.TransferMethodsEnum.SFTP, TSystem.TransferMethodsEnum.S3);
-  public static final List<ReqUpdateSystem.TransferMethodsEnum> prot2TxfrMethodsU =
-          Collections.singletonList(ReqUpdateSystem.TransferMethodsEnum.SFTP);
-  public static final List<TSystem.TransferMethodsEnum> prot2TxfrMethodsT =
-          Collections.singletonList(TSystem.TransferMethodsEnum.SFTP);
+  public static final List<TransferMethodEnum> prot1TxfrMethodsC =
+          Arrays.asList(TransferMethodEnum.SFTP, TransferMethodEnum.S3);
+  public static final List<TransferMethodEnum> prot1TxfrMethodsT =
+          Arrays.asList(TransferMethodEnum.SFTP, TransferMethodEnum.S3);
+  public static final List<TransferMethodEnum> prot2TxfrMethodsU =
+          Collections.singletonList(TransferMethodEnum.SFTP);
+  public static final List<TransferMethodEnum> prot2TxfrMethodsT =
+          Collections.singletonList(TransferMethodEnum.SFTP);
   public static final SystemsClient.AuthnMethod prot1AuthnMethod = SystemsClient.AuthnMethod.PKI_KEYS;
   public static final SystemsClient.AuthnMethod prot2AuthnMethod = SystemsClient.AuthnMethod.ACCESS_KEY;
   public static final boolean canExec = true;
-  public static final KeyValueString kv1 = new KeyValueString().key("a").value("b");
-  public static final KeyValueString kv2 = new KeyValueString().key("HOME").value("/home/testuser2");
-  public static final KeyValueString kv3 = new KeyValueString().key("TMP").value("/tmp");
-  public static final List<KeyValueString> jobEnvVariables = new ArrayList<>(List.of(kv1,kv2,kv3));
+  public static final KeyValuePair kv1 = new KeyValuePair().key("a").value("b");
+  public static final KeyValuePair kv2 = new KeyValuePair().key("HOME").value("/home/testuser2");
+  public static final KeyValuePair kv3 = new KeyValuePair().key("TMP").value("/tmp");
+  public static final List<KeyValuePair> jobEnvVariables = new ArrayList<>(List.of(kv1,kv2,kv3));
   public static final boolean jobIsBatch = true;
   public static final int jobMaxJobs = -1;
   public static final int jobMaxJobsPerUser = -1;
@@ -242,7 +245,7 @@ public final class Utils
    * Make client call to create a system given most attributes for the system.
    */
   public static String createSystem(SystemsClient clt, String[] sys, int port, SystemsClient.AuthnMethod authnMethod, Credential credential,
-                             List<ReqCreateSystem.TransferMethodsEnum> txfrMethods)
+                             List<TransferMethodEnum> txfrMethods)
           throws TapisClientException
   {
     var accMethod = authnMethod != null ? authnMethod : prot1AuthnMethod;
@@ -250,12 +253,12 @@ public final class Utils
     ReqCreateSystem rSys = new ReqCreateSystem();
     rSys.setId(sys[1]);
     rSys.description(sys[2]);
-    rSys.setSystemType(ReqCreateSystem.SystemTypeEnum.valueOf(sys[3]));
+    rSys.setSystemType(SystemTypeEnum.valueOf(sys[3]));
     rSys.owner(sys[4]);
     rSys.setHost(sys[5]);
     rSys.enabled(true);
     rSys.effectiveUserId(sys[6]);
-    rSys.defaultAuthnMethod(ReqCreateSystem.DefaultAuthnMethodEnum.valueOf(accMethod.name()));
+    rSys.defaultAuthnMethod(AuthnEnum.valueOf(accMethod.name()));
     rSys.authnCredential(credential);
     rSys.bucketName(sys[8]);
     rSys.rootDir(sys[9]);
@@ -272,7 +275,7 @@ public final class Utils
     rSys.tags(tags1);
     rSys.notes(notes1JO);
     // Convert list of TransferMethod enums to list of strings
-//    List<String> transferMethods = Stream.of(txfrMethodsStrList).map(TransferMethodsEnum::name).collect(Collectors.toList());
+//    List<String> transferMethods = Stream.of(txfrMethodsStrList).map(TransferMethodEnum::name).collect(Collectors.toList());
     // Create the system
     return clt.createSystem(rSys);
   }
@@ -288,14 +291,14 @@ public final class Utils
     SystemsClient.AuthnMethod accMethod = prot1AuthnMethod;
     ReqCreateSystem rSys = new ReqCreateSystem();
     rSys.setId(sys[1]);
-    rSys.setSystemType(ReqCreateSystem.SystemTypeEnum.valueOf(sys[3]));
+    rSys.setSystemType(SystemTypeEnum.valueOf(sys[3]));
     rSys.setHost(sys[5]);
-    rSys.defaultAuthnMethod(ReqCreateSystem.DefaultAuthnMethodEnum.valueOf(accMethod.name()));
+    rSys.defaultAuthnMethod(AuthnEnum.valueOf(accMethod.name()));
     rSys.canExec(canExec);
     // If systemType is LINUX then rootDir is required
-    if (sys[3].equals(TSystem.SystemTypeEnum.LINUX.name())) rSys.rootDir(sys[9]);
+    if (sys[3].equals(SystemTypeEnum.LINUX.name())) rSys.rootDir(sys[9]);
     // If systemType is OBJECT_STORE then bucketName is required
-    if (sys[3].equals(TSystem.SystemTypeEnum.OBJECT_STORE.name())) rSys.bucketName(sys[8]);
+    if (sys[3].equals(SystemTypeEnum.OBJECT_STORE.name())) rSys.bucketName(sys[8]);
     return clt.createSystem(rSys);
   }
 
@@ -342,9 +345,9 @@ public final class Utils
     Assert.assertEquals(tmpSys.getProxyHost(), prot1ProxyHost);
     Assert.assertEquals(tmpSys.getProxyPort().intValue(), prot1ProxyPort);
     // Verify transfer methods
-    List<TSystem.TransferMethodsEnum> tMethodsList = tmpSys.getTransferMethods();
+    List<TransferMethodEnum> tMethodsList = tmpSys.getTransferMethods();
     Assert.assertNotNull(tMethodsList, "TransferMethods list should not be null");
-    for (TSystem.TransferMethodsEnum txfrMethod : prot1TxfrMethodsT)
+    for (TransferMethodEnum txfrMethod : prot1TxfrMethodsT)
     {
       Assert.assertTrue(tMethodsList.contains(txfrMethod), "List of transfer methods did not contain: " + txfrMethod.name());
     }
@@ -356,10 +359,10 @@ public final class Utils
     Assert.assertEquals(tmpSys.getBatchScheduler(), sys0[11]);
     Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), sys0[12]);
     // Verify jobEnvVariables
-    List<KeyValueString> tmpJobEnvVariables = tmpSys.getJobEnvVariables();
+    List<KeyValuePair> tmpJobEnvVariables = tmpSys.getJobEnvVariables();
     Assert.assertNotNull(tmpJobEnvVariables, "JobEnvVariables value was null");
     Assert.assertEquals(tmpJobEnvVariables.size(), jobEnvVariables.size(), "Wrong number of JobEnvVariables");
-    for (KeyValueString kv : jobEnvVariables)
+    for (KeyValuePair kv : jobEnvVariables)
     {
       // TODO
 //      Assert.assertTrue(tmpJobEnvVariables.contains(varStr));
@@ -428,10 +431,10 @@ public final class Utils
     Assert.assertEquals(tmpSys.getCanExec(), Boolean.valueOf(canExec));
 
     // If systemType is LINUX then rootDir is required
-    if (tmpSys.getSystemType() == TSystem.SystemTypeEnum.LINUX) Assert.assertEquals(tmpSys.getRootDir(), sys0[9]);
+    if (tmpSys.getSystemType() == SystemTypeEnum.LINUX) Assert.assertEquals(tmpSys.getRootDir(), sys0[9]);
     else Assert.assertEquals(tmpSys.getRootDir(), defaultRootDir);
     // If systemType is OBJECT_STORE then bucketName is required
-    if (tmpSys.getSystemType() == TSystem.SystemTypeEnum.OBJECT_STORE) Assert.assertEquals(tmpSys.getBucketName(), sys0[8]);
+    if (tmpSys.getSystemType() == SystemTypeEnum.OBJECT_STORE) Assert.assertEquals(tmpSys.getBucketName(), sys0[8]);
     else Assert.assertEquals(tmpSys.getBucketName(), defaultBucketName);
 
     // Verify optional attributes have been set to defaults

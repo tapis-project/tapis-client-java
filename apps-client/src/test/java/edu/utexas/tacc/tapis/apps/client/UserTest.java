@@ -165,7 +165,7 @@ public class UserTest
     System.out.println("Found item: " + app0[1]);
     Assert.assertEquals(tmpApp.getId(), app0[1]);
     Assert.assertEquals(tmpApp.getDescription(), app0[2]);
-    Assert.assertEquals(tmpApp.getAppType().name(), app0[3]);
+//    Assert.assertEquals(tmpApp.getAppType().name(), app0[3]);
     Assert.assertEquals(tmpApp.getOwner(), app0[4]);
 //    // Verify capabilities
 //    List<Capability> jobCaps = tmpApp.getJobCapabilities();
@@ -225,7 +225,7 @@ public class UserTest
       System.out.println("Found item: " + app0[1]);
       Assert.assertEquals(tmpApp.getId(), app0[1]);
       Assert.assertEquals(tmpApp.getDescription(), app0[2]);
-      Assert.assertEquals(tmpApp.getAppType().name(), app0[3]);
+//      Assert.assertEquals(tmpApp.getAppType().name(), app0[3]);
       Assert.assertEquals(tmpApp.getOwner(), app0[4]);
       // Verify capabilities
 //      List<Capability> jobCaps = tmpApp.getJobCapabilities();

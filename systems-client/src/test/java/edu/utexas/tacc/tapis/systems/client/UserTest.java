@@ -14,8 +14,10 @@ import org.testng.annotations.Test;
 
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
+import edu.utexas.tacc.tapis.systems.client.gen.model.AuthnEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
+import edu.utexas.tacc.tapis.systems.client.gen.model.TransferMethodEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
 import edu.utexas.tacc.tapis.systems.client.SystemsClient.AuthnMethod;
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
@@ -263,9 +265,9 @@ public class UserTest
       Assert.assertEquals(tmpSys.getProxyPort().intValue(), prot2ProxyPort);
       Assert.assertEquals(tmpSys.getDefaultAuthnMethod().name(), prot2AuthnMethod.name());
       // Verify transfer methods
-      List<TSystem.TransferMethodsEnum> tMethodsList = tmpSys.getTransferMethods();
+      List<TransferMethodEnum> tMethodsList = tmpSys.getTransferMethods();
       Assert.assertNotNull(tMethodsList, "TransferMethods list should not be null");
-      for (TSystem.TransferMethodsEnum txfrMethod : prot2TxfrMethodsT)
+      for (TransferMethodEnum txfrMethod : prot2TxfrMethodsT)
       {
         Assert.assertTrue(tMethodsList.contains(txfrMethod), "List of transfer methods did not contain: " + txfrMethod.name());
       }
@@ -448,7 +450,7 @@ public class UserTest
     pSys.host(sys[5]);
     pSys.enabled(false);
     pSys.effectiveUserId(sys[6]);
-    pSys.defaultAuthnMethod(ReqUpdateSystem.DefaultAuthnMethodEnum.valueOf(prot2AuthnMethod.name()));
+    pSys.defaultAuthnMethod(AuthnEnum.valueOf(prot2AuthnMethod.name()));
     pSys.transferMethods(prot2TxfrMethodsU);
     pSys.port(prot2Port).useProxy(prot2UseProxy).proxyHost(prot2ProxyHost).proxyPort(prot2ProxyPort);
     pSys.jobCapabilities(jobCaps2);

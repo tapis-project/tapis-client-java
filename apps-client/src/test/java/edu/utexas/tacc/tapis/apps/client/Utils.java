@@ -23,6 +23,7 @@ package edu.utexas.tacc.tapis.apps.client;
  */
 
 import com.google.gson.JsonObject;
+import edu.utexas.tacc.tapis.apps.client.gen.model.AppTypeEnum;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqCreateApp;
@@ -54,7 +55,7 @@ public final class Utils
   public static final String ownerUser2 = testUser2;
   public static final String adminTenantName = "admin";
   public static final String filesSvcName = "files";
-  public static final String appType = ReqCreateApp.AppTypeEnum.BATCH.name();
+  public static final String appType = AppTypeEnum.BATCH.name();
   // TAPIS_BASE_URL_SUFFIX should be set according to the dev, staging or prod environment
   // dev     -> develop.tapis.io
   // staging -> staging.tapis.io
@@ -161,7 +162,7 @@ public final class Utils
     String appVersion = app[2];
     ReqCreateApp rApp = new ReqCreateApp();
     rApp.description(app[3]);
-    rApp.setAppType(ReqCreateApp.AppTypeEnum.valueOf(app[4]));
+//    rApp.setAppType(AppTypeEnum.valueOf(app[4]));
     rApp.owner(app[5]);
     rApp.enabled(true);
 ///    rApp.jobCapabilities(jobCaps1);

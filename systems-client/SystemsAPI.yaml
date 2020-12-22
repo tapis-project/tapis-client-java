@@ -768,7 +768,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ReqCreateCredential'
+              $ref: '#/components/schemas/Credential'
       responses:
         '200':
           description: Credential updated.
@@ -1080,10 +1080,7 @@ components:
         description:
           type: string
         systemType:
-          type: string
-          enum:
-            - LINUX
-            - OBJECT_STORE
+          $ref: '#/components/schemas/SystemTypeEnum'
         owner:
           type: string
         host:
@@ -1093,12 +1090,7 @@ components:
         effectiveUserId:
           type: string
         defaultAuthnMethod:
-          type: string
-          enum:
-            - PASSWORD
-            - PKI_KEYS
-            - ACCESS_KEY
-            - CERT
+          $ref: '#/components/schemas/AuthnEnum'
         authnCredential:
           $ref: '#/components/schemas/Credential'
         bucketName:
@@ -1108,10 +1100,7 @@ components:
         transferMethods:
           type: array
           items:
-            type: string
-            enum:
-              - SFTP
-              - S3
+            $ref: '#/components/schemas/TransferMethodEnum'
         port:
           type: integer
           format: int32
@@ -1137,7 +1126,7 @@ components:
         jobEnvVariables:
           type: array
           items:
-            $ref: '#/components/schemas/KeyValueString'
+            $ref: '#/components/schemas/KeyValuePair'
         jobMaxJobs:
           type: integer
         jobMaxJobsPerUser:
@@ -1191,26 +1180,11 @@ components:
       type: object
       properties:
         category:
-          type: string
-          enum:
-            - SCHEDULER
-            - OS
-            - HARDWARE
-            - SOFTWARE
-            - JOB
-            - CONTAINER
-            - MISC
-            - CUSTOM
+          $ref: '#/components/schemas/CategoryEnum'
         name:
           type: string
         datatype:
-          type: string
-          enum:
-            - STRING
-            - INTEGER
-            - BOOLEAN
-            - NUMBER
-            - TIMESTAMP
+          $ref: '#/components/schemas/DatatypeEnum'
         precedence:
           type: integer
         value:
@@ -1230,8 +1204,8 @@ components:
           type: string
         certificate:
           type: string
-    # --- KeyValueString -------------------------------------------------------
-    KeyValueString:
+    # --- KeyValuePair -------------------------------------------------------
+    KeyValuePair:
       type: object
       properties:
         key:
@@ -1248,10 +1222,7 @@ components:
         description:
           type: string
         systemType:
-          type: string
-          enum:
-            - LINUX
-            - OBJECT_STORE
+          $ref: '#/components/schemas/SystemTypeEnum'
         owner:
           type: string
         host:
@@ -1261,12 +1232,7 @@ components:
         effectiveUserId:
           type: string
         defaultAuthnMethod:
-          type: string
-          enum:
-            - PASSWORD
-            - PKI_KEYS
-            - ACCESS_KEY
-            - CERT
+          $ref: '#/components/schemas/AuthnEnum'
         authnCredential:
           $ref: '#/components/schemas/Credential'
         bucketName:
@@ -1276,10 +1242,7 @@ components:
         transferMethods:
           type: array
           items:
-            type: string
-            enum:
-              - SFTP
-              - S3
+            $ref: '#/components/schemas/TransferMethodEnum'
         port:
           type: integer
           format: int32
@@ -1305,7 +1268,7 @@ components:
         jobEnvVariables:
           type: array
           items:
-            $ref: '#/components/schemas/KeyValueString'
+            $ref: '#/components/schemas/KeyValuePair'
         jobMaxJobs:
           type: integer
         jobMaxJobsPerUser:
@@ -1342,19 +1305,11 @@ components:
         effectiveUserId:
           type: string
         defaultAuthnMethod:
-          type: string
-          enum:
-            - PASSWORD
-            - PKI_KEYS
-            - ACCESS_KEY
-            - CERT
+          $ref: '#/components/schemas/AuthnEnum'
         transferMethods:
           type: array
           items:
-            type: string
-            enum:
-              - SFTP
-              - S3
+            $ref: '#/components/schemas/TransferMethodEnum'
         port:
           type: integer
           format: int32
@@ -1429,21 +1384,6 @@ components:
             type: string
         notes:
           type: object
-    ReqCreateCredential:
-      type: object
-      properties:
-        password:
-          type: string
-        privateKey:
-          type: string
-        publicKey:
-          type: string
-        accessKey:
-          type: string
-        accessSecret:
-          type: string
-        certificate:
-          type: string
     ReqPerms:
       type: object
       properties:
@@ -1596,3 +1536,40 @@ components:
           type: string
         result:
           $ref: '#/components/schemas/Credential'
+    # --- Enums ----------------------------------------------------
+    SystemTypeEnum:
+      type: string
+      enum:
+        - LINUX
+        - OBJECT_STORE
+    AuthnEnum:
+      type: string
+      enum:
+        - PASSWORD
+        - PKI_KEYS
+        - ACCESS_KEY
+        - CERT
+    TransferMethodEnum:
+      type: string
+      enum:
+        - SFTP
+        - S3
+    CategoryEnum:
+      type: string
+      enum:
+        - SCHEDULER
+        - OS
+        - HARDWARE
+        - SOFTWARE
+        - JOB
+        - CONTAINER
+        - MISC
+        - CUSTOM
+    DatatypeEnum:
+      type: string
+      enum:
+        - STRING
+        - INTEGER
+        - BOOLEAN
+        - NUMBER
+        - TIMESTAMP

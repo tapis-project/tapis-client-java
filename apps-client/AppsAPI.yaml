@@ -207,6 +207,12 @@ paths:
           description: Pretty print the response
           schema:
             type: boolean
+        - name: requireExecPerm
+          in: query
+          description: check for EXECUTE permission as well as READ permission.
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Success.
@@ -746,17 +752,12 @@ components:
           type: string
         description:
           type: string
-        appType:
-          type: string
-          enum:
-            - BATCH
-            - INTERACTIVE
         owner:
           type: string
         enabled:
           type: boolean
         containerRuntime:
-          type: string
+          $ref: '#/components/schemas/RuntimeEnum'
         containerRuntimeVersion:
           type: string
         containerImage:
@@ -811,10 +812,12 @@ components:
           type: boolean
         parameterSet:
           $ref: '#/components/schemas/ParameterSet'
-        fileInputs:
+        strictFileInputs:
+          type: boolean
+        fileInputDefinitions:
           type: array
           items:
-            $ref: '#/components/schemas/FileInputSpec'
+            $ref: '#/components/schemas/FileInputDefinition'
         nodeCount:
           type: integer
         coresPerNode:
@@ -850,7 +853,7 @@ components:
         envVariables:
           type: array
           items:
-            $ref: '#/components/schemas/KeyValueString'
+            $ref: '#/components/schemas/KeyValuePair'
         archiveFilter:
           type: object
           properties:
@@ -862,8 +865,8 @@ components:
               type: array
               items:
                 type: string
-    # --- FileInputSpec --------------------------------------------------------
-    FileInputSpec:
+    # --- FileInputDefinition --------------------------------------------------------
+    FileInputDefinition:
       type: object
       properties:
         sourceUrl:
@@ -892,12 +895,12 @@ components:
           type: string
         required:
           type: boolean
-        kv:
+        keyValuePairs:
           type: array
           items:
-            $ref: '#/components/schemas/KeyValueString'
-    # --- KeyValueString -------------------------------------------------------
-    KeyValueString:
+            $ref: '#/components/schemas/KeyValuePair'
+    # --- KeyValuePair -------------------------------------------------------
+    KeyValuePair:
       type: object
       properties:
         key:
@@ -910,7 +913,7 @@ components:
       properties:
         filter:
           type: string
-        notificationMechanims:
+        notificationMechanisms:
           type: array
           items:
             $ref: '#/components/schemas/NotificationMechanism'
@@ -919,12 +922,7 @@ components:
       type: object
       properties:
         mechanism:
-          type: string
-          enum:
-            - WEBHOOK
-            - EMAIL
-            - QUEUE
-            - ACTOR
+          $ref: '#/components/schemas/NotificationMechanismEnum'
         webhookURL:
           type: string
         emailAddress:
@@ -942,17 +940,12 @@ components:
           type: string
         description:
           type: string
-        appType:
-          type: string
-          enum:
-            - BATCH
-            - INTERACTIVE
         owner:
           type: string
         enabled:
           type: boolean
         containerRuntime:
-          type: string
+          $ref: '#/components/schemas/RuntimeEnum'
         containerRuntimeVersion:
           type: string
         containerImage:
@@ -972,6 +965,8 @@ components:
     ReqUpdateApp:
       type: object
       properties:
+        version:
+          type: string
         description:
           type: string
         enabled:
@@ -1086,3 +1081,23 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/App'
+    # -------------------------------------------------------------------------
+    # --- Enums ---------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    AppTypeEnum:
+      type: string
+      enum:
+        - BATCH
+        - INTERACTIVE
+    RuntimeEnum:
+      type: string
+      enum:
+        - SINGULARITY
+        - DOCKER
+    NotificationMechanismEnum:
+      type: string
+      enum:
+        - WEBHOOK
+        - EMAIL
+        - QUEUE
+        - ACTOR

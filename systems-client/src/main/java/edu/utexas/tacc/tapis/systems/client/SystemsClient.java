@@ -16,7 +16,6 @@ import edu.utexas.tacc.tapis.systems.client.gen.ApiException;
 import edu.utexas.tacc.tapis.systems.client.gen.api.CredentialsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.PermissionsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.SystemsApi;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
@@ -32,8 +31,8 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystemsSearch;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
-import edu.utexas.tacc.tapis.systems.client.gen.model.Capability.CategoryEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.Capability.DatatypeEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.CategoryEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.DatatypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
@@ -436,7 +435,7 @@ public class SystemsClient
    *
    * @throws TapisClientException - If api call throws an exception
    */
-  public void updateUserCredential(String systemId, String userName, ReqCreateCredential req) throws TapisClientException
+  public void updateUserCredential(String systemId, String userName, Credential req) throws TapisClientException
   {
     // Submit the request
     try { credsApi.createUserCredential(systemId, userName, req, false); }
