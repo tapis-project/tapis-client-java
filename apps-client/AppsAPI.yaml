@@ -754,8 +754,10 @@ components:
           type: string
         owner:
           type: string
+          default: "${apiUserId}"
         enabled:
           type: boolean
+          default: true
         containerRuntime:
           $ref: '#/components/schemas/RuntimeEnum'
         containerRuntimeVersion:
@@ -764,8 +766,13 @@ components:
           type: string
         maxJobs:
           type: integer
+          default: -1
         maxJobsPerUser:
           type: integer
+          default: -1
+        strictFileInputs:
+          type: boolean
+          default: false
         jobAttributes:
           $ref: '#/components/schemas/JobAttributes'
         tags:
@@ -790,6 +797,7 @@ components:
           type: string
         dynamicExecSystem:
           type: boolean
+          default: false
         execSystemConstraints:
           type: array
           items:
@@ -810,10 +818,9 @@ components:
           type: string
         archiveOnAppError:
           type: boolean
+          default: true
         parameterSet:
           $ref: '#/components/schemas/ParameterSet'
-        strictFileInputs:
-          type: boolean
         fileInputDefinitions:
           type: array
           items:
@@ -875,6 +882,7 @@ components:
           type: string
         inPlace:
           type: boolean
+          default: false
         meta:
           $ref: '#/components/schemas/ArgMetaSpec'
     # --- ArgSpec --------------------------------------------------------------

@@ -1083,12 +1083,15 @@ components:
           $ref: '#/components/schemas/SystemTypeEnum'
         owner:
           type: string
+          default: "${apiUserId}"
         host:
           type: string
         enabled:
           type: boolean
+          default: true
         effectiveUserId:
           type: string
+          default: "${apiUserId}"
         defaultAuthnMethod:
           $ref: '#/components/schemas/AuthnEnum'
         authnCredential:
@@ -1106,6 +1109,7 @@ components:
           format: int32
         useProxy:
           type: boolean
+          default: false
         proxyHost:
           type: string
         proxyPort:
@@ -1119,6 +1123,7 @@ components:
           type: string
         isDtn:
           type: boolean
+          default: false
         canExec:
           type: boolean
         jobWorkingDir:
@@ -1133,6 +1138,7 @@ components:
           type: integer
         jobIsBatch:
           type: boolean
+          default: false
         batchScheduler:
           type: string
         batchLogicalQueues:
