@@ -901,7 +901,7 @@ paths:
       tags:
         - Permissions
       summary: Create system user permissions
-      description: Create permissions in the Security Kernel for a user. Requester must be owner of the system. Permissions are READ, MODIFY or ALL.
+      description: Create permissions in the Security Kernel for a user. Requester must be owner of the system. Permissions are READ, MODIFY.
       operationId: grantUserPerms
       parameters:
         - name: systemId
@@ -957,7 +957,7 @@ paths:
       tags:
         - Permissions
       summary: Revoke system user permissions
-      description: Revoke permissions in the Security Kernel for a user. Requester must be owner of the system. Permissions are READ, MODIFY or ALL.
+      description: Revoke permissions in the Security Kernel for a user. Requester must be owner of the system. Permissions are READ, MODIFY.
       operationId: revokeUserPerms
       parameters:
         - name: systemId
@@ -1007,7 +1007,7 @@ paths:
       tags:
         - Permissions
       summary: Revoke system user permission
-      description: Revoke system user permission in the Security Kernel. Requester must be owner of the system. Permissions are READ, MODIFY or ALL.
+      description: Revoke system user permission in the Security Kernel. Requester must be owner of the system. Permissions are READ, MODIFY.
       operationId: revokeUserPerm
       parameters:
         - name: systemId
