@@ -139,10 +139,26 @@ public class MatchConstraintsTest
     Thread.sleep(500);
     createEnd = LocalDateTime.now(ZoneId.of(ZoneOffset.UTC.getId()));
   }
+
   @AfterSuite
   public void tearDown()
   {
-    // Currently no way to hard delete from client (by design)
+    System.out.println("****** Executing AfterSuite teardown method for class: " + this.getClass().getSimpleName());
+    SystemsClient sysClient = getClientUsr(serviceURL, ownerUser1JWT);
+    // Remove all objects created by tests, ignore any exceptions
+    // This is a soft delete but still should be done to clean up SK artifacts.
+    for (int i = 1; i <= numSystems; i++)
+    {
+      String systemId = systems.get(i)[1];
+      try
+      {
+        sysClient.deleteSystem(systemId);
+      }
+      catch (Exception e)
+      {
+        System.out.println("Caught exception when deleting system: "+ systemId + " Exception: " + e);
+      }
+    }
   }
 
   /*

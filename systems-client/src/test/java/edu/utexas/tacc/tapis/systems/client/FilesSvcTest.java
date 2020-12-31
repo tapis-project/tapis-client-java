@@ -84,6 +84,9 @@ public class FilesSvcTest
     if (StringUtils.isBlank(userJWT)) throw new Exception("Authn service returned invalid owner user JWT");
     if (StringUtils.isBlank(filesServiceJWT)) throw new Exception("Tokens service returned invalid files svc JWT");
 
+    // Cleanup anything leftover from previous failed run
+    tearDown();
+
     // Create all systems we will need acting as a user.
     sysClient = getClientUsr(serviceURL, userJWT);
     for (int i = 1; i <= numSystems; i++)
@@ -107,9 +110,26 @@ public class FilesSvcTest
 
     // Update client to be the files service. All tests will be run acting as the files service.
     sysClient = getClientFilesSvc(tenantName, ownerUser1, filesServiceJWT);
+  }
 
-    // Cleanup anything leftover from previous failed run
-    tearDown();
+  @AfterSuite
+  public void tearDown() {
+    System.out.println("****** Executing AfterSuite teardown method for class: " + this.getClass().getSimpleName());
+    sysClient = getClientUsr(serviceURL, userJWT);
+    // Remove all objects created by tests, ignore any exceptions
+    // This is a soft delete but still should be done to clean up SK artifacts.
+    for (int i = 1; i <= numSystems; i++)
+    {
+      String systemId = systems.get(i)[1];
+      try
+      {
+        sysClient.deleteSystem(systemId);
+      }
+      catch (Exception e)
+      {
+        System.out.println("Caught exception when deleting system: "+ systemId + " Exception: " + e);
+      }
+    }
   }
 
   /*
@@ -265,23 +285,6 @@ public class FilesSvcTest
 //      Assert.fail();
 //    }
 //  }
-
-  @AfterSuite
-  public void tearDown() {
-// Currently no way to hard delete from client (by design)
-//    System.out.println("****** Executing AfterSuite teardown method for class: " + this.getClass().getSimpleName());
-//    // TODO: Run SQL to hard delete objects
-//    //Remove all objects created by tests, ignore any exceptions
-//    for (int i = 0; i < numSystems; i++)
-//    {
-//      try
-//      {
-//        getClientUsr(serviceURL, ownerUserJWT).deleteSystem(systems.get(i)[1]);
-//      } catch (Exception e)
-//      {
-//      }
-//    }
-  }
 
   private SystemsClient getClientFilesSvc(String tenantName, String ownerUser, String filesServiceJWT)
   {

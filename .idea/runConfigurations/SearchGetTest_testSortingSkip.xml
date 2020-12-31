@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="FilesSvcTest.testGetSystem" type="TestNG" nameIsGenerated="true">
+  <configuration default="false" name="SearchGetTest.testSortingSkip" type="TestNG" nameIsGenerated="true">
     <module name="systems-client" />
     <useClassPathOnly />
     <extension name="coverage">
@@ -10,8 +10,8 @@
     </extension>
     <option name="SUITE_NAME" value="" />
     <option name="PACKAGE_NAME" value="edu.utexas.tacc.tapis.systems.client" />
-    <option name="MAIN_CLASS_NAME" value="edu.utexas.tacc.tapis.systems.client.FilesSvcTest" />
-    <option name="METHOD_NAME" value="testGetSystem" />
+    <option name="MAIN_CLASS_NAME" value="edu.utexas.tacc.tapis.systems.client.SearchGetTest" />
+    <option name="METHOD_NAME" value="testSortingSkip" />
     <option name="GROUP_NAME" value="" />
     <option name="TEST_OBJECT" value="METHOD" />
     <option name="PARAMETERS" value="" />
@@ -20,9 +20,6 @@
       <value defaultName="moduleWithDependencies" />
     </option>
     <option name="PROPERTIES_FILE" value="" />
-    <envs>
-      <env name="TAPIS_FILES_SERVICE_PASSWORD" value="yH9BjcnJ0XUuk3yTB9BAu8Jw" />
-    </envs>
     <properties />
     <listeners />
     <method v="2">

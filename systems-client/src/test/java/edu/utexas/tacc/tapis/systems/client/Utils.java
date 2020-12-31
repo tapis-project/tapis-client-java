@@ -60,6 +60,7 @@ public final class Utils
   public static final String testUser3 = "testuser3";
   public static final String testUser4 = "testuser4";
   public static final String testUser9 = "testuser9";
+  // testuser9 must be given role "$!tenant_admin"
   public static final String adminUser = testUser9;
   public static final String ownerUser1 = testUser1;
   public static final String ownerUser2 = testUser2;
