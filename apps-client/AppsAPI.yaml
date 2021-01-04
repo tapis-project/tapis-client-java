@@ -33,7 +33,7 @@ tags:
 paths:
 
   # --- Paths for /apps -----------------------------------------------------
-  '/v3/apps/healthcheck':
+  '/v3/apps/check/health':
     get:
       tags:
         - General
@@ -48,7 +48,7 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
         '500':
           description: Server error.
-  '/v3/apps/readycheck':
+  '/v3/apps/check/ready':
     get:
       tags:
         - General
@@ -101,6 +101,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+    post:
+      tags:
+        - Applications
+      summary: Create a new version of an application
+      description: Create an application using a request body. App id+version must be unique within tenant and can be composed of alphanumeric characters and the following special characters [-._~]. Id must begin with an alphabetic character and can be no more than 256 characters in length.'
+      operationId: createAppVersion
+      parameters:
+        - name: pretty
+          in: query
+          description: Pretty print the response
+          schema:
+            type: boolean
+      requestBody:
+        required: true
+        description: A JSON object specifying information for the app to be created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqCreateApp'
+      responses:
+        '201':
+          description: App created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '409':
+          description: App already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
         '500':
           description: Server error.
           content:
@@ -280,67 +330,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/v3/apps/{appId}/{version}':
-    post:
-      tags:
-        - Applications
-      summary: Create a new version of an application
-      description: Create an application using a request body. App id+version must be unique within tenant and can be composed of alphanumeric characters and the following special characters [-._~]. Id must begin with an alphabetic character and can be no more than 256 characters in length.'
-      operationId: createAppVersion
-      parameters:
-        - name: appId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          description: Pretty print the response
-          schema:
-            type: boolean
-      requestBody:
-        required: true
-        description: A JSON object specifying information for the app to be created.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqCreateApp'
-      responses:
-        '201':
-          description: App created.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespResourceUrl'
-        '400':
-          description: Input error. Invalid JSON.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '409':
-          description: App already exists.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespResourceUrl'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
+  '/v3/apps/{appId}/{appVersion}':
     get:
       tags:
         - Applications
@@ -353,7 +343,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: version
+        - name: appVersion
           in: path
           required: true
           schema:
@@ -363,12 +353,12 @@ paths:
           description: Pretty print the response
           schema:
             type: boolean
-        - name: requiredPerms
+        - name: requireExecPerm
           in: query
-          description: Comma separated list of permissions. Used to perform additional permissions check with one call. For example requiredPerms=EXECUTE. READ is always required.
+          description: check for EXECUTE permission as well as READ permission.
           schema:
-            type: string
-            default: 'READ'
+            type: boolean
+            default: false
       responses:
         '200':
           description: App found.
@@ -412,7 +402,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: version
+        - name: appVersion
           in: path
           required: true
           schema:
@@ -903,6 +893,7 @@ components:
           type: string
         required:
           type: boolean
+          default: false
         keyValuePairs:
           type: array
           items:

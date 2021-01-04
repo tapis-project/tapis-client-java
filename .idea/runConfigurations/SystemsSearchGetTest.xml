@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="SearchGetTest" type="TestNG" nameIsGenerated="true">
+  <configuration default="false" name="SystemsSearchGetTest" type="TestNG">
     <module name="systems-client" />
     <useClassPathOnly />
     <extension name="coverage">

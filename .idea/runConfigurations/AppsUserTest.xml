@@ -1,19 +1,18 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="UserTest.testGetSystem" type="TestNG" nameIsGenerated="true">
-    <module name="systems-client" />
+  <configuration default="false" name="AppsUserTest" type="TestNG">
+    <module name="apps-client" />
     <useClassPathOnly />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="edu.utexas.tacc.tapis.systems.client.*" />
+        <option name="PATTERN" value="edu.utexas.tacc.tapis.apps.client.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>
     <option name="SUITE_NAME" value="" />
-    <option name="PACKAGE_NAME" value="edu.utexas.tacc.tapis.systems.client" />
-    <option name="MAIN_CLASS_NAME" value="edu.utexas.tacc.tapis.systems.client.UserTest" />
-    <option name="METHOD_NAME" value="testGetSystem" />
+    <option name="PACKAGE_NAME" value="edu.utexas.tacc.tapis.apps.client" />
+    <option name="MAIN_CLASS_NAME" value="edu.utexas.tacc.tapis.apps.client.UserTest" />
     <option name="GROUP_NAME" value="" />
-    <option name="TEST_OBJECT" value="METHOD" />
+    <option name="TEST_OBJECT" value="CLASS" />
     <option name="PARAMETERS" value="" />
     <option name="OUTPUT_DIRECTORY" value="" />
     <option name="TEST_SEARCH_SCOPE">

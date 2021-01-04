@@ -40,8 +40,10 @@ public class AppsClient
   // Header key for JWT
   public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
 
-  // Default required permissions
-  public static final String DEFAULT_REQUIRED_PERMS = "READ";
+  // Defaults
+  public static final boolean DEFAULT_STRICT_FILE_INPUTS = false;
+  public static final boolean DEFAULT_FILE_INPUT_IN_PLACE = false;
+  public static final boolean DEFAULT_FILE_INPUT_META_REQUIRED = false;
 
   // ************************************************************************
   // *********************** Enums ******************************************
@@ -148,17 +150,15 @@ public class AppsClient
   /**
    * Create an app
    *
-   * @param id Id of the application
-   * @param version New version of the application
    * @param req Request body specifying attributes
    * @return url pointing to created resource
    * @throws TapisClientException - If api call throws an exception
    */
-  public String createApp(String id, String version, ReqCreateApp req) throws TapisClientException
+  public String createApp(ReqCreateApp req) throws TapisClientException
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
-    try { resp = appApi.createAppVersion(id, version, req, false); }
+    try { resp = appApi.createAppVersion(req, false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
@@ -202,36 +202,51 @@ public class AppsClient
   }
 
   /**
-   * Get an app using all supported parameters requiredPerms
+   * Get a specific version of an app using all supported parameters.
    *
-   * @param id Id of the application
-   * @param version Version of the application
-   * @param requiredPerms Additional permissions required. READ is always required.
+   * @param appId Id of the application
+   * @param appVersion Version of the application
+   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
    * @return The app or null if app not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public App getApp(String id, String version, String requiredPerms) throws TapisClientException
+  public App getApp(String appId, String appVersion, Boolean requireExecPerm) throws TapisClientException
   {
     RespApp resp = null;
-    String perms = DEFAULT_REQUIRED_PERMS;
-    if (!StringUtils.isBlank(requiredPerms)) perms = requiredPerms;
-    try {resp = appApi.getApp(id, version, false, perms); }
+    try {resp = appApi.getApp(appId, appVersion, false, requireExecPerm); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null) return resp.getResult(); else return null;
   }
 
   /**
-   * Get an app using default requiredPerms=READ
+   * Get a specific version of an app
    *
-   * @param id Id of the application
-   * @param version Version of the application
+   * @param appId Id of the application
+   * @param appVersion Version of the application
    * @return The app or null if app not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public App getApp(String id, String version) throws TapisClientException
+  public App getApp(String appId, String appVersion) throws TapisClientException
   {
-    return getApp(id, version, null);
+    return getApp(appId, appVersion, null);
+  }
+
+  /**
+   * Get all versions of an app using all supported parameters.
+   *
+   * @param appId Id of the application
+   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
+   * @return All versions of the app
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public List<App> getApp(String appId, Boolean requireExecPerm) throws TapisClientException
+  {
+    RespAppArray resp = null;
+    try { resp = appApi.getAppAllVersions(appId, false, requireExecPerm); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
   }
 
   /**

@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="SearchGetTest.testSortingSkip" type="TestNG" nameIsGenerated="true">
+  <configuration default="false" name="SystemsUserTest" type="TestNG">
     <module name="systems-client" />
     <useClassPathOnly />
     <extension name="coverage">
@@ -10,10 +10,9 @@
     </extension>
     <option name="SUITE_NAME" value="" />
     <option name="PACKAGE_NAME" value="edu.utexas.tacc.tapis.systems.client" />
-    <option name="MAIN_CLASS_NAME" value="edu.utexas.tacc.tapis.systems.client.SearchGetTest" />
-    <option name="METHOD_NAME" value="testSortingSkip" />
+    <option name="MAIN_CLASS_NAME" value="edu.utexas.tacc.tapis.systems.client.UserTest" />
     <option name="GROUP_NAME" value="" />
-    <option name="TEST_OBJECT" value="METHOD" />
+    <option name="TEST_OBJECT" value="CLASS" />
     <option name="PARAMETERS" value="" />
     <option name="OUTPUT_DIRECTORY" value="" />
     <option name="TEST_SEARCH_SCOPE">

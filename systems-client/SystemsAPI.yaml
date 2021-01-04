@@ -1170,6 +1170,8 @@ components:
       properties:
         name:
           type: string
+        hpcQueueName:
+          type: string
         maxJobs:
           type: integer
         maxJobsPerUser:

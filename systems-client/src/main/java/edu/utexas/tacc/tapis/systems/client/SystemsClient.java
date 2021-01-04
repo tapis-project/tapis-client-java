@@ -218,6 +218,7 @@ public class SystemsClient
    * @param systemId System systemId
    * @param returnCredentials - Include credentials in returned system object
    * @param authnMethod - Desired authn method used when fetching credentials, for default pass in null.
+   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */

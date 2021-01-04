@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 /*
- * Utilities and data for integration testing
+ * Utilities and data for testing
  */
 public final class Utils
 {
@@ -50,6 +50,7 @@ public final class Utils
   public static final String testUser3 = "testuser3";
   public static final String testUser4 = "testuser4";
   public static final String testUser9 = "testuser9";
+  // testuser9 must be given role "$!tenant_admin"
   public static final String adminUser = testUser9;
   public static final String ownerUser1 = testUser1;
   public static final String ownerUser2 = testUser2;
@@ -71,13 +72,15 @@ public final class Utils
   public static final String TAPIS_ENV_SVC_PORT = "TAPIS_SERVICE_PORT";
 
   public static final List<String> tags1 = Arrays.asList("value1", "value2", "a",
-          "a long tag with spaces and numbers (1 3 2) and special characters [_ $ - & * % @ + = ! ^ ? < > , . ( ) { } / \\ | ]. Backslashes must be escaped.");
+          "Long tag (1 3 2) special chars [_ $ - & * % @ + = ! ^ ? < > , . ( ) { } / \\ | ]. Backslashes must be escaped.");
   public static final List<String> tags2 = Arrays.asList("value3", "value4");
   public static final JsonObject notes1JO =
           ClientTapisGsonUtils.getGson().fromJson("{\"project\":\"myproj1\", \"testdata\":\"abc1\"}", JsonObject.class);
   public static final JsonObject notes2JO =
           ClientTapisGsonUtils.getGson().fromJson("{\"project\":\"myproj2\", \"testdata\":\"abc2\"}", JsonObject.class);
   public static final List<String> testPerms = new ArrayList<>(List.of("READ", "MODIFY"));
+  public static final List<String> testREADPerm = new ArrayList<>(List.of("READ"));
+  public static final List<String> testREAD_EXECUTEPerms = new ArrayList<>(List.of("READ", "EXECUTE"));
 
 //  private static final Capability capA1 = AppsClient.buildCapability(Capability.CategoryEnum.SCHEDULER, "Type", "Slurm");
 //  private static final Capability capB1 = AppsClient.buildCapability(Capability.CategoryEnum.HARDWARE, "CoresPerNode", "4");
@@ -100,7 +103,6 @@ public final class Utils
   // String for search involving an escaped comma in a list of values
   public static final String escapedCommaInListValue = "abc\\,def";
 
-
   /**
    * Create an array of App objects in memory
    * Names will be of format TestApp_K_NNN where K is the key and NNN runs from 000 to 999
@@ -116,9 +118,9 @@ public final class Utils
     {
       // Suffix which should be unique for each app within each integration test
       String suffix = key + "_" + String.format("%03d", i);
-      String name = appNamePrefix + "_" + suffix;
+      String appId = appNamePrefix + "_" + suffix;
       // Constructor initializes all attributes except for JobCapabilities
-      String[] app0 = {tenantName, name, appVersion, "description " + suffix, appType, ownerUser1};
+      String[] app0 = {tenantName, appId, appVersion, "description " + suffix, appType, ownerUser1};
       apps.put(i, app0);
     }
     return apps;
@@ -158,20 +160,17 @@ public final class Utils
   public static String createApp(AppsClient clt, String[] app)
           throws TapisClientException
   {
-    String appName = app[1];
-    String appVersion = app[2];
     ReqCreateApp rApp = new ReqCreateApp();
+    rApp.setId(app[1]);
+    rApp.setVersion(app[2]);
     rApp.description(app[3]);
 //    rApp.setAppType(AppTypeEnum.valueOf(app[4]));
     rApp.owner(app[5]);
     rApp.enabled(true);
-///    rApp.jobCapabilities(jobCaps1);
     rApp.tags(tags1);
     rApp.notes(notes1JO);
-    // Convert list of TransferMethod enums to list of strings
-//    List<String> transferMethods = Stream.of(txfrMethodsStrList).map(TransferMethodsEnum::name).collect(Collectors.toList());
     // Create the app
-    return clt.createApp(appName, appVersion, rApp);
+    return clt.createApp(rApp);
   }
   public static AppsClient getClientUsr(String serviceURL, String userJWT)
   {

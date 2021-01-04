@@ -86,7 +86,7 @@ public class UserTest
     // Cleanup anything leftover from previous failed run
     tearDown();
 
-    // Create user clients
+    // Create user client
     usrClient = getClientUsr(serviceURL, ownerUserJWT);
 
   }
@@ -106,7 +106,7 @@ public class UserTest
       }
       catch (Exception e)
       {
-        System.out.println("Caught exception when deleting system: "+ systemId + " Exception: " + e);
+        System.out.println("Caught exception when soft deleting system: "+ systemId + " Exception: " + e);
       }
     }
     // One system may have had owner changed so use new owner.

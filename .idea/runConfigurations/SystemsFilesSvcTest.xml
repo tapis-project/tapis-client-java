@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="UserTest.testCreateSystem" type="TestNG" nameIsGenerated="true">
+  <configuration default="false" name="SystemsFilesSvcTest" type="TestNG">
     <module name="systems-client" />
     <useClassPathOnly />
     <extension name="coverage">
@@ -10,16 +10,18 @@
     </extension>
     <option name="SUITE_NAME" value="" />
     <option name="PACKAGE_NAME" value="edu.utexas.tacc.tapis.systems.client" />
-    <option name="MAIN_CLASS_NAME" value="edu.utexas.tacc.tapis.systems.client.UserTest" />
-    <option name="METHOD_NAME" value="testCreateSystem" />
+    <option name="MAIN_CLASS_NAME" value="edu.utexas.tacc.tapis.systems.client.FilesSvcTest" />
     <option name="GROUP_NAME" value="" />
-    <option name="TEST_OBJECT" value="METHOD" />
+    <option name="TEST_OBJECT" value="CLASS" />
     <option name="PARAMETERS" value="" />
     <option name="OUTPUT_DIRECTORY" value="" />
     <option name="TEST_SEARCH_SCOPE">
       <value defaultName="moduleWithDependencies" />
     </option>
     <option name="PROPERTIES_FILE" value="" />
+    <envs>
+      <env name="TAPIS_FILES_SERVICE_PASSWORD" value="yH9BjcnJ0XUuk3yTB9BAu8Jw" />
+    </envs>
     <properties />
     <listeners />
     <method v="2">

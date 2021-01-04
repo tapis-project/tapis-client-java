@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="UserTest.testHealthAndReady" type="TestNG" nameIsGenerated="true">
+  <configuration default="false" name="SystemsMatchConstraintsTest" type="TestNG">
     <module name="systems-client" />
     <useClassPathOnly />
     <extension name="coverage">
@@ -10,10 +10,10 @@
     </extension>
     <option name="SUITE_NAME" value="" />
     <option name="PACKAGE_NAME" value="edu.utexas.tacc.tapis.systems.client" />
-    <option name="MAIN_CLASS_NAME" value="edu.utexas.tacc.tapis.systems.client.UserTest" />
-    <option name="METHOD_NAME" value="testHealthAndReady" />
+    <option name="MAIN_CLASS_NAME" value="edu.utexas.tacc.tapis.systems.client.MatchConstraintsTest" />
     <option name="GROUP_NAME" value="" />
-    <option name="TEST_OBJECT" value="METHOD" />
+    <option name="TEST_OBJECT" value="CLASS" />
+    <option name="VM_PARAMETERS" value="-ea -Dp6spy.config.modulelist=" />
     <option name="PARAMETERS" value="" />
     <option name="OUTPUT_DIRECTORY" value="" />
     <option name="TEST_SEARCH_SCOPE">

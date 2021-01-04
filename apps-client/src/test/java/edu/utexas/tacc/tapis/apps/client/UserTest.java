@@ -16,15 +16,13 @@ import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.apps.client.gen.model.App;
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
-import edu.utexas.tacc.tapis.tokens.client.TokensClient;
 
 import static edu.utexas.tacc.tapis.apps.client.Utils.*;
-import static edu.utexas.tacc.tapis.client.shared.Utils.*;
 
 /**
- * Test the Apps API client acting as a user calling the apps service.
+ * Test the Apps API client acting as a single specific user calling the apps service.
  *
- * See IntegrationUtils in this package for information on environment required to run the tests.
+ * See Utils in this package for information on environment required to run the tests.
  * 
  */
 @Test(groups={"integration"})
@@ -37,14 +35,20 @@ public class UserTest
   private static final String newOwnerUser = testUser3;
   private static final String newPermsUser = testUser4;
 
-  private String serviceURL, ownerUserJWT, newOwnerUserJWT, filesServiceJWT;
+  // Create a single static client. Must do it this way because headers are static and JWT is in the header.
+  // Updating client dynamically would give false sense of security since tests might be run in parallel and there
+  //   would be concurrency issues.
+  private static AppsClient usrClient;
+  private static String serviceURL;
+  private static String ownerUserJWT;
+  private static String newOwnerUserJWT;
 
   @BeforeSuite
   public void setUp() throws Exception {
     // Get the base URLs from the environment so the test can be used in environments other than dev
     System.out.println("****** Executing BeforeSuite setup method for class: " + this.getClass().getSimpleName());
     // Get files service password from env
-    String filesSvcPasswd = Utils.getFilesSvcPassword();
+//    String filesSvcPasswd = Utils.getFilesSvcPassword();
     // Set service port for apps service. Check for port set as env var
     // NOTE: This is ignored if TAPIS_ENV_SVC_URL_APPS is set
     String servicePort = Utils.getServicePort();
@@ -58,33 +62,69 @@ public class UserTest
     System.out.println("Using Tokens URL: " + baseURL);
     // Get short term user JWT from tokens service
     var authClient = new AuthClient(baseURL);
-    var tokClient = new TokensClient(baseURL, filesSvcName, filesSvcPasswd);
+//    var tokClient = new TokensClient(baseURL, filesSvcName, filesSvcPasswd);
     try {
       ownerUserJWT = authClient.getToken(ownerUser1, ownerUser1);
       newOwnerUserJWT = authClient.getToken(newOwnerUser, newOwnerUser);
-      filesServiceJWT = tokClient.getSvcToken(adminTenantName, filesSvcName, DEFAULT_TARGET_SITE);
+//      filesServiceJWT = tokClient.getSvcToken(adminTenantName, filesSvcName, DEFAULT_TARGET_SITE);
     } catch (Exception e) {
       throw new Exception("Exception while creating tokens or auth service", e);
     }
     // Basic check of JWTs
     if (StringUtils.isBlank(ownerUserJWT)) throw new Exception("Authn service returned invalid owner user JWT");
     if (StringUtils.isBlank(newOwnerUserJWT)) throw new Exception("Authn service returned invalid new owner user JWT");
-    if (StringUtils.isBlank(filesServiceJWT)) throw new Exception("Tokens service returned invalid files svc JWT");
+//    if (StringUtils.isBlank(filesServiceJWT)) throw new Exception("Tokens service returned invalid files svc JWT");
     // Cleanup anything leftover from previous failed run
     tearDown();
+
+    // Create user client
+    usrClient = getClientUsr(serviceURL, ownerUserJWT);
+
+  }
+
+  @AfterSuite
+  public void tearDown() {
+    System.out.println("****** Executing AfterSuite teardown method for class: " + this.getClass().getSimpleName());
+    usrClient = getClientUsr(serviceURL, ownerUserJWT);
+    // Remove all objects created by tests, ignore any exceptions
+    // This is a soft delete but still should be done to clean up SK artifacts.
+    for (int i = 1; i <= numApps; i++)
+    {
+      String appId = apps.get(i)[1];
+      try
+      {
+        usrClient.deleteApp(appId);
+      }
+      catch (Exception e)
+      {
+        System.out.println("Caught exception when soft deleting app: "+ appId + " Exception: " + e);
+      }
+    }
+//    // One app may have had owner changed so use new owner.
+//    String appId = apps.get(9)[1];
+//    usrClient = getClientUsr(serviceURL, newOwnerUserJWT);
+//    try
+//    {
+//      usrClient.deleteApp(appId);
+//    }
+//    catch (Exception e)
+//    {
+//      System.out.println("Caught exception when soft deleting app: "+ appId + " Exception: " + e);
+//    }
+    usrClient = getClientUsr(serviceURL, ownerUserJWT);
   }
 
   @Test
   public void testHealthAndReady() {
     try {
       System.out.println("Checking health status");
-      String status = getClientUsr(serviceURL, ownerUserJWT).checkHealth();
+      String status = usrClient.checkHealth();
       System.out.println("Health status: " + status);
       Assert.assertNotNull(status);
       Assert.assertFalse(StringUtils.isBlank(status), "Invalid response: " + status);
       Assert.assertEquals(status, "success", "Service failed health check");
       System.out.println("Checking ready status");
-      status = getClientUsr(serviceURL, ownerUserJWT).checkReady();
+      status = usrClient.checkReady();
       System.out.println("Ready status: " + status);
       Assert.assertNotNull(status);
       Assert.assertFalse(StringUtils.isBlank(status), "Invalid response: " + status);
@@ -101,7 +141,7 @@ public class UserTest
     String[] app0 = apps.get(1);
     System.out.println("Creating app with name: " + app0[1]);
     try {
-      String respUrl = Utils.createApp(getClientUsr(serviceURL, ownerUserJWT), app0);
+      String respUrl = Utils.createApp(usrClient, app0);
       System.out.println("Created app: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
@@ -119,13 +159,11 @@ public class UserTest
     String[] app0 = apps.get(14);
     System.out.println("Creating app with name: " + app0[1]);
     // Set optional attributes to null
-//    private static final String[] sysE = {tenantName, "CsysE", null, sysType, null, "hostE", null, null,
-//            null, null, null, null, null, null};
-    app0[2] = null; app0[4] = null; app0[6] = null; app0[7] = null; app0[9] = null;
-    app0[10] = null; app0[11] = null; app0[12] = null; app0[13] = null;
+//    String[] app0 = {tenantName, appId, appVersion, "description " + suffix, appType, ownerUser1};
+    app0[3] = null; app0[4] = null; app0[5] = null;
 
     try {
-      String respUrl = createApp(getClientUsr(serviceURL, ownerUserJWT), app0);
+      String respUrl = createApp(usrClient, app0);
       System.out.println("Created app: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
@@ -140,7 +178,7 @@ public class UserTest
     String[] app0 = apps.get(7);
     System.out.println("Creating app with name: " + app0[1]);
     try {
-      String respUrl = Utils.createApp(getClientUsr(serviceURL, ownerUserJWT), app0);
+      String respUrl = Utils.createApp(usrClient, app0);
       System.out.println("Created app: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
@@ -149,7 +187,7 @@ public class UserTest
     }
     // Now attempt to create it again, should throw exception
     System.out.println("Creating app with name: " + app0[1]);
-    Utils.createApp(getClientUsr(serviceURL, ownerUserJWT), app0);
+    Utils.createApp(usrClient, app0);
     Assert.fail("Exception should have been thrown");
   }
 
@@ -157,10 +195,10 @@ public class UserTest
   @Test
   public void testGetApp() throws Exception {
     String[] app0 = apps.get(2);
-    String respUrl = Utils.createApp(getClientUsr(serviceURL, ownerUserJWT), app0);
+    String respUrl = Utils.createApp(usrClient, app0);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
-    App tmpApp = getClientFilesSvc().getApp(app0[1], app0[2]);
+    App tmpApp = usrClient.getApp(app0[1], app0[2]);
     Assert.assertNotNull(tmpApp, "Failed to create item: " + app0[1]);
     System.out.println("Found item: " + app0[1]);
     Assert.assertEquals(tmpApp.getId(), app0[1]);
@@ -211,16 +249,16 @@ public class UserTest
     System.out.println("Creating and updating app with name: " + app0[1]);
     try {
       // Create a app
-      String respUrl = Utils.createApp(getClientUsr(serviceURL, ownerUserJWT), app0);
+      String respUrl = Utils.createApp(usrClient, app0);
       System.out.println("Created app: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
       // Update the app
-      respUrl = getClientUsr(serviceURL, ownerUserJWT).updateApp(app0[1], app0[2], rApp);
+      respUrl = usrClient.updateApp(app0[1], app0[2], rApp);
       System.out.println("Updated app: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
       // Verify attributes
       app0 = appF2;
-      App tmpApp = getClientUsr(serviceURL, ownerUserJWT).getApp(app0[1], app0[2]);
+      App tmpApp = usrClient.getApp(app0[1], app0[2]);
       Assert.assertNotNull(tmpApp, "Failed to create item: " + app0[1]);
       System.out.println("Found item: " + app0[1]);
       Assert.assertEquals(tmpApp.getId(), app0[1]);
@@ -265,11 +303,11 @@ public class UserTest
   public void testChangeOwner() throws Exception {
     // Create the app
     String[] app0 = apps.get(16);
-    String respUrl = Utils.createApp(getClientUsr(serviceURL, ownerUserJWT), app0);
+    String respUrl = Utils.createApp(usrClient, app0);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
-    App tmpApp = getClientUsr(serviceURL, ownerUserJWT).getApp(app0[1], app0[2]);
+    App tmpApp = usrClient.getApp(app0[1], app0[2]);
     Assert.assertNotNull(tmpApp, "Failed to create item: " + app0[1]);
-    getClientUsr(serviceURL, ownerUserJWT).changeAppOwner(app0[1], newOwnerUser);
+    usrClient.changeAppOwner(app0[1], newOwnerUser);
     // Now that owner has given away ownership we need to be newOwnerUser or admin to get the app
     tmpApp = Utils.getClientUsr(serviceURL, newOwnerUserJWT).getApp(app0[1], app0[2]);
     Assert.assertNotNull(tmpApp, "Unable to get app after change of owner. App: " + app0[1]);
@@ -281,14 +319,14 @@ public class UserTest
   public void testGetApps() throws Exception {
     // Create 2 apps
     String[] app0 = apps.get(3);
-    String respUrl = Utils.createApp(getClientUsr(serviceURL, ownerUserJWT), app0);
+    String respUrl = Utils.createApp(usrClient, app0);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     app0 = apps.get(4);
-    respUrl = Utils.createApp(getClientUsr(serviceURL, ownerUserJWT), app0);
+    respUrl = Utils.createApp(usrClient, app0);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Get list of all app names
-    List<App> appsList = getClientUsr(serviceURL, ownerUserJWT).getApps(null);
+    List<App> appsList = usrClient.getApps(null);
     Assert.assertNotNull(appsList);
     Assert.assertFalse(appsList.isEmpty());
     var appNames = new ArrayList<String>();
@@ -304,13 +342,13 @@ public class UserTest
   public void testDelete() throws Exception {
     // Create the app
     String[] app0 = apps.get(6);
-    String respUrl = Utils.createApp(getClientUsr(serviceURL, ownerUserJWT), app0);
+    String respUrl = Utils.createApp(usrClient, app0);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Delete the app
-    getClientUsr(serviceURL, ownerUserJWT).deleteApp(app0[1]);
+    usrClient.deleteApp(app0[1]);
     try {
-      App tmpApp2 = getClientUsr(serviceURL, ownerUserJWT).getApp(app0[1], app0[2]);
+      App tmpApp2 = usrClient.getApp(app0[1], app0[2]);
       Assert.fail("App not deleted. App name: " + app0[1]);
     } catch (TapisClientException e) {
       Assert.assertEquals(e.getCode(), 404);
@@ -324,14 +362,14 @@ public class UserTest
     // Create a app
     System.out.println("Creating app with name: " + app0[1]);
     try {
-      String respUrl = Utils.createApp(getClientUsr(serviceURL, ownerUserJWT), app0);
+      String respUrl = Utils.createApp(usrClient, app0);
       System.out.println("Created app: " + respUrl);
       System.out.println("Testing perms for user: " + newPermsUser);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
       // Create user perms for the app
-      getClientUsr(serviceURL, ownerUserJWT).grantUserPermissions(app0[1], newPermsUser, testPerms);
+      usrClient.grantUserPermissions(app0[1], newPermsUser, testPerms);
       // Get the app perms for the user and make sure permissions are there
-      List<String> userPerms = getClientUsr(serviceURL, ownerUserJWT).getAppPermissions(app0[1], newPermsUser);
+      List<String> userPerms = usrClient.getAppPermissions(app0[1], newPermsUser);
       Assert.assertNotNull(userPerms, "Null returned when retrieving perms.");
       for (String perm : userPerms) {
         System.out.println("After grant found user perm: " + perm);
@@ -341,9 +379,9 @@ public class UserTest
         if (!userPerms.contains(perm)) Assert.fail("User perms should contain permission: " + perm);
       }
       // Remove perms for the user
-      getClientUsr(serviceURL, ownerUserJWT).revokeUserPermissions(app0[1], newPermsUser, testPerms);
+      usrClient.revokeUserPermissions(app0[1], newPermsUser, testPerms);
       // Get the app perms for the user and make sure permissions are gone.
-      userPerms = getClientUsr(serviceURL, ownerUserJWT).getAppPermissions(app0[1], newPermsUser);
+      userPerms = usrClient.getAppPermissions(app0[1], newPermsUser);
       Assert.assertNotNull(userPerms, "Null returned when retrieving perms.");
       for (String perm : userPerms) {
         System.out.println("After revoke found user perm: " + perm);
@@ -357,23 +395,6 @@ public class UserTest
     }
   }
 
-  @AfterSuite
-  public void tearDown() {
-// Currently no way to hard delete from client (by design)
-//    System.out.println("****** Executing AfterSuite teardown method for class: " + this.getClass().getSimpleName());
-//    // TODO: Run SQL to hard delete objects
-//    //Remove all objects created by tests, ignore any exceptions
-//    for (int i = 0; i < numApps; i++)
-//    {
-//      try
-//      {
-//        getClientUsr(serviceURL, ownerUserJWT).deleteApp(apps.get(i)[1]);
-//      } catch (Exception e)
-//      {
-//      }
-//    }
-  }
-
   private static ReqUpdateApp createPatchApp(String[] app)
   {
     ReqUpdateApp pApp = new ReqUpdateApp();
@@ -385,13 +406,13 @@ public class UserTest
     return pApp;
   }
 
-  private AppsClient getClientFilesSvc()
-  {
-    // Create the client each time due to issue with setting different headers needed by svc vs usr client
-    AppsClient clt = new AppsClient(serviceURL, filesServiceJWT);
-    clt.addDefaultHeader("X-Tapis-User", ownerUser1);
-    clt.addDefaultHeader("X-Tapis-Tenant", tenantName);
-    return clt;
-  }
+//  private AppsClient getClientFilesSvc()
+//  {
+//    // Create the client each time due to issue with setting different headers needed by svc vs usr client
+//    AppsClient clt = new AppsClient(serviceURL, filesServiceJWT);
+//    clt.addDefaultHeader("X-Tapis-User", ownerUser1);
+//    clt.addDefaultHeader("X-Tapis-Tenant", tenantName);
+//    return clt;
+//  }
 }
 
