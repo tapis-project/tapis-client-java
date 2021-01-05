@@ -46,13 +46,6 @@ public class AppsClient
   public static final boolean DEFAULT_FILE_INPUT_META_REQUIRED = false;
 
   // ************************************************************************
-  // *********************** Enums ******************************************
-  // ************************************************************************
-  // Define AuthnMethod here to be used in place of the auto-generated model enum
-  //   because the auto-generated enum is named DefaultAuthnMethodEnum which is misleading.
-//  public enum AuthnMethod {PASSWORD, PKI_KEYS, ACCESS_KEY, CERT}
-
-  // ************************************************************************
   // *********************** Fields *****************************************
   // ************************************************************************
   // Response body serializer
@@ -202,6 +195,23 @@ public class AppsClient
   }
 
   /**
+   * Get latest version of an app.
+   *
+   * @param appId Id of the application
+   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
+   * @return Latest version of the app
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public App getAppLatestVersion(String appId, Boolean requireExecPerm) throws TapisClientException
+  {
+    RespApp resp = null;
+    try {resp = appApi.getAppLatestVersion(appId, false, requireExecPerm); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null) return resp.getResult(); else return null;
+  }
+
+  /**
    * Get a specific version of an app using all supported parameters.
    *
    * @param appId Id of the application
@@ -229,47 +239,33 @@ public class AppsClient
    */
   public App getApp(String appId, String appVersion) throws TapisClientException
   {
-    return getApp(appId, appVersion, null);
+    return getApp(appId, appVersion, Boolean.FALSE);
   }
 
   /**
-   * Get all versions of an app using all supported parameters.
-   *
-   * @param appId Id of the application
-   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
-   * @return All versions of the app
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public List<App> getApp(String appId, Boolean requireExecPerm) throws TapisClientException
-  {
-    RespAppArray resp = null;
-    try { resp = appApi.getAppAllVersions(appId, false, requireExecPerm); }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
-  }
-
-  /**
-   * Get all versions of all apps using search. For example search=(id.like.MyApp*)~(enabled.eq.true)
+   * Retrieve applications. Use search query parameters to limit results.
+   * For example search=(id.like.MyApp*)~(enabled.eq.true)
+   * TODO/TBD: By default latest version of each app is returned.
    *
    * @param searchStr Search string. Empty or null to return all apps.
-   * @return All versions of all apps accessible to the caller
+   * @return Apps accessible to the caller
    * @throws TapisClientException - If api call throws an exception
    */
   public List<App> getApps(String searchStr) throws TapisClientException
   {
     RespAppArray resp = null;
-    try { resp = appApi.getAllAppsAllVersions(false, searchStr); }
+    try { resp = appApi.getApps(false, searchStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
   }
 
   /**
-   * Get all versions of all apps using search based on an array of strings representing an SQL-like WHERE clause
+   * Get apps using search based on an array of strings representing an SQL-like WHERE clause
+   * TODO/TBD: By default latest version of each app is returned.
    *
    * @param req Request body specifying SQL-like search strings.
-   * @return All versions of all apps accessible to the caller
+   * @return Apps accessible to the caller
    * @throws TapisClientException - If api call throws an exception
    */
   public List<App> searchApps(ReqSearchApps req) throws TapisClientException

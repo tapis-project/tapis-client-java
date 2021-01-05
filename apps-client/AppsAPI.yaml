@@ -68,9 +68,9 @@ paths:
     get:
       tags:
         - Applications
-      summary: Retrieve all applications
-      description: Retrieve all versions of all applications. Use search and select query parameters to limit results.
-      operationId: getAllAppsAllVersions
+      summary: Retrieve applications.
+      description: Retrieve applications. Use search and select query parameters to limit results.
+      operationId: getApps
       parameters:
         - name: pretty
           in: query
@@ -161,7 +161,7 @@ paths:
     get:
       tags:
         - Applications
-      summary: Retrieve all versions of all applications matching search conditions specified as query parameters
+      summary: Retrieve applications matching search conditions specified as query parameters.
       description: Retrieve details for applications. Use query parameters to specify search conditions. For example ?owner.eq=jdoe&port.gt=1024
       operationId: searchAppsQueryParameters
       parameters:
@@ -198,7 +198,7 @@ paths:
     post:
       tags:
         - Applications
-      summary: Retrieve all versions of all applications matching search conditions
+      summary: Retrieve applications matching search conditions.
       description: Retrieve details for applications. Use request body to specify SQL-like search conditions.
       operationId: searchAppsRequestBody
       parameters:
@@ -243,9 +243,9 @@ paths:
     get:
       tags:
         - Applications
-      summary: Retrieve all versions of an application
-      description: Retrieve all versions of an application.
-      operationId: getAppAllVersions
+      summary: Retrieve latest version of an application
+      description: Retrieve latest version of an application.
+      operationId: getAppLatestVersion
       parameters:
         - name: appId
           in: path
@@ -265,11 +265,11 @@ paths:
             default: false
       responses:
         '200':
-          description: Success.
+          description: App found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RespAppArray'
+                $ref: '#/components/schemas/RespApp'
         '400':
           description: Input error.
           content:
@@ -278,6 +278,12 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
         '401':
           description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: App not found.
           content:
             application/json:
               schema:
@@ -558,7 +564,7 @@ paths:
       tags:
         - Permissions
       summary: Create application user permissions
-      description: Create permissions in the Security Kernel for a user. Requester must be owner. Permissions are READ, MODIFY, EXECUTE or ALL.
+      description: Create permissions in the Security Kernel for a user. Requester must be owner. Permissions are READ, MODIFY, EXECUTE.
       operationId: grantUserPerms
       parameters:
         - name: appId
@@ -614,7 +620,7 @@ paths:
       tags:
         - Permissions
       summary: Revoke app user permissions
-      description: Revoke permissions in the Security Kernel for a user. Requester must be owner. Permissions are READ, MODIFY, EXECUTE or ALL.
+      description: Revoke permissions in the Security Kernel for a user. Requester must be owner. Permissions are READ, MODIFY, EXECUTE.
       operationId: revokeUserPerms
       parameters:
         - name: appId
@@ -664,7 +670,7 @@ paths:
       tags:
         - Permissions
       summary: Revoke app user permission
-      description: Revoke user permission in the Security Kernel. Requester must be owner. Permissions are READ, MODIFY, EXECUTE or ALL.
+      description: Revoke user permission in the Security Kernel. Requester must be owner. Permissions are READ, MODIFY, EXECUTE.
       operationId: revokeUserPerm
       parameters:
         - name: appId
@@ -748,9 +754,9 @@ components:
         enabled:
           type: boolean
           default: true
-        containerRuntime:
+        runtime:
           $ref: '#/components/schemas/RuntimeEnum'
-        containerRuntimeVersion:
+        runtimeVersion:
           type: string
         containerImage:
           type: string
@@ -943,9 +949,9 @@ components:
           type: string
         enabled:
           type: boolean
-        containerRuntime:
+        runtime:
           $ref: '#/components/schemas/RuntimeEnum'
-        containerRuntimeVersion:
+        runtimeVersion:
           type: string
         containerImage:
           type: string
