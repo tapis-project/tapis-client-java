@@ -488,11 +488,12 @@ public class SystemsClient
   /**
    * Utility method to build a batch LogicalQueue
    */
-  public static LogicalQueue buildLogicalQueue(String name, int maxJobs, int maxJobsPerUser, int maxNodeCount,
+  public static LogicalQueue buildLogicalQueue(String name, String hpcQueueName, int maxJobs, int maxJobsPerUser, int maxNodeCount,
                                                int maxCoresPerNode, int maxMemoryMB, int maxMinutes)
   {
     var q = new LogicalQueue();
     q.setName(name);
+    q.setHpcQueueName(hpcQueueName);
     q.setMaxJobs(maxJobs);
     q.setMaxJobsPerUser(maxJobsPerUser);
     q.setMaxNodeCount(maxNodeCount);

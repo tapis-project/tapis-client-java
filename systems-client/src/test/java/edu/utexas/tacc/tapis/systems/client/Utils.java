@@ -130,8 +130,8 @@ public final class Utils
   public static final int jobMaxJobs = -1;
   public static final int jobMaxJobsPerUser = -1;
 
-  public static final LogicalQueue q1 = SystemsClient.buildLogicalQueue("logicalQueue1", 1, 1, 1, 1, 1, 1);
-  public static final LogicalQueue q2 = SystemsClient.buildLogicalQueue("logicalQueue2", 2, 2, 2, 2, 2, 2);
+  public static final LogicalQueue q1 = SystemsClient.buildLogicalQueue("logicalQ1", "hpcQ1", 1, 1, 1, 1, 1, 1);
+  public static final LogicalQueue q2 = SystemsClient.buildLogicalQueue("logicalQ2", "hpcQ2", 2, 2, 2, 2, 2, 2);
   public static final List<LogicalQueue> jobQueues1 = new ArrayList<>(List.of(q1, q2));
 
   public static final List<String> tags1 = Arrays.asList("value1", "value2", "a",
