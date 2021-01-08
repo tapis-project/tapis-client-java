@@ -300,7 +300,7 @@ public final class Utils
     jobAttrs.setCoresPerNode(coresPerNode);
     jobAttrs.setMemoryMB(memoryMb);
     jobAttrs.setMaxMinutes(maxMinutes);
-    jobAttrs.setNotificationSubscriptions(notifList1);
+    jobAttrs.setSubscriptions(notifList1);
     jobAttrs.setTags(jobTags);
     // === End Job Attributes
     rApp.setJobAttributes(jobAttrs);

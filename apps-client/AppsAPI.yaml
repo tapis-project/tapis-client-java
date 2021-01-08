@@ -831,7 +831,7 @@ components:
           type: integer
         maxMinutes:
           type: integer
-        notificationSubscriptions:
+        subscriptions:
           type: array
           items:
             $ref: '#/components/schemas/NotificationSubscription'
