@@ -2,18 +2,21 @@
 # Use mvn to run tests for the apps client
 #   against the apps service running either locally or in k8s
 #   and other services (tenants, sk, auth, tokens) running in DEV, STAGING, or PROD
+# The apps service must already be running.
 # NOTE: For safety, for now do not allow running against PROD
-# If requested use docker to start up the apps service locally using an image
-#   - image used is based on TAPIS_RUN_ENV, for example tapis/apps:dev
+# TODO If requested use docker to start up the apps service locally using an image
+# TODO   - image used is based on TAPIS_RUN_ENV, for example tapis/apps:dev
+#
 # Use mvn to run the apps-client integration tests.
 #
 # The Tapis environment we are running in must be set to one of: dev, staging, prod
-# It can be set using env var TAPIS_RUN_ENV or by passing in as first arg, but not both.
+# TODO It can be set using env var TAPIS_RUN_ENV or by passing in as first arg, but not both.
 #
-# To start up the apps service locally the following env variables must be set:
-#     TAPIS_DB_PASSWORD
-#     TAPIS_DB_JDBC_URL
-#     TAPIS_SERVICE_PASSWORD
+# TODO To start up the apps service locally the following env variables must be set:
+# TODO     TAPIS_DB_PASSWORD
+# TODO     TAPIS_DB_JDBC_URL
+# TODO     TAPIS_SERVICE_PASSWORD
+#
 # By default service listens on port 8080. To change it set
 #     TAPIS_SERVICE_PORT
 #
@@ -92,25 +95,25 @@ else
   exit 1
 fi
 
-# If running against local service make sure we have env vars required
-# Make sure we have the service password, db password and db URL
-if [ "$RUN_SVC" = "local" ]; then
-  if [ -z "$TAPIS_SERVICE_PASSWORD" ]; then
-    echo "ERROR: Please set env variable TAPIS_SERVICE_PASSWORD to the apps service password"
-    echo $USAGE1
-    exit 1
-  fi
-  if [ -z "$TAPIS_DB_PASSWORD" ]; then
-    echo "ERROR: Please set env variable TAPIS_DB_PASSWORD"
-    echo $USAGE1
-    exit 1
-  fi
-  if [ -z "$TAPIS_DB_JDBC_URL" ]; then
-    echo "ERROR: Please set env variable TAPIS_DB_JDBC_URL"
-    echo $USAGE1
-    exit 1
-  fi
-fi
+# TODO If running against local service make sure we have env vars required
+# TODO Make sure we have the service password, db password and db URL
+# TODO if [ "$RUN_SVC" = "local" ]; then
+# TODO  if [ -z "$TAPIS_SERVICE_PASSWORD" ]; then
+# TODO    echo "ERROR: Please set env variable TAPIS_SERVICE_PASSWORD to the apps service password"
+# TODO    echo $USAGE1
+# TODO    exit 1
+# TODO  fi
+# TODO  if [ -z "$TAPIS_DB_PASSWORD" ]; then
+# TODO    echo "ERROR: Please set env variable TAPIS_DB_PASSWORD"
+# TODO    echo $USAGE1
+# TODO    exit 1
+# TODO  fi
+# TODO  if [ -z "$TAPIS_DB_JDBC_URL" ]; then
+# TODO    echo "ERROR: Please set env variable TAPIS_DB_JDBC_URL"
+# TODO    echo $USAGE1
+# TODO    exit 1
+# TODO  fi
+# TODO fi
 
 # If running against k8s and not locally set an env
 #   var to let the client test program know. Default is
@@ -129,36 +132,36 @@ export PRG_PATH=$(pwd)
 echo "****** Running client tests for Apps service. Target service = $RUN_SVC, TAPIS_RUN_ENV = $RUN_ENV"
 
 # if requested start up the apps service locally
-if [ "$RUN_SVC" = "local" ]; then
- echo "Staring apps service locally"
- DOCK_RUN_ID=$(./docker_run_svc.sh "${RUN_ENV}")
- RET_CODE=$?
- if [ $RET_CODE -ne 0 ]; then
-   echo "======================================================================"
-   echo "Error starting Apps service locally."
-   echo "Exiting ..."
-   echo "======================================================================"
-   exit $RET_CODE
- fi
-
- echo "++++++++++++++++++++++++++++++++++++++++++++++++"
- echo "Docker container ID: $DOCK_RUN_ID"
- echo "++++++++++++++++++++++++++++++++++++++++++++++++"
- echo "Pausing 5 seconds to allow container to start ... "
- sleep 5
- echo "++++++++++++++++++++++++++++++++++++++++++++++++"
- echo "DOCKER PS"
- echo "++++++++++++++++++++++++++++++++++++++++++++++++"
- docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.RunningFor}}\t{{.Status}}\t{{.Ports}}"
- echo "++++++++++++++++++++++++++++++++++++++++++++++++"
- docker logs "$DOCK_RUN_ID"
- echo "++++++++++++++++++++++++++++++++++++++++++++++++"
- echo "Pausing 5 seconds to allow local service to start ... "
- sleep 5
- echo "++++++++++++++++++++++++++++++++++++++++++++++++"
- docker logs "$DOCK_RUN_ID"
- echo "++++++++++++++++++++++++++++++++++++++++++++++++"
-fi
+# TODO if [ "$RUN_SVC" = "local" ]; then
+# TODO  echo "Staring apps service locally"
+# TODO  DOCK_RUN_ID=$(./docker_run_svc.sh "${RUN_ENV}")
+# TODO  RET_CODE=$?
+# TODO  if [ $RET_CODE -ne 0 ]; then
+# TODO    echo "======================================================================"
+# TODO    echo "Error starting Apps service locally."
+# TODO    echo "Exiting ..."
+# TODO    echo "======================================================================"
+# TODO    exit $RET_CODE
+# TODO  fi
+# TODO 
+# TODO  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+# TODO  echo "Docker container ID: $DOCK_RUN_ID"
+# TODO  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+# TODO  echo "Pausing 5 seconds to allow container to start ... "
+# TODO  sleep 5
+# TODO  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+# TODO  echo "DOCKER PS"
+# TODO  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+# TODO  docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.RunningFor}}\t{{.Status}}\t{{.Ports}}"
+# TODO  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+# TODO  docker logs "$DOCK_RUN_ID"
+# TODO  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+# TODO  echo "Pausing 5 seconds to allow local service to start ... "
+# TODO  sleep 5
+# TODO  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+# TODO  docker logs "$DOCK_RUN_ID"
+# TODO  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+# TODO fi
 
 # Run the integration tests
 echo "Running client integration tests"
@@ -166,10 +169,10 @@ mvn verify -DskipIntegrationTests=false
 RET_CODE=$?
 
 # If local then stop local apps service
-if [ "$RUN_SVC" = "local" ]; then
- echo "Stopping local apps service using docker container ID: $DOCK_RUN_ID"
- docker stop "$DOCK_RUN_ID"
-fi
+# TODO if [ "$RUN_SVC" = "local" ]; then
+# TODO  echo "Stopping local apps service using docker container ID: $DOCK_RUN_ID"
+# TODO  docker stop "$DOCK_RUN_ID"
+# TODO fi
 
 if [ $RET_CODE -ne 0 ]; then
   echo "======================================================================"
@@ -179,8 +182,8 @@ if [ $RET_CODE -ne 0 ]; then
   exit $RET_CODE
 fi
 
-# If it is a local run then cleanup DB artifacts
-if [ "$RUN_SVC" = "local" ]; then
+# If it is a local run and we have required variables then cleanup DB artifacts
+if [ "$RUN_SVC" = "local" -a  -n "$TAPIS_DB_PASSWORD" -a -n "$TAPIS_DB_JDBC_URL" ]; then
  echo "Removing test artifacts from DB"
  ./delete_client_test_data.sh
 fi

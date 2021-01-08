@@ -203,7 +203,7 @@ public final class Utils
       // Constructor initializes all attributes except for JobCapabilities and Credential
       // String[] sys0 = 0=tenantName, 1=name, 2=description, 3=sysType, 4=ownerUser1, 5=host, 6=effUser, 7=password,
       //                 8=bucketName, 9=rootDir, 10=jobWorkingDir, 11=batchScheduler, 12=batchDefaultLogicalQueue
-      String[] sys0 = {tenantName, name, "description " + suffix, sysType, ownerUser1, "host"+suffix, "effUser"+suffix,
+      String[] sys0 = {tenantName, name, "description "+suffix, sysType, ownerUser1, "host"+suffix, "effUser"+suffix,
               "fakePassword"+suffix,"bucket"+suffix, "/root"+suffix, "jobWorkDir"+suffix, "batchScheduler"+suffix,
               "batchDefaultLogicalQueue"+suffix};
       systems.put(i, sys0);

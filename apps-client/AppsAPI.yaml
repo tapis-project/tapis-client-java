@@ -748,6 +748,8 @@ components:
           type: string
         description:
           type: string
+        appType:
+          $ref: '#/components/schemas/AppTypeEnum'
         owner:
           type: string
           default: "${apiUserId}"
@@ -829,7 +831,7 @@ components:
           type: integer
         maxMinutes:
           type: integer
-        subscriptions:
+        notificationSubscriptions:
           type: array
           items:
             $ref: '#/components/schemas/NotificationSubscription'
@@ -945,10 +947,14 @@ components:
           type: string
         description:
           type: string
+        appType:
+          $ref: '#/components/schemas/AppTypeEnum'
         owner:
           type: string
+          default: "${apiUserId}"
         enabled:
           type: boolean
+          default: true
         runtime:
           $ref: '#/components/schemas/RuntimeEnum'
         runtimeVersion:
@@ -957,8 +963,13 @@ components:
           type: string
         maxJobs:
           type: integer
+          default: -1
         maxJobsPerUser:
           type: integer
+          default: -1
+        strictFileInputs:
+          type: boolean
+          default: false
         jobAttributes:
           $ref: '#/components/schemas/JobAttributes'
         tags:
@@ -1093,7 +1104,7 @@ components:
       type: string
       enum:
         - BATCH
-        - INTERACTIVE
+        - FORK
     RuntimeEnum:
       type: string
       enum:

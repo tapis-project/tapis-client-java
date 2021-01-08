@@ -1126,6 +1126,10 @@ components:
           default: false
         canExec:
           type: boolean
+        jobRuntimes:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobRuntime'
         jobWorkingDir:
           type: string
         jobEnvVariables:
@@ -1164,6 +1168,13 @@ components:
         created:
           type: string
         updated:
+          type: string
+    JobRuntime:
+      type: object
+      properties:
+        runtimeType:
+          $ref: '#/components/schemas/RuntimeTypeEnum'
+        version:
           type: string
     LogicalQueue:
       type: object
@@ -1271,6 +1282,10 @@ components:
           type: boolean
         canExec:
           type: boolean
+        jobRuntimes:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobRuntime'
         jobWorkingDir:
           type: string
         jobEnvVariables:
@@ -1581,3 +1596,8 @@ components:
         - BOOLEAN
         - NUMBER
         - TIMESTAMP
+    RuntimeTypeEnum:
+      type: string
+      enum:
+        - DOCKER
+        - SINGULARITY

@@ -79,7 +79,6 @@ public class UserTest
 
     // Create user client
     usrClient = getClientUsr(serviceURL, ownerUserJWT);
-
   }
 
   @AfterSuite
@@ -192,6 +191,7 @@ public class UserTest
   }
 
   // Test retrieving a app by name.
+  //  String[] app0 = {tenantName, appId, appVersion, "description " + suffix, appType, ownerUser1};
   @Test
   public void testGetApp() throws Exception {
     String[] app0 = apps.get(2);
@@ -201,41 +201,7 @@ public class UserTest
     App tmpApp = usrClient.getApp(app0[1], app0[2]);
     Assert.assertNotNull(tmpApp, "Failed to create item: " + app0[1]);
     System.out.println("Found item: " + app0[1]);
-    Assert.assertEquals(tmpApp.getId(), app0[1]);
-    Assert.assertEquals(tmpApp.getDescription(), app0[2]);
-//    Assert.assertEquals(tmpApp.getAppType().name(), app0[3]);
-    Assert.assertEquals(tmpApp.getOwner(), app0[4]);
-//    // Verify capabilities
-//    List<Capability> jobCaps = tmpApp.getJobCapabilities();
-//    Assert.assertNotNull(jobCaps);
-//    Assert.assertEquals(jobCaps.size(), jobCaps1.size());
-//    var capNamesFound = new ArrayList<String>();
-//    for (Capability capFound : jobCaps) {capNamesFound.add(capFound.getName());}
-//    for (Capability capSeed : jobCaps1)
-//    {
-//      Assert.assertTrue(capNamesFound.contains(capSeed.getName()), "List of capabilities did not contain a capability named: " + capSeed.getName());
-//    }
-    // Verify tags
-    List<String> tmpTags = tmpApp.getTags();
-    Assert.assertNotNull(tmpTags, "Tags value was null");
-    Assert.assertEquals(tmpTags.size(), tags1.size(), "Wrong number of tags");
-    for (String tagStr : tags1)
-    {
-      Assert.assertTrue(tmpTags.contains(tagStr));
-      System.out.println("Found tag: " + tagStr);
-    }
-    // Verify notes
-    String tmpNotesStr = (String) tmpApp.getNotes();
-    System.out.println("Found notes: " + tmpNotesStr);
-    JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(tmpNotesStr, JsonObject.class);
-    Assert.assertNotNull(tmpNotes, "Fetched Notes should not be null");
-    JsonObject origNotes = notes1JO;
-    Assert.assertTrue(tmpNotes.has("project"));
-    String projStr = origNotes.get("project").getAsString();
-    Assert.assertEquals(tmpNotes.get("project").getAsString(), projStr);
-    Assert.assertTrue(tmpNotes.has("testdata"));
-    String testdataStr = origNotes.get("testdata").getAsString();
-    Assert.assertEquals(tmpNotes.get("testdata").getAsString(), testdataStr);
+    verifyAppAttributes(tmpApp, app0);
   }
 
   @Test

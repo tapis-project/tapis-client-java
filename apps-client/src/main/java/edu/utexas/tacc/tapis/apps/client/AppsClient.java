@@ -1,8 +1,13 @@
 package edu.utexas.tacc.tapis.apps.client;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import edu.utexas.tacc.tapis.apps.client.gen.api.GeneralApi;
+import edu.utexas.tacc.tapis.apps.client.gen.model.ArgMetaSpec;
+import edu.utexas.tacc.tapis.apps.client.gen.model.ArgSpec;
+import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespBasic;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespAppArray;
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +29,8 @@ import edu.utexas.tacc.tapis.apps.client.gen.model.RespNameArray;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespResourceUrl;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespApp;
 import edu.utexas.tacc.tapis.apps.client.gen.model.App;
+
+import javax.xml.crypto.dsig.keyinfo.KeyValue;
 
 /**
  * Class providing a convenient front-end to the automatically generated client code
@@ -377,20 +384,49 @@ public class AppsClient
   // --------------------------- Utility Methods ---------------------------
   // -----------------------------------------------------------------------
 
-//  /**
-//   * Utility method to build a Capability object given category, name and value
-//   */
-//  public static Capability buildCapability(CategoryEnum category, String name, String value)
-//  {
-//    var cap = new Capability();
-//    cap.setCategory(category);
-//    cap.setName(name);
-//    cap.setValue(value);
-//    return cap;
-//  }
+  /**
+   * Utility method to build an ArgSpec given value, metaName, metaRequired and metaKeyValuePairs
+   *
+   * @param value
+   * @param metaName
+   * @param metaDescription
+   * @param metaRequired
+   * @param metaKVPairs - List of Strings in the form key=value.
+   * @return a new ArgSpec object
+   */
+  public static ArgSpec buildArg(String value, String metaName, String metaDescription,
+                                 boolean metaRequired, List<String> metaKVPairs)
+  {
+    var arg = new ArgSpec();
+    var argMeta = new ArgMetaSpec();
+    var argMetaKVPairs = new ArrayList<KeyValuePair>();
+    List<String> argKVPairs = Collections.emptyList();
+    if (metaKVPairs != null) argKVPairs = metaKVPairs;
+    // Convert strings in the form key=value into KeyValuePair objects
+    for (String kvPairStr : argKVPairs)
+    {
+      argMetaKVPairs.add(kvPairFromString(kvPairStr));
+    }
+    argMeta.setName(metaName);
+    argMeta.setDescription(metaDescription);
+    argMeta.setRequired(metaRequired);
+    argMeta.setKeyValuePairs(argMetaKVPairs);
+    arg.setArg(value);
+    arg.setMeta(argMeta);
+    return arg;
+  }
 
   // ************************************************************************
   // *********************** Private Methods ********************************
   // ************************************************************************
-
+  public static KeyValuePair kvPairFromString(String s)
+  {
+    if (StringUtils.isBlank(s)) return new KeyValuePair().key("").value("");
+    int e1 = s.indexOf('=');
+    String k = s.substring(0, e1);
+    String v = "";
+    // Everything after "=" is the value
+    if (e1 > 0) v = s.substring(e1+1, s.length()-1);
+    return new KeyValuePair().key(k).value(v);
+  }
 }
