@@ -33,7 +33,7 @@ tags:
 paths:
 
   # --- Paths for /apps -----------------------------------------------------
-  '/v3/apps/healthcheck':
+  '/v3/apps/check/health':
     get:
       tags:
         - General
@@ -48,7 +48,7 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
         '500':
           description: Server error.
-  '/v3/apps/readycheck':
+  '/v3/apps/check/ready':
     get:
       tags:
         - General
@@ -68,9 +68,9 @@ paths:
     get:
       tags:
         - Applications
-      summary: Retrieve all applications
-      description: Retrieve all versions of all applications. Use search and select query parameters to limit results.
-      operationId: getAllAppsAllVersions
+      summary: Retrieve applications.
+      description: Retrieve applications. Use search and select query parameters to limit results.
+      operationId: getApps
       parameters:
         - name: pretty
           in: query
@@ -107,11 +107,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+    post:
+      tags:
+        - Applications
+      summary: Create a new version of an application
+      description: Create an application using a request body. App id+version must be unique within tenant and can be composed of alphanumeric characters and the following special characters [-._~]. Id must begin with an alphabetic character and can be no more than 256 characters in length.'
+      operationId: createAppVersion
+      parameters:
+        - name: pretty
+          in: query
+          description: Pretty print the response
+          schema:
+            type: boolean
+      requestBody:
+        required: true
+        description: A JSON object specifying information for the app to be created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqCreateApp'
+      responses:
+        '201':
+          description: App created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
+        '400':
+          description: Input error. Invalid JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '409':
+          description: App already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
   '/v3/apps/search/apps':
     get:
       tags:
         - Applications
-      summary: Retrieve all versions of all applications matching search conditions specified as query parameters
+      summary: Retrieve applications matching search conditions specified as query parameters.
       description: Retrieve details for applications. Use query parameters to specify search conditions. For example ?owner.eq=jdoe&port.gt=1024
       operationId: searchAppsQueryParameters
       parameters:
@@ -148,7 +198,7 @@ paths:
     post:
       tags:
         - Applications
-      summary: Retrieve all versions of all applications matching search conditions
+      summary: Retrieve applications matching search conditions.
       description: Retrieve details for applications. Use request body to specify SQL-like search conditions.
       operationId: searchAppsRequestBody
       parameters:
@@ -193,9 +243,9 @@ paths:
     get:
       tags:
         - Applications
-      summary: Retrieve all versions of an application
-      description: Retrieve all versions of an application.
-      operationId: getAppAllVersions
+      summary: Retrieve latest version of an application
+      description: Retrieve latest version of an application.
+      operationId: getAppLatestVersion
       parameters:
         - name: appId
           in: path
@@ -207,13 +257,19 @@ paths:
           description: Pretty print the response
           schema:
             type: boolean
+        - name: requireExecPerm
+          in: query
+          description: check for EXECUTE permission as well as READ permission.
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
-          description: Success.
+          description: App found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RespAppArray'
+                $ref: '#/components/schemas/RespApp'
         '400':
           description: Input error.
           content:
@@ -222,6 +278,12 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
         '401':
           description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: App not found.
           content:
             application/json:
               schema:
@@ -274,67 +336,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
-  '/v3/apps/{appId}/{version}':
-    post:
-      tags:
-        - Applications
-      summary: Create a new version of an application
-      description: Create an application using a request body. App id+version must be unique within tenant and can be composed of alphanumeric characters and the following special characters [-._~]. Id must begin with an alphabetic character and can be no more than 256 characters in length.'
-      operationId: createAppVersion
-      parameters:
-        - name: appId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          description: Pretty print the response
-          schema:
-            type: boolean
-      requestBody:
-        required: true
-        description: A JSON object specifying information for the app to be created.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqCreateApp'
-      responses:
-        '201':
-          description: App created.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespResourceUrl'
-        '400':
-          description: Input error. Invalid JSON.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '409':
-          description: App already exists.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespResourceUrl'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
+  '/v3/apps/{appId}/{appVersion}':
     get:
       tags:
         - Applications
@@ -347,7 +349,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: version
+        - name: appVersion
           in: path
           required: true
           schema:
@@ -357,12 +359,12 @@ paths:
           description: Pretty print the response
           schema:
             type: boolean
-        - name: requiredPerms
+        - name: requireExecPerm
           in: query
-          description: Comma separated list of permissions. Used to perform additional permissions check with one call. For example requiredPerms=EXECUTE. READ is always required.
+          description: check for EXECUTE permission as well as READ permission.
           schema:
-            type: string
-            default: 'READ'
+            type: boolean
+            default: false
       responses:
         '200':
           description: App found.
@@ -406,7 +408,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: version
+        - name: appVersion
           in: path
           required: true
           schema:
@@ -562,7 +564,7 @@ paths:
       tags:
         - Permissions
       summary: Create application user permissions
-      description: Create permissions in the Security Kernel for a user. Requester must be owner. Permissions are READ, MODIFY, EXECUTE or ALL.
+      description: Create permissions in the Security Kernel for a user. Requester must be owner. Permissions are READ, MODIFY, EXECUTE.
       operationId: grantUserPerms
       parameters:
         - name: appId
@@ -618,7 +620,7 @@ paths:
       tags:
         - Permissions
       summary: Revoke app user permissions
-      description: Revoke permissions in the Security Kernel for a user. Requester must be owner. Permissions are READ, MODIFY, EXECUTE or ALL.
+      description: Revoke permissions in the Security Kernel for a user. Requester must be owner. Permissions are READ, MODIFY, EXECUTE.
       operationId: revokeUserPerms
       parameters:
         - name: appId
@@ -668,7 +670,7 @@ paths:
       tags:
         - Permissions
       summary: Revoke app user permission
-      description: Revoke user permission in the Security Kernel. Requester must be owner. Permissions are READ, MODIFY, EXECUTE or ALL.
+      description: Revoke user permission in the Security Kernel. Requester must be owner. Permissions are READ, MODIFY, EXECUTE.
       operationId: revokeUserPerm
       parameters:
         - name: appId
@@ -747,26 +749,30 @@ components:
         description:
           type: string
         appType:
-          type: string
-          enum:
-            - BATCH
-            - INTERACTIVE
+          $ref: '#/components/schemas/AppTypeEnum'
         owner:
           type: string
+          default: "${apiUserId}"
         enabled:
           type: boolean
-        containerRuntime:
-          type: string
-        containerRuntimeVersion:
+          default: true
+        runtime:
+          $ref: '#/components/schemas/RuntimeEnum'
+        runtimeVersion:
           type: string
         containerImage:
           type: string
-        jobAttributes:
-          $ref: '#/components/schemas/JobAttributes'
         maxJobs:
           type: integer
+          default: -1
         maxJobsPerUser:
           type: integer
+          default: -1
+        strictFileInputs:
+          type: boolean
+          default: false
+        jobAttributes:
+          $ref: '#/components/schemas/JobAttributes'
         tags:
           type: array
           items:
@@ -789,6 +795,7 @@ components:
           type: string
         dynamicExecSystem:
           type: boolean
+          default: false
         execSystemConstraints:
           type: array
           items:
@@ -809,12 +816,13 @@ components:
           type: string
         archiveOnAppError:
           type: boolean
+          default: true
         parameterSet:
           $ref: '#/components/schemas/ParameterSet'
-        fileInputs:
+        fileInputDefinitions:
           type: array
           items:
-            $ref: '#/components/schemas/FileInputSpec'
+            $ref: '#/components/schemas/FileInputDefinition'
         nodeCount:
           type: integer
         coresPerNode:
@@ -850,7 +858,7 @@ components:
         envVariables:
           type: array
           items:
-            $ref: '#/components/schemas/KeyValueString'
+            $ref: '#/components/schemas/KeyValuePair'
         archiveFilter:
           type: object
           properties:
@@ -862,8 +870,8 @@ components:
               type: array
               items:
                 type: string
-    # --- FileInputSpec --------------------------------------------------------
-    FileInputSpec:
+    # --- FileInputDefinition --------------------------------------------------------
+    FileInputDefinition:
       type: object
       properties:
         sourceUrl:
@@ -872,6 +880,7 @@ components:
           type: string
         inPlace:
           type: boolean
+          default: false
         meta:
           $ref: '#/components/schemas/ArgMetaSpec'
     # --- ArgSpec --------------------------------------------------------------
@@ -892,12 +901,13 @@ components:
           type: string
         required:
           type: boolean
-        kv:
+          default: false
+        keyValuePairs:
           type: array
           items:
-            $ref: '#/components/schemas/KeyValueString'
-    # --- KeyValueString -------------------------------------------------------
-    KeyValueString:
+            $ref: '#/components/schemas/KeyValuePair'
+    # --- KeyValuePair -------------------------------------------------------
+    KeyValuePair:
       type: object
       properties:
         key:
@@ -910,7 +920,7 @@ components:
       properties:
         filter:
           type: string
-        notificationMechanims:
+        notificationMechanisms:
           type: array
           items:
             $ref: '#/components/schemas/NotificationMechanism'
@@ -919,12 +929,7 @@ components:
       type: object
       properties:
         mechanism:
-          type: string
-          enum:
-            - WEBHOOK
-            - EMAIL
-            - QUEUE
-            - ACTOR
+          $ref: '#/components/schemas/NotificationMechanismEnum'
         webhookURL:
           type: string
         emailAddress:
@@ -943,24 +948,28 @@ components:
         description:
           type: string
         appType:
-          type: string
-          enum:
-            - BATCH
-            - INTERACTIVE
+          $ref: '#/components/schemas/AppTypeEnum'
         owner:
           type: string
+          default: "${apiUserId}"
         enabled:
           type: boolean
-        containerRuntime:
-          type: string
-        containerRuntimeVersion:
+          default: true
+        runtime:
+          $ref: '#/components/schemas/RuntimeEnum'
+        runtimeVersion:
           type: string
         containerImage:
           type: string
         maxJobs:
           type: integer
+          default: -1
         maxJobsPerUser:
           type: integer
+          default: -1
+        strictFileInputs:
+          type: boolean
+          default: false
         jobAttributes:
           $ref: '#/components/schemas/JobAttributes'
         tags:
@@ -972,6 +981,8 @@ components:
     ReqUpdateApp:
       type: object
       properties:
+        version:
+          type: string
         description:
           type: string
         enabled:
@@ -1086,3 +1097,23 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/App'
+    # -------------------------------------------------------------------------
+    # --- Enums ---------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    AppTypeEnum:
+      type: string
+      enum:
+        - BATCH
+        - FORK
+    RuntimeEnum:
+      type: string
+      enum:
+        - SINGULARITY
+        - DOCKER
+    NotificationMechanismEnum:
+      type: string
+      enum:
+        - WEBHOOK
+        - EMAIL
+        - QUEUE
+        - ACTOR

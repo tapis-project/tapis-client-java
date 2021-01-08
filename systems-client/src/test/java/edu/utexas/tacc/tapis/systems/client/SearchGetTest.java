@@ -131,7 +131,8 @@ public class SearchGetTest
           // Vary port # for checking numeric relational searches
           Utils.createSystem(getClientUsr(serviceURL, ownerUser1JWT), sys0, port, prot1AuthnMethod, null, prot1TxfrMethodsC);
           tmpSys = getClientUsr(serviceURL, ownerUser1JWT).getSystem(sys0[1]);
-        } else
+        }
+        else
         {
           Utils.createSystem(getClientUsr(serviceURL, ownerUser2JWT), sys0, port, prot1AuthnMethod, null, prot1TxfrMethodsC);
           tmpSys = getClientUsr(serviceURL, ownerUser2JWT).getSystem(sys0[1]);
@@ -158,7 +159,29 @@ public class SearchGetTest
   @AfterSuite
   public void tearDown()
   {
-    // Currently no way to hard delete from client (by design)
+    System.out.println("****** Executing AfterSuite teardown method for class: " + this.getClass().getSimpleName());
+    // Remove all objects created by tests, ignore any exceptions
+    // This is a soft delete but still should be done to clean up SK artifacts.
+    for (int i = 1; i <= numSystems; i++)
+    {
+      String systemId = systems.get(i)[1];
+      if (i <= numSystems / 2)
+      {
+        try { getClientUsr(serviceURL, ownerUser1JWT).deleteSystem(systemId); }
+        catch (Exception e)
+        {
+          System.out.println("Caught exception when deleting system: " + systemId + " Exception: " + e);
+        }
+      }
+      else
+      {
+        try { getClientUsr(serviceURL, ownerUser2JWT).deleteSystem(systemId); }
+        catch (Exception e)
+        {
+          System.out.println("Caught exception when deleting system: " + systemId + " Exception: " + e);
+        }
+      }
+    }
   }
 
   /*

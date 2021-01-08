@@ -16,7 +16,7 @@
     </parent>
 
     <artifactId>tapis-client-java</artifactId>
-    <version>1.11.24-SNAPSHOT</version>
+    <version>1.11.28-SNAPSHOT</version>
 
     <name>Tapis Client</name>
     <description>Top level java client</description>
@@ -27,21 +27,6 @@
         <url>https://github.com/tapis-project/tapis-client-java</url>
         <tag>HEAD</tag>
     </scm>
-
-    <repositories>
-        <repository>
-            <id>tapis-local-snapshots</id>
-            <name>Local repo for snapshots</name>
-            <url>http://c002.rodeo.tacc.utexas.edu:32140/repository/maven-snapshots</url>
-            <releases>  <enabled>false</enabled> </releases>
-            <snapshots> <enabled>true</enabled>  </snapshots>
-        </repository>
-        <repository>
-            <id>tapis-local-releases</id>
-            <name>Local repo for releases</name>
-            <url>http://c002.rodeo.tacc.utexas.edu:32140/repository/maven-releases</url>
-        </repository>
-    </repositories>
 
     <!-- AVOID CIRCULAR DEPENDENCY WITH TAPIS-SHARED-JAVA -->
     <!--                                                  -->
@@ -98,6 +83,32 @@
             <artifactId>swagger-annotations</artifactId>
         </dependency>
     </dependencies>
+
+    <profiles>
+      <!-- Profile for building using TACC repositories -->
+      <profile>
+        <id>tacc</id>
+        <activation> <activeByDefault>true</activeByDefault> </activation>
+        <repositories>
+          <repository>
+            <id>tapis-local-snapshots</id>
+            <name>Local repo for snapshots</name>
+            <url>http://c002.rodeo.tacc.utexas.edu:30044/repository/maven-snapshots</url>
+            <releases>  <enabled>false</enabled> </releases>
+            <snapshots> <enabled>true</enabled>  </snapshots>
+          </repository>
+          <repository>
+            <id>tapis-local-releases</id>
+            <name>Local repo for releases</name>
+            <url>http://c002.rodeo.tacc.utexas.edu:30044/repository/maven-releases</url>
+          </repository>
+        </repositories>
+      </profile>
+      <!-- Profile for building without using TACC repositories -->
+      <profile>
+        <id>tacc-external</id>
+      </profile>
+    </profiles>
 
     <modules>
         <module>shared</module>

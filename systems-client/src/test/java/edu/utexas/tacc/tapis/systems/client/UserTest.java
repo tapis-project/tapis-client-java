@@ -14,8 +14,10 @@ import org.testng.annotations.Test;
 
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
+import edu.utexas.tacc.tapis.systems.client.gen.model.AuthnEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
+import edu.utexas.tacc.tapis.systems.client.gen.model.TransferMethodEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
 import edu.utexas.tacc.tapis.systems.client.SystemsClient.AuthnMethod;
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
@@ -50,6 +52,9 @@ public class UserTest
   // Updating client dynamically would give false sense of security since tests might be run in parallel and there
   //   would be concurrency issues.
   private static SystemsClient usrClient;
+  private static String serviceURL;
+  private static String ownerUserJWT;
+  private static String newOwnerUserJWT;
 
   @BeforeSuite
   public void setUp() throws Exception {
@@ -59,7 +64,7 @@ public class UserTest
     // NOTE: This is ignored if TAPIS_ENV_SVC_URL_SYSTEMS is set
     String servicePort = Utils.getServicePort();
     // Set base URL for systems service. Check for URL set as env var
-    String serviceURL = Utils.getServiceURL(servicePort);
+    serviceURL = Utils.getServiceURL(servicePort);
     // Get base URL suffix from env or from default
     String baseURL = Utils.getBaseURL();
     // Log URLs being used
@@ -68,8 +73,6 @@ public class UserTest
     System.out.println("Using Tokens URL: " + baseURL);
     // Get short term user JWT from tokens service
     var authClient = new AuthClient(baseURL);
-    String ownerUserJWT;
-    String newOwnerUserJWT;
     try {
       ownerUserJWT = authClient.getToken(ownerUser1, ownerUser1);
       newOwnerUserJWT = authClient.getToken(newOwnerUser, newOwnerUser);
@@ -80,11 +83,44 @@ public class UserTest
     if (StringUtils.isBlank(ownerUserJWT)) throw new Exception("Authn service returned invalid owner user JWT");
     if (StringUtils.isBlank(newOwnerUserJWT)) throw new Exception("Authn service returned invalid new owner user JWT");
 
-    // Create user clients
-    usrClient = getClientUsr(serviceURL, ownerUserJWT);
-
     // Cleanup anything leftover from previous failed run
     tearDown();
+
+    // Create user client
+    usrClient = getClientUsr(serviceURL, ownerUserJWT);
+
+  }
+
+  @AfterSuite
+  public void tearDown() {
+    System.out.println("****** Executing AfterSuite teardown method for class: " + this.getClass().getSimpleName());
+    usrClient = getClientUsr(serviceURL, ownerUserJWT);
+    // Remove all objects created by tests, ignore any exceptions
+    // This is a soft delete but still should be done to clean up SK artifacts.
+    for (int i = 1; i <= numSystems; i++)
+    {
+      String systemId = systems.get(i)[1];
+      try
+      {
+        usrClient.deleteSystem(systemId);
+      }
+      catch (Exception e)
+      {
+        System.out.println("Caught exception when soft deleting system: "+ systemId + " Exception: " + e);
+      }
+    }
+    // One system may have had owner changed so use new owner.
+    String systemId = systems.get(9)[1];
+    usrClient = getClientUsr(serviceURL, newOwnerUserJWT);
+    try
+    {
+      usrClient.deleteSystem(systemId);
+    }
+    catch (Exception e)
+    {
+      System.out.println("Caught exception when deleting system: "+ systemId + " Exception: " + e);
+    }
+    usrClient = getClientUsr(serviceURL, ownerUserJWT);
   }
 
   @Test
@@ -263,9 +299,9 @@ public class UserTest
       Assert.assertEquals(tmpSys.getProxyPort().intValue(), prot2ProxyPort);
       Assert.assertEquals(tmpSys.getDefaultAuthnMethod().name(), prot2AuthnMethod.name());
       // Verify transfer methods
-      List<TSystem.TransferMethodsEnum> tMethodsList = tmpSys.getTransferMethods();
+      List<TransferMethodEnum> tMethodsList = tmpSys.getTransferMethods();
       Assert.assertNotNull(tMethodsList, "TransferMethods list should not be null");
-      for (TSystem.TransferMethodsEnum txfrMethod : prot2TxfrMethodsT)
+      for (TransferMethodEnum txfrMethod : prot2TxfrMethodsT)
       {
         Assert.assertTrue(tMethodsList.contains(txfrMethod), "List of transfer methods did not contain: " + txfrMethod.name());
       }
@@ -424,23 +460,6 @@ public class UserTest
     }
   }
 
-  @AfterSuite
-  public void tearDown() {
-// Currently no way to hard delete from client (by design)
-//    System.out.println("****** Executing AfterSuite teardown method for class: " + this.getClass().getSimpleName());
-//    // TODO: Run SQL to hard delete objects
-//    //Remove all objects created by tests, ignore any exceptions
-//    for (int i = 0; i < numSystems; i++)
-//    {
-//      try
-//      {
-//        usrClientOwner.deleteSystem(systems.get(i)[1]);
-//      } catch (Exception e)
-//      {
-//      }
-//    }
-  }
-
   private static ReqUpdateSystem createPatchSystem(String[] sys)
   {
     ReqUpdateSystem pSys = new ReqUpdateSystem();
@@ -448,7 +467,7 @@ public class UserTest
     pSys.host(sys[5]);
     pSys.enabled(false);
     pSys.effectiveUserId(sys[6]);
-    pSys.defaultAuthnMethod(ReqUpdateSystem.DefaultAuthnMethodEnum.valueOf(prot2AuthnMethod.name()));
+    pSys.defaultAuthnMethod(AuthnEnum.valueOf(prot2AuthnMethod.name()));
     pSys.transferMethods(prot2TxfrMethodsU);
     pSys.port(prot2Port).useProxy(prot2UseProxy).proxyHost(prot2ProxyHost).proxyPort(prot2ProxyPort);
     pSys.jobCapabilities(jobCaps2);

@@ -1,8 +1,13 @@
 package edu.utexas.tacc.tapis.apps.client;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import edu.utexas.tacc.tapis.apps.client.gen.api.GeneralApi;
+import edu.utexas.tacc.tapis.apps.client.gen.model.ArgMetaSpec;
+import edu.utexas.tacc.tapis.apps.client.gen.model.ArgSpec;
+import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespBasic;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespAppArray;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +30,8 @@ import edu.utexas.tacc.tapis.apps.client.gen.model.RespResourceUrl;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespApp;
 import edu.utexas.tacc.tapis.apps.client.gen.model.App;
 
+import javax.xml.crypto.dsig.keyinfo.KeyValue;
+
 /**
  * Class providing a convenient front-end to the automatically generated client code
  * for the Apps Service REST API.
@@ -40,15 +47,10 @@ public class AppsClient
   // Header key for JWT
   public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
 
-  // Default required permissions
-  public static final String DEFAULT_REQUIRED_PERMS = "READ";
-
-  // ************************************************************************
-  // *********************** Enums ******************************************
-  // ************************************************************************
-  // Define AuthnMethod here to be used in place of the auto-generated model enum
-  //   because the auto-generated enum is named DefaultAuthnMethodEnum which is misleading.
-//  public enum AuthnMethod {PASSWORD, PKI_KEYS, ACCESS_KEY, CERT}
+  // Defaults
+  public static final boolean DEFAULT_STRICT_FILE_INPUTS = false;
+  public static final boolean DEFAULT_FILE_INPUT_IN_PLACE = false;
+  public static final boolean DEFAULT_FILE_INPUT_META_REQUIRED = false;
 
   // ************************************************************************
   // *********************** Fields *****************************************
@@ -148,17 +150,15 @@ public class AppsClient
   /**
    * Create an app
    *
-   * @param id Id of the application
-   * @param version New version of the application
    * @param req Request body specifying attributes
    * @return url pointing to created resource
    * @throws TapisClientException - If api call throws an exception
    */
-  public String createApp(String id, String version, ReqCreateApp req) throws TapisClientException
+  public String createApp(ReqCreateApp req) throws TapisClientException
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
-    try { resp = appApi.createAppVersion(id, version, req, false); }
+    try { resp = appApi.createAppVersion(req, false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
@@ -202,59 +202,77 @@ public class AppsClient
   }
 
   /**
-   * Get an app using all supported parameters requiredPerms
+   * Get latest version of an app.
    *
-   * @param id Id of the application
-   * @param version Version of the application
-   * @param requiredPerms Additional permissions required. READ is always required.
-   * @return The app or null if app not found
+   * @param appId Id of the application
+   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
+   * @return Latest version of the app
    * @throws TapisClientException - If api call throws an exception
    */
-  public App getApp(String id, String version, String requiredPerms) throws TapisClientException
+  public App getAppLatestVersion(String appId, Boolean requireExecPerm) throws TapisClientException
   {
     RespApp resp = null;
-    String perms = DEFAULT_REQUIRED_PERMS;
-    if (!StringUtils.isBlank(requiredPerms)) perms = requiredPerms;
-    try {resp = appApi.getApp(id, version, false, perms); }
+    try {resp = appApi.getAppLatestVersion(appId, false, requireExecPerm); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null) return resp.getResult(); else return null;
   }
 
   /**
-   * Get an app using default requiredPerms=READ
+   * Get a specific version of an app using all supported parameters.
    *
-   * @param id Id of the application
-   * @param version Version of the application
+   * @param appId Id of the application
+   * @param appVersion Version of the application
+   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
    * @return The app or null if app not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public App getApp(String id, String version) throws TapisClientException
+  public App getApp(String appId, String appVersion, Boolean requireExecPerm) throws TapisClientException
   {
-    return getApp(id, version, null);
+    RespApp resp = null;
+    try {resp = appApi.getApp(appId, appVersion, false, requireExecPerm); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null) return resp.getResult(); else return null;
   }
 
   /**
-   * Get all versions of all apps using search. For example search=(id.like.MyApp*)~(enabled.eq.true)
+   * Get a specific version of an app
+   *
+   * @param appId Id of the application
+   * @param appVersion Version of the application
+   * @return The app or null if app not found
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public App getApp(String appId, String appVersion) throws TapisClientException
+  {
+    return getApp(appId, appVersion, Boolean.FALSE);
+  }
+
+  /**
+   * Retrieve applications. Use search query parameters to limit results.
+   * For example search=(id.like.MyApp*)~(enabled.eq.true)
+   * TODO/TBD: By default latest version of each app is returned.
    *
    * @param searchStr Search string. Empty or null to return all apps.
-   * @return All versions of all apps accessible to the caller
+   * @return Apps accessible to the caller
    * @throws TapisClientException - If api call throws an exception
    */
   public List<App> getApps(String searchStr) throws TapisClientException
   {
     RespAppArray resp = null;
-    try { resp = appApi.getAllAppsAllVersions(false, searchStr); }
+    try { resp = appApi.getApps(false, searchStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
   }
 
   /**
-   * Get all versions of all apps using search based on an array of strings representing an SQL-like WHERE clause
+   * Get apps using search based on an array of strings representing an SQL-like WHERE clause
+   * TODO/TBD: By default latest version of each app is returned.
    *
    * @param req Request body specifying SQL-like search strings.
-   * @return All versions of all apps accessible to the caller
+   * @return Apps accessible to the caller
    * @throws TapisClientException - If api call throws an exception
    */
   public List<App> searchApps(ReqSearchApps req) throws TapisClientException
@@ -366,20 +384,49 @@ public class AppsClient
   // --------------------------- Utility Methods ---------------------------
   // -----------------------------------------------------------------------
 
-//  /**
-//   * Utility method to build a Capability object given category, name and value
-//   */
-//  public static Capability buildCapability(CategoryEnum category, String name, String value)
-//  {
-//    var cap = new Capability();
-//    cap.setCategory(category);
-//    cap.setName(name);
-//    cap.setValue(value);
-//    return cap;
-//  }
+  /**
+   * Utility method to build an ArgSpec given value, metaName, metaRequired and metaKeyValuePairs
+   *
+   * @param value
+   * @param metaName
+   * @param metaDescription
+   * @param metaRequired
+   * @param metaKVPairs - List of Strings in the form key=value.
+   * @return a new ArgSpec object
+   */
+  public static ArgSpec buildArg(String value, String metaName, String metaDescription,
+                                 boolean metaRequired, List<String> metaKVPairs)
+  {
+    var arg = new ArgSpec();
+    var argMeta = new ArgMetaSpec();
+    var argMetaKVPairs = new ArrayList<KeyValuePair>();
+    List<String> argKVPairs = Collections.emptyList();
+    if (metaKVPairs != null) argKVPairs = metaKVPairs;
+    // Convert strings in the form key=value into KeyValuePair objects
+    for (String kvPairStr : argKVPairs)
+    {
+      argMetaKVPairs.add(kvPairFromString(kvPairStr));
+    }
+    argMeta.setName(metaName);
+    argMeta.setDescription(metaDescription);
+    argMeta.setRequired(metaRequired);
+    argMeta.setKeyValuePairs(argMetaKVPairs);
+    arg.setArg(value);
+    arg.setMeta(argMeta);
+    return arg;
+  }
 
   // ************************************************************************
   // *********************** Private Methods ********************************
   // ************************************************************************
-
+  public static KeyValuePair kvPairFromString(String s)
+  {
+    if (StringUtils.isBlank(s)) return new KeyValuePair().key("").value("");
+    int e1 = s.indexOf('=');
+    String k = s.substring(0, e1);
+    String v = "";
+    // Everything after "=" is the value
+    if (e1 > 0) v = s.substring(e1+1, s.length()-1);
+    return new KeyValuePair().key(k).value(v);
+  }
 }

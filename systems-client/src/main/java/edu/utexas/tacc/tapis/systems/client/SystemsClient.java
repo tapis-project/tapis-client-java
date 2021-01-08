@@ -16,7 +16,6 @@ import edu.utexas.tacc.tapis.systems.client.gen.ApiException;
 import edu.utexas.tacc.tapis.systems.client.gen.api.CredentialsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.PermissionsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.SystemsApi;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
@@ -32,8 +31,8 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystemsSearch;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
-import edu.utexas.tacc.tapis.systems.client.gen.model.Capability.CategoryEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.Capability.DatatypeEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.CategoryEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.DatatypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
@@ -219,6 +218,7 @@ public class SystemsClient
    * @param systemId System systemId
    * @param returnCredentials - Include credentials in returned system object
    * @param authnMethod - Desired authn method used when fetching credentials, for default pass in null.
+   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
@@ -436,7 +436,7 @@ public class SystemsClient
    *
    * @throws TapisClientException - If api call throws an exception
    */
-  public void updateUserCredential(String systemId, String userName, ReqCreateCredential req) throws TapisClientException
+  public void updateUserCredential(String systemId, String userName, Credential req) throws TapisClientException
   {
     // Submit the request
     try { credsApi.createUserCredential(systemId, userName, req, false); }
@@ -488,11 +488,12 @@ public class SystemsClient
   /**
    * Utility method to build a batch LogicalQueue
    */
-  public static LogicalQueue buildLogicalQueue(String name, int maxJobs, int maxJobsPerUser, int maxNodeCount,
+  public static LogicalQueue buildLogicalQueue(String name, String hpcQueueName, int maxJobs, int maxJobsPerUser, int maxNodeCount,
                                                int maxCoresPerNode, int maxMemoryMB, int maxMinutes)
   {
     var q = new LogicalQueue();
     q.setName(name);
+    q.setHpcQueueName(hpcQueueName);
     q.setMaxJobs(maxJobs);
     q.setMaxJobsPerUser(maxJobsPerUser);
     q.setMaxNodeCount(maxNodeCount);

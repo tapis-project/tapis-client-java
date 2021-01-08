@@ -129,7 +129,7 @@ export PRG_RELPATH=$(dirname "$0")
 cd "$PRG_RELPATH"/. || exit
 export PRG_PATH=$(pwd)
 
-echo "****** Running client tests for Systmes service. Target service = $RUN_SVC, TAPIS_RUN_ENV = $RUN_ENV"
+echo "****** Running client tests for Systems service. Target service = $RUN_SVC, TAPIS_RUN_ENV = $RUN_ENV"
 
 # if requested start up the systems service locally
 # TODO if [ "$RUN_SVC" = "local" ]; then
