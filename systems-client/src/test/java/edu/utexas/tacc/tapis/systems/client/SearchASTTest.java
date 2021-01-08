@@ -147,20 +147,21 @@ public class SearchASTTest
   public void tearDown()
   {
     System.out.println("****** Executing AfterSuite teardown method for class: " + this.getClass().getSimpleName());
-    SystemsClient sysClient = getClientUsr(serviceURL, ownerUser1JWT);
     // Remove all objects created by tests, ignore any exceptions
     // This is a soft delete but still should be done to clean up SK artifacts.
-    for (int i = 1; i <= numSystems; i++)
+    SystemsClient sysClient = getClientUsr(serviceURL, ownerUser1JWT);
+    for (int i = 1; i <= numSystems / 2; i++)
     {
       String systemId = systems.get(i)[1];
-      try
-      {
-        sysClient.deleteSystem(systemId);
-      }
-      catch (Exception e)
-      {
-        System.out.println("Caught exception when deleting system: "+ systemId + " Exception: " + e);
-      }
+      try { sysClient.deleteSystem(systemId); }
+      catch (Exception e) {System.out.println("Caught exception when deleting system: "+systemId+" Exception: "+e);}
+    }
+    sysClient = getClientUsr(serviceURL, ownerUser2JWT);
+    for (int i = (numSystems/2)+1; i <= numSystems;  i++)
+    {
+      String systemId = systems.get(i)[1];
+      try { sysClient.deleteSystem(systemId); }
+      catch (Exception e) {System.out.println("Caught exception when deleting system: "+systemId+" Exception: "+e);}
     }
   }
 
