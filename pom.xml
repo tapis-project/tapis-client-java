@@ -120,6 +120,7 @@
         <module>files-client</module>
         <module>meta-client</module>
         <module>apps-client</module>
+        <module>jobs-client</module>
     </modules>
 
 </project>
