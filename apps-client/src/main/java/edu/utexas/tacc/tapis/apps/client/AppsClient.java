@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.gson.JsonObject;
+import com.google.gson.internal.LinkedTreeMap;
 import edu.utexas.tacc.tapis.apps.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ArgMetaSpec;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ArgSpec;
@@ -215,7 +217,10 @@ public class AppsClient
     try {resp = appApi.getAppLatestVersion(appId, false, requireExecPerm); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null) return resp.getResult(); else return null;
+    if (resp == null || resp.getResult() == null) return null;
+    // Postprocess the app
+    App app = postProcessApp(resp.getResult());
+    return app;
   }
 
   /**
@@ -233,7 +238,10 @@ public class AppsClient
     try {resp = appApi.getApp(appId, appVersion, false, requireExecPerm); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null) return resp.getResult(); else return null;
+    if (resp == null || resp.getResult() == null) return null;
+    // Postprocess the app
+    App app = postProcessApp(resp.getResult());
+    return app;
   }
 
   /**
@@ -264,7 +272,10 @@ public class AppsClient
     try { resp = appApi.getApps(false, searchStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
+    if (resp == null || resp.getResult() == null) return null;
+    // Postprocess Apps in the result
+    for (App app : resp.getResult()) postProcessApp(app);
+    return resp.getResult();
   }
 
   /**
@@ -419,7 +430,25 @@ public class AppsClient
   // ************************************************************************
   // *********************** Private Methods ********************************
   // ************************************************************************
-  public static KeyValuePair kvPairFromString(String s)
+  /**
+   * Do any client side postprocessing of a returned app.
+   * Currently this just involves transforming the notes attribute into a json string
+   * @param app App to process
+   * @return - Resulting App
+   */
+  App postProcessApp(App app)
+  {
+    // If we have a notes attribute convert it from a LinkedTreeMap to a string with json.
+    if (app != null && app.getNotes() != null)
+    {
+      LinkedTreeMap lmap = (LinkedTreeMap) app.getNotes();
+      JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(lmap.toString(), JsonObject.class);
+      app.setNotes(tmpNotes.toString());
+    }
+    return app;
+  }
+
+  private static KeyValuePair kvPairFromString(String s)
   {
     if (StringUtils.isBlank(s)) return new KeyValuePair().key("").value("");
     int e1 = s.indexOf('=');
