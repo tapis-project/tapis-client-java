@@ -257,14 +257,11 @@ components:
         lastMessage:
           type: string
         created:
-          type: integer
-          format: int64
+          type: string
         ended:
-          type: integer
-          format: int64
+          type: string
         lastUpdated:
-          type: integer
-          format: int64
+          type: string
         uuid:
           type: string
         appId:
@@ -333,14 +330,11 @@ components:
         remoteQueue:
           type: string
         remoteSubmitted:
-          type: integer
-          format: int64
+          type: string
         remoteStarted:
-          type: integer
-          format: int64
+          type: string
         remoteEnded:
-          type: integer
-          format: int64
+          type: string
         remoteSubmitRetries:
           type: integer
           format: int32
@@ -351,8 +345,7 @@ components:
           type: integer
           format: int32
         remoteLastStatusCheck:
-          type: integer
-          format: int64
+          type: string
         tapisQueue:
           type: string
         visible:
