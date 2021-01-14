@@ -339,9 +339,11 @@ public final class Utils
     Assert.assertEquals(tmpApp.getId(), app0[1]);
     Assert.assertEquals(tmpApp.getVersion(), app0[2]);
     Assert.assertEquals(tmpApp.getDescription(), app0[3]);
+    Assert.assertNotNull(tmpApp.getAppType());
     Assert.assertEquals(tmpApp.getAppType().name(), app0[4]);
     Assert.assertEquals(tmpApp.getOwner(), app0[5]);
     Assert.assertEquals(tmpApp.getEnabled(), Boolean.valueOf(isEnabled));
+    Assert.assertNotNull(tmpApp.getRuntime());
     Assert.assertEquals(tmpApp.getRuntime().name(), app0[6]);
     Assert.assertEquals(tmpApp.getRuntimeVersion(), app0[7]);
     Assert.assertEquals(tmpApp.getContainerImage(), app0[8]);

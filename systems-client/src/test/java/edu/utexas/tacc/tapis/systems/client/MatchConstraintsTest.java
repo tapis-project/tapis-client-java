@@ -2,6 +2,7 @@ package edu.utexas.tacc.tapis.systems.client;
 
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
 import org.apache.commons.lang3.StringUtils;
@@ -106,19 +107,24 @@ public class MatchConstraintsTest
     if (tmpSys == null)
     {
       System.out.println("Test data not found. Test systems will be created.");
+      // Create systems
       for (int i = 1; i <= numSystems; i++)
       {
         String[] sys0 = systems.get(i);
+        // Vary port # for checking numeric relational searches
         int port = i;
+        ReqCreateSystem rSys;
+        // Create half the systems owned by ownerUser1 and half by ownerUser2
         if (i <= numSystems / 2)
         {
-          // Vary port # for checking numeric relational searches
-          Utils.createSystem(getClientUsr(serviceURL, ownerUser1JWT), sys0, port, prot1AuthnMethod, null, prot1TxfrMethodsC);
+          rSys = Utils.createReqSystem(sys0, port, prot1AuthnMethod, null, prot1TxfrMethodsC);
+          getClientUsr(serviceURL, ownerUser1JWT).createSystem(rSys);
           tmpSys = getClientUsr(serviceURL, ownerUser1JWT).getSystem(sys0[1]);
         }
         else
         {
-          Utils.createSystem(getClientUsr(serviceURL, ownerUser2JWT), sys0, port, prot1AuthnMethod, null, prot1TxfrMethodsC);
+          rSys = Utils.createReqSystem(sys0, port, prot1AuthnMethod, null, prot1TxfrMethodsC);
+          getClientUsr(serviceURL, ownerUser2JWT).createSystem(rSys);
           tmpSys = getClientUsr(serviceURL, ownerUser2JWT).getSystem(sys0[1]);
         }
         Assert.assertNotNull(tmpSys);

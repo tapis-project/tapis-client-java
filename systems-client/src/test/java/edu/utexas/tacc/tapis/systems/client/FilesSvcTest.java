@@ -4,6 +4,7 @@ import edu.utexas.tacc.tapis.auth.client.AuthClient;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.systems.client.SystemsClient.AuthnMethod;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
 import edu.utexas.tacc.tapis.tokens.client.TokensClient;
 import org.apache.commons.lang3.StringUtils;
@@ -94,7 +95,8 @@ public class FilesSvcTest
       String[] sys0 = systems.get(i);
       System.out.println("Creating system with name: " + sys0[1]);
       try {
-        String respUrl = Utils.createSystem(sysClient, sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
+        ReqCreateSystem rSys = Utils.createReqSystem(sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
+        String respUrl = sysClient.createSystem(rSys);
         System.out.println("Created system: " + respUrl);
         Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
       } catch (Exception e) {
