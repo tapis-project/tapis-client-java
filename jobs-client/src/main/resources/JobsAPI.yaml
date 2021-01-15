@@ -85,7 +85,10 @@ paths:
     get:
       tags:
         - jobs
-      description: Retrieve a job by it UUID.
+      description: |-
+        Retrieve a previously submitted job by its UUID.
+
+        The caller must be the job owner, creator or a tenant administrator.
       operationId: getJob
       parameters:
         - name: jobUuid

@@ -11,6 +11,7 @@ import edu.utexas.tacc.tapis.jobs.client.gen.api.JobsApi;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.Job;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqSubmitJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespBasic;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespProbe;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespSubmitJob;
 
@@ -228,6 +229,24 @@ public class JobsClient
             // Get the API object using default networking.
             var jobsApi = new JobsApi(_apiClient);
             resp = jobsApi.resubmitJob(jobUuid, false);
+        }
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+        
+        return resp == null ? null : resp.getResult();
+    }
+
+    /* ---------------------------------------------------------------------------- */
+    /* getJob:                                                                      */
+    /* ---------------------------------------------------------------------------- */
+    public Job getJob(String jobUuid)
+     throws TapisClientException
+    {
+        RespGetJob resp = null;
+        try {
+            // Get the API object using default networking.
+            var jobsApi = new JobsApi(_apiClient);
+            resp = jobsApi.getJob(jobUuid, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
