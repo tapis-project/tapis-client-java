@@ -33,7 +33,7 @@ tags:
 paths:
 
   # --- Paths for /apps -----------------------------------------------------
-  '/v3/apps/check/health':
+  '/v3/apps/healthcheck':
     get:
       tags:
         - General
@@ -48,7 +48,7 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
         '500':
           description: Server error.
-  '/v3/apps/check/ready':
+  '/v3/apps/readycheck':
     get:
       tags:
         - General
