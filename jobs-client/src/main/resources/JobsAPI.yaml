@@ -417,6 +417,14 @@ components:
           format: int32
         remoteLastStatusCheck:
           type: string
+        inputTransactionId:
+          type: string
+        inputCorrelationId:
+          type: string
+        archiveTransactionId:
+          type: string
+        archiveCorrelationId:
+          type: string
         tapisQueue:
           type: string
         visible:
