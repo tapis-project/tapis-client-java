@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.utexas.tacc.tapis</groupId>
   <artifactId>tapis-client-java</artifactId>
-  <version>1.11.38</version>
+  <version>1.11.39</version>
   <packaging>pom</packaging>
   <name>Tapis Client</name>
   <description>Top level java client</description>
@@ -221,7 +221,7 @@
     <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
     <mockito-core.version>3.0.0</mockito-core.version>
     <javax.websocket-api.version>1.1</javax.websocket-api.version>
-    <build.timestamp>2021-01-21T17:05:18Z</build.timestamp>
+    <build.timestamp>2021-01-25T17:39:15Z</build.timestamp>
     <statefulj.version>3.0</statefulj.version>
     <java-source.version>1.15</java-source.version>
     <reactor-rabbitmq.version>1.4.4.RELEASE</reactor-rabbitmq.version>
@@ -234,7 +234,7 @@
     <logback-classic.version>1.2.3</logback-classic.version>
     <shiro.version>1.4.1</shiro.version>
     <maven-javadoc-plugin.version>3.0.0</maven-javadoc-plugin.version>
-    <jersey-container-servlet.version>2.30</jersey-container-servlet.version>
+    <jersey-container-servlet.version>2.33</jersey-container-servlet.version>
     <javax.activation.activation.version>1.1.1</javax.activation.activation.version>
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
     <org.everit.json.schema.version>1.12.1</org.everit.json.schema.version>
@@ -424,7 +424,7 @@
       </testResource>
     </testResources>
     <directory>target</directory>
-    <finalName>tapis-client-java-1.11.38</finalName>
+    <finalName>tapis-client-java-1.11.39</finalName>
   </build>
   <reporting>
     <outputDirectory>target/site</outputDirectory>

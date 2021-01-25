@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.utexas.tacc.tapis</groupId>
   <artifactId>systems-client</artifactId>
-  <version>1.11.38</version>
+  <version>1.11.39</version>
   <name>Tapis Systems Client</name>
   <description>Java client for Systems Service</description>
   <url>https://github.com/tapis-project/tapis-client-java/systems-client</url>
@@ -208,7 +208,7 @@
     <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
     <mockito-core.version>3.0.0</mockito-core.version>
     <javax.websocket-api.version>1.1</javax.websocket-api.version>
-    <build.timestamp>2021-01-21T17:05:18Z</build.timestamp>
+    <build.timestamp>2021-01-25T17:39:15Z</build.timestamp>
     <statefulj.version>3.0</statefulj.version>
     <java-source.version>1.15</java-source.version>
     <reactor-rabbitmq.version>1.4.4.RELEASE</reactor-rabbitmq.version>
@@ -221,7 +221,7 @@
     <logback-classic.version>1.2.3</logback-classic.version>
     <shiro.version>1.4.1</shiro.version>
     <maven-javadoc-plugin.version>3.0.0</maven-javadoc-plugin.version>
-    <jersey-container-servlet.version>2.30</jersey-container-servlet.version>
+    <jersey-container-servlet.version>2.33</jersey-container-servlet.version>
     <javax.activation.activation.version>1.1.1</javax.activation.activation.version>
     <skipIntegrationTests>true</skipIntegrationTests>
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
@@ -298,19 +298,19 @@
     <dependency>
       <groupId>edu.utexas.tacc.tapis</groupId>
       <artifactId>auth-client</artifactId>
-      <version>1.11.38</version>
+      <version>1.11.39</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>edu.utexas.tacc.tapis</groupId>
       <artifactId>shared</artifactId>
-      <version>1.11.38</version>
+      <version>1.11.39</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>edu.utexas.tacc.tapis</groupId>
       <artifactId>tokens-client</artifactId>
-      <version>1.11.38</version>
+      <version>1.11.39</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -469,6 +469,24 @@
     <finalName>systems-client</finalName>
     <plugins>
       <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.6.0</version>
+        <extensions>false</extensions>
+        <executions>
+          <execution>
+            <id>Download openapi file</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>${basedir}/gen_spec.sh</executable>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.openapitools</groupId>
         <artifactId>openapi-generator-maven-plugin</artifactId>
         <version>4.3.1</version>
@@ -479,7 +497,7 @@
               <goal>generate</goal>
             </goals>
             <configuration>
-              <inputSpec>${project.basedir}/SystemsAPI.yaml</inputSpec>
+              <inputSpec>${project.basedir}/target/SystemsAPI.yaml</inputSpec>
               <enablePostProcessFile>true</enablePostProcessFile>
               <output>${project.build.directory}/generated-sources/openapi</output>
               <generatorName>java</generatorName>
