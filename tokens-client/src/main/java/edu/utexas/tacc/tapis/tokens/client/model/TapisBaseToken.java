@@ -1,12 +1,12 @@
 package edu.utexas.tacc.tapis.tokens.client.model;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 public abstract class TapisBaseToken 
 {
     // Fields.
     private Instant  expiresAt;   // UTC expiration time
-    private Integer  expiresIn;   // approximate seconds to expiration
     
     // Accessors.
     public Instant getExpiresAt() {return expiresAt;}
@@ -29,12 +29,14 @@ public abstract class TapisBaseToken
             }
     }
 
-    public Integer getExpiresIn() {return expiresIn; }
-    public void setExpiresIn(Integer expiresIn) {this.expiresIn = expiresIn;}
+    public long getExpiresIn() {
+    	if (expiresAt == null) return 0;
+    	return Instant.now().until(expiresAt, ChronoUnit.SECONDS); 
+    }
 
     // Make sure both fields are filled in.
     public boolean isValid() {
-        if (expiresAt == null || expiresIn == null) return false;
+        if (expiresAt == null) return false;
         return true;
     }
 }

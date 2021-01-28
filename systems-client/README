@@ -2,7 +2,7 @@
 Running the client tests against Systems service running locally or in k8s
 Files
  run_client_tests.sh,
- docker_run_sys_svc.sh,
+ docker_run_svc.sh,
  delete_client_test_data.sh
 ==========================================================================
 The client tests for Systems service are run using the script run_client_tests.sh.
