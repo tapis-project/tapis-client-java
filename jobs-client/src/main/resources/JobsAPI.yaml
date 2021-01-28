@@ -631,8 +631,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/NotificationSubscription'
-        consolidatedConstraints:
-          type: string
   securitySchemes:
     TapisJWT:
       type: apiKey
