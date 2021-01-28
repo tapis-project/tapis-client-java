@@ -8,7 +8,7 @@
     <parent>
         <groupId>edu.utexas.tacc.tapis</groupId>
         <artifactId>tapis-bom</artifactId>
-        <version>1.10</version>
+        <version>[1.11,2.0)</version>
         <!-- Set empty relative path to avoid maven warning and -->
         <!--   ensure parent is found in local repository if that -->
         <!--   is the only place it exists. -->
@@ -16,7 +16,7 @@
     </parent>
 
     <artifactId>tapis-client-java</artifactId>
-    <version>1.10</version>
+    <version>1.11.40-SNAPSHOT</version>
 
     <name>Tapis Client</name>
     <description>Top level java client</description>
@@ -84,6 +84,32 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+      <!-- Profile for building using TACC repositories -->
+      <profile>
+        <id>tacc</id>
+        <activation> <activeByDefault>true</activeByDefault> </activation>
+        <repositories>
+          <repository>
+            <id>tapis-local-snapshots</id>
+            <name>Local repo for snapshots</name>
+            <url>http://c002.rodeo.tacc.utexas.edu:30044/repository/maven-snapshots</url>
+            <releases>  <enabled>false</enabled> </releases>
+            <snapshots> <enabled>true</enabled>  </snapshots>
+          </repository>
+          <repository>
+            <id>tapis-local-releases</id>
+            <name>Local repo for releases</name>
+            <url>http://c002.rodeo.tacc.utexas.edu:30044/repository/maven-releases</url>
+          </repository>
+        </repositories>
+      </profile>
+      <!-- Profile for building without using TACC repositories -->
+      <profile>
+        <id>tacc-external</id>
+      </profile>
+    </profiles>
+
     <modules>
         <module>shared</module>
         <module>auth-client</module>
@@ -93,6 +119,8 @@
         <module>systems-client</module>
         <module>files-client</module>
         <module>meta-client</module>
+        <module>apps-client</module>
+        <module>jobs-client</module>
     </modules>
 
 </project>

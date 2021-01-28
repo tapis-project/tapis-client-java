@@ -1,0 +1,101 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>edu.utexas.tacc.tapis</groupId>
+        <artifactId>tapis-client-java</artifactId>
+        <version>1.11.40-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>jobs-client</artifactId>
+
+    <name>Tapis Jobs Client</name>
+    <description>Java client for Tapis Jobs Service</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>shared</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+    </dependencies>
+    
+    <build>
+        <sourceDirectory>src/main/java</sourceDirectory>
+
+    <plugins>
+        <!-- Capture the git commit hash and branch identifiers. -->
+        <!-- See parent pom for configuration details. -->
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>buildnumber-maven-plugin</artifactId>
+        </plugin>
+
+        <plugin>
+            <!-- The version is set in the parent pom -->
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+                <suiteXmlFiles>
+                    <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                </suiteXmlFiles>
+            </configuration>
+        </plugin>
+
+        <!-- Build generated client code using openapi-generator -->
+        <plugin>
+            <groupId>org.openapitools</groupId>
+            <artifactId>openapi-generator-maven-plugin</artifactId>
+            <version>${openapi-generator-maven-plugin.version}</version>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>generate</goal>
+                    </goals>
+                    <configuration>
+                        <inputSpec>${project.basedir}/src/main/resources/JobsAPI.yaml</inputSpec>
+                        <enablePostProcessFile>true</enablePostProcessFile>
+                        <output>${project.build.directory}/generated-sources/openapi</output>
+                        <generatorName>java</generatorName>
+                        <groupId>edu.utexas.tacc.tapis</groupId>
+                        <invokerPackage>edu.utexas.tacc.tapis.jobs.client.gen</invokerPackage>
+                        <apiPackage>edu.utexas.tacc.tapis.jobs.client.gen.api</apiPackage>
+                        <modelPackage>edu.utexas.tacc.tapis.jobs.client.gen.model</modelPackage>
+                        <!-- Turn off generation of stuff we do not need -->
+                        <generateApiTests>false</generateApiTests>
+                        <generateApiDocumentation>false</generateApiDocumentation>
+                        <generateModelTests>false</generateModelTests>
+                        <generateModelDocumentation>false</generateModelDocumentation>
+                        <configOptions>
+                            <sourceFolder>src/gen/java/main</sourceFolder>
+                            <!-- Use java 8 libraries instead of 3rd party libraries -->
+                            <java8>true</java8>
+                            <dateLibrary>java8</dateLibrary>
+                        </configOptions>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <configuration>
+                <createDependencyReducedPom>false</createDependencyReducedPom>
+            </configuration>
+            <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>shade</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+        <finalName>jobs-client</finalName>
+    </build>
+
+</project>

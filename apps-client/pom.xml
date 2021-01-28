@@ -1,0 +1,132 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>edu.utexas.tacc.tapis</groupId>
+    <artifactId>tapis-client-java</artifactId>
+    <version>1.11.40-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>apps-client</artifactId>
+
+  <name>Tapis Apps Client</name>
+  <description>Java client for Apps Service</description>
+
+  <properties>
+    <!-- Skip integration tests by default -->
+    <!-- To run tests TAPIS_FILES_SVC_PASSWORD must be set in the env -->
+    <!-- Use following command to run integration tests -->
+    <!--   TAPIS_FILES_SVC_PASSWORD=<files_service_password> mvn verify -DskipIntegrationTests=false  -->
+    <skipIntegrationTests>true</skipIntegrationTests>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>shared</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>auth-client</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>tokens-client</artifactId>
+        <version>${project.version}</version>
+        <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <sourceDirectory>src/main/java</sourceDirectory>
+    
+    <!-- NOTE: THE CALLED SCRIPT INTRODUCES HIDDEN DEPENDENCIES -->
+    <!--       These dependencies include curl.      -->
+    <plugins>
+      <!-- Run script to download latest openapi spec -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>${exec-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>Download openapi file</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>${basedir}/gen_spec.sh</executable>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Build generated client code using openapi-generator -->
+      <plugin>
+        <groupId>org.openapitools</groupId>
+        <artifactId>openapi-generator-maven-plugin</artifactId>
+        <version>${openapi-generator-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <!-- Use the openapi spec here. Tapis live-docs website should also get spec from here -->
+              <inputSpec>${project.basedir}/target/AppsAPI.yaml</inputSpec>
+              <enablePostProcessFile>true</enablePostProcessFile>
+              <output>${project.build.directory}/generated-sources/openapi</output>
+              <generatorName>java</generatorName>
+              <groupId>edu.utexas.tacc.tapis</groupId>
+              <invokerPackage>edu.utexas.tacc.tapis.apps.client.gen</invokerPackage>
+              <apiPackage>edu.utexas.tacc.tapis.apps.client.gen.api</apiPackage>
+              <modelPackage>edu.utexas.tacc.tapis.apps.client.gen.model</modelPackage>
+              <!-- Turn off generation of stuff we do not need -->
+              <generateApiTests>false</generateApiTests>
+              <generateApiDocumentation>false</generateApiDocumentation>
+              <generateModelTests>false</generateModelTests>
+              <generateModelDocumentation>false</generateModelDocumentation>
+              <configOptions>
+                <sourceFolder>src/gen/java/main</sourceFolder>
+                <!-- Use java 8 libraries instead of 3rd party libraries -->
+                <java8>true</java8>
+                <dateLibrary>java8</dateLibrary>
+              </configOptions>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <configuration>
+          <createDependencyReducedPom>false</createDependencyReducedPom>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- failsafe plugin is for running integration tests -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <skip>${skipIntegrationTests}</skip>
+          <environmentVariables>
+            <APP_ENV>test</APP_ENV>
+          </environmentVariables>
+        </configuration>
+      </plugin>
+    </plugins>
+
+    <finalName>apps-client</finalName>
+  </build>
+
+</project>

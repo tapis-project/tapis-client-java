@@ -1,5 +1,6 @@
 package edu.utexas.tacc.tapis.tokens.client;
 
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_TARGET_SITE;
 import static org.testng.Assert.assertNotNull;
 
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +27,7 @@ public class TokensClientTest
   private static final String TAPIS_ENV_SVC_URL_TOKENS = "TAPIS_SVC_URL_TOKENS";
 
   // Test data
-  private static final String tenantName = "master";
+  private static final String tenantName = "admin";
   private static final String userName = "testuser1";
   private static final String serviceName = "systems";
   private static final String servicePassword = "S4nUNjL6JCwmCw3QQWR7Lyx1J/ayV6BEnAwTBi5sJ8E=";
@@ -57,7 +58,7 @@ public class TokensClientTest
   @Test(enabled=true)
   public void testGetSvcToken() throws Exception
   {
-    String svcToken = tokensClient.getSvcToken(tenantName, serviceName);
+    String svcToken = tokensClient.getSvcToken(tenantName, serviceName, DEFAULT_TARGET_SITE);
     System.out.println("Got token for service: " + serviceName);
     System.out.println("Token: " + svcToken);
     Assert.assertFalse(StringUtils.isBlank(svcToken), "Service token should not be blank");

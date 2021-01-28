@@ -3,6 +3,7 @@ package edu.utexas.tacc.tapis.security.client;
 import java.util.Arrays;
 import java.util.List;
 
+import edu.utexas.tacc.tapis.security.client.gen.model.ReqUserIsAdmin;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.utexas.tacc.tapis.client.shared.Utils;
@@ -111,10 +112,6 @@ public class SKClient
      * the TAPIS_JWT_HEADER key will be set to the jwt value. 
      * 
      * The user-agent is automatically set to SKClient.
-     * 
-     * Instances of this class are currently limited to using the default ApiClient.
-     * This implies that the RoleApi, UserApi and GeneralApi implementations also
-     * are expected to be using the same default ApiClient object.
      * 
      * @param path the base path 
      */
@@ -890,8 +887,34 @@ public class SKClient
         Boolean b = resp.getResult().getIsAuthorized();
         return b == null ? false : b;
     }
-    
-    /* ---------------------------------------------------------------------------- */
+
+  /* ---------------------------------------------------------------------------- */
+  /* isAdmin:                                                                     */
+  /* ---------------------------------------------------------------------------- */
+  public boolean isAdmin(String tenant, String user)
+          throws TapisClientException
+  {
+    // Assign input body.
+    var body = new ReqUserIsAdmin();
+    body.setTenant(tenant);
+    body.setUser(user);
+
+    // Make the REST call.
+    RespAuthorized resp = null;
+    try {
+      // Get the API object using default networking.
+      var userApi = new UserApi(_apiClient);
+      resp = userApi.isAdmin(body, false);
+    }
+    catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+    catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+
+    // Return result value.
+    Boolean b = resp.getResult().getIsAuthorized();
+    return b == null ? false : b;
+  }
+
+  /* ---------------------------------------------------------------------------- */
     /* isPermitted:                                                                 */
     /* ---------------------------------------------------------------------------- */
     public boolean isPermitted(String tenant, String user, String permSpec)
