@@ -132,7 +132,7 @@ public final class Utils
   public static final boolean inPlaceTrue = true;
 
   public static final List<String> metaKVPairs = Arrays.asList("metaKey1=metaVal1", "metaKey2=metaVal2");
-  public static final KeyValuePair kv1 = new KeyValuePair().key("a").value("b");
+  public static final KeyValuePair kv1 = new KeyValuePair().key("key1").value("value1");
   public static final KeyValuePair kv2 = new KeyValuePair().key("HOME").value("/home/testuser2");
   public static final KeyValuePair kv3 = new KeyValuePair().key("TMP").value("/tmp");
   public static final List<KeyValuePair> envVariables = new ArrayList<>(List.of(kv1,kv2,kv3));
@@ -140,17 +140,18 @@ public final class Utils
   public static final List<String> archiveExcludes = Arrays.asList("/archiveExclude1", "/archiveExclude2");
   public static final List<String> jobTags = Arrays.asList("jobtag1", "jobtag2");
 
+  public static final String srcA1 = "https://example.com/srcA1";
+  public static final String srcB1 = "https://example.com/srcB1";
   public static final List<KeyValuePair> kvPairsFinA1 = new ArrayList<>(List.of(kv1,kv2,kv3));
   public static final ArgMetaSpec argMetaFinA1 = new ArgMetaSpec().name("finA1").description("File input A1")
                                                          .required(metaRequiredTrue).keyValuePairs(kvPairsFinA1);
-  public static final FileInputDefinition finA1 = new FileInputDefinition().sourceUrl("/srcA1").targetPath("/targetA1")
+  public static final FileInputDefinition finA1 = new FileInputDefinition().sourceUrl(srcA1).targetPath("/targetA1")
                                                          .inPlace(inPlaceTrue).meta(argMetaFinA1);
   public static final List<KeyValuePair> kvPairsFinB1 = new ArrayList<>(List.of(kv1,kv2,kv3));
   public static final ArgMetaSpec argMetaFinB1 = new ArgMetaSpec().name("finB1").description("File input B1")
           .required(metaRequiredTrue).keyValuePairs(kvPairsFinB1);
-  public static final FileInputDefinition finB1 = new FileInputDefinition().sourceUrl("/srcB1").targetPath("/targetB1")
+  public static final FileInputDefinition finB1 = new FileInputDefinition().sourceUrl(srcB1).targetPath("/targetB1")
           .inPlace(inPlaceTrue).meta(argMetaFinB1);
-
   public static final List<FileInputDefinition> fileInputDefinitions = new ArrayList<>(List.of(finA1, finB1));
 
   public static final NotificationMechanism notifMechA1 =
@@ -312,6 +313,14 @@ public final class Utils
     return clt.createApp(rApp);
   }
 
+  public static String createAppMinimal(AppsClient clt, String[] app) throws TapisClientException
+  {
+    ReqCreateApp rApp = new ReqCreateApp();
+    rApp.setId(app[1]);
+    rApp.setVersion(app[2]);
+    return clt.createApp(rApp);
+  }
+
   /**
    * Verify most attributes for an App using default create data for following attributes:
    *     port, useProxy, proxyHost, proxyPort, defaultAuthnMethod, transferMethods,
@@ -330,55 +339,159 @@ public final class Utils
     Assert.assertEquals(tmpApp.getId(), app0[1]);
     Assert.assertEquals(tmpApp.getVersion(), app0[2]);
     Assert.assertEquals(tmpApp.getDescription(), app0[3]);
+    Assert.assertNotNull(tmpApp.getAppType());
     Assert.assertEquals(tmpApp.getAppType().name(), app0[4]);
     Assert.assertEquals(tmpApp.getOwner(), app0[5]);
     Assert.assertEquals(tmpApp.getEnabled(), Boolean.valueOf(isEnabled));
+    Assert.assertNotNull(tmpApp.getRuntime());
+    Assert.assertEquals(tmpApp.getRuntime().name(), app0[6]);
+    Assert.assertEquals(tmpApp.getRuntimeVersion(), app0[7]);
+    Assert.assertEquals(tmpApp.getContainerImage(), app0[8]);
+    Assert.assertEquals(tmpApp.getMaxJobs(), Integer.valueOf(maxJobs));
+    Assert.assertEquals(tmpApp.getMaxJobsPerUser(), Integer.valueOf(maxJobsPerUser));
+    Assert.assertEquals(tmpApp.getStrictFileInputs(), Boolean.valueOf(strictFileInputs));
 
-//    // Verify transfer methods
-//    List<TransferMethodEnum> tMethodsList = tmpApp.getTransferMethods();
-//    Assert.assertNotNull(tMethodsList, "TransferMethods list should not be null");
-//    for (TransferMethodEnum txfrMethod : prot1TxfrMethodsT)
-//    {
-//      Assert.assertTrue(tMethodsList.contains(txfrMethod), "List of transfer methods did not contain: " + txfrMethod.name());
-//    }
-//    Assert.assertEquals(tmpApp.getCanExec(), Boolean.valueOf(canExec));
-//    Assert.assertEquals(tmpApp.getJobWorkingDir(), app0[10]);
-//    Assert.assertEquals(tmpApp.getJobMaxJobs().intValue(), jobMaxJobs);
-//    Assert.assertEquals(tmpApp.getJobMaxJobsPerUser().intValue(), jobMaxJobsPerUser);
-//    Assert.assertEquals(tmpApp.getJobIsBatch(), Boolean.valueOf(jobIsBatch));
-//    Assert.assertEquals(tmpApp.getBatchScheduler(), app0[11]);
-//    Assert.assertEquals(tmpApp.getBatchDefaultLogicalQueue(), app0[12]);
-//    // Verify jobEnvVariables
-//    List<KeyValuePair> tmpJobEnvVariables = tmpApp.getJobEnvVariables();
-//    Assert.assertNotNull(tmpJobEnvVariables, "JobEnvVariables value was null");
-//    Assert.assertEquals(tmpJobEnvVariables.size(), jobEnvVariables.size(), "Wrong number of JobEnvVariables");
-//    for (KeyValuePair kv : jobEnvVariables)
-//    {
-//      // TODO
-////      Assert.assertTrue(tmpJobEnvVariables.contains(varStr));
-//      System.out.println("Found JobEnvVariable: " + kv.getKey() + "=" + kv.getValue());
-//    }
-//    // Verify batchLogicalQueues
-//    List<LogicalQueue> jobQueues = tmpApp.getBatchLogicalQueues();
-//// TODO logical queues not yet implemented.
-////    Assert.assertNotNull(jobQueues);
-////    Assert.assertEquals(jobQueues.size(), jobQueues1.size());
-////    var qNamesFound = new ArrayList<String>();
-////    for (LogicalQueue qFound : jobQueues) {qNamesFound.add(qFound.getName());}
-////    for (LogicalQueue qSeed : jobQueues1)
-////    {
-////      Assert.assertTrue(qNamesFound.contains(qSeed.getName()), "List of logical queues did not contain a queue named: " + qSeed.getName());
-////    }
-//    // Verify capabilities
-//    List<Capability> jobCaps = tmpApp.getJobCapabilities();
-//    Assert.assertNotNull(jobCaps);
-//    Assert.assertEquals(jobCaps.size(), jobCaps1.size());
-//    var capNamesFound = new ArrayList<String>();
-//    for (Capability capFound : jobCaps) {capNamesFound.add(capFound.getName());}
-//    for (Capability capSeed : jobCaps1)
-//    {
-//      Assert.assertTrue(capNamesFound.contains(capSeed.getName()), "List of capabilities did not contain a capability named: " + capSeed.getName());
-//    }
+    // ========== JobAttributes
+    JobAttributes jobAttributes = tmpApp.getJobAttributes();
+    Assert.assertNotNull(jobAttributes);
+    Assert.assertEquals(jobAttributes.getDescription(), app0[9]);
+    Assert.assertEquals(jobAttributes.getDynamicExecSystem(), Boolean.valueOf(dynamicExecSystem));
+    Assert.assertEquals(jobAttributes.getExecSystemId(), app0[10]);
+    Assert.assertEquals(jobAttributes.getExecSystemExecDir(), app0[11]);
+    Assert.assertEquals(jobAttributes.getExecSystemInputDir(), app0[12]);
+    Assert.assertEquals(jobAttributes.getExecSystemOutputDir(), app0[13]);
+    Assert.assertEquals(jobAttributes.getExecSystemLogicalQueue(), app0[14]);
+    Assert.assertEquals(jobAttributes.getArchiveSystemId(), app0[15]);
+    Assert.assertEquals(jobAttributes.getArchiveSystemDir(), app0[16]);
+    Assert.assertEquals(jobAttributes.getArchiveOnAppError(), Boolean.valueOf(archiveOnAppError));
+    Assert.assertEquals(jobAttributes.getNodeCount(), Integer.valueOf(nodeCount));
+    Assert.assertEquals(jobAttributes.getCoresPerNode(), Integer.valueOf(coresPerNode));
+    Assert.assertEquals(jobAttributes.getMemoryMB(), Integer.valueOf(memoryMb));
+    Assert.assertEquals(jobAttributes.getMaxMinutes(), Integer.valueOf(maxMinutes));
+
+    // TODO Verify fileInputs
+    // TODO only meta.name is checked
+    List<FileInputDefinition> tFileInputs = jobAttributes.getFileInputDefinitions();
+    Assert.assertNotNull(tFileInputs, "FileInputs list should not be null.");
+    Assert.assertEquals(tFileInputs.size(), fileInputDefinitions.size(), "Wrong number of FileInputs");
+    var metaNamesFound = new ArrayList<String>();
+    for (FileInputDefinition itemFound : tFileInputs)
+    {
+      Assert.assertNotNull(itemFound.getMeta(), "FileInput meta value should not be null");
+      metaNamesFound.add(itemFound.getMeta().getName());
+    }
+    for (FileInputDefinition itemSeedItem : fileInputDefinitions)
+    {
+      Assert.assertTrue(metaNamesFound.contains(itemSeedItem.getMeta().getName()),
+              "List of fileInputs did not contain an item with metaName: " + itemSeedItem.getMeta().getName());
+    }
+
+    // TODO Verify notificationSubscriptions
+    // TODO: Filter is checked but not mechanisms
+    List<NotificationSubscription> tSubscriptions = jobAttributes.getSubscriptions();
+    Assert.assertNotNull(tSubscriptions, "Subscriptions list should not be null.");
+    Assert.assertEquals(tSubscriptions.size(), notifList1.size(), "Wrong number of Subscriptions");
+    var filtersFound = new ArrayList<String>();
+    for (NotificationSubscription itemFound : tSubscriptions)
+    {
+      Assert.assertNotNull(itemFound.getFilter(), "Subscription filter should not be null");
+      filtersFound.add(itemFound.getFilter());
+    }
+    for (NotificationSubscription itemSeedItem : notifList1)
+    {
+      Assert.assertTrue(filtersFound.contains(itemSeedItem.getFilter()),
+              "List of subscriptions did not contain a filter: " + itemSeedItem.getFilter());
+    }
+
+    // Verify jobTags
+    List<String> tmpJobTags = jobAttributes.getTags();
+    Assert.assertNotNull(tmpJobTags, "jobTags value was null");
+    Assert.assertEquals(tmpJobTags.size(), jobTags.size(), "Wrong number of jobTags");
+    for (String tagStr : jobTags)
+    {
+      Assert.assertTrue(tmpJobTags.contains(tagStr));
+      System.out.println("Found jobTag: " + tagStr);
+    }
+
+    // ========== ParameterSet
+    ParameterSet parameterSet = jobAttributes.getParameterSet();
+    Assert.assertNotNull(parameterSet, "ParameterSet should not be null.");
+    // TODO Verify appArgs
+//    // TODO Arg value is checked but not arg metadata
+    List<ArgSpec> tmpArgs = parameterSet.getAppArgs();
+    Assert.assertNotNull(tmpArgs, "Fetched appArgs was null");
+    Assert.assertEquals(tmpArgs.size(), appArgs.size());
+    var argValuesFound = new ArrayList<String>();
+    for (ArgSpec itemFound : tmpArgs) {argValuesFound.add(itemFound.getArg());}
+    for (ArgSpec itemSeedItem : appArgs)
+    {
+      Assert.assertTrue(argValuesFound.contains(itemSeedItem.getArg()),
+              "List of appArgs did not contain an item with arg value: " + itemSeedItem.getArg());
+    }
+
+    // Verify containerArgs
+    // TODO: Check metadata
+    tmpArgs = parameterSet.getContainerArgs();
+    Assert.assertNotNull(tmpArgs, "Fetched containerArgs was null");
+    Assert.assertEquals(tmpArgs.size(), containerArgs.size());
+    argValuesFound = new ArrayList<>();
+    for (ArgSpec itemFound : tmpArgs) {argValuesFound.add(itemFound.getArg());}
+    for (ArgSpec itemSeedItem : containerArgs)
+    {
+      Assert.assertTrue(argValuesFound.contains(itemSeedItem.getArg()),
+              "List of containerArgs did not contain an item with arg value: " + itemSeedItem.getArg());
+    }
+
+    // Verify schedulerOptions
+    // TODO: Check metadata
+    tmpArgs = parameterSet.getSchedulerOptions();
+    Assert.assertNotNull(tmpArgs, "Fetched schedulerOptions was null");
+    Assert.assertEquals(tmpArgs.size(), schedulerOptions.size());
+    argValuesFound = new ArrayList<>();
+    for (ArgSpec itemFound : tmpArgs) {argValuesFound.add(itemFound.getArg());}
+    for (ArgSpec itemSeedItem : schedulerOptions)
+    {
+      Assert.assertTrue(argValuesFound.contains(itemSeedItem.getArg()),
+              "List of schedulerOptions did not contain an item with arg value: " + itemSeedItem.getArg());
+    }
+
+    // Verify envVariables
+    List<KeyValuePair> tmpEnvVariables = parameterSet.getEnvVariables();
+    Assert.assertNotNull(tmpEnvVariables, "ParameterSet envVariables value was null");
+    Assert.assertEquals(tmpEnvVariables.size(), envVariables.size(), "Wrong number of envVariables");
+    List<String> kvFoundList = new ArrayList<>();
+    for (KeyValuePair kv : tmpEnvVariables)
+    {
+      kvFoundList.add(kv.getKey() + "=" + kv.getValue());
+      System.out.println("Found envVariable: " + kv.getKey() + "=" + kv.getValue());
+    }
+    for (KeyValuePair kv : envVariables)
+    {
+      String kvStr = kv.getKey() + "=" + kv.getValue();
+      Assert.assertTrue(kvFoundList.contains(kvStr),
+              "List of envVariables did not contain an item with key=value of : " + kvStr);
+    }
+
+    // Verify archiveFilter includes and excludes
+    ParameterSetArchiveFilter archiveFilter = parameterSet.getArchiveFilter();
+    Assert.assertNotNull(archiveFilter, "ParameterSetArchiveFilter was null");
+    List<String> tmpFileList = archiveFilter.getIncludes();
+    Assert.assertNotNull(tmpFileList, "includes list from ParameterSetArchiveFilter was null");
+    Assert.assertEquals(tmpFileList.size(), archiveIncludes.size(), "Wrong number of archiveIncludes");
+    for (String tmpStr : archiveIncludes)
+    {
+      Assert.assertTrue(tmpFileList.contains(tmpStr));
+      System.out.println("Found archiveInclude: " + tmpStr);
+    }
+    tmpFileList = archiveFilter.getExcludes();
+    Assert.assertNotNull(tmpFileList, "excludes list from ParameterSetArchiveFilter was null");
+    Assert.assertEquals(tmpFileList.size(), archiveExcludes.size(), "Wrong number of archiveExcludes");
+    for (String tmpStr : archiveExcludes)
+    {
+      Assert.assertTrue(tmpFileList.contains(tmpStr));
+      System.out.println("Found archiveExclude: " + tmpStr);
+    }
+
     // Verify tags
     List<String> tmpTags = tmpApp.getTags();
     Assert.assertNotNull(tmpTags, "Tags value was null");
@@ -389,9 +502,6 @@ public final class Utils
       System.out.println("Found tag: " + tagStr);
     }
     // Verify notes
-    // TODO: Currently the client converts notes from a gson LinkedTreeMap to a string of json so we cast it to String here.
-    // TODO/TBD: Can we update jsonschema and model on server to make it a String instead of Object?
-    //           Previously this caused issues with json serialization.
     String tmpNotesStr = (String) tmpApp.getNotes();
     System.out.println("Found notes: " + tmpNotesStr);
     JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(tmpNotesStr, JsonObject.class);

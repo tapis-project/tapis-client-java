@@ -30,10 +30,11 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.CategoryEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.DatatypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.AuthnEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
+import edu.utexas.tacc.tapis.systems.client.gen.model.JobRuntime;
 import edu.utexas.tacc.tapis.systems.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RuntimeTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SystemTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TransferMethodEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
@@ -121,7 +122,8 @@ public final class Utils
           Collections.singletonList(TransferMethodEnum.SFTP);
   public static final SystemsClient.AuthnMethod prot1AuthnMethod = SystemsClient.AuthnMethod.PKI_KEYS;
   public static final SystemsClient.AuthnMethod prot2AuthnMethod = SystemsClient.AuthnMethod.ACCESS_KEY;
-  public static final boolean canExec = true;
+  public static final boolean canExecTrue = true;
+  public static final boolean canExecFalse = false;
   public static final KeyValuePair kv1 = new KeyValuePair().key("a").value("b");
   public static final KeyValuePair kv2 = new KeyValuePair().key("HOME").value("/home/testuser2");
   public static final KeyValuePair kv3 = new KeyValuePair().key("TMP").value("/tmp");
@@ -129,6 +131,11 @@ public final class Utils
   public static final boolean jobIsBatch = true;
   public static final int jobMaxJobs = -1;
   public static final int jobMaxJobsPerUser = -1;
+
+  public static final List<JobRuntime> jobRuntimesEmpty = new ArrayList<>();
+  public static final JobRuntime runtimeDocker =
+          new JobRuntime().runtimeType(RuntimeTypeEnum.DOCKER).version("0.0.1runtime");
+  public static final List<JobRuntime> jobRuntimes1 = new ArrayList<>(List.of(runtimeDocker));
 
   public static final LogicalQueue q1 = SystemsClient.buildLogicalQueue("logicalQ1", "hpcQ1", 1, 1, 1, 1, 1, 1);
   public static final LogicalQueue q2 = SystemsClient.buildLogicalQueue("logicalQ2", "hpcQ2", 2, 2, 2, 2, 2, 2);
@@ -173,6 +180,8 @@ public final class Utils
   public static final int qMaxCoresPerNode = -1;
   public static final int qMaxMemoryMB = -1;
   public static final int qMaxMinutes = -1;
+
+  public static final Credential credNull = null;
 
   public static final String sysNamePrefix = "CSys";
 
@@ -243,11 +252,10 @@ public final class Utils
   }
 
   /*
-   * Make client call to create a system given most attributes for the system.
+   * Build a ReqCreateSystem object to be used for client call to create a system given most attributes for the system.
    */
-  public static String createSystem(SystemsClient clt, String[] sys, int port, SystemsClient.AuthnMethod authnMethod, Credential credential,
-                             List<TransferMethodEnum> txfrMethods)
-          throws TapisClientException
+  public static ReqCreateSystem createReqSystem(String[] sys, int port, SystemsClient.AuthnMethod authnMethod,
+                                                Credential credential, List<TransferMethodEnum> txfrMethods)
   {
     var accMethod = authnMethod != null ? authnMethod : prot1AuthnMethod;
     var tMethods = txfrMethods != null ? txfrMethods : prot1TxfrMethodsC;
@@ -265,7 +273,8 @@ public final class Utils
     rSys.rootDir(sys[9]);
     rSys.setTransferMethods(tMethods);
     rSys.port(port).useProxy(prot1UseProxy).proxyHost(prot1ProxyHost).proxyPort(prot1ProxyPort);
-    rSys.canExec(canExec);
+    rSys.canExec(canExecTrue);
+    rSys.setJobRuntimes(jobRuntimes1);
     rSys.jobWorkingDir(sys[10]);
     rSys.jobEnvVariables(jobEnvVariables);
     rSys.jobMaxJobs(jobMaxJobs).jobMaxJobsPerUser(jobMaxJobsPerUser);
@@ -275,10 +284,7 @@ public final class Utils
     rSys.jobCapabilities(jobCaps1);
     rSys.tags(tags1);
     rSys.notes(notes1JO);
-    // Convert list of TransferMethod enums to list of strings
-//    List<String> transferMethods = Stream.of(txfrMethodsStrList).map(TransferMethodEnum::name).collect(Collectors.toList());
-    // Create the system
-    return clt.createSystem(rSys);
+    return rSys;
   }
 
   /*
@@ -289,13 +295,14 @@ public final class Utils
   public static String createSystemMinimal(SystemsClient clt, String[] sys)
           throws TapisClientException
   {
-    SystemsClient.AuthnMethod accMethod = prot1AuthnMethod;
     ReqCreateSystem rSys = new ReqCreateSystem();
     rSys.setId(sys[1]);
     rSys.setSystemType(SystemTypeEnum.valueOf(sys[3]));
     rSys.setHost(sys[5]);
-    rSys.defaultAuthnMethod(AuthnEnum.valueOf(accMethod.name()));
-    rSys.canExec(canExec);
+    rSys.defaultAuthnMethod(AuthnEnum.valueOf(prot1AuthnMethod.name()));
+    rSys.canExec(canExecTrue);
+    rSys.setJobWorkingDir(sys[10]);
+    rSys.setJobRuntimes(jobRuntimes1);
     // If systemType is LINUX then rootDir is required
     if (sys[3].equals(SystemTypeEnum.LINUX.name())) rSys.rootDir(sys[9]);
     // If systemType is OBJECT_STORE then bucketName is required
@@ -333,17 +340,22 @@ public final class Utils
   {
     Assert.assertEquals(tmpSys.getId(), sys0[1]);
     Assert.assertEquals(tmpSys.getDescription(), sys0[2]);
+    Assert.assertNotNull(tmpSys.getSystemType());
     Assert.assertEquals(tmpSys.getSystemType().name(), sys0[3]);
     Assert.assertEquals(tmpSys.getOwner(), sys0[4]);
     Assert.assertEquals(tmpSys.getHost(), sys0[5]);
     Assert.assertEquals(tmpSys.getEnabled(), Boolean.valueOf(defaultIsEnabled));
     Assert.assertEquals(tmpSys.getEffectiveUserId(), sys0[6]);
+    Assert.assertNotNull(tmpSys.getDefaultAuthnMethod());
     Assert.assertEquals(tmpSys.getDefaultAuthnMethod().name(), prot1AuthnMethod.name());
     Assert.assertEquals(tmpSys.getBucketName(), sys0[8]);
     Assert.assertEquals(tmpSys.getRootDir(), sys0[9]);
+    Assert.assertNotNull(tmpSys.getPort());
     Assert.assertEquals(tmpSys.getPort().intValue(), prot1Port);
+    Assert.assertNotNull(tmpSys.getUseProxy());
     Assert.assertEquals(tmpSys.getUseProxy().booleanValue(), prot1UseProxy);
     Assert.assertEquals(tmpSys.getProxyHost(), prot1ProxyHost);
+    Assert.assertNotNull(tmpSys.getProxyPort());
     Assert.assertEquals(tmpSys.getProxyPort().intValue(), prot1ProxyPort);
     // Verify transfer methods
     List<TransferMethodEnum> tMethodsList = tmpSys.getTransferMethods();
@@ -352,9 +364,12 @@ public final class Utils
     {
       Assert.assertTrue(tMethodsList.contains(txfrMethod), "List of transfer methods did not contain: " + txfrMethod.name());
     }
-    Assert.assertEquals(tmpSys.getCanExec(), Boolean.valueOf(canExec));
+    Assert.assertEquals(tmpSys.getCanExec(), Boolean.valueOf(canExecTrue));
     Assert.assertEquals(tmpSys.getJobWorkingDir(), sys0[10]);
+    // TODO check jobRuntimes
+    Assert.assertNotNull(tmpSys.getJobMaxJobs());
     Assert.assertEquals(tmpSys.getJobMaxJobs().intValue(), jobMaxJobs);
+    Assert.assertNotNull(tmpSys.getJobMaxJobsPerUser());
     Assert.assertEquals(tmpSys.getJobMaxJobsPerUser().intValue(), jobMaxJobsPerUser);
     Assert.assertEquals(tmpSys.getJobIsBatch(), Boolean.valueOf(jobIsBatch));
     Assert.assertEquals(tmpSys.getBatchScheduler(), sys0[11]);
@@ -426,10 +441,12 @@ public final class Utils
   {
     // Verify required attributes
     Assert.assertEquals(tmpSys.getId(), sys0[1]);
+    Assert.assertNotNull(tmpSys.getSystemType());
     Assert.assertEquals(tmpSys.getSystemType().name(), sys0[3]);
     Assert.assertEquals(tmpSys.getHost(), sys0[5]);
+    Assert.assertNotNull(tmpSys.getDefaultAuthnMethod());
     Assert.assertEquals(tmpSys.getDefaultAuthnMethod().name(), prot1AuthnMethod.name());
-    Assert.assertEquals(tmpSys.getCanExec(), Boolean.valueOf(canExec));
+    Assert.assertEquals(tmpSys.getCanExec(), Boolean.valueOf(canExecTrue));
 
     // If systemType is LINUX then rootDir is required
     if (tmpSys.getSystemType() == SystemTypeEnum.LINUX) Assert.assertEquals(tmpSys.getRootDir(), sys0[9]);
@@ -447,14 +464,19 @@ public final class Utils
     Assert.assertEquals(tmpSys.getEffectiveUserId(), testUser1);
     Assert.assertNotNull(tmpSys.getTransferMethods());
     Assert.assertTrue(tmpSys.getTransferMethods().isEmpty());
+    Assert.assertNotNull(tmpSys.getPort());
     Assert.assertEquals(tmpSys.getPort().intValue(), defaultPort);
+    Assert.assertNotNull(tmpSys.getUseProxy());
     Assert.assertEquals(tmpSys.getUseProxy().booleanValue(), defaultUseProxy);
     Assert.assertEquals(tmpSys.getProxyHost(), defaultProxyHost);
+    Assert.assertNotNull(tmpSys.getProxyPort());
     Assert.assertEquals(tmpSys.getProxyPort().intValue(), defaultProxyPort);
-    Assert.assertEquals(tmpSys.getJobWorkingDir(), defaultJobWorkingDir);
+    Assert.assertEquals(tmpSys.getJobWorkingDir(), sys0[10]);
     Assert.assertNotNull(tmpSys.getJobEnvVariables());
     Assert.assertTrue(tmpSys.getJobEnvVariables().isEmpty());
+    Assert.assertNotNull(tmpSys.getJobMaxJobs());
     Assert.assertEquals(tmpSys.getJobMaxJobs().intValue(), defaultJobMaxJobs);
+    Assert.assertNotNull(tmpSys.getJobMaxJobsPerUser());
     Assert.assertEquals(tmpSys.getJobMaxJobsPerUser().intValue(), defaultJobMaxJobsPerUser);
     Assert.assertEquals(tmpSys.getJobIsBatch(), Boolean.valueOf(defaultJobIsBatch));
     Assert.assertEquals(tmpSys.getBatchScheduler(), defaultBatchScheduler);

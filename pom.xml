@@ -16,7 +16,7 @@
     </parent>
 
     <artifactId>tapis-client-java</artifactId>
-    <version>1.11.33-SNAPSHOT</version>
+    <version>1.11.41-SNAPSHOT</version>
 
     <name>Tapis Client</name>
     <description>Top level java client</description>
@@ -120,6 +120,7 @@
         <module>files-client</module>
         <module>meta-client</module>
         <module>apps-client</module>
+        <module>jobs-client</module>
     </modules>
 
 </project>

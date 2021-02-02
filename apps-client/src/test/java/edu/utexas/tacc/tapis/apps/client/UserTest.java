@@ -90,26 +90,20 @@ public class UserTest
     for (int i = 1; i <= numApps; i++)
     {
       String appId = apps.get(i)[1];
-      try
-      {
-        usrClient.deleteApp(appId);
-      }
+      try { usrClient.deleteApp(appId); }
       catch (Exception e)
       {
         System.out.println("Caught exception when soft deleting app: "+ appId + " Exception: " + e);
       }
     }
-//    // One app may have had owner changed so use new owner.
-//    String appId = apps.get(9)[1];
-//    usrClient = getClientUsr(serviceURL, newOwnerUserJWT);
-//    try
-//    {
-//      usrClient.deleteApp(appId);
-//    }
-//    catch (Exception e)
-//    {
-//      System.out.println("Caught exception when soft deleting app: "+ appId + " Exception: " + e);
-//    }
+    // One app may have had owner changed so use new owner.
+    String appId = apps.get(16)[1];
+    usrClient = getClientUsr(serviceURL, newOwnerUserJWT);
+    try { usrClient.deleteApp(appId); }
+    catch (Exception e)
+    {
+      System.out.println("Caught exception when soft deleting app: "+ appId + " Exception: " + e);
+    }
     usrClient = getClientUsr(serviceURL, ownerUserJWT);
   }
 
@@ -150,19 +144,17 @@ public class UserTest
   }
 
   // Create a app using minimal attributes:
-  //   name, appType
+  //   id, version
   @Test
   public void testCreateAppMinimal()
   {
-    // Create a app
+    // Create an app using only required attributes
     String[] app0 = apps.get(14);
     System.out.println("Creating app with name: " + app0[1]);
-    // Set optional attributes to null
-//    String[] app0 = {tenantName, appId, appVersion, "description " + suffix, appType, ownerUser1};
     app0[3] = null; app0[4] = null; app0[5] = null;
 
     try {
-      String respUrl = createApp(usrClient, app0);
+      String respUrl = createAppMinimal(usrClient, app0);
       System.out.println("Created app: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
@@ -252,6 +244,7 @@ public class UserTest
       }
       // Verify notes
       String tmpNotesStr = (String) tmpApp.getNotes();
+      System.out.println("Found notes: " + tmpNotesStr);
       JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(tmpNotesStr, JsonObject.class);
       Assert.assertNotNull(tmpNotes);
       System.out.println("Found notes: " + tmpNotesStr);
@@ -314,7 +307,7 @@ public class UserTest
     // Delete the app
     usrClient.deleteApp(app0[1]);
     try {
-      App tmpApp2 = usrClient.getApp(app0[1], app0[2]);
+      usrClient.getApp(app0[1], app0[2]);
       Assert.fail("App not deleted. App name: " + app0[1]);
     } catch (TapisClientException e) {
       Assert.assertEquals(e.getCode(), 404);

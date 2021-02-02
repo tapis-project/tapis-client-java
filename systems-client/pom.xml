@@ -3,7 +3,7 @@
   <parent>
     <groupId>edu.utexas.tacc.tapis</groupId>
     <artifactId>tapis-client-java</artifactId>
-    <version>1.11.33-SNAPSHOT</version>
+    <version>1.11.41-SNAPSHOT</version>
   </parent>
 
   <artifactId>systems-client</artifactId>
@@ -41,8 +41,28 @@
 
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
-
+    
+    <!-- NOTE: THE CALLED SCRIPT INTRODUCES HIDDEN DEPENDENCIES -->
+    <!--       These dependencies include curl.      -->
     <plugins>
+      <!-- Run script to download latest openapi spec -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>${exec-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>Download openapi file</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>${basedir}/gen_spec.sh</executable>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <!-- Build generated client code using openapi-generator -->
       <plugin>
         <groupId>org.openapitools</groupId>
@@ -55,7 +75,7 @@
             </goals>
             <configuration>
               <!-- Use the openapi spec here. Tapis live-docs website should also get spec from here -->
-              <inputSpec>${project.basedir}/SystemsAPI.yaml</inputSpec>
+              <inputSpec>${project.basedir}/target/SystemsAPI.yaml</inputSpec>
               <enablePostProcessFile>true</enablePostProcessFile>
               <output>${project.build.directory}/generated-sources/openapi</output>
               <generatorName>java</generatorName>

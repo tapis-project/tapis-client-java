@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gson.JsonObject;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SystemTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
@@ -42,6 +44,10 @@ import static edu.utexas.tacc.tapis.systems.client.Utils.*;
 public class UserTest
 {
   // Test data
+  // NOTE: We create a certain number of systems but during refactoring some end up not being used.
+  //       When creating a new test look for an unused system and remove it from the this list.
+  //  List of unused systems: 5, 6
+  //  If list is empty then increment numSystems by 1 and use it.
   int numSystems = 13;
   Map<Integer, String[]> systems = Utils.makeSystems(numSystems, "CltUsr");
   
@@ -148,10 +154,10 @@ public class UserTest
   public void testCreateSystem() {
     // Create a system
     String[] sys0 = systems.get(1);
-    Credential cred0 = null;
     System.out.println("Creating system with name: " + sys0[1]);
     try {
-      String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
+      String respUrl =
+              usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull, prot1TxfrMethodsC));
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
@@ -164,10 +170,10 @@ public class UserTest
   public void testCreateSystemAlreadyExists() throws Exception {
     // Create a system
     String[] sys0 = systems.get(3);
-    Credential cred0 = null;
     System.out.println("Creating system with name: " + sys0[1]);
     try {
-      String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
+      String respUrl =
+              usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull, prot1TxfrMethodsC));
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
@@ -176,46 +182,119 @@ public class UserTest
     }
     // Now attempt to create it again, should throw exception
     System.out.println("Creating system with name: " + sys0[1]);
-    Utils.createSystem(usrClient, sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
+    usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull, prot1TxfrMethodsC));
     Assert.fail("Exception should have been thrown");
   }
 
-  // Test that bucketName is required if transfer methods include S3
-  @Test(expectedExceptions = {TapisClientException.class}, expectedExceptionsMessageRegExp = ".*SYSAPI_S3_NOBUCKET_INPUT.*")
-  public void testCreateSystemS3NoBucketName() throws Exception {
-    // Create a system
+  // Test various restrictions on system attributes at system creation time
+  public void testSystemCreateRestrictions() {
     String[] sys0 = systems.get(4);
-    // Set bucketName to empty string
-    sys0[8] = "";
-    Credential cred0 = null;
-    System.out.println("Creating system with name: " + sys0[1]);
-    Utils.createSystem(usrClient, sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
-    Assert.fail("Exception should have been thrown");
-  }
+    ReqCreateSystem rSys = createReqSystem(sys0, prot1Port, prot1AuthnMethod, null, prot1TxfrMethodsC);
 
-  // Test that authn method of CERT and static owner is not allowed
-  @Test(expectedExceptions = {TapisClientException.class}, expectedExceptionsMessageRegExp = ".*SYSAPI_INVALID_EFFECTIVEUSERID_INPUT.*")
-  public void testCreateSystemInvalidEffUserId() throws Exception {
-    // Create a system
-    String[] sys0 = systems.get(5);
-    Credential cred0 = null;
-    System.out.println("Creating system with name: " + sys0[1]);
-    Utils.createSystem(usrClient, sys0, prot1Port, AuthnMethod.CERT, cred0, prot1TxfrMethodsC);
-    Assert.fail("Exception should have been thrown");
-  }
+    // Attempt to create a system with transfer methods including S3 and no bucketName
+    boolean pass = false;
+    System.out.println("Attempting to create system with S3 and no bucketName. System name: " + sys0[1]);
+    rSys.setBucketName(null);
+    try { usrClient.createSystem(rSys); }
+    catch (TapisClientException tce)
+    {
+      System.out.println("Caught exception: " + tce.getMessage());
+      Assert.assertTrue(tce.getMessage().contains("SYSAPI_S3_NOBUCKET_INPUT"));
+      pass = true;
+    }
+    Assert.assertTrue(pass, "Should not be able to create system with S3 and no bucketName");
+    rSys.setBucketName(sys0[8]);
 
-  // Test that providing credentials for dynamic effective user is not allowed
-  @Test(expectedExceptions = {TapisClientException.class}, expectedExceptionsMessageRegExp = ".*SYSAPI_CRED_DISALLOWED_INPUT.*")
-  public void testCreateSystemCredDisallowed() throws Exception {
-    // Create a system
-    String[] sys0 = systems.get(6);
-    // Set effectiveUserId to api user
+    // Attempt to create an OBJECT_STORE system with canExec=true
+    pass = false;
+    System.out.println("Attempting to create system of type OBJECT_STORE with canExec=true. System name: " + sys0[1]);
+    rSys.setSystemType(SystemTypeEnum.OBJECT_STORE);
+    try { usrClient.createSystem(rSys); }
+    catch (TapisClientException tce)
+    {
+      System.out.println("Caught exception: " + tce.getMessage());
+      Assert.assertTrue(tce.getMessage().contains("SYSAPI_OBJSTORE_CANEXEC_INPUT"));
+      pass = true;
+    }
+    Assert.assertTrue(pass, "Should not be able to create system of type OBJECT_STORE with canExec=true");
+    rSys.setSystemType(SystemTypeEnum.LINUX);
+
+    // Test that authn method of CERT and static owner is not allowed
+    pass = false;
+    System.out.println("Attempting to create system with authnMethod=CERT and static owner. System name: " + sys0[1]);
+    try
+    {
+      usrClient.createSystem(createReqSystem(sys0, prot1Port, AuthnMethod.CERT, credNull, prot1TxfrMethodsC));
+    }
+    catch (TapisClientException tce)
+    {
+      System.out.println("Caught exception: " + tce.getMessage());
+      Assert.assertTrue(tce.getMessage().contains("SYSAPI_INVALID_EFFECTIVEUSERID_INPUT"));
+      pass = true;
+    }
+    Assert.assertTrue(pass, "Should not be able to create system authnMethod=CERT and static owner");
+
+    // Test that providing credentials for dynamic effective user is not allowed
+    pass = false;
+    System.out.println("Attempting to create system with credentials and apiUserId. System name: " + sys0[1]);
+    String tmpEffUser = sys0[6];
     sys0[6] = "${apiUserId}";
     Credential cred0 = SystemsClient.buildCredential(sys0[7], "fakePrivateKey", "fakePublicKey",
                                            "fakeAccessKey", "fakeAccessSecret", "fakeCert");
-    System.out.println("Creating system with name: " + sys0[1]);
-    Utils.createSystem(usrClient, sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
-    Assert.fail("Exception should have been thrown");
+    try
+    {
+      usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC));
+    }
+    catch (TapisClientException tce)
+    {
+      System.out.println("Caught exception: " + tce.getMessage());
+      Assert.assertTrue(tce.getMessage().contains("SYSAPI_CRED_DISALLOWED_INPUT"));
+      pass = true;
+    }
+    Assert.assertTrue(pass, "Should not be able to create system with credentials and apiUserId");
+    sys0[6] = tmpEffUser;
+
+    // Attempt to create a system with with canExec = true and no jobWorkingDir
+    pass = false;
+    System.out.println("Attempting to create system with canExec=true and no jobWorkingDir. System name: " + sys0[1]);
+    rSys.setJobWorkingDir(null);
+    try { usrClient.createSystem(rSys); }
+    catch (TapisClientException tce)
+    {
+      System.out.println("Caught exception: " + tce.getMessage());
+      Assert.assertTrue(tce.getMessage().contains("SYSAPI_CANEXEC_NO_JOBWORKINGDIR_INPUT"));
+      pass = true;
+    }
+    Assert.assertTrue(pass, "Should not be able to create system with canExec=true and no jobWorkingDir");
+
+    // Attempt to create a system with with canExec = true and null jobRuntimes
+    pass = false;
+    System.out.println("Attempting to create system with canExec=true and no jobRuntimes. System name: " + sys0[1]);
+    rSys.setJobWorkingDir(sys0[10]);
+    rSys.setJobRuntimes(null);
+    try { usrClient.createSystem(rSys); }
+    catch (TapisClientException tce)
+    {
+      System.out.println("Caught exception: " + tce.getMessage());
+      Assert.assertTrue(tce.getMessage().contains("SYSAPI_CANEXEC_NO_JOBRUNTIME_INPUT"));
+      pass = true;
+    }
+    Assert.assertTrue(pass, "Should not be able to create system with canExec=true and no jobRuntimes");
+
+    // Attempt to create a system with with canExec = true and empty jobRuntimes
+    // Jsonschema check should reject
+    pass = false;
+    System.out.println("Attempting to create system with canExec=true and no jobRuntimes. System name: " + sys0[1]);
+    rSys.setJobRuntimes(jobRuntimesEmpty);
+    try { usrClient.createSystem(rSys); }
+    catch (TapisClientException tce)
+    {
+      System.out.println("Caught exception: " + tce.getMessage());
+//      Assert.assertTrue(tce.getMessage().contains("SYSAPI_CANEXEC_NO_JOBRUNTIME_INPUT"));
+      Assert.assertTrue(tce.getMessage().contains("TAPIS_JSON_VALIDATION_FAILURE"));
+      pass = true;
+    }
+    Assert.assertTrue(pass, "Should not be able to create system with canExec=true and no jobRuntimes");
   }
 
   // Test retrieving a system including default authn method
@@ -223,8 +302,8 @@ public class UserTest
   @Test
   public void testGetSystem() throws Exception {
     String[] sys0 = systems.get(7);
-    Credential cred0 = null;
-    String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, AuthnMethod.PKI_KEYS, cred0, prot1TxfrMethodsC);
+    String respUrl =
+            usrClient.createSystem(createReqSystem(sys0, prot1Port, AuthnMethod.PKI_KEYS, credNull, prot1TxfrMethodsC));
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     TSystem tmpSys = usrClient.getSystem(sys0[1]);
@@ -260,7 +339,6 @@ public class UserTest
   @Test
   public void testUpdateSystem() {
     String[] sys0 = systems.get(8);
-    Credential cred0 = null;
 //    private static final String[] sysF2 = {tenantName, "CsysF", "description PATCHED", sysType, ownerUser, "hostPATCHED", "effUserPATCHED",
 //            "fakePasswordF", "bucketF", "/rootF", "jobLocalWorkDirF", "jobLocalArchDirF", "jobRemoteArchSystemF", "jobRemoteArchDirF"};
     String[] sysF2 = sys0.clone();
@@ -269,7 +347,8 @@ public class UserTest
     System.out.println("Creating and updating system with name: " + sys0[1]);
     try {
       // Create a system
-      String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
+      String respUrl =
+              usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull, prot1TxfrMethodsC));
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
       // Update the system
@@ -293,10 +372,14 @@ public class UserTest
       Assert.assertEquals(tmpSys.getBatchScheduler(), sys0[11]);
       Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), sys0[12]);
 // TODO logical queues?      Assert.assertEquals(tmpSys.getJobRemoteArchiveDir(), sys0[13]);
+      Assert.assertNotNull(tmpSys.getPort());
       Assert.assertEquals(tmpSys.getPort().intValue(), prot2Port);
+      Assert.assertNotNull(tmpSys.getUseProxy());
       Assert.assertEquals(tmpSys.getUseProxy().booleanValue(), prot2UseProxy);
       Assert.assertEquals(tmpSys.getProxyHost(), prot2ProxyHost);
+      Assert.assertNotNull(tmpSys.getProxyPort());
       Assert.assertEquals(tmpSys.getProxyPort().intValue(), prot2ProxyPort);
+      Assert.assertNotNull(tmpSys.getDefaultAuthnMethod());
       Assert.assertEquals(tmpSys.getDefaultAuthnMethod().name(), prot2AuthnMethod.name());
       // Verify transfer methods
       List<TransferMethodEnum> tMethodsList = tmpSys.getTransferMethods();
@@ -321,7 +404,7 @@ public class UserTest
       Assert.assertEquals(tmpTags.size(), tags2.size(), "Wrong number of tags");
       for (String tagStr : tags2)
       {
-        Assert.assertTrue(tmpTags.contains(tagStr));
+        Assert.assertTrue(tmpTags.contains(tagStr), "List of tags did not contain a tag named: " + tagStr);
         System.out.println("Found tag: " + tagStr);
       }
       // Verify notes
@@ -330,9 +413,9 @@ public class UserTest
       JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(tmpNotesStr, JsonObject.class);
       Assert.assertNotNull(tmpNotes);
       System.out.println("Found notes: " + tmpNotesStr);
-      Assert.assertTrue(tmpNotes.has("project"));
+      Assert.assertTrue(tmpNotes.has("project"), "Notes json did not contain project");
       Assert.assertEquals(tmpNotes.get("project").getAsString(), notes2JO.get("project").getAsString());
-      Assert.assertTrue(tmpNotes.has("testdata"));
+      Assert.assertTrue(tmpNotes.has("testdata"), "Notes json did not contain testdata");
       Assert.assertEquals(tmpNotes.get("testdata").getAsString(), notes2JO.get("testdata").getAsString());
     } catch (Exception e) {
       System.out.println("Caught exception: " + e);
@@ -343,13 +426,13 @@ public class UserTest
   /**
    * Check that as a user we can give away ownership. Since we can have only one client (i.e. one user) then all we
    * can do after giving away ownership is check that we can no longer modify the system
-   * @throws Exception
    */
   @Test
   public void testChangeOwner() throws Exception {
     // Create the system
     String[] sys0 = systems.get(9);
-    String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, prot1AuthnMethod, null, prot1TxfrMethodsC);
+    String respUrl =
+            usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, null, prot1TxfrMethodsC));
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     TSystem tmpSys = usrClient.getSystem(sys0[1]);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
@@ -377,11 +460,12 @@ public class UserTest
   public void testGetSystems() throws Exception {
     // Create 2 systems
     String[] sys1 = systems.get(10);
-    Credential cred0 = null;
-    String respUrl = Utils.createSystem(usrClient, sys1, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
+    String respUrl =
+            usrClient.createSystem(createReqSystem(sys1, prot1Port, prot1AuthnMethod, credNull, prot1TxfrMethodsC));
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     String[] sys2 = systems.get(11);
-    respUrl = Utils.createSystem(usrClient, sys2, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
+    respUrl =
+            usrClient.createSystem(createReqSystem(sys2, prot1Port, prot1AuthnMethod, credNull, prot1TxfrMethodsC));
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Get list of all systems
@@ -405,8 +489,8 @@ public class UserTest
   public void testDelete() throws Exception {
     // Create the system
     String[] sys0 = systems.get(12);
-    Credential cred0 = null;
-    String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
+    String respUrl =
+            usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull, prot1TxfrMethodsC));
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Delete the system
@@ -423,11 +507,11 @@ public class UserTest
   @Test
   public void testUserPerms() {
     String[] sys0 = systems.get(13);
-    Credential cred0 = null;
     // Create a system
     System.out.println("Creating system with name: " + sys0[1]);
     try {
-      String respUrl = Utils.createSystem(usrClient, sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
+      String respUrl =
+              usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull, prot1TxfrMethodsC));
       System.out.println("Created system: " + respUrl);
       System.out.println("Testing perms for user: " + newPermsUser);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);

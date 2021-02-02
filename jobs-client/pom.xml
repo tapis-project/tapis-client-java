@@ -1,18 +1,17 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>edu.utexas.tacc.tapis</groupId>
         <artifactId>tapis-client-java</artifactId>
         <version>1.11.41-SNAPSHOT</version>
     </parent>
 
-	<artifactId>meta-client</artifactId>
+    <artifactId>jobs-client</artifactId>
 
-	<name>Tapis Meta Client</name>
-	<description>Java client for tapis-metaapi web application</description>
+    <name>Tapis Jobs Client</name>
+    <description>Java client for Tapis Jobs Service</description>
 
-	<dependencies>
+    <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>shared</artifactId>
@@ -22,29 +21,29 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
-	</dependencies>
+    </dependencies>
     
-	<build>
-		<sourceDirectory>src/main/java</sourceDirectory>
+    <build>
+        <sourceDirectory>src/main/java</sourceDirectory>
 
-	<plugins>
-		<!-- Capture the git commit hash and branch identifiers. -->
-		<!-- See parent pom for configuration details. -->
-		<plugin>
-			<groupId>org.codehaus.mojo</groupId>
-			<artifactId>buildnumber-maven-plugin</artifactId>
-		</plugin>
+    <plugins>
+        <!-- Capture the git commit hash and branch identifiers. -->
+        <!-- See parent pom for configuration details. -->
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>buildnumber-maven-plugin</artifactId>
+        </plugin>
 
-		<plugin>
-			<!-- The version is set in the parent pom -->
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-surefire-plugin</artifactId>
-			<configuration>
-				<suiteXmlFiles>
-					<suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
-				</suiteXmlFiles>
-			</configuration>
-		</plugin>
+        <plugin>
+            <!-- The version is set in the parent pom -->
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+                <suiteXmlFiles>
+                    <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                </suiteXmlFiles>
+            </configuration>
+        </plugin>
 
         <!-- Build generated client code using openapi-generator -->
         <plugin>
@@ -57,14 +56,14 @@
                         <goal>generate</goal>
                     </goals>
                     <configuration>
-                        <inputSpec>${project.basedir}/src/main/resources/metav3-openapi.yaml</inputSpec>
+                        <inputSpec>${project.basedir}/src/main/resources/JobsAPI.yaml</inputSpec>
                         <enablePostProcessFile>true</enablePostProcessFile>
                         <output>${project.build.directory}/generated-sources/openapi</output>
                         <generatorName>java</generatorName>
                         <groupId>edu.utexas.tacc.tapis</groupId>
-                        <invokerPackage>edu.utexas.tacc.tapis.meta.client.gen</invokerPackage>
-                        <apiPackage>edu.utexas.tacc.tapis.meta.client.gen.api</apiPackage>
-                        <modelPackage>edu.utexas.tacc.tapis.meta.client.gen.model</modelPackage>
+                        <invokerPackage>edu.utexas.tacc.tapis.jobs.client.gen</invokerPackage>
+                        <apiPackage>edu.utexas.tacc.tapis.jobs.client.gen.api</apiPackage>
+                        <modelPackage>edu.utexas.tacc.tapis.jobs.client.gen.model</modelPackage>
                         <!-- Turn off generation of stuff we do not need -->
                         <generateApiTests>false</generateApiTests>
                         <generateApiDocumentation>false</generateApiDocumentation>
@@ -96,7 +95,7 @@
             </executions>
         </plugin>
     </plugins>
-		<finalName>meta-client</finalName>
-	</build>
+        <finalName>jobs-client</finalName>
+    </build>
 
 </project>

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.utexas.tacc.tapis</groupId>
   <artifactId>tapis-client-java</artifactId>
-  <version>1.11.32</version>
+  <version>1.11.40</version>
   <packaging>pom</packaging>
   <name>Tapis Client</name>
   <description>Top level java client</description>
@@ -137,6 +137,7 @@
     <module>files-client</module>
     <module>meta-client</module>
     <module>apps-client</module>
+    <module>jobs-client</module>
   </modules>
   <scm>
     <connection>scm:git:git@github.com:tapis-project/tapis-client-java.git</connection>
@@ -157,7 +158,7 @@
     <activemq-client.version>5.16.0</activemq-client.version>
     <jackson.version>2.10.1</jackson.version>
     <jargon-core.version>4.3.0.1-RELEASE</jargon-core.version>
-    <maven-compiler-plugin-release>13</maven-compiler-plugin-release>
+    <maven-compiler-plugin-release>15</maven-compiler-plugin-release>
     <jakarta.el.version>3.0.3</jakarta.el.version>
     <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
     <nexus-staging-maven-plugin.version>1.6.7</nexus-staging-maven-plugin.version>
@@ -191,13 +192,13 @@
     <swagger-jaxrs2.version>2.0.10</swagger-jaxrs2.version>
     <undertow.version>2.2.2.Final</undertow.version>
     <commons-math3.version>3.6.1</commons-math3.version>
-    <reactor-core.version>3.3.11.RELEASE</reactor-core.version>
+    <reactor-core.version>3.4.1</reactor-core.version>
     <software.amazon.awssdk.version>2.13.11</software.amazon.awssdk.version>
     <testng.version>6.14.3</testng.version>
     <commons-lang3.version>3.9</commons-lang3.version>
     <junit.version>4.12</junit.version>
     <javacc.version>7.0.6</javacc.version>
-    <rabbitmq.version>3.6.11</rabbitmq.version>
+    <rabbitmq.version>5.10.0</rabbitmq.version>
     <javax.mail.version>1.6.2</javax.mail.version>
     <reactor-test.version>3.2.3.RELEASE</reactor-test.version>
     <jaxb-api.version>2.3.1</jaxb-api.version>
@@ -220,7 +221,7 @@
     <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
     <mockito-core.version>3.0.0</mockito-core.version>
     <javax.websocket-api.version>1.1</javax.websocket-api.version>
-    <build.timestamp>2021-01-08T18:57:51Z</build.timestamp>
+    <build.timestamp>2021-01-29T14:22:32Z</build.timestamp>
     <statefulj.version>3.0</statefulj.version>
     <java-source.version>1.15</java-source.version>
     <reactor-rabbitmq.version>1.4.4.RELEASE</reactor-rabbitmq.version>
@@ -233,7 +234,7 @@
     <logback-classic.version>1.2.3</logback-classic.version>
     <shiro.version>1.4.1</shiro.version>
     <maven-javadoc-plugin.version>3.0.0</maven-javadoc-plugin.version>
-    <jersey-container-servlet.version>2.30</jersey-container-servlet.version>
+    <jersey-container-servlet.version>2.33</jersey-container-servlet.version>
     <javax.activation.activation.version>1.1.1</javax.activation.activation.version>
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
     <org.everit.json.schema.version>1.12.1</org.everit.json.schema.version>
@@ -423,7 +424,7 @@
       </testResource>
     </testResources>
     <directory>target</directory>
-    <finalName>tapis-client-java-1.11.32</finalName>
+    <finalName>tapis-client-java-1.11.40</finalName>
   </build>
   <reporting>
     <outputDirectory>target/site</outputDirectory>

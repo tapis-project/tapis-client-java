@@ -2,6 +2,7 @@ package edu.utexas.tacc.tapis.systems.client;
 
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
 import org.apache.commons.lang3.StringUtils;
@@ -106,19 +107,24 @@ public class MatchConstraintsTest
     if (tmpSys == null)
     {
       System.out.println("Test data not found. Test systems will be created.");
+      // Create systems
       for (int i = 1; i <= numSystems; i++)
       {
         String[] sys0 = systems.get(i);
+        // Vary port # for checking numeric relational searches
         int port = i;
+        ReqCreateSystem rSys;
+        // Create half the systems owned by ownerUser1 and half by ownerUser2
         if (i <= numSystems / 2)
         {
-          // Vary port # for checking numeric relational searches
-          Utils.createSystem(getClientUsr(serviceURL, ownerUser1JWT), sys0, port, prot1AuthnMethod, null, prot1TxfrMethodsC);
+          rSys = Utils.createReqSystem(sys0, port, prot1AuthnMethod, null, prot1TxfrMethodsC);
+          getClientUsr(serviceURL, ownerUser1JWT).createSystem(rSys);
           tmpSys = getClientUsr(serviceURL, ownerUser1JWT).getSystem(sys0[1]);
         }
         else
         {
-          Utils.createSystem(getClientUsr(serviceURL, ownerUser2JWT), sys0, port, prot1AuthnMethod, null, prot1TxfrMethodsC);
+          rSys = Utils.createReqSystem(sys0, port, prot1AuthnMethod, null, prot1TxfrMethodsC);
+          getClientUsr(serviceURL, ownerUser2JWT).createSystem(rSys);
           tmpSys = getClientUsr(serviceURL, ownerUser2JWT).getSystem(sys0[1]);
         }
         Assert.assertNotNull(tmpSys);
@@ -144,20 +150,22 @@ public class MatchConstraintsTest
   public void tearDown()
   {
     System.out.println("****** Executing AfterSuite teardown method for class: " + this.getClass().getSimpleName());
-    SystemsClient sysClient = getClientUsr(serviceURL, ownerUser1JWT);
+    SystemsClient sysClient;
     // Remove all objects created by tests, ignore any exceptions
     // This is a soft delete but still should be done to clean up SK artifacts.
-    for (int i = 1; i <= numSystems; i++)
+    sysClient = getClientUsr(serviceURL, ownerUser1JWT);
+    for (int i = 1; i <= numSystems / 2; i++)
     {
       String systemId = systems.get(i)[1];
-      try
-      {
-        sysClient.deleteSystem(systemId);
-      }
-      catch (Exception e)
-      {
-        System.out.println("Caught exception when deleting system: "+ systemId + " Exception: " + e);
-      }
+      try { sysClient.deleteSystem(systemId); }
+      catch (Exception e) {System.out.println("Caught exception when deleting system: "+systemId+" Exception: "+e);}
+    }
+    sysClient = getClientUsr(serviceURL, ownerUser2JWT);
+    for (int i = (numSystems/2)+1; i <= numSystems;  i++)
+    {
+      String systemId = systems.get(i)[1];
+      try { sysClient.deleteSystem(systemId); }
+      catch (Exception e) {System.out.println("Caught exception when deleting system: "+systemId+" Exception: "+e);}
     }
   }
 
