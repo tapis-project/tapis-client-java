@@ -1,11 +1,13 @@
 package edu.utexas.tacc.tapis.systems.client;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gson.JsonObject;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.systems.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespBoolean;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.internal.LinkedTreeMap;
 
@@ -277,7 +279,7 @@ public class SystemsClient
     try { resp = sysApi.getSystems(false, searchStr, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null) return null;
+    if (resp == null || resp.getResult() == null) return Collections.emptyList();
     // Postprocess TSystems in the result
     for (TSystem tSys : resp.getResult()) postProcessSystem(tSys);
     return resp.getResult();
@@ -313,7 +315,7 @@ public class SystemsClient
     try { resp = sysApi.searchSystemsRequestBody(req, false, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null || resp.getResult().getSearch() == null) return null;
+    if (resp == null || resp.getResult() == null || resp.getResult().getSearch() == null) return Collections.emptyList();
     // Postprocess TSystems in the result
     for (TSystem tSys : resp.getResult().getSearch()) postProcessSystem(tSys);
     return resp.getResult().getSearch();
@@ -338,7 +340,7 @@ public class SystemsClient
     try { resp = sysApi.matchConstraints(req, false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null) return null;
+    if (resp == null || resp.getResult() == null) return Collections.emptyList();
     // Postprocess TSystems in the result
     for (TSystem tSys : resp.getResult()) postProcessSystem(tSys);
     return resp.getResult();
@@ -362,6 +364,30 @@ public class SystemsClient
     if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
     else return -1;
   }
+
+  /**
+   * Check if resource is enabled
+   *
+   * @return boolean indicating if enabled
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public boolean isEnabled(String systemId) throws TapisClientException
+  {
+    // Submit the request and return the response
+    RespBoolean resp = null;
+    try { resp = sysApi.isEnabled(systemId, false); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null)
+    {
+      return resp.getResult();
+    }
+    else
+    {
+      throw new TapisClientException("isEnabled did not return a result");
+    }
+  }
+
 
   // -----------------------------------------------------------------------
   // --------------------------- Permissions -------------------------------
@@ -393,7 +419,14 @@ public class SystemsClient
     try { resp = permsApi.getUserPerms(systemId, userName, false); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null) return resp.getResult().getNames(); else return null;
+    if (resp != null && resp.getResult() != null)
+    {
+      return resp.getResult().getNames();
+    }
+    else
+    {
+      return Collections.emptyList();
+    }
   }
 
   /**

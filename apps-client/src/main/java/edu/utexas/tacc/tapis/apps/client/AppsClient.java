@@ -32,8 +32,6 @@ import edu.utexas.tacc.tapis.apps.client.gen.model.RespResourceUrl;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespApp;
 import edu.utexas.tacc.tapis.apps.client.gen.model.App;
 
-import javax.xml.crypto.dsig.keyinfo.KeyValue;
-
 /**
  * Class providing a convenient front-end to the automatically generated client code
  * for the Apps Service REST API.
@@ -53,6 +51,7 @@ public class AppsClient
   public static final boolean DEFAULT_STRICT_FILE_INPUTS = false;
   public static final boolean DEFAULT_FILE_INPUT_IN_PLACE = false;
   public static final boolean DEFAULT_FILE_INPUT_META_REQUIRED = false;
+  public static final int DEFAULT_MAX_JOBS = Integer.MAX_VALUE;
 
   // ************************************************************************
   // *********************** Fields *****************************************
