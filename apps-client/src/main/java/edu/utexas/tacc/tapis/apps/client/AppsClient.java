@@ -12,6 +12,7 @@ import edu.utexas.tacc.tapis.apps.client.gen.model.ArgSpec;
 import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespBasic;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespAppArray;
+import edu.utexas.tacc.tapis.apps.client.gen.model.RespBoolean;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.Gson;
 
@@ -311,6 +312,29 @@ public class AppsClient
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
     else return -1;
+  }
+
+  /**
+   * Check if resource is enabled
+   *
+   * @return boolean indicating if enabled
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public boolean isEnabled(String appId) throws TapisClientException
+  {
+    // Submit the request and return the response
+    RespBoolean resp = null;
+    try { resp = appApi.isEnabled(appId, false); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null)
+    {
+      return resp.getResult();
+    }
+    else
+    {
+      throw new TapisClientException("isEnabled did not return a result");
+    }
   }
 
   // -----------------------------------------------------------------------
