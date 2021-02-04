@@ -121,6 +121,7 @@
         <module>meta-client</module>
         <module>apps-client</module>
         <module>jobs-client</module>
+        <module>notifications-client</module>
     </modules>
 
 </project>
