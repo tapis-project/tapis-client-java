@@ -88,7 +88,7 @@ paths:
             type: integer
         - name: sortBy
           in: query
-          description: Attribute for sorting. Direction may be included. For example sortBy=name(desc). Default direction is (asc).
+          description: Attribute for sorting. Direction may be included. For example sortBy=id(desc). Default direction is (asc).
           schema:
             type: string
         - name: skip
@@ -98,7 +98,7 @@ paths:
             type: integer
         - name: startAfter
           in: query
-          description: Where to start when sorting. Use one of skip or startAfter. Must also specify sortBy. For example, limit=10&sortBy=seqId(asc)&startAfter=101
+          description: Where to start when sorting. Use one of skip or startAfter. Must also specify sortBy. For example, limit=10&sortBy=id(asc)&startAfter=my.sys1
           schema:
             type: string
         - name: computeTotal
@@ -135,7 +135,7 @@ paths:
       tags:
         - Systems
       summary: Create a system
-      description: Create a system using a request body. System name must be unique within a tenant and can be composed of alphanumeric characters and the following special characters [-._~]. Name must begin with an alphabetic character and can be no more than 256 characters in length. Description is optional with a maximum length of 2048 characters.'
+      description: Create a system using a request body. System name must be unique within a tenant and can be composed of alphanumeric characters and the following special characters [-._~]. Name must begin with an alphabetic character and can be no more than 80 characters in length. Description is optional with a maximum length of 2048 characters.'
       operationId: createSystem
       parameters:
         - name: pretty
@@ -201,7 +201,7 @@ paths:
             type: integer
         - name: sortBy
           in: query
-          description: Attribute for sorting. Direction may be included. For example sortBy=name(desc). Default direction is (asc).
+          description: Attribute for sorting. Direction may be included. For example sortBy=id(desc). Default direction is (asc).
           schema:
             type: string
         - name: skip
@@ -211,7 +211,7 @@ paths:
             type: integer
         - name: startAfter
           in: query
-          description: Where to start when sorting. Use one of skip or startAfter. Must also specify sortBy. For example, limit=10&sortBy=id(asc)&startAfter=101
+          description: Where to start when sorting. Use one of skip or startAfter. Must also specify sortBy. For example, limit=10&sortBy=id(asc)&startAfter=my.sys2
           schema:
             type: string
         - name: computeTotal
@@ -263,7 +263,7 @@ paths:
             type: integer
         - name: sortBy
           in: query
-          description: Attribute for sorting. Direction may be included. For example sortBy=name(desc). Default direction is (asc).
+          description: Attribute for sorting. Direction may be included. For example sortBy=id(desc). Default direction is (asc).
           schema:
             type: string
         - name: skip
@@ -273,7 +273,7 @@ paths:
             type: integer
         - name: startAfter
           in: query
-          description: Where to start when sorting. Use one of skip or startAfter. Must also specify sortBy. For example, limit=10&sortBy=id(asc)&startAfter=101
+          description: Where to start when sorting. Use one of skip or startAfter. Must also specify sortBy. For example, limit=10&sortBy=id(asc)&startAfter=my.sys1
           schema:
             type: string
         - name: computeTotal
@@ -429,7 +429,7 @@ paths:
       tags:
         - Systems
       summary: Soft delete a system
-      description: Soft delete a system given the system name.
+      description: Soft delete a system given the system name. Must specify confirm=true to complete the action.
       operationId: deleteSystem
       parameters:
         - name: systemId
@@ -440,6 +440,11 @@ paths:
         - name: pretty
           in: query
           description: Pretty print the response. For example pretty=true. Default is false.
+          schema:
+            type: boolean
+        - name: confirm
+          in: query
+          description: Must be specified to complete the action. For example confirm=true. Default is false.
           schema:
             type: boolean
       responses:
@@ -1005,9 +1010,6 @@ components:
     TSystem:
       type: object
       properties:
-        seqId:
-          type: integer
-          format: int32
         tenant:
           type: string
         id:

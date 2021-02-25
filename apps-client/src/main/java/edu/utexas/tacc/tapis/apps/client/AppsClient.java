@@ -297,6 +297,7 @@ public class AppsClient
 
   /**
    * Delete an app given the app id.
+   * @param confirm Confirm the action
    * Return 1 if record was deleted
    * Return 0 if record not present
    *
@@ -304,10 +305,10 @@ public class AppsClient
    * @return number of records modified as a result of the action
    * @throws TapisClientException - If api call throws an exception
    */
-  public int deleteApp(String id) throws TapisClientException
+  public int deleteApp(String id, Boolean confirm) throws TapisClientException
   {
     RespChangeCount resp = null;
-    try { resp = appApi.deleteApp(id, false); }
+    try { resp = appApi.deleteApp(id, false, confirm); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();

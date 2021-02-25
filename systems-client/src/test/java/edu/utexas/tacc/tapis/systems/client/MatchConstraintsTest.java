@@ -157,14 +157,14 @@ public class MatchConstraintsTest
     for (int i = 1; i <= numSystems / 2; i++)
     {
       String systemId = systems.get(i)[1];
-      try { sysClient.deleteSystem(systemId); }
+      try { sysClient.deleteSystem(systemId, true); }
       catch (Exception e) {System.out.println("Caught exception when deleting system: "+systemId+" Exception: "+e);}
     }
     sysClient = getClientUsr(serviceURL, ownerUser2JWT);
     for (int i = (numSystems/2)+1; i <= numSystems;  i++)
     {
       String systemId = systems.get(i)[1];
-      try { sysClient.deleteSystem(systemId); }
+      try { sysClient.deleteSystem(systemId, true); }
       catch (Exception e) {System.out.println("Caught exception when deleting system: "+systemId+" Exception: "+e);}
     }
   }

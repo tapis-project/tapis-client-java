@@ -108,7 +108,7 @@ public class UserTest
       String systemId = systems.get(i)[1];
       try
       {
-        usrClient.deleteSystem(systemId);
+        usrClient.deleteSystem(systemId, true);
       }
       catch (Exception e)
       {
@@ -120,7 +120,7 @@ public class UserTest
     usrClient = getClientUsr(serviceURL, newOwnerUserJWT);
     try
     {
-      usrClient.deleteSystem(systemId);
+      usrClient.deleteSystem(systemId, true);
     }
     catch (Exception e)
     {
@@ -439,7 +439,7 @@ public class UserTest
     usrClient.changeSystemOwner(sys0[1], newOwnerUser);
     // Now that owner has given away ownership they should no longer be able to modify or read.
     try {
-      usrClient.deleteSystem(sys0[1]);
+      usrClient.deleteSystem(sys0[1], true);
       Assert.fail("Original owner should not have permission to update system after change of ownership. System name: " +
                   sys0[1] + " Old owner: " + ownerUser1 + " New Owner: " + newOwnerUser);
     } catch (TapisClientException e) {
@@ -494,7 +494,7 @@ public class UserTest
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Delete the system
-    usrClient.deleteSystem(sys0[1]);
+    usrClient.deleteSystem(sys0[1], true);
     try {
       TSystem tmpSys2 = usrClient.getSystem(sys0[1]);
       Assert.fail("System not deleted. System name: " + sys0[1]);
