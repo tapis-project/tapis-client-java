@@ -42,6 +42,14 @@ public class FilesClient {
     }
 
     /**
+     * Get the base path.
+     */
+    public String getBasePath()
+    {
+        return getApiClient().getBasePath();
+    }
+
+    /**
      * Update base path for default client.
      */
     public FilesClient setBasePath(String basePath)
