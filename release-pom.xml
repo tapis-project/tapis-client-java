@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.utexas.tacc.tapis</groupId>
   <artifactId>tapis-client-java</artifactId>
-  <version>1.11.40</version>
+  <version>1.11.47</version>
   <packaging>pom</packaging>
   <name>Tapis Client</name>
   <description>Top level java client</description>
@@ -138,6 +138,7 @@
     <module>meta-client</module>
     <module>apps-client</module>
     <module>jobs-client</module>
+    <module>notifications-client</module>
   </modules>
   <scm>
     <connection>scm:git:git@github.com:tapis-project/tapis-client-java.git</connection>
@@ -154,6 +155,7 @@
     </snapshotRepository>
   </distributionManagement>
   <properties>
+    <jersey-entity-filtering.version>2.33</jersey-entity-filtering.version>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
     <activemq-client.version>5.16.0</activemq-client.version>
     <jackson.version>2.10.1</jackson.version>
@@ -221,7 +223,7 @@
     <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
     <mockito-core.version>3.0.0</mockito-core.version>
     <javax.websocket-api.version>1.1</javax.websocket-api.version>
-    <build.timestamp>2021-01-29T14:22:32Z</build.timestamp>
+    <build.timestamp>2021-03-01T17:07:49Z</build.timestamp>
     <statefulj.version>3.0</statefulj.version>
     <java-source.version>1.15</java-source.version>
     <reactor-rabbitmq.version>1.4.4.RELEASE</reactor-rabbitmq.version>
@@ -424,7 +426,7 @@
       </testResource>
     </testResources>
     <directory>target</directory>
-    <finalName>tapis-client-java-1.11.40</finalName>
+    <finalName>tapis-client-java-1.11.47</finalName>
   </build>
   <reporting>
     <outputDirectory>target/site</outputDirectory>

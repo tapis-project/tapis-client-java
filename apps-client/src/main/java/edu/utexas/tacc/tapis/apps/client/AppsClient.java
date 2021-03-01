@@ -12,6 +12,7 @@ import edu.utexas.tacc.tapis.apps.client.gen.model.ArgSpec;
 import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespBasic;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespAppArray;
+import edu.utexas.tacc.tapis.apps.client.gen.model.RespBoolean;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.Gson;
 
@@ -32,8 +33,6 @@ import edu.utexas.tacc.tapis.apps.client.gen.model.RespResourceUrl;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespApp;
 import edu.utexas.tacc.tapis.apps.client.gen.model.App;
 
-import javax.xml.crypto.dsig.keyinfo.KeyValue;
-
 /**
  * Class providing a convenient front-end to the automatically generated client code
  * for the Apps Service REST API.
@@ -53,6 +52,7 @@ public class AppsClient
   public static final boolean DEFAULT_STRICT_FILE_INPUTS = false;
   public static final boolean DEFAULT_FILE_INPUT_IN_PLACE = false;
   public static final boolean DEFAULT_FILE_INPUT_META_REQUIRED = false;
+  public static final int DEFAULT_MAX_JOBS = Integer.MAX_VALUE;
 
   // ************************************************************************
   // *********************** Fields *****************************************
@@ -297,6 +297,7 @@ public class AppsClient
 
   /**
    * Delete an app given the app id.
+   * @param confirm Confirm the action
    * Return 1 if record was deleted
    * Return 0 if record not present
    *
@@ -304,14 +305,37 @@ public class AppsClient
    * @return number of records modified as a result of the action
    * @throws TapisClientException - If api call throws an exception
    */
-  public int deleteApp(String id) throws TapisClientException
+  public int deleteApp(String id, Boolean confirm) throws TapisClientException
   {
     RespChangeCount resp = null;
-    try { resp = appApi.deleteApp(id, false); }
+    try { resp = appApi.deleteApp(id, false, confirm); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
     else return -1;
+  }
+
+  /**
+   * Check if resource is enabled
+   *
+   * @return boolean indicating if enabled
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public boolean isEnabled(String appId) throws TapisClientException
+  {
+    // Submit the request and return the response
+    RespBoolean resp = null;
+    try { resp = appApi.isEnabled(appId, false); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null)
+    {
+      return resp.getResult();
+    }
+    else
+    {
+      throw new TapisClientException("isEnabled did not return a result");
+    }
   }
 
   // -----------------------------------------------------------------------

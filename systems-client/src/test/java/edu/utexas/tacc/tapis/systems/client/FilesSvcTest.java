@@ -125,7 +125,7 @@ public class FilesSvcTest
       String systemId = systems.get(i)[1];
       try
       {
-        sysClient.deleteSystem(systemId);
+        sysClient.deleteSystem(systemId, true);
       }
       catch (Exception e)
       {

@@ -20,11 +20,10 @@ public class FilesClient {
     private final ContentApi fileContents;
     private final TransfersApi fileTransfers;
     private final HealthApi fileHealth;
-
-
+    private final ApiClient apiClient;
 
     public FilesClient(String basePath, String jwt) {
-        ApiClient apiClient = Configuration.getDefaultApiClient();
+        apiClient = new ApiClient();
         if (!StringUtils.isBlank(basePath)) apiClient.setBasePath(basePath);
         if (!StringUtils.isBlank(jwt)) apiClient.addDefaultHeader(TAPIS_JWT_HEADER, jwt);
         fileOperations = new FileOperationsApi();
@@ -37,7 +36,15 @@ public class FilesClient {
 
     public ApiClient getApiClient()
     {
-        return Configuration.getDefaultApiClient();
+        return apiClient;
+    }
+
+    /**
+     * Get the base path.
+     */
+    public String getBasePath()
+    {
+        return getApiClient().getBasePath();
     }
 
     /**
@@ -45,7 +52,7 @@ public class FilesClient {
      */
     public FilesClient setBasePath(String basePath)
     {
-        Configuration.getDefaultApiClient().setBasePath(basePath);
+        apiClient.setBasePath(basePath);
         return this;
     }
 
@@ -54,7 +61,7 @@ public class FilesClient {
      */
     public FilesClient addDefaultHeader(String key, String val)
     {
-        Configuration.getDefaultApiClient().addDefaultHeader(key, val);
+        apiClient.addDefaultHeader(key, val);
         return this;
     }
 

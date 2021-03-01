@@ -173,7 +173,7 @@ public class SearchGetTest
       String systemId = systems.get(i)[1];
       if (i <= numSystems / 2)
       {
-        try { getClientUsr(serviceURL, ownerUser1JWT).deleteSystem(systemId); }
+        try { getClientUsr(serviceURL, ownerUser1JWT).deleteSystem(systemId, true); }
         catch (Exception e)
         {
           System.out.println("Caught exception when deleting system: " + systemId + " Exception: " + e);
@@ -181,7 +181,7 @@ public class SearchGetTest
       }
       else
       {
-        try { getClientUsr(serviceURL, ownerUser2JWT).deleteSystem(systemId); }
+        try { getClientUsr(serviceURL, ownerUser2JWT).deleteSystem(systemId, true); }
         catch (Exception e)
         {
           System.out.println("Caught exception when deleting system: " + systemId + " Exception: " + e);
