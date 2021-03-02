@@ -109,6 +109,9 @@ public class AppsClient
   public ApiClient getApiClient() { return apiClient; }
 
   // Update base path for default client.
+  public String getBasePath() { return apiClient.getBasePath(); }
+
+  // Update base path for default client.
   public void setBasePath(String basePath) { apiClient.setBasePath(basePath); }
 
   // Add http header to default client
