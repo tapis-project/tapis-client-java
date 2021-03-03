@@ -19,6 +19,8 @@ import edu.utexas.tacc.tapis.files.client.gen.model.FilePermissionStringResponse
 import edu.utexas.tacc.tapis.files.client.gen.model.FileStringResponse;
 import edu.utexas.tacc.tapis.files.client.gen.model.HeaderByteRange;
 import edu.utexas.tacc.tapis.files.client.gen.model.HealthCheckResponse;
+import edu.utexas.tacc.tapis.files.client.gen.model.MoveCopyRenameRequest;
+import edu.utexas.tacc.tapis.files.client.gen.model.MoveCopyRenameRequest.OperationEnum;
 import edu.utexas.tacc.tapis.files.client.gen.model.TapisResponse;
 import edu.utexas.tacc.tapis.files.client.gen.model.TransferTask;
 import edu.utexas.tacc.tapis.files.client.gen.model.TransferTaskListResponse;
@@ -181,7 +183,10 @@ public class FilesClient {
           throws TapisClientException
   {
     FileStringResponse resp = null;
-    try { resp = fileOperations.rename(systemId, path, newName); }
+    var renameReq = new MoveCopyRenameRequest();
+    renameReq.setOperation(OperationEnum.RENAME);
+    renameReq.setNewPath(newName);
+    try { resp = fileOperations.moveCopyRename(systemId, path, renameReq); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp; else return null;
