@@ -3,7 +3,7 @@
     <parent>
         <groupId>edu.utexas.tacc.tapis</groupId>
         <artifactId>tapis-client-java</artifactId>
-        <version>1.11.48-SNAPSHOT</version>
+        <version>1.11.50-SNAPSHOT</version>
     </parent>
 
     <artifactId>files-client</artifactId>
@@ -11,6 +11,13 @@
     <name>Tapis Files Client</name>
     <description>Java client for Files Service</description>
 
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>shared</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
