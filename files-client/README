@@ -1,0 +1,8 @@
+==========================================================================
+Running the client tests against Files service running locally or in k8s
+Files
+ run_client_tests.sh,
+==========================================================================
+The client tests for Files service are run using the script run_client_tests.sh.
+Please see the script file for information on how to run the script and which
+environment variables must be set prior to running the script.
