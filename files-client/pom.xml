@@ -11,11 +11,25 @@
     <name>Tapis Files Client</name>
     <description>Java client for Files Service</description>
 
+  <properties>
+    <!-- Skip integration tests by default -->
+    <!-- TODO/TBD To run tests TAPIS_FILES_SVC_PASSWORD must be set in the env -->
+    <!-- Use following command to run integration tests -->
+    <!-- TODO/TBD  TAPIS_FILES_SVC_PASSWORD=<files_service_password> mvn verify -DskipIntegrationTests=false  -->
+    <skipIntegrationTests>true</skipIntegrationTests>
+  </properties>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>shared</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>auth-client</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -74,6 +88,22 @@
                     </execution>
                 </executions>
             </plugin>
+      <!-- failsafe plugin is for running integration tests -->
+      <!-- NOTE: reuseForks=false because clients have static variables for headers and cannot be shared within a JVM -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <skip>${skipIntegrationTests}</skip>
+          <environmentVariables>
+            <APP_ENV>test</APP_ENV>
+          </environmentVariables>
+          <forkCount>3</forkCount>
+          <reuseForks>false</reuseForks>
+          <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
+          <workingDirectory>FORK_DIRECTORY_${surefire.forkNumber}</workingDirectory>
+        </configuration>
+      </plugin>
         </plugins>
 
         <finalName>files-client</finalName>

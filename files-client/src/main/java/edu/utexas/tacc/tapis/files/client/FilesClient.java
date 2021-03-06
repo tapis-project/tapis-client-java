@@ -58,6 +58,22 @@ public class FilesClient {
     private final ApiClient apiClient;
 
   /**
+   * Default constructor which uses the compiled-in basePath based on the openapi spec
+   *   used to autogenerate the client.
+   */
+  public FilesClient()
+  {
+    apiClient = new ApiClient();
+    fileOperations = new FileOperationsApi(apiClient);
+    fileContents = new ContentApi(apiClient);
+    filePermissions = new PermissionsApi(apiClient);
+    fileShares = new ShareApi(apiClient);
+    fileTransfers = new TransfersApi(apiClient);
+    fileHealth = new HealthApi(apiClient);
+  }
+
+
+  /**
    * Constructor that overrides the compiled-in basePath value in ApiClient.
    * The path should include the URL prefix up to and including the service root.
    * In production environments the protocol should be https and the host/port will
@@ -70,12 +86,12 @@ public class FilesClient {
         apiClient = new ApiClient();
         if (!StringUtils.isBlank(basePath)) apiClient.setBasePath(basePath);
         if (!StringUtils.isBlank(jwt)) apiClient.addDefaultHeader(TAPIS_JWT_HEADER, jwt);
-        fileOperations = new FileOperationsApi();
-        fileContents = new ContentApi();
-        filePermissions = new PermissionsApi();
-        fileShares = new ShareApi();
-        fileTransfers = new TransfersApi();
-        fileHealth = new HealthApi();
+        fileOperations = new FileOperationsApi(apiClient);
+        fileContents = new ContentApi(apiClient);
+        filePermissions = new PermissionsApi(apiClient);
+        fileShares = new ShareApi(apiClient);
+        fileTransfers = new TransfersApi(apiClient);
+        fileHealth = new HealthApi(apiClient);
     }
 
     // getApiClient: Return underlying ApiClient
