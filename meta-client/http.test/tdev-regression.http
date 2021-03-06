@@ -1,0 +1,192 @@
+##############################################################
+#      Tests use meta.admin.regression service token
+#       run with env meta.admin.regression
+#
+#  Assumes: MyTstDB exists
+#           collection and other resources do not exist
+#  Initial tests are sanity checks to see if we can run other tests
+#
+##############################################################
+
+###  sanity test to see if service is alive
+GET https://dev.develop.tapis.io/v3/meta/healthcheck
+Content-Type: application/json
+###
+
+##############################################################
+#      setup for tests using creates for needed resources
+#       run with env meta.admin
+#       meta admin token
+#  Assumes collection and other resources do not exist
+##############################################################
+
+#  create a document in /v3/meta/{{db}}/{{collection}}
+# adding a name on the end of a POST will create a document by that name and basic response if basic = true
+###
+POST https://dev.develop.tapis.io/v3/meta/{{db}}/{{collection}}?basic=true
+X-Tapis-Token: {{token}}
+X-Tapis-User: {{user}}
+X-Tapis-Tenant: {{tenant}}
+Content-Type: application/json
+
+{ "_id":"tstDoc0","name": "test document slt 3.6.2021-12:10", "jimmyList":["1","3"],"description": "POST a new document with basic response"}
+
+###
+
+
+# get document  in /v3/meta/{{db}}/{{collection}}//{{docId}}
+###
+GET https://dev.develop.tapis.io/v3/meta/{{db}}/{{collection}}/{{docId}}
+X-Tapis-Token: {{token}}
+X-Tapis-User: {{user}}
+X-Tapis-Tenant: {{tenant}}
+Content-Type: application/json
+
+###
+
+#  create a test collection tstTmp in db /v3/meta/db/collection
+###
+PUT https://dev.develop.tapis.io/v3/meta/{{db}}/{{collection}}
+X-Tapis-Token: {{token}}
+X-Tapis-User: {{user}}
+X-Tapis-Tenant: {{tenant}}
+Content-Type: application/json
+
+###
+
+#  create a document in /v3/meta/{{db}}/{{collection}}
+# adding a name on the end of a PUT will create a document by that name
+# this is a replacement but creates the document if it doesn't exist
+###
+PUT https://dev.develop.tapis.io/v3/meta/{{db}}/{{collection}}/tstDoc
+X-Tapis-Token: {{token}}
+X-Tapis-User: {{user}}
+X-Tapis-Tenant: {{tenant}}
+Content-Type: application/json
+
+{ "name": "test document slt 4.28.2020-15:23", "jimmyList":["1","3"],"description": "PUT tstDoc for testing"}
+
+###
+
+#  create a document in /v3/meta/{{db}}/{{collection}}
+# adding a name on the end of a PUT will create a document by that name and basic response  !!! PUT doesn't return basic response
+# replaces the document or creates it if it doesn't exist.
+###
+PUT https://dev.develop.tapis.io/v3/meta/{{db}}/{{collection}}/tstDoc1?basic=true
+X-Tapis-Token: {{token}}
+X-Tapis-User: {{user}}
+X-Tapis-Tenant: {{tenant}}
+Content-Type: application/json
+
+{ "name": "test document slt 4.28.2020-15:23", "jimmyList":["1","3"],"description": "PUT tstDoc1 for testing"}
+
+###
+
+#  create a document in /v3/meta/{{db}}/{{collection}}
+# POST will create a document
+###
+POST https://dev.develop.tapis.io/v3/meta/{{db}}/{{collection}}
+X-Tapis-Token: {{token}}
+X-Tapis-User: {{user}}
+X-Tapis-Tenant: {{tenant}}
+Content-Type: application/json
+
+{ "name": "test document slt 4.28.2020-15:43", "jimmyList":["1","3"],"description": "POST a new document with basic response"}
+
+###
+
+##############################################################
+#      DB endpoints
+##############################################################
+
+###   db list collections
+GET https://dev.develop.tapis.io/v3/meta/{{db}}
+X-Tapis-Token: {{token}}
+X-Tapis-User: {{user}}
+X-Tapis-Tenant: {{tenant}}
+Content-Type: application/json
+
+###
+
+###   db metadata
+GET https://dev.develop.tapis.io/v3/meta/{{db}}/_meta
+X-Tapis-Token: {{token}}
+X-Tapis-User: {{user}}
+X-Tapis-Tenant: {{tenant}}
+Content-Type: application/json
+
+> {%
+    client.test("Request get db metadata executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+###
+
+##############################################################
+#     Collection endpoints
+##############################################################
+#
+#  get a document list under {{db}}/{{collection}} /v3/meta/{{db}}/{{collection}}
+#
+###
+GET https://dev.develop.tapis.io/v3/meta/{{db}}/{{collection}}
+X-Tapis-Token: {{token}}
+X-Tapis-User: {{user}}
+X-Tapis-Tenant: {{tenant}}
+Content-Type: application/json
+
+###
+
+#
+#  get metadata for {{db}}/{{collection}} /v3/meta/{{db}}/{{collection}}
+#
+###
+GET https://dev.develop.tapis.io/v3/meta/{{db}}/{{collection}}/_meta
+X-Tapis-Token: {{token}}
+X-Tapis-User: {{user}}
+X-Tapis-Tenant: {{tenant}}
+Content-Type: application/json
+
+###
+
+#  query for list under {{db}}/{{collection}} /v3/meta/{{db}}/{{collection}}
+###
+GET https://dev.develop.tapis.io/v3/meta/{{db}}/{{collection}}?filter={"_id": "tstDoc"}
+X-Tapis-Token: {{token}}
+X-Tapis-User: {{user}}
+X-Tapis-Tenant: {{tenant}}
+Content-Type: application/json
+
+###
+
+##############################################################
+#     Document endpoints
+##############################################################
+###
+GET https://dev.develop.tapis.io/v3/meta/{{db}}/{{collection}}/tstDoc
+X-Tapis-Token: {{token}}
+X-Tapis-User: {{user}}
+X-Tapis-Tenant: {{tenant}}
+Content-Type: application/json
+
+###
+
+###
+GET https://dev.develop.tapis.io/v3/meta/{{db}}/{{collection}}?filter={"_id": "tstDoc"}
+X-Tapis-Token: {{token}}
+X-Tapis-User: {{user}}
+X-Tapis-Tenant: {{tenant}}
+Content-Type: application/json
+
+###
+
+###
+DELETE https://dev.develop.tapis.io/v3/meta/{{db}}/{{collection}}/tstDoc
+X-Tapis-Token: {{token}}
+X-Tapis-User: {{user}}
+X-Tapis-Tenant: {{tenant}}
+Content-Type: application/json
+
+###
+
