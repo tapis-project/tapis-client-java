@@ -260,7 +260,7 @@ public class FilesClient {
           throws TapisClientException
   {
     FileStringResponse resp = null;
-    try { resp = fileOperations.mkdir(systemId, path); }
+    try { resp = fileOperations.mkdir(systemId, path, null); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp; else return null;
@@ -380,10 +380,10 @@ public class FilesClient {
    * @return list of recent transfer tasks
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<TransferTask> getRecentTransferTasks() throws TapisClientException
+  public List<TransferTask> getRecentTransferTasks(int limit, int offset) throws TapisClientException
   {
     TransferTaskListResponse resp = null;
-    try { resp = fileTransfers.getRecentTransferTasks(); }
+    try { resp = fileTransfers.getRecentTransferTasks(limit, offset); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
