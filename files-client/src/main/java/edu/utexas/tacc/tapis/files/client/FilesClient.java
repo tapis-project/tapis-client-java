@@ -1,9 +1,20 @@
 package edu.utexas.tacc.tapis.files.client;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
 import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.files.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.files.client.gen.ApiException;
+import edu.utexas.tacc.tapis.files.client.gen.JSON;
 import edu.utexas.tacc.tapis.files.client.gen.api.ContentApi;
 import edu.utexas.tacc.tapis.files.client.gen.api.FileOperationsApi;
 import edu.utexas.tacc.tapis.files.client.gen.api.HealthApi;
@@ -30,9 +41,17 @@ import edu.utexas.tacc.tapis.files.client.gen.model.TransferTaskResponse;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+
+
 
 /**
  * Class providing a convenient front-end to the automatically generated client code
@@ -42,6 +61,17 @@ import java.util.UUID;
  */
 public class FilesClient {
 
+  private static final class InstantAdapter extends TypeAdapter<Instant> {
+    @Override
+    public void write( final JsonWriter jsonWriter, final Instant localDate ) throws IOException {
+      jsonWriter.value(localDate.toString());
+    }
+
+    @Override
+    public Instant read( final JsonReader jsonReader ) throws IOException {
+      return Instant.parse(jsonReader.nextString());
+    }
+  }
   // ************************************************************************
   // *********************** Constants **************************************
   // ************************************************************************
@@ -85,8 +115,14 @@ public class FilesClient {
    */
     public FilesClient(String basePath, String jwt) {
         apiClient = new ApiClient();
+        JSON mapper = new JSON();
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(Instant.class, new InstantAdapter())
+                .create();
+        mapper.setGson(gson);
+        apiClient.setJSON(mapper);
         if (!StringUtils.isBlank(basePath)) apiClient.setBasePath(basePath);
-        if (!StringUtils.isBlank(jwt)) apiClient.addDefaultHeader(TAPIS_JWT_HEADER, jwt);
+        if (!StringUtils.isBlank(jwt)) apiClient.addDefaultHeader("x-tapis-token", jwt);
         fileOperations = new FileOperationsApi(apiClient);
         fileContents = new ContentApi(apiClient);
         filePermissions = new PermissionsApi(apiClient);
@@ -123,7 +159,7 @@ public class FilesClient {
      */
     public FilesClient addDefaultHeader(String key, String val)
     {
-        apiClient.addDefaultHeader(key, val);
+//        apiClient.addDefaultHeader(key, val);
         return this;
     }
 
