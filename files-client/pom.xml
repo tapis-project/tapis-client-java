@@ -63,6 +63,12 @@
                             <generateApiDocumentation>false</generateApiDocumentation>
                             <generateModelTests>false</generateModelTests>
                             <generateModelDocumentation>false</generateModelDocumentation>
+                            <typeMappings>
+                              <typeMapping>OffsetDateTime=Instant</typeMapping>
+                            </typeMappings>
+                            <importMappings>
+                              <importMapping>java.time.OffsetDateTime=java.time.Instant</importMapping>
+                            </importMappings>
                             <configOptions>
                                 <sourceFolder>src/gen/java/main</sourceFolder>
                                 <!-- Use java 8 libraries instead of 3rd party libraries -->
