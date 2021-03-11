@@ -164,7 +164,7 @@ public class FilesClient {
      */
     public FilesClient addDefaultHeader(String key, String val)
     {
-//        apiClient.addDefaultHeader(key, val);
+        apiClient.addDefaultHeader(key, val);
         return this;
     }
 
