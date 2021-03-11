@@ -63,13 +63,18 @@ public class FilesClient {
 
   private static final class InstantAdapter extends TypeAdapter<Instant> {
     @Override
-    public void write( final JsonWriter jsonWriter, final Instant localDate ) throws IOException {
-      jsonWriter.value(localDate.toString());
+    public void write( final JsonWriter jsonWriter, final Instant instant ) throws IOException {
+      jsonWriter.value(instant.toString());
     }
 
     @Override
-    public Instant read( final JsonReader jsonReader ) throws IOException {
-      return Instant.parse(jsonReader.nextString());
+    public Instant read( final JsonReader in ) throws IOException {
+      if (in.peek() == JsonToken.NULL) {
+        in.nextNull();
+        return null;
+      }
+      String instantStr = in.nextString();
+      return Instant.parse(instantStr);
     }
   }
   // ************************************************************************
