@@ -14,6 +14,7 @@ import edu.utexas.tacc.tapis.tokens.client.model.CreateTokenParms;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.io.File;
 import java.util.List;
 
 @Test(groups = {"e2e"})
@@ -72,6 +73,21 @@ public class ITestFilesClient {
         Assert.assertThrows(Exception.class, ()-> client.listFiles(systemId, "/test-directory-e2e", 100, 0, false));
 
 
+    }
+
+    public void testInsert() throws Exception {
+        AuthClient authClient = new AuthClient(basepath);
+        String jwt = authClient.getToken(username, password);
+        FilesClient client = new FilesClient(basepath, jwt);
+
+        client.insert(systemId, "test-directory-e2e/e2e-test-file.txt", new File("src/test/resources/e2etestfile.txt"));
+        List<FileInfo> listing = client.listFiles(systemId, "/test-directory-e2e", 100, 0, false);
+        Assert.assertNotNull(listing);
+        Assert.assertEquals(listing.size(), 1);
+        Assert.assertEquals(listing.get(0).getName(), "test-directory-e2e/e2e-test-file.txt");
+
+        client.delete(systemId, "test-directory-e2e");
+        Assert.assertThrows(Exception.class, ()-> client.listFiles(systemId, "/test-directory-e2e", 100, 0, false));
     }
 
 
