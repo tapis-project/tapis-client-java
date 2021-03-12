@@ -443,7 +443,7 @@ public class FilesClient {
   public TransferTask getTransferTaskHistory(String transferTaskId) throws TapisClientException
   {
     TransferTaskResponse resp = null;
-    try { resp = fileTransfers.getTransferTaskHistory(UUID.fromString(transferTaskId)); }
+    try { resp = fileTransfers.getTransferTaskHistory(transferTaskId); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
