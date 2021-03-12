@@ -38,12 +38,12 @@ tags:
     description: informational endpoints
 
 paths:
-  /meta/healthCheck:
+  /meta/healthcheck:
     get:
       tags:
         - general
       description: Health check for liveness. No authorization required.
-      operationId: healthCheck
+      operationId: healthcheck
       responses:
         '200':
           description: Message received.
@@ -110,7 +110,7 @@ paths:
               schema:
                 type: object
       deprecated: false
-    put:  # todo in ResouceBucket
+    put:
       tags:
         - db
       summary: createDB
@@ -480,7 +480,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                type: array
+                items:
+                  type: object
         '401':
           description: Not authorized.
           content:
@@ -522,9 +524,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: string
+                type: String
         '401':
           description: Not authorized.
           content:
