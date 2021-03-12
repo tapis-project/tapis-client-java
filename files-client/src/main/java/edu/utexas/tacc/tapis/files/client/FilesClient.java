@@ -1,9 +1,20 @@
 package edu.utexas.tacc.tapis.files.client;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
 import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.files.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.files.client.gen.ApiException;
+import edu.utexas.tacc.tapis.files.client.gen.JSON;
 import edu.utexas.tacc.tapis.files.client.gen.api.ContentApi;
 import edu.utexas.tacc.tapis.files.client.gen.api.FileOperationsApi;
 import edu.utexas.tacc.tapis.files.client.gen.api.HealthApi;
@@ -19,6 +30,7 @@ import edu.utexas.tacc.tapis.files.client.gen.model.FilePermissionStringResponse
 import edu.utexas.tacc.tapis.files.client.gen.model.FileStringResponse;
 import edu.utexas.tacc.tapis.files.client.gen.model.HeaderByteRange;
 import edu.utexas.tacc.tapis.files.client.gen.model.HealthCheckResponse;
+import edu.utexas.tacc.tapis.files.client.gen.model.MkdirRequest;
 import edu.utexas.tacc.tapis.files.client.gen.model.MoveCopyRenameRequest;
 import edu.utexas.tacc.tapis.files.client.gen.model.MoveCopyRenameRequest.OperationEnum;
 import edu.utexas.tacc.tapis.files.client.gen.model.TapisResponse;
@@ -29,9 +41,17 @@ import edu.utexas.tacc.tapis.files.client.gen.model.TransferTaskResponse;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+
+
 
 /**
  * Class providing a convenient front-end to the automatically generated client code
@@ -41,6 +61,22 @@ import java.util.UUID;
  */
 public class FilesClient {
 
+  private static final class InstantAdapter extends TypeAdapter<Instant> {
+    @Override
+    public void write( final JsonWriter jsonWriter, final Instant instant ) throws IOException {
+      jsonWriter.value(instant.toString());
+    }
+
+    @Override
+    public Instant read( final JsonReader in ) throws IOException {
+      if (in.peek() == JsonToken.NULL) {
+        in.nextNull();
+        return null;
+      }
+      String instantStr = in.nextString();
+      return Instant.parse(instantStr);
+    }
+  }
   // ************************************************************************
   // *********************** Constants **************************************
   // ************************************************************************
@@ -84,8 +120,14 @@ public class FilesClient {
    */
     public FilesClient(String basePath, String jwt) {
         apiClient = new ApiClient();
+        JSON mapper = new JSON();
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(Instant.class, new InstantAdapter())
+                .create();
+        mapper.setGson(gson);
+        apiClient.setJSON(mapper);
         if (!StringUtils.isBlank(basePath)) apiClient.setBasePath(basePath);
-        if (!StringUtils.isBlank(jwt)) apiClient.addDefaultHeader(TAPIS_JWT_HEADER, jwt);
+        if (!StringUtils.isBlank(jwt)) apiClient.addDefaultHeader("x-tapis-token", jwt);
         fileOperations = new FileOperationsApi(apiClient);
         fileContents = new ContentApi(apiClient);
         filePermissions = new PermissionsApi(apiClient);
@@ -260,7 +302,9 @@ public class FilesClient {
           throws TapisClientException
   {
     FileStringResponse resp = null;
-    try { resp = fileOperations.mkdir(systemId, path); }
+    var req = new MkdirRequest();
+    req.setPath(path);
+    try { resp = fileOperations.mkdir(systemId, req); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp; else return null;
@@ -380,10 +424,10 @@ public class FilesClient {
    * @return list of recent transfer tasks
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<TransferTask> getRecentTransferTasks() throws TapisClientException
+  public List<TransferTask> getRecentTransferTasks(int limit, int offset) throws TapisClientException
   {
     TransferTaskListResponse resp = null;
-    try { resp = fileTransfers.getRecentTransferTasks(); }
+    try { resp = fileTransfers.getRecentTransferTasks(limit, offset); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;

@@ -1,15 +1,16 @@
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>edu.utexas.tacc.tapis</groupId>
         <artifactId>tapis-client-java</artifactId>
-        <version>1.11.51-SNAPSHOT</version>
+        <version>1.11.56-SNAPSHOT</version>
     </parent>
 
-    <artifactId>files-client</artifactId>
+  <artifactId>files-client</artifactId>
 
-    <name>Tapis Files Client</name>
-    <description>Java client for Files Service</description>
+  <name>Tapis Files Client</name>
+  <description>Java client for Files Service</description>
 
   <properties>
     <!-- Skip integration tests by default -->
@@ -19,75 +20,87 @@
     <skipIntegrationTests>true</skipIntegrationTests>
   </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>shared</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>auth-client</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>shared</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>auth-client</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>tokens-client</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
-    <build>
-        <sourceDirectory>src/main/java</sourceDirectory>
+  <build>
+    <sourceDirectory>src/main/java</sourceDirectory>
 
-        <plugins>
-            <!-- Build generated client code using openapi-generator -->
-            <plugin>
-                <groupId>org.openapitools</groupId>
-                <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>${openapi-generator-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <!-- Use the openapi spec here. Tapis live-docs website should also get spec from here -->
-                            <inputSpec>https://raw.githubusercontent.com/tapis-project/tapis-files/dev/api/src/main/resources/openapi.yaml</inputSpec>
-                            <enablePostProcessFile>true</enablePostProcessFile>
-                            <output>${project.build.directory}/generated-sources/openapi</output>
-                            <generatorName>java</generatorName>
-                            <groupId>edu.utexas.tacc.tapis</groupId>
-                            <invokerPackage>edu.utexas.tacc.tapis.files.client.gen</invokerPackage>
-                            <apiPackage>edu.utexas.tacc.tapis.files.client.gen.api</apiPackage>
-                            <modelPackage>edu.utexas.tacc.tapis.files.client.gen.model</modelPackage>
+    <plugins>
+      <!-- Build generated client code using openapi-generator -->
+      <plugin>
+        <groupId>org.openapitools</groupId>
+        <artifactId>openapi-generator-maven-plugin</artifactId>
+        <version>${openapi-generator-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <!-- Use the openapi spec here. Tapis live-docs website should also get spec from here -->
+              <inputSpec>${project.basedir}/src/main/resources/openapi.yaml</inputSpec>
+              <enablePostProcessFile>true</enablePostProcessFile>
+              <output>${project.build.directory}/generated-sources/openapi</output>
+              <generatorName>java</generatorName>
+              <groupId>edu.utexas.tacc.tapis</groupId>
+              <invokerPackage>edu.utexas.tacc.tapis.files.client.gen</invokerPackage>
+              <apiPackage>edu.utexas.tacc.tapis.files.client.gen.api</apiPackage>
+              <modelPackage>edu.utexas.tacc.tapis.files.client.gen.model</modelPackage>
 
-                            <!-- Turn off generation of stuff we do not need -->
-                            <generateApiTests>false</generateApiTests>
-                            <generateApiDocumentation>false</generateApiDocumentation>
-                            <generateModelTests>false</generateModelTests>
-                            <generateModelDocumentation>false</generateModelDocumentation>
-                            <configOptions>
-                                <sourceFolder>src/gen/java/main</sourceFolder>
-                                <!-- Use java 8 libraries instead of 3rd party libraries -->
-                                <java8>true</java8>
-                                <dateLibrary>java8</dateLibrary>
-                            </configOptions>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <configuration>
-                    <createDependencyReducedPom>false</createDependencyReducedPom>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+              <!-- Turn off generation of stuff we do not need -->
+              <generateApiTests>false</generateApiTests>
+              <generateApiDocumentation>false</generateApiDocumentation>
+              <generateModelTests>false</generateModelTests>
+              <generateModelDocumentation>false</generateModelDocumentation>
+              <typeMappings>
+                <typeMapping>OffsetDateTime=Instant</typeMapping>
+              </typeMappings>
+              <importMappings>
+                <importMapping>java.time.OffsetDateTime=java.time.Instant</importMapping>
+              </importMappings>
+              <configOptions>
+                <sourceFolder>src/gen/java/main</sourceFolder>
+                <!-- Use java 8 libraries instead of 3rd party libraries -->
+                <java8>true</java8>
+                <dateLibrary>java8</dateLibrary>
+              </configOptions>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <configuration>
+          <createDependencyReducedPom>false</createDependencyReducedPom>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <!-- failsafe plugin is for running integration tests -->
       <!-- NOTE: reuseForks=false because clients have static variables for headers and cannot be shared within a JVM -->
       <plugin>
@@ -104,9 +117,9 @@
           <workingDirectory>FORK_DIRECTORY_${surefire.forkNumber}</workingDirectory>
         </configuration>
       </plugin>
-        </plugins>
+    </plugins>
 
-        <finalName>files-client</finalName>
-    </build>
+    <finalName>files-client</finalName>
+  </build>
 
 </project>
