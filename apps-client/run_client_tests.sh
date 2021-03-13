@@ -182,10 +182,10 @@ if [ $RET_CODE -ne 0 ]; then
   exit $RET_CODE
 fi
 
-# If it is a local run and we have required variables then cleanup DB artifacts
-if [ "$RUN_SVC" = "local" -a  -n "$TAPIS_DB_PASSWORD" -a -n "$TAPIS_DB_JDBC_URL" ]; then
- echo "Removing test artifacts from DB"
- ./delete_client_test_data.sh
-fi
+# TODO If it is a local run and we have required variables then cleanup DB artifacts
+# if [ "$RUN_SVC" = "local" -a  -n "$TAPIS_DB_PASSWORD" -a -n "$TAPIS_DB_JDBC_URL" ]; then
+#  echo "Removing test artifacts from DB"
+#  ./delete_client_test_data.sh
+# fi
 
 cd $RUN_DIR

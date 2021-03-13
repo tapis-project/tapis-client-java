@@ -189,6 +189,40 @@ public class AppsClient
   }
 
   /**
+   * Update enabled attribute to true.
+   *
+   * @param id App id
+   * @return number of records modified as a result of the action
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public int enableApp(String id) throws TapisClientException
+  {
+    RespChangeCount resp = null;
+    try { resp = appApi.enableApp(id); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
+    else return -1;
+  }
+
+  /**
+   * Update enabled attribute to false.
+   *
+   * @param id App id
+   * @return number of records modified as a result of the action
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public int disableApp(String id) throws TapisClientException
+  {
+    RespChangeCount resp = null;
+    try { resp = appApi.disableApp(id); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
+    else return -1;
+  }
+
+  /**
    * Change app owner given the app id and new owner id.
    *
    * @param id App id

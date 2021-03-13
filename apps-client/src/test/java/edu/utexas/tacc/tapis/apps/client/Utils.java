@@ -100,25 +100,28 @@ public final class Utils
   // App attributes test data
   public static final String appNamePrefix = "CApp";
   public static final String appVersion = "0.0.1";
-  public static final AppTypeEnum appType = AppTypeEnum.BATCH;
-  public static final boolean isEnabled = true;
+  public static final AppTypeEnum appTypeBatch = AppTypeEnum.BATCH;
+  public static final boolean isEnabledTrue = true;
   public static final RuntimeEnum runtime = RuntimeEnum.DOCKER;
   public static final String runtimeVersion = "0.0.1";
   public static final String containerImage = "containerImage";
-  public static final boolean dynamicExecSystem = true;
+  public static final boolean dynamicExecSystemTrue = true;
   public static final List<String> execSystemConstraints = Arrays.asList("Constraint1 AND", "Constraint2");
-  public static final String execSystemId = "execSystem";
+  public static final String execSystemId = "exec.system.org";
   public static final String execSystemExecDir = "execSystemExecDir";
   public static final String execSystemInputDir = "execSystemInputDir";
   public static final String execSystemOutputDir = "execSystemOutputDir";
   public static final String execSystemLogicalQueue = "execSystemLogicalQueue";
-  public static final String archiveSystemId = "archiveSystem";
+  public static final String archiveSystemId = "archive.system.org";
+  public static final String archiveSystemIdNull = null;
   public static final String archiveSystemDir = "archiveSystemDir";
-  public static final boolean archiveOnAppError = true;
+  public static final boolean archiveOnAppErrorTrue = true;
   public static final String jobDescription = "job description";
   public static final int maxJobs = 1;
+  public static final int maxJobsMAX = Integer.MAX_VALUE;
   public static final int maxJobsPerUser = 1;
-  public static final boolean strictFileInputs = false;
+  public static final int maxJobsPerUserMAX = Integer.MAX_VALUE;
+  public static final boolean strictFileInputsFalse = false;
   public static final int nodeCount = 1;
   public static final int coresPerNode = 1;
   public static final int memoryMb = 1;
@@ -213,10 +216,10 @@ public final class Utils
 //              6=runtime, 7=runtimeVersion, 8=containerImage, 9=jobDescription,
 //              10=execSystemId, 11=execSystemExecDir, 12=execSystemInputDir, 13=execSystemOutputDir,
 //              14=execSystemLogicalQueue, 15=archiveSystemId, 16=archiveSystemDir};
-      String[] app0 = {tenantName, appId, appVersion, "description "+suffix, appType.name(), ownerUser1,
+      String[] app0 = {tenantName, appId, appVersion, "description "+suffix, appTypeBatch.name(), ownerUser1,
                        runtime.name(), runtimeVersion+suffix, containerImage+suffix, jobDescription+suffix,
-                       execSystemId+suffix, execSystemExecDir+suffix, execSystemInputDir+suffix, execSystemOutputDir+suffix,
-                       execSystemLogicalQueue+suffix, archiveSystemId+suffix, archiveSystemDir+suffix};
+                       execSystemId, execSystemExecDir+suffix, execSystemInputDir+suffix, execSystemOutputDir+suffix,
+                       execSystemLogicalQueue+suffix, archiveSystemId, archiveSystemDir+suffix};
       apps.put(i, app0);
     }
     return apps;
@@ -262,18 +265,18 @@ public final class Utils
     rApp.description(app[3]);
     rApp.setAppType(AppTypeEnum.valueOf(app[4]));
     rApp.owner(app[5]);
-    rApp.enabled(isEnabled);
+    rApp.enabled(isEnabledTrue);
     rApp.setRuntime(RuntimeEnum.valueOf(app[6]));
     rApp.setRuntimeVersion(app[7]);
     rApp.setContainerImage(app[8]);
     rApp.setMaxJobs(maxJobs);
     rApp.setMaxJobsPerUser(maxJobsPerUser);
-    rApp.strictFileInputs(strictFileInputs);
+    rApp.strictFileInputs(strictFileInputsFalse);
 
     // === Start Job Attributes
     JobAttributes jobAttrs = new JobAttributes();
     jobAttrs.setDescription(app[9]);
-    jobAttrs.setDynamicExecSystem(dynamicExecSystem);
+    jobAttrs.setDynamicExecSystem(dynamicExecSystemTrue);
     jobAttrs.setExecSystemConstraints(execSystemConstraints);
     jobAttrs.setExecSystemId(app[10]);
     jobAttrs.setExecSystemExecDir(app[11]);
@@ -282,7 +285,7 @@ public final class Utils
     jobAttrs.setExecSystemLogicalQueue(app[14]);
     jobAttrs.setArchiveSystemId(app[15]);
     jobAttrs.setArchiveSystemDir(app[16]);
-    jobAttrs.setArchiveOnAppError(archiveOnAppError);
+    jobAttrs.setArchiveOnAppError(archiveOnAppErrorTrue);
     // ====== Start Parameter Set
     ParameterSet parameterSet = new ParameterSet();
     parameterSet.setAppArgs(appArgs);
@@ -318,6 +321,13 @@ public final class Utils
     ReqCreateApp rApp = new ReqCreateApp();
     rApp.setId(app[1]);
     rApp.setVersion(app[2]);
+    rApp.setAppType(appTypeBatch);
+    rApp.setContainerImage(containerImage);
+    // === Start Job Attributes
+    JobAttributes jobAttrs = new JobAttributes();
+    jobAttrs.setExecSystemId(app[10]);
+    rApp.setJobAttributes(jobAttrs);
+
     return clt.createApp(rApp);
   }
 
@@ -342,20 +352,20 @@ public final class Utils
     Assert.assertNotNull(tmpApp.getAppType());
     Assert.assertEquals(tmpApp.getAppType().name(), app0[4]);
     Assert.assertEquals(tmpApp.getOwner(), app0[5]);
-    Assert.assertEquals(tmpApp.getEnabled(), Boolean.valueOf(isEnabled));
+    Assert.assertEquals(tmpApp.getEnabled(), Boolean.valueOf(isEnabledTrue));
     Assert.assertNotNull(tmpApp.getRuntime());
     Assert.assertEquals(tmpApp.getRuntime().name(), app0[6]);
     Assert.assertEquals(tmpApp.getRuntimeVersion(), app0[7]);
     Assert.assertEquals(tmpApp.getContainerImage(), app0[8]);
     Assert.assertEquals(tmpApp.getMaxJobs(), Integer.valueOf(maxJobs));
     Assert.assertEquals(tmpApp.getMaxJobsPerUser(), Integer.valueOf(maxJobsPerUser));
-    Assert.assertEquals(tmpApp.getStrictFileInputs(), Boolean.valueOf(strictFileInputs));
+    Assert.assertEquals(tmpApp.getStrictFileInputs(), Boolean.valueOf(strictFileInputsFalse));
 
     // ========== JobAttributes
     JobAttributes jobAttributes = tmpApp.getJobAttributes();
     Assert.assertNotNull(jobAttributes);
     Assert.assertEquals(jobAttributes.getDescription(), app0[9]);
-    Assert.assertEquals(jobAttributes.getDynamicExecSystem(), Boolean.valueOf(dynamicExecSystem));
+    Assert.assertEquals(jobAttributes.getDynamicExecSystem(), Boolean.valueOf(dynamicExecSystemTrue));
     Assert.assertEquals(jobAttributes.getExecSystemId(), app0[10]);
     Assert.assertEquals(jobAttributes.getExecSystemExecDir(), app0[11]);
     Assert.assertEquals(jobAttributes.getExecSystemInputDir(), app0[12]);
@@ -363,7 +373,7 @@ public final class Utils
     Assert.assertEquals(jobAttributes.getExecSystemLogicalQueue(), app0[14]);
     Assert.assertEquals(jobAttributes.getArchiveSystemId(), app0[15]);
     Assert.assertEquals(jobAttributes.getArchiveSystemDir(), app0[16]);
-    Assert.assertEquals(jobAttributes.getArchiveOnAppError(), Boolean.valueOf(archiveOnAppError));
+    Assert.assertEquals(jobAttributes.getArchiveOnAppError(), Boolean.valueOf(archiveOnAppErrorTrue));
     Assert.assertEquals(jobAttributes.getNodeCount(), Integer.valueOf(nodeCount));
     Assert.assertEquals(jobAttributes.getCoresPerNode(), Integer.valueOf(coresPerNode));
     Assert.assertEquals(jobAttributes.getMemoryMB(), Integer.valueOf(memoryMb));
@@ -377,7 +387,7 @@ public final class Utils
     var metaNamesFound = new ArrayList<String>();
     for (FileInputDefinition itemFound : tFileInputs)
     {
-      Assert.assertNotNull(itemFound.getMeta(), "FileInput meta value should not be null");
+      Assert.assertNotNull(itemFound.getMeta(), "FileInput meta value should not be null.");
       metaNamesFound.add(itemFound.getMeta().getName());
     }
     for (FileInputDefinition itemSeedItem : fileInputDefinitions)
@@ -394,7 +404,7 @@ public final class Utils
     var filtersFound = new ArrayList<String>();
     for (NotificationSubscription itemFound : tSubscriptions)
     {
-      Assert.assertNotNull(itemFound.getFilter(), "Subscription filter should not be null");
+      Assert.assertNotNull(itemFound.getFilter(), "Subscription filter should not be null.");
       filtersFound.add(itemFound.getFilter());
     }
     for (NotificationSubscription itemSeedItem : notifList1)
@@ -505,7 +515,7 @@ public final class Utils
     String tmpNotesStr = (String) tmpApp.getNotes();
     System.out.println("Found notes: " + tmpNotesStr);
     JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(tmpNotesStr, JsonObject.class);
-    Assert.assertNotNull(tmpNotes, "Fetched Notes should not be null");
+    Assert.assertNotNull(tmpNotes, "Fetched Notes should not be null.");
     JsonObject origNotes = notes1JO;
     Assert.assertTrue(tmpNotes.has("project"));
     String projStr = origNotes.get("project").getAsString();
@@ -513,6 +523,9 @@ public final class Utils
     Assert.assertTrue(tmpNotes.has("testdata"));
     String testdataStr = origNotes.get("testdata").getAsString();
     Assert.assertEquals(tmpNotes.get("testdata").getAsString(), testdataStr);
+
+    Assert.assertNotNull(tmpApp.getCreated(), "Fetched created timestamp should not be null.");
+    Assert.assertNotNull(tmpApp.getUpdated(), "Fetched updated timestamp should not be null.");
   }
 
   public static AppsClient getClientUsr(String serviceURL, String userJWT)

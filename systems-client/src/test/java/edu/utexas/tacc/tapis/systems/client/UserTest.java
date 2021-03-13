@@ -195,17 +195,19 @@ public class UserTest
     boolean pass = false;
     System.out.println("Attempting to create system with S3 and no bucketName. System name: " + sys0[1]);
     rSys.setBucketName(null);
+    rSys.setCanExec(false);
     try { usrClient.createSystem(rSys); }
     catch (TapisClientException tce)
     {
       System.out.println("Caught exception: " + tce.getMessage());
-      Assert.assertTrue(tce.getMessage().contains("SYSAPI_S3_NOBUCKET_INPUT"));
+      Assert.assertTrue(tce.getMessage().contains("SYSLIB_S3_NOBUCKET_INPUT"));
       pass = true;
     }
     Assert.assertTrue(pass, "Should not be able to create system with S3 and no bucketName");
-    rSys.setBucketName(sys0[8]);
 
     // Attempt to create an OBJECT_STORE system with canExec=true
+    rSys.setBucketName(sys0[8]);
+    rSys.setCanExec(true);
     pass = false;
     System.out.println("Attempting to create system of type OBJECT_STORE with canExec=true. System name: " + sys0[1]);
     rSys.setSystemType(SystemTypeEnum.OBJECT_STORE);
@@ -213,7 +215,7 @@ public class UserTest
     catch (TapisClientException tce)
     {
       System.out.println("Caught exception: " + tce.getMessage());
-      Assert.assertTrue(tce.getMessage().contains("SYSAPI_OBJSTORE_CANEXEC_INPUT"));
+      Assert.assertTrue(tce.getMessage().contains("SYSLIB_OBJSTORE_CANEXEC_INPUT"));
       pass = true;
     }
     Assert.assertTrue(pass, "Should not be able to create system of type OBJECT_STORE with canExec=true");
@@ -229,7 +231,7 @@ public class UserTest
     catch (TapisClientException tce)
     {
       System.out.println("Caught exception: " + tce.getMessage());
-      Assert.assertTrue(tce.getMessage().contains("SYSAPI_INVALID_EFFECTIVEUSERID_INPUT"));
+      Assert.assertTrue(tce.getMessage().contains("SYSLIB_INVALID_EFFECTIVEUSERID_INPUT"));
       pass = true;
     }
     Assert.assertTrue(pass, "Should not be able to create system authnMethod=CERT and static owner");
@@ -248,7 +250,7 @@ public class UserTest
     catch (TapisClientException tce)
     {
       System.out.println("Caught exception: " + tce.getMessage());
-      Assert.assertTrue(tce.getMessage().contains("SYSAPI_CRED_DISALLOWED_INPUT"));
+      Assert.assertTrue(tce.getMessage().contains("SYSLIB_CRED_DISALLOWED_INPUT"));
       pass = true;
     }
     Assert.assertTrue(pass, "Should not be able to create system with credentials and apiUserId");
@@ -262,7 +264,7 @@ public class UserTest
     catch (TapisClientException tce)
     {
       System.out.println("Caught exception: " + tce.getMessage());
-      Assert.assertTrue(tce.getMessage().contains("SYSAPI_CANEXEC_NO_JOBWORKINGDIR_INPUT"));
+      Assert.assertTrue(tce.getMessage().contains("SYSLIB_CANEXEC_NO_JOBWORKINGDIR_INPUT"));
       pass = true;
     }
     Assert.assertTrue(pass, "Should not be able to create system with canExec=true and no jobWorkingDir");
@@ -276,7 +278,7 @@ public class UserTest
     catch (TapisClientException tce)
     {
       System.out.println("Caught exception: " + tce.getMessage());
-      Assert.assertTrue(tce.getMessage().contains("SYSAPI_CANEXEC_NO_JOBRUNTIME_INPUT"));
+      Assert.assertTrue(tce.getMessage().contains("SYSLIB_CANEXEC_NO_JOBRUNTIME_INPUT"));
       pass = true;
     }
     Assert.assertTrue(pass, "Should not be able to create system with canExec=true and no jobRuntimes");
@@ -342,7 +344,7 @@ public class UserTest
 //    private static final String[] sysF2 = {tenantName, "CsysF", "description PATCHED", sysType, ownerUser, "hostPATCHED", "effUserPATCHED",
 //            "fakePasswordF", "bucketF", "/rootF", "jobLocalWorkDirF", "jobLocalArchDirF", "jobRemoteArchSystemF", "jobRemoteArchDirF"};
     String[] sysF2 = sys0.clone();
-    sysF2[2] = "description PATCHED"; sysF2[5] = "hostPATCHED"; sysF2[6] = "effUserPATCHED";
+    sysF2[2] = "description PATCHED"; sysF2[5] = hostPatchedId; sysF2[6] = "effUserPATCHED";
     ReqUpdateSystem rSystem = createPatchSystem(sysF2);
     System.out.println("Creating and updating system with name: " + sys0[1]);
     try {
