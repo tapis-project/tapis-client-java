@@ -20,8 +20,6 @@
 # By default service listens on port 8080. To change it set
 #     TAPIS_SERVICE_PORT
 #
-# To run the client integration tests the following env variables must be set:
-#   TAPIS_FILES_SERVICE_PASSWORD - used for testing credential retrieval
 
 PrgName=$(basename "$0")
 
@@ -66,15 +64,6 @@ fi
 # Make sure run env is valid
 if [ "$RUN_ENV" != "dev" ] && [ "$RUN_ENV" != "staging" ]; then
   echo "ERROR: Invalid Tapis run env = $RUN_ENV"
-  echo "$USAGE1"
-  echo "$USAGE2"
-  exit 1
-fi
-
-# Make sure we have the files service password
-# This is used for testing credential retrieval
-if [ -z "$TAPIS_FILES_SERVICE_PASSWORD" ]; then
-  echo "Please set env variable TAPIS_FILES_SERVICE_PASSWORD to the files service password"
   echo "$USAGE1"
   echo "$USAGE2"
   exit 1
