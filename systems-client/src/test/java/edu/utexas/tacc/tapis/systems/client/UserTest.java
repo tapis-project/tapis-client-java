@@ -48,7 +48,7 @@ public class UserTest
   //       When creating a new test look for an unused system and remove it from the this list.
   //  List of unused systems: 5, 6
   //  If list is empty then increment numSystems by 1 and use it.
-  int numSystems = 13;
+  int numSystems = 14;
   Map<Integer, String[]> systems = Utils.makeSystems(numSystems, "CltUsr");
   
   private static final String newOwnerUser = testUser3;
@@ -488,6 +488,24 @@ public class UserTest
   }
 
   @Test
+  public void testEnableDisable() throws Exception
+  {
+    String[] sys0 = systems.get(14);
+    String respUrl =
+            usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull, prot1TxfrMethodsC));
+    Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    // Enabled should start off true, then become false and finally true again.
+    TSystem tmpSys = usrClient.getSystem(sys0[1]);
+    Assert.assertTrue(tmpSys.getEnabled());
+    int changeCount = usrClient.disableSystem(tmpSys.getId());
+    tmpSys = usrClient.getSystem(sys0[1]);
+    Assert.assertFalse(tmpSys.getEnabled());
+    changeCount = usrClient.enableSystem(tmpSys.getId());
+    tmpSys = usrClient.getSystem(sys0[1]);
+    Assert.assertTrue(tmpSys.getEnabled());
+  }
+
+  @Test
   public void testDelete() throws Exception {
     // Create the system
     String[] sys0 = systems.get(12);
@@ -551,7 +569,6 @@ public class UserTest
     ReqUpdateSystem pSys = new ReqUpdateSystem();
     pSys.description(sys[2]);
     pSys.host(sys[5]);
-    pSys.enabled(false);
     pSys.effectiveUserId(sys[6]);
     pSys.defaultAuthnMethod(AuthnEnum.valueOf(prot2AuthnMethod.name()));
     pSys.transferMethods(prot2TxfrMethodsU);

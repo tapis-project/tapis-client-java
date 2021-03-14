@@ -309,7 +309,12 @@ public class UserTest
     // Enabled should start off true, then become false and finally true again.
     App tmpApp = usrClient.getApp(app0[1], app0[2]);
     Assert.assertTrue(tmpApp.getEnabled());
-//    usrClient.
+    int changeCount = usrClient.disableApp(tmpApp.getId());
+    tmpApp = usrClient.getApp(app0[1], app0[2]);
+    Assert.assertFalse(tmpApp.getEnabled());
+    changeCount = usrClient.enableApp(tmpApp.getId());
+    tmpApp = usrClient.getApp(app0[1], app0[2]);
+    Assert.assertTrue(tmpApp.getEnabled());
 
   }
 
