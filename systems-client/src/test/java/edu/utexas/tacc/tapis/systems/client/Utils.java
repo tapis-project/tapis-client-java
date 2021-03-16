@@ -96,7 +96,6 @@ public final class Utils
   public static final String defaultJobWorkingDir = null;
   public static final String defaultBatchScheduler = null;
   public static final String defaultBatchDefaultLogicalQueue = null;
-  public static final String defaultImportRefId = null;
   public static final String defaultEffectiveUserId = "${apiUserId}";
   public static final String defaultNotesStr = "{}";
   public static final boolean defaultIsEnabled = true;
@@ -177,7 +176,6 @@ public final class Utils
                                                                         DatatypeEnum.STRING, precedence, null);
   public static final List<Capability> jobCaps2 = new ArrayList<>(List.of(capA2, capB2, capC2, capD2));
   public static final boolean isDeleted = false;
-  public static final String importRefId = null;
   public static final Instant created = null;
   public static final Instant updated = null;
   public static final int qMaxJobs = -1;
@@ -500,6 +498,5 @@ public final class Utils
     Assert.assertTrue(tmpSys.getTags().isEmpty());
     Assert.assertNotNull(tmpSys.getNotes());
     Assert.assertEquals((String) tmpSys.getNotes(), defaultNotesStr);
-    Assert.assertEquals(tmpSys.getImportRefId(), defaultImportRefId);
   }
 }

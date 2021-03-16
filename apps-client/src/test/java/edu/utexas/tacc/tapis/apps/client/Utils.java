@@ -83,7 +83,6 @@ public final class Utils
 
   // Default system attributes
   public static final String defaultDescription = null;
-  public static final String defaultImportRefId = null;
   public static final String defaultNotesStr = "{}";
 
   public static final List<String> tags1 = Arrays.asList("value1", "value2", "a",
@@ -128,7 +127,6 @@ public final class Utils
   public static final int maxMinutes = 1;
   public static final boolean metaRequiredTrue = true;
   public static final boolean metaRequiredFalse = false;
-  public static final String importRefIdNull = null;
   public static final boolean deletedFalse = false;
   public static final Instant createdNull = null;
   public static final Instant updatedNull = null;
