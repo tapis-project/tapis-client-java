@@ -3,7 +3,7 @@
   <parent>
     <groupId>edu.utexas.tacc.tapis</groupId>
     <artifactId>tapis-client-java</artifactId>
-    <version>1.11.60-SNAPSHOT</version>
+    <version>1.11.60</version>
   </parent>
   <artifactId>shared</artifactId>
   <name>Tapis Client Shared</name>
