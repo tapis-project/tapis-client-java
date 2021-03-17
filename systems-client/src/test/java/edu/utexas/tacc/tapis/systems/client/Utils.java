@@ -86,6 +86,9 @@ public final class Utils
   public static final boolean prot1UseProxy = false, prot2UseProxy = true;
   public static final String prot1ProxyHost = "proxyhost1", prot2ProxyHost = "proxyhost2";
 
+  public static final String hostPatchedId = "patched.system.org";
+  public static final String hostMinimalId = "minimal.system.org";
+
   // Default system attributes
   public static final String defaultDescription = null;
   public static final String defaultRootDir = null;
@@ -93,7 +96,6 @@ public final class Utils
   public static final String defaultJobWorkingDir = null;
   public static final String defaultBatchScheduler = null;
   public static final String defaultBatchDefaultLogicalQueue = null;
-  public static final String defaultImportRefId = null;
   public static final String defaultEffectiveUserId = "${apiUserId}";
   public static final String defaultNotesStr = "{}";
   public static final boolean defaultIsEnabled = true;
@@ -128,9 +130,12 @@ public final class Utils
   public static final KeyValuePair kv2 = new KeyValuePair().key("HOME").value("/home/testuser2");
   public static final KeyValuePair kv3 = new KeyValuePair().key("TMP").value("/tmp");
   public static final List<KeyValuePair> jobEnvVariables = new ArrayList<>(List.of(kv1,kv2,kv3));
-  public static final boolean jobIsBatch = true;
+  public static final boolean jobIsBatchTrue = true;
+  public static final boolean jobIsBatchFalse = false;
   public static final int jobMaxJobs = -1;
+  public static final int jobMaxJobsMAX = Integer.MAX_VALUE;
   public static final int jobMaxJobsPerUser = -1;
+  public static final int jobMaxJobsPerUserMAX = Integer.MAX_VALUE;
 
   public static final List<JobRuntime> jobRuntimesEmpty = new ArrayList<>();
   public static final JobRuntime runtimeDocker =
@@ -171,7 +176,6 @@ public final class Utils
                                                                         DatatypeEnum.STRING, precedence, null);
   public static final List<Capability> jobCaps2 = new ArrayList<>(List.of(capA2, capB2, capC2, capD2));
   public static final boolean isDeleted = false;
-  public static final String importRefId = null;
   public static final Instant created = null;
   public static final Instant updated = null;
   public static final int qMaxJobs = -1;
@@ -207,12 +211,14 @@ public final class Utils
     for (int i = 1; i <= n; i++)
     {
       // Suffix which should be unique for each system within each integration test
-      String suffix = key + "_" + String.format("%03d", i);
+      String iStr = String.format("%03d", i+1);
+      String suffix = key + "_" + iStr;
       String name = getSysName(key, i);
+      String hostName = "host" + key + iStr + ".test.org";
       // Constructor initializes all attributes except for JobCapabilities and Credential
       // String[] sys0 = 0=tenantName, 1=name, 2=description, 3=sysType, 4=ownerUser1, 5=host, 6=effUser, 7=password,
       //                 8=bucketName, 9=rootDir, 10=jobWorkingDir, 11=batchScheduler, 12=batchDefaultLogicalQueue
-      String[] sys0 = {tenantName, name, "description "+suffix, sysType, ownerUser1, "host"+suffix, "effUser"+suffix,
+      String[] sys0 = {tenantName, name, "description "+suffix, sysType, ownerUser1, hostName, "effUser"+suffix,
               "fakePassword"+suffix,"bucket"+suffix, "/root"+suffix, "jobWorkDir"+suffix, "batchScheduler"+suffix,
               "batchDefaultLogicalQueue"+suffix};
       systems.put(i, sys0);
@@ -278,7 +284,7 @@ public final class Utils
     rSys.jobWorkingDir(sys[10]);
     rSys.jobEnvVariables(jobEnvVariables);
     rSys.jobMaxJobs(jobMaxJobs).jobMaxJobsPerUser(jobMaxJobsPerUser);
-    rSys.jobIsBatch(jobIsBatch);
+    rSys.jobIsBatch(jobIsBatchFalse);
     rSys.batchScheduler(sys[11]).batchDefaultLogicalQueue(sys[12]);
     rSys.batchLogicalQueues(jobQueues1);
     rSys.jobCapabilities(jobCaps1);
@@ -368,10 +374,10 @@ public final class Utils
     Assert.assertEquals(tmpSys.getJobWorkingDir(), sys0[10]);
     // TODO check jobRuntimes
     Assert.assertNotNull(tmpSys.getJobMaxJobs());
-    Assert.assertEquals(tmpSys.getJobMaxJobs().intValue(), jobMaxJobs);
+    Assert.assertEquals(tmpSys.getJobMaxJobs().intValue(), jobMaxJobsMAX);
     Assert.assertNotNull(tmpSys.getJobMaxJobsPerUser());
-    Assert.assertEquals(tmpSys.getJobMaxJobsPerUser().intValue(), jobMaxJobsPerUser);
-    Assert.assertEquals(tmpSys.getJobIsBatch(), Boolean.valueOf(jobIsBatch));
+    Assert.assertEquals(tmpSys.getJobMaxJobsPerUser().intValue(), jobMaxJobsPerUserMAX);
+    Assert.assertEquals(tmpSys.getJobIsBatch(), Boolean.valueOf(jobIsBatchFalse));
     Assert.assertEquals(tmpSys.getBatchScheduler(), sys0[11]);
     Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), sys0[12]);
     // Verify jobEnvVariables
@@ -429,6 +435,9 @@ public final class Utils
     Assert.assertTrue(tmpNotes.has("testdata"));
     String testdataStr = origNotes.get("testdata").getAsString();
     Assert.assertEquals(tmpNotes.get("testdata").getAsString(), testdataStr);
+
+    Assert.assertNotNull(tmpSys.getCreated(), "Fetched created timestamp should not be null.");
+    Assert.assertNotNull(tmpSys.getUpdated(), "Fetched updated timestamp should not be null.");
   }
 
   /**
@@ -475,9 +484,9 @@ public final class Utils
     Assert.assertNotNull(tmpSys.getJobEnvVariables());
     Assert.assertTrue(tmpSys.getJobEnvVariables().isEmpty());
     Assert.assertNotNull(tmpSys.getJobMaxJobs());
-    Assert.assertEquals(tmpSys.getJobMaxJobs().intValue(), defaultJobMaxJobs);
+    Assert.assertEquals(tmpSys.getJobMaxJobs().intValue(), jobMaxJobsMAX);
     Assert.assertNotNull(tmpSys.getJobMaxJobsPerUser());
-    Assert.assertEquals(tmpSys.getJobMaxJobsPerUser().intValue(), defaultJobMaxJobsPerUser);
+    Assert.assertEquals(tmpSys.getJobMaxJobsPerUser().intValue(), jobMaxJobsPerUserMAX);
     Assert.assertEquals(tmpSys.getJobIsBatch(), Boolean.valueOf(defaultJobIsBatch));
     Assert.assertEquals(tmpSys.getBatchScheduler(), defaultBatchScheduler);
     Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), defaultBatchDefaultLogicalQueue);
@@ -489,6 +498,5 @@ public final class Utils
     Assert.assertTrue(tmpSys.getTags().isEmpty());
     Assert.assertNotNull(tmpSys.getNotes());
     Assert.assertEquals((String) tmpSys.getNotes(), defaultNotesStr);
-    Assert.assertEquals(tmpSys.getImportRefId(), defaultImportRefId);
   }
 }

@@ -29,7 +29,7 @@ import static edu.utexas.tacc.tapis.apps.client.Utils.*;
 public class UserTest
 {
   // Test data
-  int numApps = 16;
+  int numApps = 17;
   Map<Integer, String[]> apps = Utils.makeApps(numApps, "CltUsr");
   
   private static final String newOwnerUser = testUser3;
@@ -198,64 +198,68 @@ public class UserTest
 
   @Test
   public void testUpdateApp() {
-    String[] app0 = apps.get(15);
-//    private static final String[] sysF2 = {tenantName, "CsysF", "description PATCHED", sysType, ownerUser, "hostPATCHED", "effUserPATCHED",
-//            "fakePasswordF", "bucketF", "/rootF", "jobLocalWorkDirF", "jobLocalArchDirF", "jobRemoteArchAppF", "jobRemoteArchDirF"};
-    String[] appF2 = app0.clone();
-    appF2[2] = "description PATCHED"; appF2[5] = "hostPATCHED"; appF2[6] = "effUserPATCHED";
-    ReqUpdateApp rApp = createPatchApp(appF2);
-    System.out.println("Creating and updating app with name: " + app0[1]);
-    try {
-      // Create a app
-      String respUrl = Utils.createApp(usrClient, app0);
-      System.out.println("Created app: " + respUrl);
-      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
-      // Update the app
-      respUrl = usrClient.updateApp(app0[1], app0[2], rApp);
-      System.out.println("Updated app: " + respUrl);
-      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
-      // Verify attributes
-      app0 = appF2;
-      App tmpApp = usrClient.getApp(app0[1], app0[2]);
-      Assert.assertNotNull(tmpApp, "Failed to create item: " + app0[1]);
-      System.out.println("Found item: " + app0[1]);
-      Assert.assertEquals(tmpApp.getId(), app0[1]);
-      Assert.assertEquals(tmpApp.getDescription(), app0[2]);
-//      Assert.assertEquals(tmpApp.getAppType().name(), app0[3]);
-      Assert.assertEquals(tmpApp.getOwner(), app0[4]);
-      // Verify capabilities
-//      List<Capability> jobCaps = tmpApp.getJobCapabilities();
-//      Assert.assertNotNull(jobCaps);
-//      Assert.assertEquals(jobCaps.size(), jobCaps2.size());
-//      var capNamesFound = new ArrayList<String>();
-//      for (Capability capFound : jobCaps) {capNamesFound.add(capFound.getName());}
-//      for (Capability capSeed : jobCaps2)
+//    String[] app0 = apps.get(15);
+////    String[] app0 = {tenantName, appId, appVersion, "description "+suffix, appTypeBatch.name(), ownerUser1,
+////            runtime.name(), runtimeVersion+suffix, containerImage+suffix, jobDescription+suffix,
+////            execSystemId, execSystemExecDir+suffix, execSystemInputDir+suffix, execSystemOutputDir+suffix,
+////            execSystemLogicalQueue+suffix, archiveSystemId, archiveSystemDir+suffix};
+//    String[] appF2 = app0.clone();
+//    appF2[2] = "description PATCHED";
+//    appF2[] = "pATCHED";
+//    appF2[] = ;
+//    ReqUpdateApp rApp = createPatchApp(appF2);
+//    System.out.println("Creating and updating app with name: " + app0[1]);
+//    try {
+//      // Create a app
+//      String respUrl = Utils.createApp(usrClient, app0);
+//      System.out.println("Created app: " + respUrl);
+//      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+//      // Update the app
+//      respUrl = usrClient.updateApp(app0[1], app0[2], rApp);
+//      System.out.println("Updated app: " + respUrl);
+//      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+//      // Verify attributes
+//      app0 = appF2;
+//      App tmpApp = usrClient.getApp(app0[1], app0[2]);
+//      Assert.assertNotNull(tmpApp, "Failed to create item: " + app0[1]);
+//      System.out.println("Found item: " + app0[1]);
+//      Assert.assertEquals(tmpApp.getId(), app0[1]);
+//      Assert.assertEquals(tmpApp.getDescription(), app0[2]);
+////      Assert.assertEquals(tmpApp.getAppType().name(), app0[3]);
+//      Assert.assertEquals(tmpApp.getOwner(), app0[4]);
+//      // Verify capabilities
+////      List<Capability> jobCaps = tmpApp.getJobCapabilities();
+////      Assert.assertNotNull(jobCaps);
+////      Assert.assertEquals(jobCaps.size(), jobCaps2.size());
+////      var capNamesFound = new ArrayList<String>();
+////      for (Capability capFound : jobCaps) {capNamesFound.add(capFound.getName());}
+////      for (Capability capSeed : jobCaps2)
+////      {
+////        Assert.assertTrue(capNamesFound.contains(capSeed.getName()), "List of capabilities did not contain a capability named: " + capSeed.getName());
+////      }
+//      // Verify tags
+//      List<String> tmpTags = tmpApp.getTags();
+//      Assert.assertNotNull(tmpTags, "Tags value was null");
+//      Assert.assertEquals(tmpTags.size(), tags2.size(), "Wrong number of tags");
+//      for (String tagStr : tags2)
 //      {
-//        Assert.assertTrue(capNamesFound.contains(capSeed.getName()), "List of capabilities did not contain a capability named: " + capSeed.getName());
+//        Assert.assertTrue(tmpTags.contains(tagStr));
+//        System.out.println("Found tag: " + tagStr);
 //      }
-      // Verify tags
-      List<String> tmpTags = tmpApp.getTags();
-      Assert.assertNotNull(tmpTags, "Tags value was null");
-      Assert.assertEquals(tmpTags.size(), tags2.size(), "Wrong number of tags");
-      for (String tagStr : tags2)
-      {
-        Assert.assertTrue(tmpTags.contains(tagStr));
-        System.out.println("Found tag: " + tagStr);
-      }
-      // Verify notes
-      String tmpNotesStr = (String) tmpApp.getNotes();
-      System.out.println("Found notes: " + tmpNotesStr);
-      JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(tmpNotesStr, JsonObject.class);
-      Assert.assertNotNull(tmpNotes);
-      System.out.println("Found notes: " + tmpNotesStr);
-      Assert.assertTrue(tmpNotes.has("project"));
-      Assert.assertEquals(tmpNotes.get("project").getAsString(), notes2JO.get("project").getAsString());
-      Assert.assertTrue(tmpNotes.has("testdata"));
-      Assert.assertEquals(tmpNotes.get("testdata").getAsString(), notes2JO.get("testdata").getAsString());
-    } catch (Exception e) {
-      System.out.println("Caught exception: " + e);
-      Assert.fail();
-    }
+//      // Verify notes
+//      String tmpNotesStr = (String) tmpApp.getNotes();
+//      System.out.println("Found notes: " + tmpNotesStr);
+//      JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(tmpNotesStr, JsonObject.class);
+//      Assert.assertNotNull(tmpNotes);
+//      System.out.println("Found notes: " + tmpNotesStr);
+//      Assert.assertTrue(tmpNotes.has("project"));
+//      Assert.assertEquals(tmpNotes.get("project").getAsString(), notes2JO.get("project").getAsString());
+//      Assert.assertTrue(tmpNotes.has("testdata"));
+//      Assert.assertEquals(tmpNotes.get("testdata").getAsString(), notes2JO.get("testdata").getAsString());
+//    } catch (Exception e) {
+//      System.out.println("Caught exception: " + e);
+//      Assert.fail();
+//    }
   }
 
   @Test
@@ -295,6 +299,23 @@ public class UserTest
     }
     Assert.assertTrue(appNames.contains(apps.get(3)[1]), "List of apps did not contain app name: " + apps.get(3)[1]);
     Assert.assertTrue(appNames.contains(apps.get(4)[1]), "List of apps did not contain app name: " + apps.get(4)[1]);
+  }
+
+  @Test
+  public void testEnableDisable() throws Exception {
+    String[] app0 = apps.get(17);
+    String respUrl = Utils.createApp(usrClient, app0);
+    Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    // Enabled should start off true, then become false and finally true again.
+    App tmpApp = usrClient.getApp(app0[1], app0[2]);
+    Assert.assertTrue(tmpApp.getEnabled());
+    int changeCount = usrClient.disableApp(tmpApp.getId());
+    tmpApp = usrClient.getApp(app0[1], app0[2]);
+    Assert.assertFalse(tmpApp.getEnabled());
+    changeCount = usrClient.enableApp(tmpApp.getId());
+    tmpApp = usrClient.getApp(app0[1], app0[2]);
+    Assert.assertTrue(tmpApp.getEnabled());
+
   }
 
   @Test
@@ -358,7 +379,6 @@ public class UserTest
   {
     ReqUpdateApp pApp = new ReqUpdateApp();
     pApp.description(app[2]);
-    pApp.enabled(false);
 //    pApp.jobCapabilities(jobCaps2);
     pApp.tags(tags2);
     pApp.notes(notes2JO);
