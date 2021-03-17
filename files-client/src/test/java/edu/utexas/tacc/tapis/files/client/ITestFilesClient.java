@@ -34,8 +34,8 @@ public class ITestFilesClient {
 
         TransferTaskRequest req = new TransferTaskRequest();
         TransferTaskRequestElement element = new TransferTaskRequestElement();
-        element.setDestinationURI("tapis://dev.tapis.develop.io/tapis-demo/b/");
-        element.setSourceURI("tapis://dev.tapis.develop.io/tapis-demo/a/");
+        element.setDestinationURI("tapis://tapis-demo/b/");
+        element.setSourceURI("tapis://tapis-demo/a/");
         req.addElementsItem(element);
         req.setTag("e2e-test");
         TransferTask newTask = client.createTransferTask(req);
