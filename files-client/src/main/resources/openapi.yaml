@@ -1028,10 +1028,8 @@ components:
       properties:
         sourceURI:
           type: string
-          description: Fully qualified URI, such as tapis://{systemID}/{path} or https://myserver.com/path/to/inputs/
         destinationURI:
           type: string
-          description: Fully qualified URI to a tapis system, such as tapis://{systemID}/{path}
         optional:
           type: boolean
           description: Allow the full transfer to succeed even if this portion fails?
