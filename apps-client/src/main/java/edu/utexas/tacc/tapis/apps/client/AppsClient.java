@@ -117,6 +117,22 @@ public class AppsClient
   // Add http header to default client
   public void addDefaultHeader(String key, String val) { apiClient.addDefaultHeader(key, val); }
 
+  /**
+   *  Close connections and stop threads that can sometimes prevent JVM shutdown.
+   */
+  public void close()
+  {
+    try {
+      // Best effort attempt to shut things down.
+      var okClient = apiClient.getHttpClient();
+      if (okClient != null)
+      {
+        var pool = okClient.connectionPool();
+        if (pool != null) pool.evictAll();
+      }
+    } catch (Exception e) {}
+  }
+
   // -----------------------------------------------------------------------
   // ------------------------- Apps -------------------------------------
   // -----------------------------------------------------------------------
