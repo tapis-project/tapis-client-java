@@ -106,12 +106,12 @@ public final class Utils
   public static final String containerImage = "containerImage";
   public static final boolean dynamicExecSystemTrue = true;
   public static final List<String> execSystemConstraints = Arrays.asList("Constraint1 AND", "Constraint2");
-  public static final String execSystemId = "exec.system.org";
+  public static final String execSystemId = "tapisv3-exec";
   public static final String execSystemExecDir = "execSystemExecDir";
   public static final String execSystemInputDir = "execSystemInputDir";
   public static final String execSystemOutputDir = "execSystemOutputDir";
   public static final String execSystemLogicalQueue = "execSystemLogicalQueue";
-  public static final String archiveSystemId = "archive.system.org";
+  public static final String archiveSystemId = "tapisv3-storage";
   public static final String archiveSystemIdNull = null;
   public static final String archiveSystemDir = "archiveSystemDir";
   public static final boolean archiveOnAppErrorTrue = true;
