@@ -76,7 +76,7 @@ public class FilesSvcTest
     var authClient = new AuthClient(baseURL);
     var tokClient = new TokensClient(baseURL, filesSvcName, filesSvcPasswd);
     try {
-      userJWT = authClient.getToken(ownerUser1, ownerUser1);
+      userJWT = authClient.getToken(testUser1, testUser1);
       filesServiceJWT = tokClient.getSvcToken(adminTenantName, filesSvcName, DEFAULT_TARGET_SITE);
     } catch (Exception e) {
       throw new Exception("Exception while creating tokens or auth service", e);
@@ -111,7 +111,7 @@ public class FilesSvcTest
     sysClient.grantUserPermissions(sys0[1], testUser3, testREADPerm);
 
     // Update client to be the files service. All tests will be run acting as the files service.
-    sysClient = getClientFilesSvc(tenantName, ownerUser1, filesServiceJWT);
+    sysClient = getClientFilesSvc(tenantName, testUser1, filesServiceJWT);
   }
 
   @AfterSuite

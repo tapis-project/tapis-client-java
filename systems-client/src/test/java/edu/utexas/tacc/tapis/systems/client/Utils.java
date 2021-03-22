@@ -63,8 +63,6 @@ public final class Utils
   public static final String testUser9 = "testuser9";
   // testuser9 must be given role "$!tenant_admin"
   public static final String adminUser = testUser9;
-  public static final String ownerUser1 = testUser1;
-  public static final String ownerUser2 = testUser2;
   public static final String adminTenantName = "admin";
   public static final String filesSvcName = "files";
   public static final String sysType = SystemTypeEnum.LINUX.name();
@@ -218,7 +216,7 @@ public final class Utils
       // Constructor initializes all attributes except for JobCapabilities and Credential
       // String[] sys0 = 0=tenantName, 1=name, 2=description, 3=sysType, 4=ownerUser1, 5=host, 6=effUser, 7=password,
       //                 8=bucketName, 9=rootDir, 10=jobWorkingDir, 11=batchScheduler, 12=batchDefaultLogicalQueue
-      String[] sys0 = {tenantName, name, "description "+suffix, sysType, ownerUser1, hostName, "effUser"+suffix,
+      String[] sys0 = {tenantName, name, "description "+suffix, sysType, testUser1, hostName, "effUser"+suffix,
               "fakePassword"+suffix,"bucket"+suffix, "/root"+suffix, "jobWorkDir"+suffix, "batchScheduler"+suffix,
               "batchDefaultLogicalQueue"+suffix};
       systems.put(i, sys0);
@@ -286,6 +284,7 @@ public final class Utils
     rSys.jobMaxJobs(jobMaxJobs).jobMaxJobsPerUser(jobMaxJobsPerUser);
     rSys.jobIsBatch(jobIsBatchFalse);
     rSys.batchScheduler(sys[11]).batchDefaultLogicalQueue(sys[12]);
+    rSys.setJobRuntimes(jobRuntimes1);
     rSys.batchLogicalQueues(jobQueues1);
     rSys.jobCapabilities(jobCaps1);
     rSys.tags(tags1);
@@ -466,7 +465,7 @@ public final class Utils
 
     // Verify optional attributes have been set to defaults
     // Owner should have defaulted to user who created the system
-    Assert.assertEquals(tmpSys.getOwner(), ownerUser1);
+    Assert.assertEquals(tmpSys.getOwner(), testUser1);
     Assert.assertEquals(tmpSys.getDescription(), defaultDescription);
     Assert.assertEquals(tmpSys.getEnabled(), Boolean.valueOf(defaultIsEnabled));
     // Effective user should result to requestor which in this case is testuser1

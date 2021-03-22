@@ -80,7 +80,7 @@ public class UserTest
     // Get short term user JWT from tokens service
     var authClient = new AuthClient(baseURL);
     try {
-      ownerUserJWT = authClient.getToken(ownerUser1, ownerUser1);
+      ownerUserJWT = authClient.getToken(testUser1, testUser1);
       newOwnerUserJWT = authClient.getToken(newOwnerUser, newOwnerUser);
     } catch (Exception e) {
       throw new Exception("Exception while creating tokens or auth service", e);
@@ -443,7 +443,7 @@ public class UserTest
     try {
       usrClient.deleteSystem(sys0[1], true);
       Assert.fail("Original owner should not have permission to update system after change of ownership. System name: " +
-                  sys0[1] + " Old owner: " + ownerUser1 + " New Owner: " + newOwnerUser);
+                  sys0[1] + " Old owner: " + testUser1 + " New Owner: " + newOwnerUser);
     } catch (TapisClientException e) {
       Assert.assertTrue(e.getMessage().contains("HTTP 401 Unauthorized"));
     }
