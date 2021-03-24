@@ -202,7 +202,7 @@ public class FilesClient {
           throws TapisClientException
   {
     FileListingResponse resp = null;
-    try { resp = fileOperations.listFiles(systemId, path, limit, offset, meta); }
+    try { resp = fileOperations.listFiles(systemId, path, limit, offset); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
