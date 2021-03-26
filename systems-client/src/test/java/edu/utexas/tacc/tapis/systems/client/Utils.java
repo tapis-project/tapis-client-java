@@ -35,6 +35,7 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RuntimeTypeEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SystemTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TransferMethodEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
@@ -283,7 +284,7 @@ public final class Utils
     rSys.jobEnvVariables(jobEnvVariables);
     rSys.jobMaxJobs(jobMaxJobs).jobMaxJobsPerUser(jobMaxJobsPerUser);
     rSys.jobIsBatch(jobIsBatchFalse);
-    rSys.batchScheduler(sys[11]).batchDefaultLogicalQueue(sys[12]);
+    rSys.batchScheduler(SchedulerTypeEnum.fromValue(sys[11])).batchDefaultLogicalQueue(sys[12]);
     rSys.setJobRuntimes(jobRuntimes1);
     rSys.batchLogicalQueues(jobQueues1);
     rSys.jobCapabilities(jobCaps1);
