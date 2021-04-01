@@ -2,10 +2,6 @@ package edu.utexas.tacc.tapis.files.client;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
@@ -26,13 +22,12 @@ import edu.utexas.tacc.tapis.files.client.gen.model.FileInfo;
 import edu.utexas.tacc.tapis.files.client.gen.model.FileListingResponse;
 import edu.utexas.tacc.tapis.files.client.gen.model.FilePermission;
 import edu.utexas.tacc.tapis.files.client.gen.model.FilePermissionResponse;
-import edu.utexas.tacc.tapis.files.client.gen.model.FilePermissionStringResponse;
 import edu.utexas.tacc.tapis.files.client.gen.model.FileStringResponse;
-import edu.utexas.tacc.tapis.files.client.gen.model.HeaderByteRange;
 import edu.utexas.tacc.tapis.files.client.gen.model.HealthCheckResponse;
 import edu.utexas.tacc.tapis.files.client.gen.model.MkdirRequest;
 import edu.utexas.tacc.tapis.files.client.gen.model.MoveCopyRenameRequest;
 import edu.utexas.tacc.tapis.files.client.gen.model.MoveCopyRenameRequest.OperationEnum;
+import edu.utexas.tacc.tapis.files.client.gen.model.StringResponse;
 import edu.utexas.tacc.tapis.files.client.gen.model.TapisResponse;
 import edu.utexas.tacc.tapis.files.client.gen.model.TransferTask;
 import edu.utexas.tacc.tapis.files.client.gen.model.TransferTaskListResponse;
@@ -42,15 +37,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-
-
 
 
 /**
@@ -323,20 +312,16 @@ public class FilesClient {
    * @return List of FilePermission objects
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<FilePermission> getFilePermissions(String systemId, String path, String username)
+  public FilePermission getFilePermissions(String systemId, String path, String username)
           throws TapisClientException
   {
-    List<FilePermissionResponse> resp = null;
-    try { resp = filePermissions.permissionsSystemIdPathGet(systemId, path, username); }
+    FilePermissionResponse resp = null;
+    try { resp = filePermissions.getPermissions(systemId, path, username); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null) return null;
-    List<FilePermission> filePermissions= new ArrayList<>();
-    for (FilePermissionResponse filePermResp : resp)
-    {
-      if (filePermResp.getResult() != null) filePermissions.add(filePermResp.getResult());
-    }
-    return filePermissions;
+
+    return resp.getResult();
   }
 
   /**
@@ -370,15 +355,15 @@ public class FilesClient {
    * @return FilePermissionStringResponse
    * @throws TapisClientException - If api call throws an exception
    */
-  public FilePermissionStringResponse deleteFilePermissionForUser(String systemId, String path, String username)
+  public String deleteFilePermissionForUser(String systemId, String path, String username)
           throws TapisClientException
   {
-    FilePermissionStringResponse resp = null;
+    StringResponse resp = null;
     try { resp = filePermissions.permissionsSystemIdPathDelete(systemId, path, username); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
-    return resp;
+    return resp.getResult();
   }
 
   // -----------------------------------------------------------------------

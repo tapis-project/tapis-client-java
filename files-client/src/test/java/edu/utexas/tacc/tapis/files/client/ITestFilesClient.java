@@ -4,6 +4,7 @@ package edu.utexas.tacc.tapis.files.client;
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
 import edu.utexas.tacc.tapis.auth.client.gen.model.Token;
 import edu.utexas.tacc.tapis.files.client.gen.model.FileInfo;
+import edu.utexas.tacc.tapis.files.client.gen.model.FilePermission;
 import edu.utexas.tacc.tapis.files.client.gen.model.MkdirRequest;
 import edu.utexas.tacc.tapis.files.client.gen.model.TransferTask;
 import edu.utexas.tacc.tapis.files.client.gen.model.TransferTaskListResponse;
@@ -88,6 +89,16 @@ public class ITestFilesClient {
 
         client.delete(systemId, "test-directory-e2e");
         Assert.assertThrows(Exception.class, ()-> client.listFiles(systemId, "/test-directory-e2e", 100, 0, false));
+    }
+
+    public void testGetPerms() throws Exception {
+        AuthClient authClient = new AuthClient(basepath);
+        String jwt = authClient.getToken(username, password);
+        FilesClient client = new FilesClient(basepath, jwt);
+
+        client.insert(systemId, "test-directory-e2e/e2e-test-file.txt", new File("src/test/resources/e2etestfile.txt"));
+        FilePermission perms = client.getFilePermissions(systemId, "/test-directory-e2e", null);
+        Assert.assertNotNull(perms);
     }
 
 
