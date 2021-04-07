@@ -7,6 +7,7 @@ import java.util.Map;
 import com.google.gson.JsonObject;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SystemTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
@@ -371,7 +372,7 @@ public class UserTest
       Assert.assertEquals(tmpSys.getBucketName(), sys0[8]);
       Assert.assertEquals(tmpSys.getRootDir(), sys0[9]);
       Assert.assertEquals(tmpSys.getJobWorkingDir(), sys0[10]);
-      Assert.assertEquals(tmpSys.getBatchScheduler(), sys0[11]);
+      Assert.assertEquals(tmpSys.getBatchScheduler(), SchedulerTypeEnum.valueOf(sys0[11]));
       Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), sys0[12]);
 // TODO logical queues?      Assert.assertEquals(tmpSys.getJobRemoteArchiveDir(), sys0[13]);
       Assert.assertNotNull(tmpSys.getPort());
@@ -445,7 +446,7 @@ public class UserTest
       Assert.fail("Original owner should not have permission to update system after change of ownership. System name: " +
                   sys0[1] + " Old owner: " + testUser1 + " New Owner: " + newOwnerUser);
     } catch (TapisClientException e) {
-      Assert.assertTrue(e.getMessage().contains("HTTP 401 Unauthorized"));
+      Assert.assertTrue(e.getMessage().contains("SYSLIB_UNAUTH"));
     }
     // TODO figure out why this fails
     //      passes manually, auth denied when manually attempting to retrieve as testuser2 when system owned by testuser3
@@ -454,7 +455,7 @@ public class UserTest
 //      Assert.fail("Original owner should not have permission to read system after change of ownership. System name: " +
 //              sys0[1] + " Old owner: " + ownerUser1 + " New Owner: " + newOwnerUser);
 //    } catch (TapisClientException e) {
-//      Assert.assertTrue(e.getMessage().contains("HTTP 401 Unauthorized"));
+//      Assert.assertTrue(e.getMessage().contains("SYSLIB_UNAUTH"));
 //    }
   }
 

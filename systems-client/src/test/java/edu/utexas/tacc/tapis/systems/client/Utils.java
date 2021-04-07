@@ -93,7 +93,7 @@ public final class Utils
   public static final String defaultRootDir = null;
   public static final String defaultBucketName = null;
   public static final String defaultJobWorkingDir = null;
-  public static final String defaultBatchScheduler = null;
+  public static final String defaultBatchScheduler = SchedulerTypeEnum.SLURM.toString();
   public static final String defaultBatchDefaultLogicalQueue = null;
   public static final String defaultEffectiveUserId = "${apiUserId}";
   public static final String defaultNotesStr = "{}";
@@ -218,7 +218,7 @@ public final class Utils
       // String[] sys0 = 0=tenantName, 1=name, 2=description, 3=sysType, 4=ownerUser1, 5=host, 6=effUser, 7=password,
       //                 8=bucketName, 9=rootDir, 10=jobWorkingDir, 11=batchScheduler, 12=batchDefaultLogicalQueue
       String[] sys0 = {tenantName, name, "description "+suffix, sysType, testUser1, hostName, "effUser"+suffix,
-              "fakePassword"+suffix,"bucket"+suffix, "/root"+suffix, "jobWorkDir"+suffix, "batchScheduler"+suffix,
+              "fakePassword"+suffix,"bucket"+suffix, "/root"+suffix, "jobWorkDir"+suffix, "SLURM",
               "batchDefaultLogicalQueue"+suffix};
       systems.put(i, sys0);
     }
@@ -378,7 +378,7 @@ public final class Utils
     Assert.assertNotNull(tmpSys.getJobMaxJobsPerUser());
     Assert.assertEquals(tmpSys.getJobMaxJobsPerUser().intValue(), jobMaxJobsPerUserMAX);
     Assert.assertEquals(tmpSys.getJobIsBatch(), Boolean.valueOf(jobIsBatchFalse));
-    Assert.assertEquals(tmpSys.getBatchScheduler(), sys0[11]);
+    Assert.assertEquals(tmpSys.getBatchScheduler(), SchedulerTypeEnum.valueOf(sys0[11]));
     Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), sys0[12]);
     // Verify jobEnvVariables
     List<KeyValuePair> tmpJobEnvVariables = tmpSys.getJobEnvVariables();
@@ -457,6 +457,7 @@ public final class Utils
     Assert.assertEquals(tmpSys.getDefaultAuthnMethod().name(), prot1AuthnMethod.name());
     Assert.assertEquals(tmpSys.getCanExec(), Boolean.valueOf(canExecTrue));
 
+    SchedulerTypeEnum schedulerType = (tmpSys.getBatchScheduler() == null) ? null : SchedulerTypeEnum.valueOf(defaultBatchScheduler);
     // If systemType is LINUX then rootDir is required
     if (tmpSys.getSystemType() == SystemTypeEnum.LINUX) Assert.assertEquals(tmpSys.getRootDir(), sys0[9]);
     else Assert.assertEquals(tmpSys.getRootDir(), defaultRootDir);
@@ -488,7 +489,7 @@ public final class Utils
     Assert.assertNotNull(tmpSys.getJobMaxJobsPerUser());
     Assert.assertEquals(tmpSys.getJobMaxJobsPerUser().intValue(), jobMaxJobsPerUserMAX);
     Assert.assertEquals(tmpSys.getJobIsBatch(), Boolean.valueOf(defaultJobIsBatch));
-    Assert.assertEquals(tmpSys.getBatchScheduler(), defaultBatchScheduler);
+    Assert.assertEquals(tmpSys.getBatchScheduler(), schedulerType);
     Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), defaultBatchDefaultLogicalQueue);
     Assert.assertNotNull(tmpSys.getBatchLogicalQueues());
     Assert.assertTrue(tmpSys.getBatchLogicalQueues().isEmpty());
