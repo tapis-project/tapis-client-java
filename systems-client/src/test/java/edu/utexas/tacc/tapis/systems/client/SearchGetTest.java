@@ -3,7 +3,7 @@ package edu.utexas.tacc.tapis.systems.client;
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ResultSystem;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
@@ -60,7 +60,7 @@ public class SearchGetTest
 //
 //  private final int numSystems = 20;
 //  private final Map<Integer, String[]> systems = Utils.makeSystems(numSystems, testKey);
-//  private final Map<Integer, TSystem> systemsMap = new HashMap<>();
+//  private final Map<Integer, ResultSystem> systemsMap = new HashMap<>();
 //
 //  private LocalDateTime createBegin;
 //  private LocalDateTime createEnd;
@@ -113,7 +113,7 @@ public class SearchGetTest
 //    // Check for a system. If it is there assume data is already properly seeded.
 //    // This seems like a reasonable approach since there is not a way to clean up (i.e., hard delete
 //    // systems and other resources) using the client.
-//    TSystem tmpSys;
+//    ResultSystem tmpSys;
 //    try {
 //      tmpSys = getClientUsr(serviceURL, ownerUser1JWT).getSystem(systems.get(1)[1]);
 //    } catch (TapisClientException e) {
@@ -196,7 +196,7 @@ public class SearchGetTest
 //  @Test(groups={"integration"})
 //  public void testValidCases() throws Exception
 //  {
-//    TSystem sys0 = systemsMap.get(1);
+//    ResultSystem sys0 = systemsMap.get(1);
 //    String sys0Name = sys0.getId();
 //    String nameList = "noSuchName1,noSuchName2," + sys0Name + ",noSuchName3";
 //    // Create all input and validation data for tests
@@ -284,7 +284,7 @@ public class SearchGetTest
 //      CaseData cd = item.getValue();
 //      int caseNum = item.getKey();
 //      System.out.println("Checking case # " + caseNum + " Input: " + cd.searchStr);
-//      List<TSystem> searchResults = getClientUsr(serviceURL, adminUserJWT).getSystems(cd.searchStr);
+//      List<ResultSystem> searchResults = getClientUsr(serviceURL, adminUserJWT).getSystems(cd.searchStr);
 //      assertEquals(searchResults.size(), cd.count);
 //    }
 //  }
@@ -296,7 +296,7 @@ public class SearchGetTest
 //  public void testSortingSkip() throws Exception
 //  {
 //    String searchStr = "id.like." + sysNameLikeAll;
-//    List<TSystem> searchResults;
+//    List<ResultSystem> searchResults;
 //
 //    String sortBy;
 //    int limit;
@@ -344,7 +344,7 @@ public class SearchGetTest
 //  /**
 //   * Check that results were sorted in correct order when sorting on system name
 //   */
-//  private void checkOrder(List<TSystem> searchResults, int start, int end)
+//  private void checkOrder(List<ResultSystem> searchResults, int start, int end)
 //  {
 //    int idx = 0; // Position in result
 //    // Name should match for loop counter i

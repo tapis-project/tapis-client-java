@@ -3,8 +3,8 @@ package edu.utexas.tacc.tapis.systems.client;
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
-import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
+//import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ResultSystem;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
@@ -46,7 +46,7 @@ public class MatchConstraintsTest
 //  // Keep numSystems even since some data is modified for half the systems.
 //  private final int numSystems = 4;
 //  private final Map<Integer, String[]> systems = Utils.makeSystems(numSystems, testKey);
-//  private final Map<Integer, TSystem> systemsMap = new HashMap<>();
+//  private final Map<Integer, ResultSystem> systemsMap = new HashMap<>();
 //
 //  private LocalDateTime createBegin;
 //  private LocalDateTime createEnd;
@@ -97,7 +97,7 @@ public class MatchConstraintsTest
 //    // Check for a system. If it is there assume data is already properly seeded.
 //    // This seems like a reasonable approach since there is not a way to clean up (i.e., hard delete
 //    // systems and other resources) using the client.
-//    TSystem tmpSys;
+//    ResultSystem tmpSys;
 //    try {
 //      tmpSys = getClientUsr(serviceURL, ownerUser1JWT).getSystem(systems.get(1)[1]);
 //    } catch (TapisClientException e) {
@@ -175,7 +175,7 @@ public class MatchConstraintsTest
 //  @Test(groups={"integration"})
 //  public void testValidCases() throws Exception
 //  {
-//    TSystem sys0 = systemsMap.get(1);
+//    ResultSystem sys0 = systemsMap.get(1);
 //    String sys0Name = sys0.getId();
 //    String nameList = "noSuchName1,noSuchName2," + sys0Name + ",noSuchName3";
 //    // Create all input and validation data for tests
@@ -218,7 +218,7 @@ public class MatchConstraintsTest
 //      ReqMatchConstraints req = new ReqMatchConstraints();
 //      req.addMatchItem(cd.matchStr);
 //      // Submit match request
-//      List<TSystem> matchResults = getClientUsr(serviceURL, adminUserJWT).matchConstraints(req);
+//      List<ResultSystem> matchResults = getClientUsr(serviceURL, adminUserJWT).matchConstraints(req);
 //// TODO: re-enable when this is actually implemented
 ////      assertEquals(matchResults.size(), cd.count);
 //    }

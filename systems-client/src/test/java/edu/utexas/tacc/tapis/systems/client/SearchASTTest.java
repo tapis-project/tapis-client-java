@@ -4,7 +4,7 @@ import edu.utexas.tacc.tapis.auth.client.AuthClient;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqSearchSystems;
-import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ResultSystem;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
@@ -44,7 +44,7 @@ public class SearchASTTest
 //
 //  private final int numSystems = 20;
 //  private final Map<Integer, String[]> systems = Utils.makeSystems(numSystems, testKey);
-//  private final Map<Integer, TSystem> systemsMap = new HashMap<>();
+//  private final Map<Integer, ResultSystem> systemsMap = new HashMap<>();
 //
 //  private LocalDateTime createBegin;
 //  private LocalDateTime createEnd;
@@ -100,7 +100,7 @@ public class SearchASTTest
 //    // Check for a system. If it is there assume data is already properly seeded.
 //    // This seems like a reasonable approach since there is not a way to clean up (i.e., hard delete
 //    // systems and other resources) using the client.
-//    TSystem tmpSys;
+//    ResultSystem tmpSys;
 //    try {
 //      tmpSys = getClientUsr(serviceURL, ownerUser1JWT).getSystem(systems.get(1)[1]);
 //    } catch (TapisClientException e) {
@@ -177,7 +177,7 @@ public class SearchASTTest
 //  @Test(groups={"integration"})
 //  public void testValidCases() throws Exception
 //  {
-//    TSystem sys0 = systemsMap.get(1);
+//    ResultSystem sys0 = systemsMap.get(1);
 //    String sys0Name = sys0.getId();
 //    String nameList = "noSuchName1,noSuchName2," + sys0Name + ",noSuchName3";
 //    // Create all input and validation data for tests
@@ -216,7 +216,7 @@ public class SearchASTTest
 //      ReqSearchSystems req = new ReqSearchSystems();
 //      req.addSearchItem(cd.searchStr);
 //      // Submit search request
-//      List<TSystem> searchResults = getClientUsr(serviceURL, adminUserJWT).searchSystems(req);
+//      List<ResultSystem> searchResults = getClientUsr(serviceURL, adminUserJWT).searchSystems(req);
 //      assertEquals(searchResults.size(), cd.count);
 //    }
 //  }

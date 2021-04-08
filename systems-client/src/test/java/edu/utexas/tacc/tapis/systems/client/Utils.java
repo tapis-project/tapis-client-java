@@ -38,7 +38,7 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.RuntimeTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SystemTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TransferMethodEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ResultSystem;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 
@@ -197,12 +197,12 @@ public final class Utils
   public static final String escapedCommaInListValue = "abc\\,def";
 
   /**
-   * Create an array of TSystem objects in memory
+   * Create an array of ResultSystem objects in memory
    * Names will be of format TestSys_K_NNN where K is the key and NNN runs from 000 to 999
    * We need a key because maven runs the tests in parallel so each set of systems created by an integration
    *   test will need its own namespace.
    * @param n number of systems to create
-   * @return array of TSystem objects
+   * @return array of ResultSystem objects
    */
   public static Map<Integer, String[]> makeSystems(int n, String key)
   {
@@ -335,14 +335,14 @@ public final class Utils
   }
 
   /**
-   * Verify most attributes for a TSystem using default create data for following attributes:
+   * Verify most attributes for a ResultSystem using default create data for following attributes:
    *     port, useProxy, proxyHost, proxyPort, defaultAuthnMethod, transferMethods,
    *     canExec, jobWorkingDir, jobMaxJobs, jobMaxJobsPerUser, jobIsBatch, batchScheduler, batchDefaultLogicalQueue,
    *     jobEnvVariables, jobLogicalQueues, capabilities, tags, notes
    * @param tmpSys - system retrieved from the service
    * @param sys0 - Data used to create the system
    */
-  public static void verifySystemAttributes(TSystem tmpSys, String[] sys0)
+  public static void verifySystemAttributes(ResultSystem tmpSys, String[] sys0)
   {
     Assert.assertEquals(tmpSys.getId(), sys0[1]);
     Assert.assertEquals(tmpSys.getDescription(), sys0[2]);
@@ -441,12 +441,12 @@ public final class Utils
   }
 
   /**
-   * Verify the required attributes for a TSystem
+   * Verify the required attributes for a ResultSystem
    *   and verify that other attributes are set to expected defaults.
    * @param tmpSys - system retrieved from the service
    * @param sys0 - Data used to create the system
    */
-  public static void verifySystemDefaults(TSystem tmpSys, String[] sys0)
+  public static void verifySystemDefaults(ResultSystem tmpSys, String[] sys0)
   {
     // Verify required attributes
     Assert.assertEquals(tmpSys.getId(), sys0[1]);

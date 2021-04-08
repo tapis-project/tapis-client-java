@@ -7,6 +7,7 @@ import java.util.Map;
 import com.google.gson.JsonObject;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ResultSystemBasic;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SystemTypeEnum;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +22,7 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.AuthnEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TransferMethodEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ResultSystem;
 import edu.utexas.tacc.tapis.systems.client.SystemsClient.AuthnMethod;
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
 
@@ -309,7 +310,7 @@ public class UserTest
             usrClient.createSystem(createReqSystem(sys0, prot1Port, AuthnMethod.PKI_KEYS, credNull, prot1TxfrMethodsC));
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
-    TSystem tmpSys = usrClient.getSystem(sys0[1]);
+    ResultSystem tmpSys = usrClient.getSystem(sys0[1]);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
     System.out.println("Found item: " + sys0[1]);
     verifySystemAttributes(tmpSys, sys0);
@@ -333,7 +334,7 @@ public class UserTest
       Assert.fail();
     }
     // Get the system and check the defaults
-    TSystem tmpSys = usrClient.getSystem(sys0[1]);
+    ResultSystem tmpSys = usrClient.getSystem(sys0[1]);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
     System.out.println("Found item: " + sys0[1]);
     Utils.verifySystemDefaults(tmpSys, sys0);
@@ -360,7 +361,7 @@ public class UserTest
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
       // Verify attributes
       sys0 = sysF2;
-      TSystem tmpSys = usrClient.getSystem(sys0[1]);
+      ResultSystem tmpSys = usrClient.getSystem(sys0[1]);
       Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
       System.out.println("Found item: " + sys0[1]);
       Assert.assertEquals(tmpSys.getId(), sys0[1]);
@@ -437,7 +438,7 @@ public class UserTest
     String respUrl =
             usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, null, prot1TxfrMethodsC));
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
-    TSystem tmpSys = usrClient.getSystem(sys0[1]);
+    ResultSystem tmpSys = usrClient.getSystem(sys0[1]);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
     usrClient.changeSystemOwner(sys0[1], newOwnerUser);
     // Now that owner has given away ownership they should no longer be able to modify or read.
@@ -472,15 +473,15 @@ public class UserTest
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Get list of all systems
-    List<TSystem> systemsList = usrClient.getSystems();
+    List<ResultSystemBasic> systemsList = usrClient.getSystems(null, -1, null, -1, null);
     Assert.assertNotNull(systemsList);
     Assert.assertFalse(systemsList.isEmpty());
     var systemNames = new ArrayList<String>();
-    for (TSystem system : systemsList) {
+    for (ResultSystemBasic system : systemsList) {
       System.out.println("Found item: " + system.getId());
       systemNames.add(system.getId());
     }
-    TSystem tmpSys = usrClient.getSystem(sys1[1]);
+    ResultSystem tmpSys = usrClient.getSystem(sys1[1]);
     verifySystemAttributes(tmpSys, sys1);
     tmpSys = usrClient.getSystem(sys2[1]);
     verifySystemAttributes(tmpSys, sys2);
@@ -496,7 +497,7 @@ public class UserTest
             usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull, prot1TxfrMethodsC));
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     // Enabled should start off true, then become false and finally true again.
-    TSystem tmpSys = usrClient.getSystem(sys0[1]);
+    ResultSystem tmpSys = usrClient.getSystem(sys0[1]);
     Assert.assertTrue(tmpSys.getEnabled());
     int changeCount = usrClient.disableSystem(tmpSys.getId());
     tmpSys = usrClient.getSystem(sys0[1]);
@@ -517,7 +518,7 @@ public class UserTest
     // Delete the system
     usrClient.deleteSystem(sys0[1], true);
     try {
-      TSystem tmpSys2 = usrClient.getSystem(sys0[1]);
+      ResultSystem tmpSys2 = usrClient.getSystem(sys0[1]);
       Assert.fail("System not deleted. System name: " + sys0[1]);
     } catch (TapisClientException e) {
       Assert.assertEquals(e.getCode(), 404);

@@ -12,6 +12,9 @@
   <description>Java client for Systems Service</description>
 
   <properties>
+    <!-- Location of openapi spec. Default is dev branch -->
+    <specPath>https://raw.githubusercontent.com/tapis-project/openapi-systems/dev/SystemsAPI.yaml</specPath>
+
     <!-- Skip integration tests by default -->
     <!-- To run tests TAPIS_FILES_SVC_PASSWORD must be set in the env -->
     <!-- Use following command to run integration tests -->
@@ -41,28 +44,8 @@
 
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
-    
-    <!-- NOTE: THE CALLED SCRIPT INTRODUCES HIDDEN DEPENDENCIES -->
-    <!--       These dependencies include curl.      -->
+
     <plugins>
-      <!-- Run script to download latest openapi spec -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>${exec-maven-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>Download openapi file</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>${basedir}/gen_spec.sh</executable>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
       <!-- Build generated client code using openapi-generator -->
       <plugin>
         <groupId>org.openapitools</groupId>
@@ -75,7 +58,7 @@
             </goals>
             <configuration>
               <!-- Use the openapi spec here. Tapis live-docs website should also get spec from here -->
-              <inputSpec>${project.basedir}/target/SystemsAPI.yaml</inputSpec>
+              <inputSpec>${specPath}</inputSpec>
               <enablePostProcessFile>true</enablePostProcessFile>
               <output>${project.build.directory}/generated-sources/openapi</output>
               <generatorName>java</generatorName>
