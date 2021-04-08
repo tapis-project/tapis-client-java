@@ -3,24 +3,24 @@ package edu.utexas.tacc.tapis.systems.client;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.JsonObject;
+
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
+import edu.utexas.tacc.tapis.client.shared.Utils;
+import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.systems.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespBoolean;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystemsBasic;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ResultSystemBasic;
-import org.apache.commons.lang3.StringUtils;
-import com.google.gson.internal.LinkedTreeMap;
-
-import edu.utexas.tacc.tapis.client.shared.Utils;
-import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystems;
 import edu.utexas.tacc.tapis.systems.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.systems.client.gen.ApiException;
 import edu.utexas.tacc.tapis.systems.client.gen.api.CredentialsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.PermissionsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.SystemsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqSearchSystems;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
@@ -30,7 +30,7 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.RespCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespNameArray;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespResourceUrl;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ResultSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
 import edu.utexas.tacc.tapis.systems.client.gen.model.CategoryEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.DatatypeEnum;
@@ -276,7 +276,7 @@ public class SystemsClient
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public ResultSystem getSystem(String systemId, Boolean returnCredentials, AuthnMethod authnMethod, Boolean requireExecPerm)
+  public TapisSystem getSystem(String systemId, Boolean returnCredentials, AuthnMethod authnMethod, Boolean requireExecPerm)
           throws TapisClientException
   {
     RespSystem resp = null;
@@ -285,7 +285,7 @@ public class SystemsClient
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
-    // Postprocess the ResultSystem
+    // Postprocess the TapisSystem
     return postProcessSystem(resp.getResult());
   }
 
@@ -296,7 +296,7 @@ public class SystemsClient
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public ResultSystem getSystem(String systemId) throws TapisClientException
+  public TapisSystem getSystem(String systemId) throws TapisClientException
   {
     return getSystem(systemId, false, null, false);
   }
@@ -313,7 +313,7 @@ public class SystemsClient
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public ResultSystem getSystemWithCredentials(String systemId, AuthnMethod authnMethod) throws TapisClientException
+  public TapisSystem getSystemWithCredentials(String systemId, AuthnMethod authnMethod) throws TapisClientException
   {
     return getSystem(systemId, true, authnMethod, false);
   }
@@ -324,23 +324,23 @@ public class SystemsClient
    * Use only one of skip or startAfter
    * When using startAfter sortBy must be specified.
    */
-  public List<ResultSystemBasic> getSystems(String searchStr, int limit,
-                                       String sortBy, int skip, String startAfter) throws TapisClientException
+  public List<TapisSystem> getSystems(String searchStr, int limit,
+                                      String sortBy, int skip, String startAfter) throws TapisClientException
   {
-    RespSystemsBasic resp = null;
+    RespSystems resp = null;
     try { resp = sysApi.getSystems(false, searchStr, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return Collections.emptyList();
-    // Postprocess ResultSystems in the result
-//    for (ResultSystem rSys : resp.getResult()) postProcessSystem(rSys);
+    // Postprocess TapisSystems in the result
+    for (TapisSystem tSys : resp.getResult().getSearch()) postProcessSystem(tSys);
     return resp.getResult().getSearch();
   }
 
   /**
    * Get list of systems using search. For example search=(id.like.MySys*)~(enabled.eq.true)
    */
-  public List<ResultSystemBasic> getSystems(String searchStr) throws TapisClientException
+  public List<TapisSystem> getSystems(String searchStr) throws TapisClientException
   {
     return getSystems(searchStr, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER);
   }
@@ -348,7 +348,7 @@ public class SystemsClient
   /**
    * Get list of all systems
    */
-  public List<ResultSystemBasic> getSystems() throws TapisClientException
+  public List<TapisSystem> getSystems() throws TapisClientException
   {
     return getSystems(DEFAULT_SEARCH);
   }
@@ -361,15 +361,15 @@ public class SystemsClient
    * Use only one of skip or startAfter
    * When using startAfter sortBy must be specified.
    */
-  public List<ResultSystemBasic> searchSystems(ReqSearchSystems req, int limit, String sortBy, int skip, String startAfter) throws TapisClientException
+  public List<TapisSystem> searchSystems(ReqSearchSystems req, int limit, String sortBy, int skip, String startAfter) throws TapisClientException
   {
-    RespSystemsBasic resp = null;
+    RespSystems resp = null;
     try { resp = sysApi.searchSystemsRequestBody(req, false, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null || resp.getResult().getSearch() == null) return Collections.emptyList();
-    // Postprocess ResultSystems in the result
-//    for (ResultSystemBasic rSys : resp.getResult().getSearch()) postProcessSystem(rSys);
+    // Postprocess TapisSystems in the result
+    for (TapisSystem tSys : resp.getResult().getSearch()) postProcessSystem(tSys);
     return resp.getResult().getSearch();
   }
 
@@ -377,26 +377,26 @@ public class SystemsClient
    * Dedicated search endpoint using requestBody only
    * Search for systems using an array of strings that represent an SQL-like WHERE clause
    */
-  public List<ResultSystemBasic> searchSystems(ReqSearchSystems req) throws TapisClientException
+  public List<TapisSystem> searchSystems(ReqSearchSystems req) throws TapisClientException
   {
     return searchSystems(req, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER);
   }
 
-//  /**
-//   * Dedicated search endpoint for retrieving systems that match a list of constraint conditions
-//   * The constraint conditions are passed in as an array of strings that represent an SQL-like WHERE clause
-//   */
-//  public List<ResultSystemBasic> matchConstraints(ReqMatchConstraints req) throws TapisClientException
-//  {
-//    RespSystems resp = null;
-//    try { resp = sysApi.matchConstraints(req); }
-//    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-//    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-//    if (resp == null || resp.getResult() == null) return Collections.emptyList();
-//    // Postprocess ResultSystemBasics in the result
-//    for (ResultSystemBasic rSys : resp.getResult()) postProcessSystem(rSys);
-//    return resp.getResult();
-//  }
+  /**
+   * Dedicated search endpoint for retrieving systems that match a list of constraint conditions
+   * The constraint conditions are passed in as an array of strings that represent an SQL-like WHERE clause
+   */
+  public List<TapisSystem> matchConstraints(ReqMatchConstraints req) throws TapisClientException
+  {
+    RespSystems resp = null;
+    try { resp = sysApi.matchConstraints(req); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp == null || resp.getResult() == null) return Collections.emptyList();
+    // Postprocess TapisSystems in the result
+    for (TapisSystem tSys : resp.getResult().getSearch()) postProcessSystem(tSys);
+    return resp.getResult().getSearch();
+  }
 
   /**
    * Delete a system given the system systemId.
@@ -627,18 +627,18 @@ public class SystemsClient
   /**
    * Do any client side postprocessing of a returned system.
    * Currently this just involves transforming the notes attribute into a json string
-   * @param rSys - ResultSystem to process
-   * @return - Resulting ResultSystem
+   * @param tSys - TapisSystem to process
+   * @return - Resulting TapisSystem
    */
-  ResultSystem postProcessSystem(ResultSystem rSys)
+  TapisSystem postProcessSystem(TapisSystem tSys)
   {
     // If we have a notes attribute convert it from a LinkedTreeMap to a string with json.
-    if (rSys != null && rSys.getNotes() != null)
+    if (tSys != null && tSys.getNotes() != null)
     {
-      LinkedTreeMap lmap = (LinkedTreeMap) rSys.getNotes();
+      LinkedTreeMap lmap = (LinkedTreeMap) tSys.getNotes();
       JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(lmap.toString(), JsonObject.class);
-      rSys.setNotes(tmpNotes.toString());
+      tSys.setNotes(tmpNotes.toString());
     }
-    return rSys;
+    return tSys;
   }
 }

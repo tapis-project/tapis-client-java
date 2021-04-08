@@ -5,7 +5,7 @@ import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.systems.client.SystemsClient.AuthnMethod;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ResultSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
 import edu.utexas.tacc.tapis.tokens.client.TokensClient;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
@@ -148,7 +148,7 @@ public class FilesSvcTest
   public void testAllTests() throws Exception {
     // Test 1. retrieving a system including default authn method
     String[] sys0 = systems.get(1);
-    ResultSystem tmpSys = sysClient.getSystemWithCredentials(sys0[1], null);
+    TapisSystem tmpSys = sysClient.getSystemWithCredentials(sys0[1], null);
     Assert.assertNotNull(tmpSys, "Failed to find item: " + sys0[1]);
     System.out.println("Found item: " + sys0[1]);
     // Verify most attributes

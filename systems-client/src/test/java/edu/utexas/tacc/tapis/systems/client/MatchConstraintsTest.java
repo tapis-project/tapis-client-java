@@ -4,7 +4,7 @@ import edu.utexas.tacc.tapis.auth.client.AuthClient;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 //import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ResultSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
