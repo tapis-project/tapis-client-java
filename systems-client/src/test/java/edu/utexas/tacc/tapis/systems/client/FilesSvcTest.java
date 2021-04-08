@@ -204,7 +204,7 @@ public class FilesSvcTest
       sysClient.getSystem(sys0[1], false, null, true);
       Assert.fail("Fetch of system did not require EXECUTE permission as expected");
     } catch (TapisClientException tce) {
-      Assert.assertTrue(tce.getTapisMessage().contains("HTTP 401 Unauthorized"), "Wrong exception message: " + tce.getTapisMessage());
+      Assert.assertTrue(tce.getTapisMessage().contains("SYSLIB_UNAUTH"), "Wrong exception message: " + tce.getTapisMessage());
     }
   }
 
