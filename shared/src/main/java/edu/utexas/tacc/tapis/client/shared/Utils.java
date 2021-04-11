@@ -21,7 +21,9 @@ public class Utils
   public static final int DEFAULT_SKIP = -1;
   public static final String DEFAULT_STARTAFTER = "";
   public static final boolean DEFAULT_COMPUTETOTAL = false;
-  
+  public static final String DEFAULT_SELECT_ALL = "allAttributes";
+  public static final String DEFAULT_SELECT_SUMMARY = "summaryAttributes";
+
   // Default target site for service JWTs
   public static final String DEFAULT_TARGET_SITE = "tacc";
 

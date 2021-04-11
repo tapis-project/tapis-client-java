@@ -42,6 +42,8 @@ import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SEARCH;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SORTBY;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_COMPUTETOTAL;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_SUMMARY;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_ALL;
 
 /**
  * Class providing a convenient front-end to the automatically generated client code
@@ -279,9 +281,11 @@ public class SystemsClient
   public TapisSystem getSystem(String systemId, Boolean returnCredentials, AuthnMethod authnMethod, Boolean requireExecPerm)
           throws TapisClientException
   {
+    // TODO: Allow caller to specify selectStr
+    String selectStr = DEFAULT_SELECT_ALL;
     RespSystem resp = null;
     String authnMethodStr = (authnMethod==null ? null : authnMethod.name());
-    try {resp = sysApi.getSystem(systemId, returnCredentials, authnMethodStr, requireExecPerm); }
+    try {resp = sysApi.getSystem(systemId, returnCredentials, authnMethodStr, requireExecPerm, selectStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
@@ -327,8 +331,10 @@ public class SystemsClient
   public List<TapisSystem> getSystems(String searchStr, int limit,
                                       String sortBy, int skip, String startAfter) throws TapisClientException
   {
+    // TODO: Allow caller to specify selectStr
+    String selectStr = DEFAULT_SELECT_SUMMARY;
     RespSystems resp = null;
-    try { resp = sysApi.getSystems(false, searchStr, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL); }
+    try { resp = sysApi.getSystems(searchStr, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return Collections.emptyList();
@@ -363,8 +369,10 @@ public class SystemsClient
    */
   public List<TapisSystem> searchSystems(ReqSearchSystems req, int limit, String sortBy, int skip, String startAfter) throws TapisClientException
   {
+    // TODO: Allow caller to specify selectStr
+    String selectStr = DEFAULT_SELECT_SUMMARY;
     RespSystems resp = null;
-    try { resp = sysApi.searchSystemsRequestBody(req, false, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL); }
+    try { resp = sysApi.searchSystemsRequestBody(req, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null || resp.getResult().getSearch() == null) return Collections.emptyList();

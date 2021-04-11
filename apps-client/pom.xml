@@ -13,6 +13,12 @@
 
   <properties>
     <!-- Location of openapi spec. Default is dev branch -->
+    <!-- NOTE: In order to try out openapi updates using a local file do something similar to the following:
+           mvn clean install
+           cd apps-client
+           cp ../../openapi-apps/AppsAPI.yaml target/
+           mvn install -DspecPath="/home/scblack/src_git/github/dev/tapis-client-java/apps-client/target/AppsAPI.yaml"
+     -->
     <specPath>https://raw.githubusercontent.com/tapis-project/openapi-apps/dev/AppsAPI.yaml</specPath>
 
     <!-- Skip integration tests by default -->
