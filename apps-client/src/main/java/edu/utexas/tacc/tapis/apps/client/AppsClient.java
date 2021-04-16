@@ -10,6 +10,7 @@ import edu.utexas.tacc.tapis.apps.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ArgMetaSpec;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ArgSpec;
 import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
+import edu.utexas.tacc.tapis.apps.client.gen.model.RespApps;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespBasic;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespAppArray;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespBoolean;
@@ -32,6 +33,14 @@ import edu.utexas.tacc.tapis.apps.client.gen.model.RespNameArray;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespResourceUrl;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespApp;
 import edu.utexas.tacc.tapis.apps.client.gen.model.App;
+
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_COMPUTETOTAL;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_ALL;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_SUMMARY;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SORTBY;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
 
 /**
  * Class providing a convenient front-end to the automatically generated client code
@@ -321,8 +330,12 @@ public class AppsClient
    */
   public List<App> getApps(String searchStr) throws TapisClientException
   {
-    RespAppArray resp = null;
-    try { resp = appApi.getApps(searchStr); }
+    RespApps resp = null;
+    // TODO: Allow caller to specify selectStr
+    String selectStr = DEFAULT_SELECT_ALL;
+
+    try { resp = appApi.getApps(searchStr, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
+                                DEFAULT_COMPUTETOTAL, selectStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
@@ -341,8 +354,11 @@ public class AppsClient
    */
   public List<App> searchApps(ReqSearchApps req) throws TapisClientException
   {
-    RespAppArray resp = null;
-    try { resp = appApi.searchAppsRequestBody(req); }
+    RespApps resp = null;
+    // TODO: Allow caller to specify selectStr
+    String selectStr = DEFAULT_SELECT_ALL;
+    try { resp = appApi.searchAppsRequestBody(req, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
+                                              DEFAULT_COMPUTETOTAL, selectStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;

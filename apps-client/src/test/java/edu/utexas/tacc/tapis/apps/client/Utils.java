@@ -35,6 +35,7 @@ import edu.utexas.tacc.tapis.apps.client.gen.model.NotificationSubscription;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ParameterSet;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ParameterSetArchiveFilter;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RuntimeEnum;
+import edu.utexas.tacc.tapis.apps.client.gen.model.RuntimeOptionEnum;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqCreateApp;
@@ -103,6 +104,9 @@ public final class Utils
   public static final boolean isEnabledTrue = true;
   public static final RuntimeEnum runtime = RuntimeEnum.DOCKER;
   public static final String runtimeVersion = "0.0.1";
+  public static final List<RuntimeOptionEnum> runtimeOptions1 = new ArrayList<>(List.of(RuntimeOptionEnum.RUN));
+  public static final List<RuntimeOptionEnum> runtimeOptions2 = new ArrayList<>(List.of(RuntimeOptionEnum.START));
+  public static final List<RuntimeOptionEnum> runtimeOptionsNull = null;
   public static final String containerImage = "containerImage";
   public static final boolean dynamicExecSystemTrue = true;
   public static final List<String> execSystemConstraints = Arrays.asList("Constraint1 AND", "Constraint2");
@@ -266,6 +270,7 @@ public final class Utils
     rApp.enabled(isEnabledTrue);
     rApp.setRuntime(RuntimeEnum.valueOf(app[6]));
     rApp.setRuntimeVersion(app[7]);
+    rApp.setRuntimeOptions(runtimeOptions1);
     rApp.setContainerImage(app[8]);
     rApp.setMaxJobs(maxJobs);
     rApp.setMaxJobsPerUser(maxJobsPerUser);
@@ -354,6 +359,14 @@ public final class Utils
     Assert.assertNotNull(tmpApp.getRuntime());
     Assert.assertEquals(tmpApp.getRuntime().name(), app0[6]);
     Assert.assertEquals(tmpApp.getRuntimeVersion(), app0[7]);
+    // Verify runtimeOptions
+    List<RuntimeOptionEnum> rtOps = tmpApp.getRuntimeOptions();
+    Assert.assertNotNull(rtOps);
+    for (RuntimeOptionEnum rtOption : runtimeOptions1)
+    {
+      Assert.assertTrue(rtOps.contains(rtOption), "List of runtime options did not contain: " + rtOption.name());
+    }
+
     Assert.assertEquals(tmpApp.getContainerImage(), app0[8]);
     Assert.assertEquals(tmpApp.getMaxJobs(), Integer.valueOf(maxJobs));
     Assert.assertEquals(tmpApp.getMaxJobsPerUser(), Integer.valueOf(maxJobsPerUser));

@@ -339,8 +339,8 @@ public class SystemsClient
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return Collections.emptyList();
     // Postprocess TapisSystems in the result
-    for (TapisSystem tSys : resp.getResult().getSearch()) postProcessSystem(tSys);
-    return resp.getResult().getSearch();
+    for (TapisSystem tSys : resp.getResult()) postProcessSystem(tSys);
+    return resp.getResult();
   }
 
   /**
@@ -375,10 +375,10 @@ public class SystemsClient
     try { resp = sysApi.searchSystemsRequestBody(req, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null || resp.getResult().getSearch() == null) return Collections.emptyList();
+    if (resp == null || resp.getResult() == null || resp.getResult() == null) return Collections.emptyList();
     // Postprocess TapisSystems in the result
-    for (TapisSystem tSys : resp.getResult().getSearch()) postProcessSystem(tSys);
-    return resp.getResult().getSearch();
+    for (TapisSystem tSys : resp.getResult()) postProcessSystem(tSys);
+    return resp.getResult();
   }
 
   /**
@@ -402,8 +402,8 @@ public class SystemsClient
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return Collections.emptyList();
     // Postprocess TapisSystems in the result
-    for (TapisSystem tSys : resp.getResult().getSearch()) postProcessSystem(tSys);
-    return resp.getResult().getSearch();
+    for (TapisSystem tSys : resp.getResult()) postProcessSystem(tSys);
+    return resp.getResult();
   }
 
   /**
