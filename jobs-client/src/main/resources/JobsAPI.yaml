@@ -341,8 +341,12 @@ components:
           type: string
         version:
           type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
         result:
           $ref: '#/components/schemas/JobsProbe'
+    ResultMetadata:
+      type: object
     RespBasic:
       type: object
       properties:
@@ -352,6 +356,8 @@ components:
           type: string
         version:
           type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
         result:
           type: object
     Job:
@@ -505,6 +511,8 @@ components:
           type: string
         version:
           type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
         result:
           $ref: '#/components/schemas/Job'
     RespName:
@@ -516,6 +524,8 @@ components:
           type: string
         version:
           type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
         result:
           $ref: '#/components/schemas/ResultName'
     ResultName:
@@ -537,6 +547,8 @@ components:
           type: string
         version:
           type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
         result:
           $ref: '#/components/schemas/JobStatusDisplay'
     RespSubmitJob:
@@ -548,6 +560,8 @@ components:
           type: string
         version:
           type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
         result:
           $ref: '#/components/schemas/Job'
     ArgMetaSpec:
