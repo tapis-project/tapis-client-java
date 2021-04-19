@@ -12,7 +12,6 @@ import edu.utexas.tacc.tapis.apps.client.gen.model.ArgSpec;
 import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespApps;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespBasic;
-import edu.utexas.tacc.tapis.apps.client.gen.model.RespAppArray;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespBoolean;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.Gson;
@@ -332,7 +331,7 @@ public class AppsClient
   {
     RespApps resp = null;
     // TODO: Allow caller to specify selectStr
-    String selectStr = DEFAULT_SELECT_ALL;
+    String selectStr = DEFAULT_SELECT_SUMMARY;
 
     try { resp = appApi.getApps(searchStr, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
                                 DEFAULT_COMPUTETOTAL, selectStr); }
@@ -356,7 +355,7 @@ public class AppsClient
   {
     RespApps resp = null;
     // TODO: Allow caller to specify selectStr
-    String selectStr = DEFAULT_SELECT_ALL;
+    String selectStr = DEFAULT_SELECT_SUMMARY;
     try { resp = appApi.searchAppsRequestBody(req, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
                                               DEFAULT_COMPUTETOTAL, selectStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
