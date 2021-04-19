@@ -289,7 +289,7 @@ public class UserTest
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Get list of all app names
-    List<App> appsList = usrClient.getApps(null);
+    List<App> appsList = usrClient.getApps(null, null);
     Assert.assertNotNull(appsList);
     Assert.assertFalse(appsList.isEmpty());
     var appNames = new ArrayList<String>();

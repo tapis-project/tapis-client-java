@@ -275,14 +275,16 @@ public class SystemsClient
    * @param returnCredentials - Include credentials in returned system object
    * @param authnMethod - Desired authn method used when fetching credentials, for default pass in null.
    * @param requireExecPerm Check for EXECUTE permission as well as READ permission
+   * @param selectStr1 - Attributes to be included in result. For example select=id,owner,host
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public TapisSystem getSystem(String systemId, Boolean returnCredentials, AuthnMethod authnMethod, Boolean requireExecPerm)
+  public TapisSystem getSystem(String systemId, Boolean returnCredentials, AuthnMethod authnMethod,
+                               Boolean requireExecPerm, String selectStr1)
           throws TapisClientException
   {
-    // TODO: Allow caller to specify selectStr
     String selectStr = DEFAULT_SELECT_ALL;
+    if (StringUtils.isBlank(selectStr1)) selectStr = selectStr1;
     RespSystem resp = null;
     String authnMethodStr = (authnMethod==null ? null : authnMethod.name());
     try {resp = sysApi.getSystem(systemId, returnCredentials, authnMethodStr, requireExecPerm, selectStr); }
@@ -294,6 +296,26 @@ public class SystemsClient
   }
 
   /**
+   * Get a system using most supported parameters.
+   * Fetching of credentials is highly restricted. Only certain Tapis services are authorized.
+   * If authnMethod is null then default authn method for the system is used.
+   * Use of this method is highly restricted.
+   *
+   * @param systemId System systemId
+   * @param returnCredentials - Include credentials in returned system object
+   * @param authnMethod - Desired authn method used when fetching credentials, for default pass in null.
+   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
+   * @return The system or null if system not found
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public TapisSystem getSystem(String systemId, Boolean returnCredentials, AuthnMethod authnMethod,
+                               Boolean requireExecPerm)
+          throws TapisClientException
+  {
+    return getSystem(systemId, returnCredentials, authnMethod, requireExecPerm, DEFAULT_SELECT_ALL);
+  }
+
+  /**
    * Get a system by systemId without returning credentials
    *
    * @param systemId System systemId
@@ -302,7 +324,7 @@ public class SystemsClient
    */
   public TapisSystem getSystem(String systemId) throws TapisClientException
   {
-    return getSystem(systemId, false, null, false);
+    return getSystem(systemId, false, null, false, DEFAULT_SELECT_ALL);
   }
 
   /**
@@ -323,16 +345,31 @@ public class SystemsClient
   }
 
   /**
+   * Get a system by systemId returning credentials for default authn method.
+   * Use of this method is highly restricted. Only certain Tapis services are
+   * authorized to call this method.
+   *
+   * @param systemId System systemId
+   * @return The system or null if system not found
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public TapisSystem getSystemWithCredentials(String systemId) throws TapisClientException
+  {
+    return getSystemWithCredentials(systemId, null);
+  }
+
+  /**
    * Get list of systems using all supported parameters: searchStr, limit, sortBy, sip, startAfter.
    * For example search=(id.like.MySys*)~(enabled.eq.true)&limit=10&sortBy=id(asc)&startAfter=my.sys1
    * Use only one of skip or startAfter
    * When using startAfter sortBy must be specified.
    */
-  public List<TapisSystem> getSystems(String searchStr, int limit,
-                                      String sortBy, int skip, String startAfter) throws TapisClientException
+  public List<TapisSystem> getSystems(String searchStr, int limit, String sortBy, int skip, String startAfter,
+                                      String selectStr1)
+          throws TapisClientException
   {
-    // TODO: Allow caller to specify selectStr
     String selectStr = DEFAULT_SELECT_SUMMARY;
+    if (StringUtils.isBlank(selectStr1)) selectStr = selectStr1;
     RespSystems resp = null;
     try { resp = sysApi.getSystems(searchStr, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
@@ -348,7 +385,7 @@ public class SystemsClient
    */
   public List<TapisSystem> getSystems(String searchStr) throws TapisClientException
   {
-    return getSystems(searchStr, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER);
+    return getSystems(searchStr, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_SELECT_SUMMARY);
   }
 
   /**
@@ -367,10 +404,12 @@ public class SystemsClient
    * Use only one of skip or startAfter
    * When using startAfter sortBy must be specified.
    */
-  public List<TapisSystem> searchSystems(ReqSearchSystems req, int limit, String sortBy, int skip, String startAfter) throws TapisClientException
+  public List<TapisSystem> searchSystems(ReqSearchSystems req, int limit, String sortBy, int skip, String startAfter,
+                                         String selectStr1)
+          throws TapisClientException
   {
-    // TODO: Allow caller to specify selectStr
     String selectStr = DEFAULT_SELECT_SUMMARY;
+    if (StringUtils.isBlank(selectStr1)) selectStr = selectStr1;
     RespSystems resp = null;
     try { resp = sysApi.searchSystemsRequestBody(req, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
@@ -387,7 +426,7 @@ public class SystemsClient
    */
   public List<TapisSystem> searchSystems(ReqSearchSystems req) throws TapisClientException
   {
-    return searchSystems(req, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER);
+    return searchSystems(req, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_SELECT_SUMMARY);
   }
 
   /**

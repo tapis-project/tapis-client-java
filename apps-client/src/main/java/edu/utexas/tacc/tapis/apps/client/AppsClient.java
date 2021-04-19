@@ -265,38 +265,21 @@ public class AppsClient
   }
 
   /**
-   * Get latest version of an app.
-   *
-   * @param appId Id of the application
-   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
-   * @return Latest version of the app
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public App getAppLatestVersion(String appId, Boolean requireExecPerm) throws TapisClientException
-  {
-    RespApp resp = null;
-    try {resp = appApi.getAppLatestVersion(appId, requireExecPerm); }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null) return null;
-    // Postprocess the app
-    App app = postProcessApp(resp.getResult());
-    return app;
-  }
-
-  /**
    * Get a specific version of an app using all supported parameters.
    *
    * @param appId Id of the application
    * @param appVersion Version of the application
    * @param requireExecPerm Check for EXECUTE permission as well as READ permission
+   * @param selectStr1 - Attributes to be included in result. For example select=id,version,owner
    * @return The app or null if app not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public App getApp(String appId, String appVersion, Boolean requireExecPerm) throws TapisClientException
+  public App getApp(String appId, String appVersion, Boolean requireExecPerm, String selectStr1) throws TapisClientException
   {
+    String selectStr = DEFAULT_SELECT_ALL;
+    if (StringUtils.isBlank(selectStr1)) selectStr = selectStr1;
     RespApp resp = null;
-    try {resp = appApi.getApp(appId, appVersion, requireExecPerm); }
+    try {resp = appApi.getApp(appId, appVersion, requireExecPerm, selectStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
@@ -310,12 +293,61 @@ public class AppsClient
    *
    * @param appId Id of the application
    * @param appVersion Version of the application
+   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
+   * @return The app or null if app not found
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public App getApp(String appId, String appVersion, Boolean requireExecPerm) throws TapisClientException
+  {
+    return getApp(appId, appVersion, requireExecPerm, DEFAULT_SELECT_ALL);
+  }
+
+  /**
+   * Get a specific version of an app using minimal attributes
+   *
+   * @param appId Id of the application
+   * @param appVersion Version of the application
    * @return The app or null if app not found
    * @throws TapisClientException - If api call throws an exception
    */
   public App getApp(String appId, String appVersion) throws TapisClientException
   {
-    return getApp(appId, appVersion, Boolean.FALSE);
+    return getApp(appId, appVersion, Boolean.FALSE, DEFAULT_SELECT_ALL);
+  }
+
+  /**
+   * Get latest version of an app using minimal attributes
+   *
+   * @param appId Id of the application
+   * @return The app or null if app not found
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public App getApp(String appId) throws TapisClientException
+  {
+    return getAppLatestVersion(appId, Boolean.FALSE, DEFAULT_SELECT_ALL);
+  }
+
+  /**
+   * Get latest version of an app using all supported parameters
+   *
+   * @param appId Id of the application
+   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
+   * @param selectStr1 - Attributes to be included in result. For example select=id,version,owner
+   * @return Latest version of the app
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public App getAppLatestVersion(String appId, Boolean requireExecPerm, String selectStr1) throws TapisClientException
+  {
+    String selectStr = DEFAULT_SELECT_ALL;
+    if (StringUtils.isBlank(selectStr1)) selectStr = selectStr1;
+    RespApp resp = null;
+    try {resp = appApi.getAppLatestVersion(appId, requireExecPerm, selectStr); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp == null || resp.getResult() == null) return null;
+    // Postprocess the app
+    App app = postProcessApp(resp.getResult());
+    return app;
   }
 
   /**
@@ -327,11 +359,11 @@ public class AppsClient
    * @return Apps accessible to the caller
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<App> getApps(String searchStr) throws TapisClientException
+  public List<App> getApps(String searchStr, String selectStr1) throws TapisClientException
   {
     RespApps resp = null;
-    // TODO: Allow caller to specify selectStr
     String selectStr = DEFAULT_SELECT_SUMMARY;
+    if (StringUtils.isBlank(selectStr1)) selectStr = selectStr1;
 
     try { resp = appApi.getApps(searchStr, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
                                 DEFAULT_COMPUTETOTAL, selectStr); }
@@ -351,11 +383,11 @@ public class AppsClient
    * @return Apps accessible to the caller
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<App> searchApps(ReqSearchApps req) throws TapisClientException
+  public List<App> searchApps(ReqSearchApps req, String selectStr1) throws TapisClientException
   {
     RespApps resp = null;
-    // TODO: Allow caller to specify selectStr
     String selectStr = DEFAULT_SELECT_SUMMARY;
+    if (StringUtils.isBlank(selectStr1)) selectStr = selectStr1;
     try { resp = appApi.searchAppsRequestBody(req, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
                                               DEFAULT_COMPUTETOTAL, selectStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
