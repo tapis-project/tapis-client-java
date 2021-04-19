@@ -165,7 +165,7 @@ echo "****** Running client tests for Systems service. Target service = $RUN_SVC
 
 # Run the integration tests
 echo "Running client integration tests"
-mvn verify -DskipIntegrationTests=false
+mvn verify -DskipIntegrationTests=false -DspecPath="https://raw.githubusercontent.com/tapis-project/openapi-systems/local/SystemsAPI.yaml"
 RET_CODE=$?
 
 # If local then stop local systems service

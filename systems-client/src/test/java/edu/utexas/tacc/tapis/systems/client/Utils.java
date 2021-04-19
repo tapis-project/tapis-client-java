@@ -35,9 +35,10 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RuntimeTypeEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SystemTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TransferMethodEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 
@@ -63,8 +64,6 @@ public final class Utils
   public static final String testUser9 = "testuser9";
   // testuser9 must be given role "$!tenant_admin"
   public static final String adminUser = testUser9;
-  public static final String ownerUser1 = testUser1;
-  public static final String ownerUser2 = testUser2;
   public static final String adminTenantName = "admin";
   public static final String filesSvcName = "files";
   public static final String sysType = SystemTypeEnum.LINUX.name();
@@ -86,14 +85,16 @@ public final class Utils
   public static final boolean prot1UseProxy = false, prot2UseProxy = true;
   public static final String prot1ProxyHost = "proxyhost1", prot2ProxyHost = "proxyhost2";
 
+  public static final String hostPatchedId = "patched.system.org";
+  public static final String hostMinimalId = "minimal.system.org";
+
   // Default system attributes
   public static final String defaultDescription = null;
   public static final String defaultRootDir = null;
   public static final String defaultBucketName = null;
   public static final String defaultJobWorkingDir = null;
-  public static final String defaultBatchScheduler = null;
+  public static final String defaultBatchScheduler = SchedulerTypeEnum.SLURM.toString();
   public static final String defaultBatchDefaultLogicalQueue = null;
-  public static final String defaultImportRefId = null;
   public static final String defaultEffectiveUserId = "${apiUserId}";
   public static final String defaultNotesStr = "{}";
   public static final boolean defaultIsEnabled = true;
@@ -128,9 +129,12 @@ public final class Utils
   public static final KeyValuePair kv2 = new KeyValuePair().key("HOME").value("/home/testuser2");
   public static final KeyValuePair kv3 = new KeyValuePair().key("TMP").value("/tmp");
   public static final List<KeyValuePair> jobEnvVariables = new ArrayList<>(List.of(kv1,kv2,kv3));
-  public static final boolean jobIsBatch = true;
+  public static final boolean jobIsBatchTrue = true;
+  public static final boolean jobIsBatchFalse = false;
   public static final int jobMaxJobs = -1;
+  public static final int jobMaxJobsMAX = Integer.MAX_VALUE;
   public static final int jobMaxJobsPerUser = -1;
+  public static final int jobMaxJobsPerUserMAX = Integer.MAX_VALUE;
 
   public static final List<JobRuntime> jobRuntimesEmpty = new ArrayList<>();
   public static final JobRuntime runtimeDocker =
@@ -171,7 +175,6 @@ public final class Utils
                                                                         DatatypeEnum.STRING, precedence, null);
   public static final List<Capability> jobCaps2 = new ArrayList<>(List.of(capA2, capB2, capC2, capD2));
   public static final boolean isDeleted = false;
-  public static final String importRefId = null;
   public static final Instant created = null;
   public static final Instant updated = null;
   public static final int qMaxJobs = -1;
@@ -194,12 +197,12 @@ public final class Utils
   public static final String escapedCommaInListValue = "abc\\,def";
 
   /**
-   * Create an array of TSystem objects in memory
+   * Create an array of TapisSystem objects in memory
    * Names will be of format TestSys_K_NNN where K is the key and NNN runs from 000 to 999
    * We need a key because maven runs the tests in parallel so each set of systems created by an integration
    *   test will need its own namespace.
    * @param n number of systems to create
-   * @return array of TSystem objects
+   * @return array of TapisSystem objects
    */
   public static Map<Integer, String[]> makeSystems(int n, String key)
   {
@@ -207,13 +210,15 @@ public final class Utils
     for (int i = 1; i <= n; i++)
     {
       // Suffix which should be unique for each system within each integration test
-      String suffix = key + "_" + String.format("%03d", i);
+      String iStr = String.format("%03d", i+1);
+      String suffix = key + "_" + iStr;
       String name = getSysName(key, i);
+      String hostName = "host" + key + iStr + ".test.org";
       // Constructor initializes all attributes except for JobCapabilities and Credential
       // String[] sys0 = 0=tenantName, 1=name, 2=description, 3=sysType, 4=ownerUser1, 5=host, 6=effUser, 7=password,
       //                 8=bucketName, 9=rootDir, 10=jobWorkingDir, 11=batchScheduler, 12=batchDefaultLogicalQueue
-      String[] sys0 = {tenantName, name, "description "+suffix, sysType, ownerUser1, "host"+suffix, "effUser"+suffix,
-              "fakePassword"+suffix,"bucket"+suffix, "/root"+suffix, "jobWorkDir"+suffix, "batchScheduler"+suffix,
+      String[] sys0 = {tenantName, name, "description "+suffix, sysType, testUser1, hostName, "effUser"+suffix,
+              "fakePassword"+suffix,"bucket"+suffix, "/root"+suffix, "jobWorkDir"+suffix, "SLURM",
               "batchDefaultLogicalQueue"+suffix};
       systems.put(i, sys0);
     }
@@ -278,8 +283,9 @@ public final class Utils
     rSys.jobWorkingDir(sys[10]);
     rSys.jobEnvVariables(jobEnvVariables);
     rSys.jobMaxJobs(jobMaxJobs).jobMaxJobsPerUser(jobMaxJobsPerUser);
-    rSys.jobIsBatch(jobIsBatch);
-    rSys.batchScheduler(sys[11]).batchDefaultLogicalQueue(sys[12]);
+    rSys.jobIsBatch(jobIsBatchFalse);
+    rSys.batchScheduler(SchedulerTypeEnum.fromValue(sys[11])).batchDefaultLogicalQueue(sys[12]);
+    rSys.setJobRuntimes(jobRuntimes1);
     rSys.batchLogicalQueues(jobQueues1);
     rSys.jobCapabilities(jobCaps1);
     rSys.tags(tags1);
@@ -329,14 +335,14 @@ public final class Utils
   }
 
   /**
-   * Verify most attributes for a TSystem using default create data for following attributes:
+   * Verify most attributes for a TapisSystem using default create data for following attributes:
    *     port, useProxy, proxyHost, proxyPort, defaultAuthnMethod, transferMethods,
    *     canExec, jobWorkingDir, jobMaxJobs, jobMaxJobsPerUser, jobIsBatch, batchScheduler, batchDefaultLogicalQueue,
    *     jobEnvVariables, jobLogicalQueues, capabilities, tags, notes
    * @param tmpSys - system retrieved from the service
    * @param sys0 - Data used to create the system
    */
-  public static void verifySystemAttributes(TSystem tmpSys, String[] sys0)
+  public static void verifySystemAttributes(TapisSystem tmpSys, String[] sys0)
   {
     Assert.assertEquals(tmpSys.getId(), sys0[1]);
     Assert.assertEquals(tmpSys.getDescription(), sys0[2]);
@@ -368,11 +374,11 @@ public final class Utils
     Assert.assertEquals(tmpSys.getJobWorkingDir(), sys0[10]);
     // TODO check jobRuntimes
     Assert.assertNotNull(tmpSys.getJobMaxJobs());
-    Assert.assertEquals(tmpSys.getJobMaxJobs().intValue(), jobMaxJobs);
+    Assert.assertEquals(tmpSys.getJobMaxJobs().intValue(), jobMaxJobsMAX);
     Assert.assertNotNull(tmpSys.getJobMaxJobsPerUser());
-    Assert.assertEquals(tmpSys.getJobMaxJobsPerUser().intValue(), jobMaxJobsPerUser);
-    Assert.assertEquals(tmpSys.getJobIsBatch(), Boolean.valueOf(jobIsBatch));
-    Assert.assertEquals(tmpSys.getBatchScheduler(), sys0[11]);
+    Assert.assertEquals(tmpSys.getJobMaxJobsPerUser().intValue(), jobMaxJobsPerUserMAX);
+    Assert.assertEquals(tmpSys.getJobIsBatch(), Boolean.valueOf(jobIsBatchFalse));
+    Assert.assertEquals(tmpSys.getBatchScheduler(), SchedulerTypeEnum.valueOf(sys0[11]));
     Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), sys0[12]);
     // Verify jobEnvVariables
     List<KeyValuePair> tmpJobEnvVariables = tmpSys.getJobEnvVariables();
@@ -429,15 +435,18 @@ public final class Utils
     Assert.assertTrue(tmpNotes.has("testdata"));
     String testdataStr = origNotes.get("testdata").getAsString();
     Assert.assertEquals(tmpNotes.get("testdata").getAsString(), testdataStr);
+
+    Assert.assertNotNull(tmpSys.getCreated(), "Fetched created timestamp should not be null.");
+    Assert.assertNotNull(tmpSys.getUpdated(), "Fetched updated timestamp should not be null.");
   }
 
   /**
-   * Verify the required attributes for a TSystem
+   * Verify the required attributes for a TapisSystem
    *   and verify that other attributes are set to expected defaults.
    * @param tmpSys - system retrieved from the service
    * @param sys0 - Data used to create the system
    */
-  public static void verifySystemDefaults(TSystem tmpSys, String[] sys0)
+  public static void verifySystemDefaults(TapisSystem tmpSys, String[] sys0)
   {
     // Verify required attributes
     Assert.assertEquals(tmpSys.getId(), sys0[1]);
@@ -448,6 +457,7 @@ public final class Utils
     Assert.assertEquals(tmpSys.getDefaultAuthnMethod().name(), prot1AuthnMethod.name());
     Assert.assertEquals(tmpSys.getCanExec(), Boolean.valueOf(canExecTrue));
 
+    SchedulerTypeEnum schedulerType = (tmpSys.getBatchScheduler() == null) ? null : SchedulerTypeEnum.valueOf(defaultBatchScheduler);
     // If systemType is LINUX then rootDir is required
     if (tmpSys.getSystemType() == SystemTypeEnum.LINUX) Assert.assertEquals(tmpSys.getRootDir(), sys0[9]);
     else Assert.assertEquals(tmpSys.getRootDir(), defaultRootDir);
@@ -457,7 +467,7 @@ public final class Utils
 
     // Verify optional attributes have been set to defaults
     // Owner should have defaulted to user who created the system
-    Assert.assertEquals(tmpSys.getOwner(), ownerUser1);
+    Assert.assertEquals(tmpSys.getOwner(), testUser1);
     Assert.assertEquals(tmpSys.getDescription(), defaultDescription);
     Assert.assertEquals(tmpSys.getEnabled(), Boolean.valueOf(defaultIsEnabled));
     // Effective user should result to requestor which in this case is testuser1
@@ -475,11 +485,11 @@ public final class Utils
     Assert.assertNotNull(tmpSys.getJobEnvVariables());
     Assert.assertTrue(tmpSys.getJobEnvVariables().isEmpty());
     Assert.assertNotNull(tmpSys.getJobMaxJobs());
-    Assert.assertEquals(tmpSys.getJobMaxJobs().intValue(), defaultJobMaxJobs);
+    Assert.assertEquals(tmpSys.getJobMaxJobs().intValue(), jobMaxJobsMAX);
     Assert.assertNotNull(tmpSys.getJobMaxJobsPerUser());
-    Assert.assertEquals(tmpSys.getJobMaxJobsPerUser().intValue(), defaultJobMaxJobsPerUser);
+    Assert.assertEquals(tmpSys.getJobMaxJobsPerUser().intValue(), jobMaxJobsPerUserMAX);
     Assert.assertEquals(tmpSys.getJobIsBatch(), Boolean.valueOf(defaultJobIsBatch));
-    Assert.assertEquals(tmpSys.getBatchScheduler(), defaultBatchScheduler);
+    Assert.assertEquals(tmpSys.getBatchScheduler(), schedulerType);
     Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), defaultBatchDefaultLogicalQueue);
     Assert.assertNotNull(tmpSys.getBatchLogicalQueues());
     Assert.assertTrue(tmpSys.getBatchLogicalQueues().isEmpty());
@@ -489,6 +499,5 @@ public final class Utils
     Assert.assertTrue(tmpSys.getTags().isEmpty());
     Assert.assertNotNull(tmpSys.getNotes());
     Assert.assertEquals((String) tmpSys.getNotes(), defaultNotesStr);
-    Assert.assertEquals(tmpSys.getImportRefId(), defaultImportRefId);
   }
 }

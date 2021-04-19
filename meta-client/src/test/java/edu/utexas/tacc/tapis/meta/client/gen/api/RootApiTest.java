@@ -13,8 +13,9 @@
 
 package edu.utexas.tacc.tapis.meta.client.gen.api;
 
-import org.junit.Before;
-import org.junit.Test;
+
+import org.testng.annotations.Test;
+
 import edu.utexas.tacc.tapis.meta.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.meta.client.gen.ApiException;
 import edu.utexas.tacc.tapis.meta.client.gen.Configuration;
@@ -25,22 +26,27 @@ import java.util.List;
 /**
  * API tests for RootApi
  */
-// @Ignore
+@Test(groups={"integration"})
 public class RootApiTest {
 
-    private RootApi api;
-
-@Before
+    private RootApi rootApi;
+    private GeneralApi generalApi;
+    
 public void setUp() throws Exception {
     ApiClient defaultClient = Configuration.getDefaultApiClient();
-    defaultClient.setBasePath("http://c002.rodeo.tacc.utexas.edu:30401");
+    defaultClient.setBasePath("https://dev.develop.tapis.io/v3"); //"http://localhost:8080/v3"
     
     // Configure API key authorization: TapisJWT
     ApiKeyAuth TapisJWT = (ApiKeyAuth) defaultClient.getAuthentication("TapisJWT");
-    TapisJWT.setApiKey("YOUR API KEY");
+    TapisJWT.setApiKey("eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiIxZjJlMzJlOS0xZWJmLTQ2MGQtYjdmNy1jMTNhMWZmODcwZTciLCJpc3MiOiJodHRwczovL2FkbWluLmRldmVsb3AudGFwaXMuaW8vdjMvdG9rZW5zIiwic3ViIjoibWV0YUBhZG1pbiIsInRhcGlzL3RlbmFudF9pZCI6ImFkbWluIiwidGFwaXMvdG9rZW5fdHlwZSI6ImFjY2VzcyIsInRhcGlzL2RlbGVnYXRpb24iOmZhbHNlLCJ0YXBpcy9kZWxlZ2F0aW9uX3N1YiI6bnVsbCwidGFwaXMvdXNlcm5hbWUiOiJtZXRhIiwidGFwaXMvYWNjb3VudF90eXBlIjoic2VydmljZSIsImV4cCI6MTYxNzcxNDQ3NCwidGFwaXMvdGFyZ2V0X3NpdGUiOiJ0YWNjIn0.IHRhplxg1oZ2EX8SLmeqDzNry6PXzoCVnxVX7jrYB2Z9oY5getn0m3GFDbBgRDI7hfP4SNjZd5f6ctAGiNU2nAyUDYKqT6V2X6PYSjarqkh_HV764MqsWk7XwAg7FiVvvHIaawxa1PowZfUx3JzG6_fdCMOvKqLOfWOi4mPHvULgXTp2En3zZPvBL5OfH-8yVf6YaqG8mjc4rRVlRrGlEQigFifrYUuhzbEJAc1HTxX3W-G6oYGPjpt2n66-L9q2D1QWrG8cLFP1BQFQIoqpD5BH8FurH3F_yO6rLm8G4xQZLUYvqiS4Gb9RrX_frYEGXPtLQhzCqMa2ifMt3aYTwg");
     // Uncomment the following line to set a prefix for the API key, e.g. "Token" (defaults to null)
-    //TapisJWT.setApiKeyPrefix("Token");
-    this.api = new RootApi(defaultClient);
+    // TapisJWT.setApiKeyPrefix("Token");
+    defaultClient.addDefaultHeader("X-Tapis-User","meta");
+    defaultClient.addDefaultHeader("X-Tapis-Tenant","admin");
+    this.rootApi = new RootApi(defaultClient);
+    this.generalApi = new GeneralApi(defaultClient);
+    
+    System.out.println();
 }
 
     /**
@@ -55,9 +61,20 @@ public void setUp() throws Exception {
     public void listDBNamesTest() throws ApiException {
         Boolean np = null;
         
-        List<String> response = api.listDBNames();
-
+        List<String> response = rootApi.listDBNames();
+        System.out.println("here we are");
+        System.out.println(response.toString());
+        System.out.println();
         // TODO: test validations
+    }
+    public static void main(String[] args) {
+        RootApiTest rootApiTest = new RootApiTest();
+        try {
+            rootApiTest.setUp();
+            rootApiTest.listDBNamesTest();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
 }
