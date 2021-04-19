@@ -20,8 +20,6 @@
 # By default service listens on port 8080. To change it set
 #     TAPIS_SERVICE_PORT
 #
-# To run the client integration tests the following env variables must be set:
-#   TAPIS_FILES_SERVICE_PASSWORD - used for testing credential retrieval
 
 PrgName=$(basename "$0")
 
@@ -66,15 +64,6 @@ fi
 # Make sure run env is valid
 if [ "$RUN_ENV" != "dev" ] && [ "$RUN_ENV" != "staging" ]; then
   echo "ERROR: Invalid Tapis run env = $RUN_ENV"
-  echo "$USAGE1"
-  echo "$USAGE2"
-  exit 1
-fi
-
-# Make sure we have the files service password
-# This is used for testing credential retrieval
-if [ -z "$TAPIS_FILES_SERVICE_PASSWORD" ]; then
-  echo "Please set env variable TAPIS_FILES_SERVICE_PASSWORD to the files service password"
   echo "$USAGE1"
   echo "$USAGE2"
   exit 1
@@ -165,7 +154,7 @@ echo "****** Running client tests for Apps service. Target service = $RUN_SVC, T
 
 # Run the integration tests
 echo "Running client integration tests"
-mvn verify -DskipIntegrationTests=false
+mvn verify -DskipIntegrationTests=false -DspecPath="https://raw.githubusercontent.com/tapis-project/openapi-apps/local/AppsAPI.yaml"
 RET_CODE=$?
 
 # If local then stop local apps service
@@ -182,10 +171,10 @@ if [ $RET_CODE -ne 0 ]; then
   exit $RET_CODE
 fi
 
-# If it is a local run and we have required variables then cleanup DB artifacts
-if [ "$RUN_SVC" = "local" -a  -n "$TAPIS_DB_PASSWORD" -a -n "$TAPIS_DB_JDBC_URL" ]; then
- echo "Removing test artifacts from DB"
- ./delete_client_test_data.sh
-fi
+# TODO If it is a local run and we have required variables then cleanup DB artifacts
+# if [ "$RUN_SVC" = "local" -a  -n "$TAPIS_DB_PASSWORD" -a -n "$TAPIS_DB_JDBC_URL" ]; then
+#  echo "Removing test artifacts from DB"
+#  ./delete_client_test_data.sh
+# fi
 
 cd $RUN_DIR

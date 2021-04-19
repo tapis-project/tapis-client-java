@@ -5,7 +5,7 @@ import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.systems.client.SystemsClient.AuthnMethod;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
 import edu.utexas.tacc.tapis.tokens.client.TokensClient;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
@@ -76,7 +76,7 @@ public class FilesSvcTest
     var authClient = new AuthClient(baseURL);
     var tokClient = new TokensClient(baseURL, filesSvcName, filesSvcPasswd);
     try {
-      userJWT = authClient.getToken(ownerUser1, ownerUser1);
+      userJWT = authClient.getToken(testUser1, testUser1);
       filesServiceJWT = tokClient.getSvcToken(adminTenantName, filesSvcName, DEFAULT_TARGET_SITE);
     } catch (Exception e) {
       throw new Exception("Exception while creating tokens or auth service", e);
@@ -111,7 +111,7 @@ public class FilesSvcTest
     sysClient.grantUserPermissions(sys0[1], testUser3, testREADPerm);
 
     // Update client to be the files service. All tests will be run acting as the files service.
-    sysClient = getClientFilesSvc(tenantName, ownerUser1, filesServiceJWT);
+    sysClient = getClientFilesSvc(tenantName, testUser1, filesServiceJWT);
   }
 
   @AfterSuite
@@ -125,7 +125,7 @@ public class FilesSvcTest
       String systemId = systems.get(i)[1];
       try
       {
-        sysClient.deleteSystem(systemId);
+        sysClient.deleteSystem(systemId, true);
       }
       catch (Exception e)
       {
@@ -148,7 +148,7 @@ public class FilesSvcTest
   public void testAllTests() throws Exception {
     // Test 1. retrieving a system including default authn method
     String[] sys0 = systems.get(1);
-    TSystem tmpSys = sysClient.getSystemWithCredentials(sys0[1], null);
+    TapisSystem tmpSys = sysClient.getSystemWithCredentials(sys0[1], null);
     Assert.assertNotNull(tmpSys, "Failed to find item: " + sys0[1]);
     System.out.println("Found item: " + sys0[1]);
     // Verify most attributes
@@ -204,7 +204,7 @@ public class FilesSvcTest
       sysClient.getSystem(sys0[1], false, null, true);
       Assert.fail("Fetch of system did not require EXECUTE permission as expected");
     } catch (TapisClientException tce) {
-      Assert.assertTrue(tce.getTapisMessage().contains("HTTP 401 Unauthorized"), "Wrong exception message: " + tce.getTapisMessage());
+      Assert.assertTrue(tce.getTapisMessage().contains("SYSLIB_UNAUTH"), "Wrong exception message: " + tce.getTapisMessage());
     }
   }
 

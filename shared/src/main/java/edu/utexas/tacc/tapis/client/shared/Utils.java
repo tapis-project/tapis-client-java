@@ -21,7 +21,9 @@ public class Utils
   public static final int DEFAULT_SKIP = -1;
   public static final String DEFAULT_STARTAFTER = "";
   public static final boolean DEFAULT_COMPUTETOTAL = false;
-  
+  public static final String DEFAULT_SELECT_ALL = "allAttributes";
+  public static final String DEFAULT_SELECT_SUMMARY = "summaryAttributes";
+
   // Default target site for service JWTs
   public static final String DEFAULT_TARGET_SITE = "tacc";
 
@@ -66,19 +68,13 @@ public class Utils
       try {tapisResponse = _gson.fromJson(respBody, TapisResponse.class);}
       catch (Exception e1) {msg = respBody;} // not proper json
     }
-    else msg = e.getMessage();
+    else
+    {
+      msg = (e == null ? ERR_MSG : e.getMessage());
+    }
     // If top level msg is empty attempt to use msg from response body
     // If no other msg available fall back to default msg
-    if (StringUtils.isBlank(msg))
-    {
-      if (tapisResponse != null) msg = tapisResponse.message;
-      else msg = ERR_MSG;
-    }
-
-    // Use the extracted information if there's any.
-    if (StringUtils.isBlank(msg))
-      if (tapisResponse != null) msg = tapisResponse.message;
-      else msg = EMsg.ERROR_STATUS.name();
+    if (StringUtils.isBlank(msg)) msg = (tapisResponse == null ? ERR_MSG : tapisResponse.message);
 
     // Create the client exception.
     var clientException = new TapisClientException(msg, e);

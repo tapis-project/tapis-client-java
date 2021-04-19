@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.utexas.tacc.tapis</groupId>
   <artifactId>meta-client</artifactId>
-  <version>1.11.39</version>
+  <version>1.11.69</version>
   <name>Tapis Meta Client</name>
   <description>Java client for tapis-metaapi web application</description>
   <url>https://github.com/tapis-project/tapis-client-java/meta-client</url>
@@ -141,6 +141,7 @@
     </snapshotRepository>
   </distributionManagement>
   <properties>
+    <jersey-entity-filtering.version>2.33</jersey-entity-filtering.version>
     <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
     <activemq-client.version>5.16.0</activemq-client.version>
     <jackson.version>2.10.1</jackson.version>
@@ -156,7 +157,7 @@
     <google-findbugs.version>3.0.2</google-findbugs.version>
     <maven-war-plugin.version>3.2.3</maven-war-plugin.version>
     <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
-    <tapis-shared-java.version>[1.11.50,2.0)</tapis-shared-java.version>
+    <tapis-shared-java.version>[1.11.77,2.0)</tapis-shared-java.version>
     <com.amazonaws.version>1.11.327</com.amazonaws.version>
     <p6spy.version>3.8.3</p6spy.version>
     <httpclient.version>4.5.8</httpclient.version>
@@ -171,7 +172,7 @@
     <commons-io.version>2.6</commons-io.version>
     <javax.validation.version>2.0.1.Final</javax.validation.version>
     <amqp-client.version>5.10.0</amqp-client.version>
-    <timestamp>1611596444377</timestamp>
+    <timestamp>1618848611350</timestamp>
     <metrics-core.version>3.2.3</metrics-core.version>
     <threetenbp.version>1.3.5</threetenbp.version>
     <snakeyaml.version>1.26</snakeyaml.version>
@@ -180,7 +181,7 @@
     <swagger-jaxrs2.version>2.0.10</swagger-jaxrs2.version>
     <undertow.version>2.2.2.Final</undertow.version>
     <commons-math3.version>3.6.1</commons-math3.version>
-    <buildNumber>fa412831</buildNumber>
+    <buildNumber>e30c36f0</buildNumber>
     <reactor-core.version>3.4.1</reactor-core.version>
     <software.amazon.awssdk.version>2.13.11</software.amazon.awssdk.version>
     <testng.version>6.14.3</testng.version>
@@ -205,12 +206,12 @@
     <jcraft.version>0.1.55</jcraft.version>
     <commons-codec.version>1.15</commons-codec.version>
     <hk2.version>2.6.1</hk2.version>
-    <tapis-client-java.version>[1.11.26,2.0)</tapis-client-java.version>
+    <tapis-client-java.version>[1.11.67,2.0)</tapis-client-java.version>
     <javax.xml.bind.jaxb-core.version>2.3.0.1</javax.xml.bind.jaxb-core.version>
     <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
     <mockito-core.version>3.0.0</mockito-core.version>
     <javax.websocket-api.version>1.1</javax.websocket-api.version>
-    <build.timestamp>2021-01-25T17:39:15Z</build.timestamp>
+    <build.timestamp>2021-04-19T16:08:44Z</build.timestamp>
     <statefulj.version>3.0</statefulj.version>
     <java-source.version>1.15</java-source.version>
     <reactor-rabbitmq.version>1.4.4.RELEASE</reactor-rabbitmq.version>
@@ -282,7 +283,7 @@
     <dependency>
       <groupId>edu.utexas.tacc.tapis</groupId>
       <artifactId>shared</artifactId>
-      <version>1.11.39</version>
+      <version>1.11.69</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

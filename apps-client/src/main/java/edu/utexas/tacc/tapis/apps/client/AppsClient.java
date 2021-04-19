@@ -10,8 +10,9 @@ import edu.utexas.tacc.tapis.apps.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ArgMetaSpec;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ArgSpec;
 import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
+import edu.utexas.tacc.tapis.apps.client.gen.model.RespApps;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespBasic;
-import edu.utexas.tacc.tapis.apps.client.gen.model.RespAppArray;
+import edu.utexas.tacc.tapis.apps.client.gen.model.RespBoolean;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.Gson;
 
@@ -32,7 +33,13 @@ import edu.utexas.tacc.tapis.apps.client.gen.model.RespResourceUrl;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespApp;
 import edu.utexas.tacc.tapis.apps.client.gen.model.App;
 
-import javax.xml.crypto.dsig.keyinfo.KeyValue;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_COMPUTETOTAL;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_ALL;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_SUMMARY;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SORTBY;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
 
 /**
  * Class providing a convenient front-end to the automatically generated client code
@@ -53,6 +60,7 @@ public class AppsClient
   public static final boolean DEFAULT_STRICT_FILE_INPUTS = false;
   public static final boolean DEFAULT_FILE_INPUT_IN_PLACE = false;
   public static final boolean DEFAULT_FILE_INPUT_META_REQUIRED = false;
+  public static final int DEFAULT_MAX_JOBS = Integer.MAX_VALUE;
 
   // ************************************************************************
   // *********************** Fields *****************************************
@@ -109,10 +117,29 @@ public class AppsClient
   public ApiClient getApiClient() { return apiClient; }
 
   // Update base path for default client.
+  public String getBasePath() { return apiClient.getBasePath(); }
+
+  // Update base path for default client.
   public void setBasePath(String basePath) { apiClient.setBasePath(basePath); }
 
   // Add http header to default client
   public void addDefaultHeader(String key, String val) { apiClient.addDefaultHeader(key, val); }
+
+  /**
+   *  Close connections and stop threads that can sometimes prevent JVM shutdown.
+   */
+  public void close()
+  {
+    try {
+      // Best effort attempt to shut things down.
+      var okClient = apiClient.getHttpClient();
+      if (okClient != null)
+      {
+        var pool = okClient.connectionPool();
+        if (pool != null) pool.evictAll();
+      }
+    } catch (Exception e) {}
+  }
 
   // -----------------------------------------------------------------------
   // ------------------------- Apps -------------------------------------
@@ -160,7 +187,7 @@ public class AppsClient
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
-    try { resp = appApi.createAppVersion(req, false); }
+    try { resp = appApi.createAppVersion(req); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
@@ -179,10 +206,44 @@ public class AppsClient
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
-    try { resp = appApi.updateApp(id, version, req, false); }
+    try { resp = appApi.updateApp(id, version, req); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
+  }
+
+  /**
+   * Update enabled attribute to true.
+   *
+   * @param id App id
+   * @return number of records modified as a result of the action
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public int enableApp(String id) throws TapisClientException
+  {
+    RespChangeCount resp = null;
+    try { resp = appApi.enableApp(id); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
+    else return -1;
+  }
+
+  /**
+   * Update enabled attribute to false.
+   *
+   * @param id App id
+   * @return number of records modified as a result of the action
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public int disableApp(String id) throws TapisClientException
+  {
+    RespChangeCount resp = null;
+    try { resp = appApi.disableApp(id); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
+    else return -1;
   }
 
   /**
@@ -196,7 +257,7 @@ public class AppsClient
   public int changeAppOwner(String id, String newOwnerName) throws TapisClientException
   {
     RespChangeCount resp = null;
-    try { resp = appApi.changeAppOwner(id, newOwnerName, false); }
+    try { resp = appApi.changeAppOwner(id, newOwnerName); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
@@ -214,7 +275,7 @@ public class AppsClient
   public App getAppLatestVersion(String appId, Boolean requireExecPerm) throws TapisClientException
   {
     RespApp resp = null;
-    try {resp = appApi.getAppLatestVersion(appId, false, requireExecPerm); }
+    try {resp = appApi.getAppLatestVersion(appId, requireExecPerm); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
@@ -235,7 +296,7 @@ public class AppsClient
   public App getApp(String appId, String appVersion, Boolean requireExecPerm) throws TapisClientException
   {
     RespApp resp = null;
-    try {resp = appApi.getApp(appId, appVersion, false, requireExecPerm); }
+    try {resp = appApi.getApp(appId, appVersion, requireExecPerm); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
@@ -268,8 +329,12 @@ public class AppsClient
    */
   public List<App> getApps(String searchStr) throws TapisClientException
   {
-    RespAppArray resp = null;
-    try { resp = appApi.getApps(false, searchStr); }
+    RespApps resp = null;
+    // TODO: Allow caller to specify selectStr
+    String selectStr = DEFAULT_SELECT_SUMMARY;
+
+    try { resp = appApi.getApps(searchStr, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
+                                DEFAULT_COMPUTETOTAL, selectStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
@@ -288,8 +353,11 @@ public class AppsClient
    */
   public List<App> searchApps(ReqSearchApps req) throws TapisClientException
   {
-    RespAppArray resp = null;
-    try { resp = appApi.searchAppsRequestBody(req, false); }
+    RespApps resp = null;
+    // TODO: Allow caller to specify selectStr
+    String selectStr = DEFAULT_SELECT_SUMMARY;
+    try { resp = appApi.searchAppsRequestBody(req, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
+                                              DEFAULT_COMPUTETOTAL, selectStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
@@ -297,6 +365,7 @@ public class AppsClient
 
   /**
    * Delete an app given the app id.
+   * @param confirm Confirm the action
    * Return 1 if record was deleted
    * Return 0 if record not present
    *
@@ -304,14 +373,37 @@ public class AppsClient
    * @return number of records modified as a result of the action
    * @throws TapisClientException - If api call throws an exception
    */
-  public int deleteApp(String id) throws TapisClientException
+  public int deleteApp(String id, Boolean confirm) throws TapisClientException
   {
     RespChangeCount resp = null;
-    try { resp = appApi.deleteApp(id, false); }
+    try { resp = appApi.deleteApp(id, confirm); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
     else return -1;
+  }
+
+  /**
+   * Check if resource is enabled
+   *
+   * @return boolean indicating if enabled
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public boolean isEnabled(String appId) throws TapisClientException
+  {
+    // Submit the request and return the response
+    RespBoolean resp = null;
+    try { resp = appApi.isEnabled(appId); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null)
+    {
+      return resp.getResult();
+    }
+    else
+    {
+      throw new TapisClientException("isEnabled did not return a result");
+    }
   }
 
   // -----------------------------------------------------------------------
@@ -333,7 +425,7 @@ public class AppsClient
     var req = new ReqPerms();
     req.setPermissions(permissions);
     // Submit the request
-    try { permsApi.grantUserPerms(appId, userName, req, false); }
+    try { permsApi.grantUserPerms(appId, userName, req); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
   }
@@ -348,7 +440,7 @@ public class AppsClient
   public List<String> getAppPermissions(String appId, String userName) throws TapisClientException
   {
     RespNameArray resp = null;
-    try { resp = permsApi.getUserPerms(appId, userName, false); }
+    try { resp = permsApi.getUserPerms(appId, userName); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getNames(); else return null;
@@ -369,7 +461,7 @@ public class AppsClient
     var req = new ReqPerms();
     req.setPermissions(permissions);
     // Submit the request
-    try { permsApi.revokeUserPerms(appId, userName, req, false); }
+    try { permsApi.revokeUserPerms(appId, userName, req); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
   }
@@ -386,7 +478,7 @@ public class AppsClient
           throws TapisClientException
   {
     // Submit the request
-    try { permsApi.revokeUserPerm(appId, userName, permission, false); }
+    try { permsApi.revokeUserPerm(appId, userName, permission); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
   }
