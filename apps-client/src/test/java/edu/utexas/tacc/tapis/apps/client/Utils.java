@@ -104,8 +104,8 @@ public final class Utils
   public static final boolean isEnabledTrue = true;
   public static final RuntimeEnum runtime = RuntimeEnum.DOCKER;
   public static final String runtimeVersion = "0.0.1";
-  public static final List<RuntimeOptionEnum> runtimeOptions1 = new ArrayList<>(List.of(RuntimeOptionEnum.RUN));
-  public static final List<RuntimeOptionEnum> runtimeOptions2 = new ArrayList<>(List.of(RuntimeOptionEnum.START));
+  public static final List<RuntimeOptionEnum> runtimeOptions1 = new ArrayList<>(List.of(RuntimeOptionEnum.SINGULARITY_RUN));
+  public static final List<RuntimeOptionEnum> runtimeOptions2 = new ArrayList<>(List.of(RuntimeOptionEnum.SINGULARITY_START));
   public static final List<RuntimeOptionEnum> runtimeOptionsNull = null;
   public static final String containerImage = "containerImage";
   public static final boolean dynamicExecSystemTrue = true;
