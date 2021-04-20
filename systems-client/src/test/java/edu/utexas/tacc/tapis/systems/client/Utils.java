@@ -210,7 +210,7 @@ public final class Utils
     for (int i = 1; i <= n; i++)
     {
       // Suffix which should be unique for each system within each integration test
-      String iStr = String.format("%03d", i+1);
+      String iStr = String.format("%03d", i);
       String suffix = key + "_" + iStr;
       String name = getSysName(key, i);
       String hostName = "host" + key + iStr + ".test.org";
@@ -218,7 +218,7 @@ public final class Utils
       // String[] sys0 = 0=tenantName, 1=name, 2=description, 3=sysType, 4=ownerUser1, 5=host, 6=effUser, 7=password,
       //                 8=bucketName, 9=rootDir, 10=jobWorkingDir, 11=batchScheduler, 12=batchDefaultLogicalQueue
       String[] sys0 = {tenantName, name, "description "+suffix, sysType, testUser1, hostName, "effUser"+suffix,
-              "fakePassword"+suffix,"bucket"+suffix, "/root"+suffix, "jobWorkDir"+suffix, "SLURM",
+              "fakePassword"+suffix,"bucket"+suffix, "/root"+suffix, "jobWorkDir"+suffix, SchedulerTypeEnum.SLURM.name(),
               "batchDefaultLogicalQueue"+suffix};
       systems.put(i, sys0);
     }

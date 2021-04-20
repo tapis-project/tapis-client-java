@@ -39,7 +39,7 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SEARCH;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SORTBY;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_ORDERBY;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_COMPUTETOTAL;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_SUMMARY;
@@ -359,19 +359,19 @@ public class SystemsClient
   }
 
   /**
-   * Get list of systems using all supported parameters: searchStr, limit, sortBy, sip, startAfter.
-   * For example search=(id.like.MySys*)~(enabled.eq.true)&limit=10&sortBy=id(asc)&startAfter=my.sys1
+   * Get list of systems using all supported parameters: searchStr, limit, orderBy, sip, startAfter.
+   * For example search=(id.like.MySys*)~(enabled.eq.true)&limit=10&orderBy=id(asc)&startAfter=my.sys1
    * Use only one of skip or startAfter
-   * When using startAfter sortBy must be specified.
+   * When using startAfter orderBy must be specified.
    */
-  public List<TapisSystem> getSystems(String searchStr, int limit, String sortBy, int skip, String startAfter,
+  public List<TapisSystem> getSystems(String searchStr, int limit, String orderBy, int skip, String startAfter,
                                       String selectStr1)
           throws TapisClientException
   {
     String selectStr = DEFAULT_SELECT_SUMMARY;
     if (StringUtils.isBlank(selectStr1)) selectStr = selectStr1;
     RespSystems resp = null;
-    try { resp = sysApi.getSystems(searchStr, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr); }
+    try { resp = sysApi.getSystems(searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return Collections.emptyList();
@@ -385,7 +385,7 @@ public class SystemsClient
    */
   public List<TapisSystem> getSystems(String searchStr) throws TapisClientException
   {
-    return getSystems(searchStr, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_SELECT_SUMMARY);
+    return getSystems(searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_SELECT_SUMMARY);
   }
 
   /**
@@ -400,18 +400,18 @@ public class SystemsClient
    * Dedicated search endpoint using all supported parameters
    * Search for systems using an array of strings that represent an SQL-like WHERE clause
    * and using query parameters for sorting.
-   * For example limit=10&sortBy=id(asc)&startAfter=my.sys1
+   * For example limit=10&orderBy=id(asc)&startAfter=my.sys1
    * Use only one of skip or startAfter
-   * When using startAfter sortBy must be specified.
+   * When using startAfter orderBy must be specified.
    */
-  public List<TapisSystem> searchSystems(ReqSearchSystems req, int limit, String sortBy, int skip, String startAfter,
+  public List<TapisSystem> searchSystems(ReqSearchSystems req, int limit, String orderBy, int skip, String startAfter,
                                          String selectStr1)
           throws TapisClientException
   {
     String selectStr = DEFAULT_SELECT_SUMMARY;
     if (StringUtils.isBlank(selectStr1)) selectStr = selectStr1;
     RespSystems resp = null;
-    try { resp = sysApi.searchSystemsRequestBody(req, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr); }
+    try { resp = sysApi.searchSystemsRequestBody(req, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null || resp.getResult() == null) return Collections.emptyList();
@@ -426,7 +426,7 @@ public class SystemsClient
    */
   public List<TapisSystem> searchSystems(ReqSearchSystems req) throws TapisClientException
   {
-    return searchSystems(req, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_SELECT_SUMMARY);
+    return searchSystems(req, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_SELECT_SUMMARY);
   }
 
   /**

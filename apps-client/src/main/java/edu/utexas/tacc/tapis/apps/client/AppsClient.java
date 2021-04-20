@@ -38,7 +38,7 @@ import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_ALL;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_SUMMARY;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SORTBY;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_ORDERBY;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
 
 /**
@@ -365,7 +365,7 @@ public class AppsClient
     String selectStr = DEFAULT_SELECT_SUMMARY;
     if (StringUtils.isBlank(selectStr1)) selectStr = selectStr1;
 
-    try { resp = appApi.getApps(searchStr, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
+    try { resp = appApi.getApps(searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
                                 DEFAULT_COMPUTETOTAL, selectStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -388,7 +388,7 @@ public class AppsClient
     RespApps resp = null;
     String selectStr = DEFAULT_SELECT_SUMMARY;
     if (StringUtils.isBlank(selectStr1)) selectStr = selectStr1;
-    try { resp = appApi.searchAppsRequestBody(req, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
+    try { resp = appApi.searchAppsRequestBody(req, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
                                               DEFAULT_COMPUTETOTAL, selectStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
