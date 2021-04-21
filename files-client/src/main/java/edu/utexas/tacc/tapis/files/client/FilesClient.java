@@ -32,12 +32,14 @@ import edu.utexas.tacc.tapis.files.client.gen.model.TransferTask;
 import edu.utexas.tacc.tapis.files.client.gen.model.TransferTaskListResponse;
 import edu.utexas.tacc.tapis.files.client.gen.model.TransferTaskRequest;
 import edu.utexas.tacc.tapis.files.client.gen.model.TransferTaskResponse;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -244,17 +246,29 @@ public class FilesClient {
    *
    * @param systemId system
    * @param path path relative to system rootDir
-   * @param file file to upload
+   * @param inputStream file to upload
    * @return FileStringResponse
    * @throws TapisClientException - If api call throws an exception
    */
-  public FileStringResponse insert(String systemId, String path, File file)
+  public FileStringResponse insert(String systemId, String path, InputStream inputStream)
           throws TapisClientException
   {
+
+    File tmp = null;
     FileStringResponse resp = null;
-    try { resp = fileOperations.insert(systemId, path, file); }
+    try {
+      tmp = File.createTempFile("files-java-client", null);
+      try (FileOutputStream out = new FileOutputStream(tmp)) {
+        IOUtils.copy(inputStream, out);
+      }
+      tmp.deleteOnExit();
+      resp = fileOperations.insert(systemId, path, tmp);
+    }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    finally {
+      if (tmp != null) tmp.delete();
+    }
     if (resp != null && resp.getResult() != null) return resp; else return null;
   }
 

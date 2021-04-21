@@ -12,9 +12,12 @@ import edu.utexas.tacc.tapis.files.client.gen.model.TransferTaskRequest;
 import edu.utexas.tacc.tapis.files.client.gen.model.TransferTaskRequestElement;
 import edu.utexas.tacc.tapis.tokens.client.TokensClient;
 import edu.utexas.tacc.tapis.tokens.client.model.CreateTokenParms;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.io.DataInputStream;
 import java.io.File;
 import java.util.List;
 
@@ -80,13 +83,13 @@ public class ITestFilesClient {
         AuthClient authClient = new AuthClient(basepath);
         String jwt = authClient.getToken(username, password);
         FilesClient client = new FilesClient(basepath, jwt);
-
-        client.insert(systemId, "test-directory-e2e/e2e-test-file.txt", new File("src/test/resources/e2etestfile.txt"));
+        final File initialFile = new File("src/test/resources/e2etestfile.txt");
+        client.insert(systemId, "test-directory-e2e/e2e-test-file.txt", FileUtils.openInputStream(initialFile));
         List<FileInfo> listing = client.listFiles(systemId, "/test-directory-e2e", 100, 0, false);
         Assert.assertNotNull(listing);
         Assert.assertEquals(listing.size(), 1);
-        Assert.assertEquals(listing.get(0).getName(), "test-directory-e2e/e2e-test-file.txt");
-
+        Assert.assertEquals(listing.get(0).getPath(), "test-directory-e2e/e2e-test-file.txt");
+        Assert.assertTrue(listing.get(0).getSize() > 0);
         client.delete(systemId, "test-directory-e2e");
         Assert.assertThrows(Exception.class, ()-> client.listFiles(systemId, "/test-directory-e2e", 100, 0, false));
     }
@@ -95,8 +98,8 @@ public class ITestFilesClient {
         AuthClient authClient = new AuthClient(basepath);
         String jwt = authClient.getToken(username, password);
         FilesClient client = new FilesClient(basepath, jwt);
-
-        client.insert(systemId, "test-directory-e2e/e2e-test-file.txt", new File("src/test/resources/e2etestfile.txt"));
+        final File initialFile = new File("src/test/resources/e2etestfile.txt");
+        client.insert(systemId, "test-directory-e2e/e2e-test-file.txt", FileUtils.openInputStream(initialFile));
         FilePermission perms = client.getFilePermissions(systemId, "/test-directory-e2e", null);
         Assert.assertNotNull(perms);
     }
