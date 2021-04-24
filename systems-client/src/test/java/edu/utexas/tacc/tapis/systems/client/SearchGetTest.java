@@ -138,13 +138,13 @@ public class SearchGetTest
         // Create half the systems owned by testUser1 and half by testUser2
         if (i <= numSystems / 2)
         {
-          rSys = Utils.createReqSystem(sys0, port, prot1AuthnMethod, null, prot1TxfrMethodsC);
+          rSys = Utils.createReqSystem(sys0, port, prot1AuthnMethod, null);
           getClientUsr(serviceURL, testUser1JWT).createSystem(rSys);
           tmpSys = getClientUsr(serviceURL, testUser1JWT).getSystem(sys0[1]);
         }
         else
         {
-          rSys = Utils.createReqSystem(sys0, port, prot1AuthnMethod, null, prot1TxfrMethodsC);
+          rSys = Utils.createReqSystem(sys0, port, prot1AuthnMethod, null);
           getClientUsr(serviceURL, testUser2JWT).createSystem(rSys);
           tmpSys = getClientUsr(serviceURL, testUser2JWT).getSystem(sys0[1]);
         }

@@ -96,7 +96,7 @@ public class FilesSvcTest
       String[] sys0 = systems.get(i);
       System.out.println("Creating system with name: " + sys0[1]);
       try {
-        ReqCreateSystem rSys = Utils.createReqSystem(sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
+        ReqCreateSystem rSys = Utils.createReqSystem(sys0, prot1Port, prot1AuthnMethod, cred0);
         String respUrl = sysClient.createSystem(rSys);
         System.out.println("Created system: " + respUrl);
         Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
@@ -217,7 +217,7 @@ public class FilesSvcTest
 //    String[] sys0 = systems.get(2);
 //    System.out.println("Creating system with name: " + sys0[1]);
 //    try {
-//      String respUrl = Utils.createSystem(getClientUsr(serviceURL, ownerUserJWT), sys0, prot1Port, prot1AuthnMethod, null, prot1TxfrMethodsC);
+//      String respUrl = Utils.createSystem(getClientUsr(serviceURL, ownerUserJWT), sys0, prot1Port, prot1AuthnMethod, null);
 //      System.out.println("Created system: " + respUrl);
 //      System.out.println("Testing credentials for user: " + newPermsUser);
 //      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);

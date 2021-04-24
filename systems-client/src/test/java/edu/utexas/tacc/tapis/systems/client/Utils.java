@@ -37,7 +37,6 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RuntimeTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SystemTypeEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.TransferMethodEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
@@ -113,14 +112,6 @@ public final class Utils
   public static final int defaultQMinutes = -1;
   public static final int defaultCapPrecedence = 100;
 
-  public static final List<TransferMethodEnum> prot1TxfrMethodsC =
-          Arrays.asList(TransferMethodEnum.SFTP, TransferMethodEnum.S3);
-  public static final List<TransferMethodEnum> prot1TxfrMethodsT =
-          Arrays.asList(TransferMethodEnum.SFTP, TransferMethodEnum.S3);
-  public static final List<TransferMethodEnum> prot2TxfrMethodsU =
-          Collections.singletonList(TransferMethodEnum.SFTP);
-  public static final List<TransferMethodEnum> prot2TxfrMethodsT =
-          Collections.singletonList(TransferMethodEnum.SFTP);
   public static final SystemsClient.AuthnMethod prot1AuthnMethod = SystemsClient.AuthnMethod.PKI_KEYS;
   public static final SystemsClient.AuthnMethod prot2AuthnMethod = SystemsClient.AuthnMethod.ACCESS_KEY;
   public static final boolean canExecTrue = true;
@@ -260,10 +251,9 @@ public final class Utils
    * Build a ReqCreateSystem object to be used for client call to create a system given most attributes for the system.
    */
   public static ReqCreateSystem createReqSystem(String[] sys, int port, SystemsClient.AuthnMethod authnMethod,
-                                                Credential credential, List<TransferMethodEnum> txfrMethods)
+                                                Credential credential)
   {
     var accMethod = authnMethod != null ? authnMethod : prot1AuthnMethod;
-    var tMethods = txfrMethods != null ? txfrMethods : prot1TxfrMethodsC;
     ReqCreateSystem rSys = new ReqCreateSystem();
     rSys.setId(sys[1]);
     rSys.description(sys[2]);
@@ -276,7 +266,6 @@ public final class Utils
     rSys.authnCredential(credential);
     rSys.bucketName(sys[8]);
     rSys.rootDir(sys[9]);
-    rSys.setTransferMethods(tMethods);
     rSys.port(port).useProxy(prot1UseProxy).proxyHost(prot1ProxyHost).proxyPort(prot1ProxyPort);
     rSys.canExec(canExecTrue);
     rSys.setJobRuntimes(jobRuntimes1);
@@ -311,8 +300,8 @@ public final class Utils
     rSys.setJobRuntimes(jobRuntimes1);
     // If systemType is LINUX then rootDir is required
     if (sys[3].equals(SystemTypeEnum.LINUX.name())) rSys.rootDir(sys[9]);
-    // If systemType is OBJECT_STORE then bucketName is required
-    if (sys[3].equals(SystemTypeEnum.OBJECT_STORE.name())) rSys.bucketName(sys[8]);
+    // If systemType is S3 then bucketName is required
+    if (sys[3].equals(SystemTypeEnum.S3.name())) rSys.bucketName(sys[8]);
     return clt.createSystem(rSys);
   }
 
@@ -336,7 +325,7 @@ public final class Utils
 
   /**
    * Verify most attributes for a TapisSystem using default create data for following attributes:
-   *     port, useProxy, proxyHost, proxyPort, defaultAuthnMethod, transferMethods,
+   *     port, useProxy, proxyHost, proxyPort, defaultAuthnMethod,
    *     canExec, jobWorkingDir, jobMaxJobs, jobMaxJobsPerUser, jobIsBatch, batchScheduler, batchDefaultLogicalQueue,
    *     jobEnvVariables, jobLogicalQueues, capabilities, tags, notes
    * @param tmpSys - system retrieved from the service
@@ -363,13 +352,6 @@ public final class Utils
     Assert.assertEquals(tmpSys.getProxyHost(), prot1ProxyHost);
     Assert.assertNotNull(tmpSys.getProxyPort());
     Assert.assertEquals(tmpSys.getProxyPort().intValue(), prot1ProxyPort);
-    // Verify transfer methods
-    List<TransferMethodEnum> tMethodsList = tmpSys.getTransferMethods();
-    Assert.assertNotNull(tMethodsList, "TransferMethods list should not be null");
-    for (TransferMethodEnum txfrMethod : prot1TxfrMethodsT)
-    {
-      Assert.assertTrue(tMethodsList.contains(txfrMethod), "List of transfer methods did not contain: " + txfrMethod.name());
-    }
     Assert.assertEquals(tmpSys.getCanExec(), Boolean.valueOf(canExecTrue));
     Assert.assertEquals(tmpSys.getJobWorkingDir(), sys0[10]);
     // TODO check jobRuntimes
@@ -461,8 +443,8 @@ public final class Utils
     // If systemType is LINUX then rootDir is required
     if (tmpSys.getSystemType() == SystemTypeEnum.LINUX) Assert.assertEquals(tmpSys.getRootDir(), sys0[9]);
     else Assert.assertEquals(tmpSys.getRootDir(), defaultRootDir);
-    // If systemType is OBJECT_STORE then bucketName is required
-    if (tmpSys.getSystemType() == SystemTypeEnum.OBJECT_STORE) Assert.assertEquals(tmpSys.getBucketName(), sys0[8]);
+    // If systemType is S3 then bucketName is required
+    if (tmpSys.getSystemType() == SystemTypeEnum.S3) Assert.assertEquals(tmpSys.getBucketName(), sys0[8]);
     else Assert.assertEquals(tmpSys.getBucketName(), defaultBucketName);
 
     // Verify optional attributes have been set to defaults
@@ -472,8 +454,6 @@ public final class Utils
     Assert.assertEquals(tmpSys.getEnabled(), Boolean.valueOf(defaultIsEnabled));
     // Effective user should result to requestor which in this case is testuser1
     Assert.assertEquals(tmpSys.getEffectiveUserId(), testUser1);
-    Assert.assertNotNull(tmpSys.getTransferMethods());
-    Assert.assertTrue(tmpSys.getTransferMethods().isEmpty());
     Assert.assertNotNull(tmpSys.getPort());
     Assert.assertEquals(tmpSys.getPort().intValue(), defaultPort);
     Assert.assertNotNull(tmpSys.getUseProxy());
