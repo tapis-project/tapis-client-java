@@ -185,12 +185,11 @@ public class SearchASTTest
     class CaseData {public final int count; public final String searchStr; CaseData(int c, String s) { count = c; searchStr = s; }}
     var validCaseInputs = new HashMap<Integer, CaseData>();
     // Test basic types and operators
-    // TODO/TBD: Must surround values in single quotes for some cases, e.g. when _ or . is present in value.
     validCaseInputs.put( 1,new CaseData(1, String.format("id = '%s'",sys0Name))); // 1 has specific name
     validCaseInputs.put( 2,new CaseData(1, String.format("description = '%s'",sys0.getDescription())));
     validCaseInputs.put( 3,new CaseData(1, String.format("host = '%s'",sys0.getHost())));
     validCaseInputs.put( 4,new CaseData(1, String.format("bucket_name = '%s'",sys0.getBucketName())));
-    validCaseInputs.put( 5,new CaseData(1, String.format("root_dir = '%s'", sys0.getRootDir()))); //TODO underscore
+    validCaseInputs.put( 5,new CaseData(1, String.format("root_dir = '%s'", sys0.getRootDir())));
     validCaseInputs.put( 6,new CaseData(1, String.format("job_working_dir = '%s'",sys0.getJobWorkingDir())));
     validCaseInputs.put( 7,new CaseData(numSystems, sysNameLikeAll + " AND batch_scheduler = " + SchedulerTypeEnum.SLURM.name()));
     validCaseInputs.put( 8,new CaseData(1, String.format("batch_default_logical_queue = '%s'",sys0.getBatchDefaultLogicalQueue())));
@@ -203,9 +202,9 @@ public class SearchASTTest
     validCaseInputs.put(16,new CaseData(1, String.format("id LIKE '%s'",sys0Name)));
     validCaseInputs.put(17,new CaseData(0, "id LIKE 'NOSUCHSYSTEMxFM2c29bc8RpKWeE2sht7aZrJzQf3s'"));
     validCaseInputs.put(18,new CaseData(numSystems, sysNameLikeAll));
-//    validCaseInputs.put(19,new CaseData(numSystems-1, sysNameLikeAll + String.format(" AND id NLIKE '%s'",sys0Name))); // TODO support NLIKE
+    validCaseInputs.put(19,new CaseData(numSystems-1, sysNameLikeAll + String.format(" AND id NLIKE '%s'",sys0Name)));
     validCaseInputs.put(20,new CaseData(1, sysNameLikeAll + " AND id IN " + nameList));
-//    validCaseInputs.put(21,new CaseData(numSystems-1, sysNameLikeAll + " AND id NIN " + nameList)); // TODO support NIN
+    validCaseInputs.put(21,new CaseData(numSystems-1, sysNameLikeAll + " AND id NIN " + nameList));
     validCaseInputs.put(22,new CaseData(numSystems, sysNameLikeAll + " AND system_type = LINUX"));
     validCaseInputs.put(23,new CaseData(numSystems/2, sysNameLikeAll + String.format(" AND system_type = LINUX AND owner <> '%s'",testUser2)));
 
@@ -224,4 +223,3 @@ public class SearchASTTest
     }
   }
 }
-

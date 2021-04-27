@@ -202,7 +202,7 @@ public class UserTest
     catch (TapisClientException tce)
     {
       System.out.println("Caught exception: " + tce.getMessage());
-      Assert.assertTrue(tce.getMessage().contains("SYSLIB_S3_NOBUCKET_INPUT"));
+      Assert.assertTrue(tce.getMessage().contains("SYSLIB_OBJSTORE_NOBUCKET_INPUT"));
       pass = true;
     }
     Assert.assertTrue(pass, "Should not be able to create system with S3 and no bucketName");

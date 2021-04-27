@@ -44,7 +44,6 @@ import org.testng.Assert;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,9 +59,7 @@ public final class Utils
   public static final String testUser2 = "testuser2";
   public static final String testUser3 = "testuser3";
   public static final String testUser4 = "testuser4";
-  public static final String testUser9 = "testuser9";
-  // testuser9 must be given role "$!tenant_admin"
-  public static final String adminUser = testUser9;
+  public static final String adminUser = "testadmin";
   public static final String adminTenantName = "admin";
   public static final String filesSvcName = "files";
   public static final String sysType = SystemTypeEnum.LINUX.name();
