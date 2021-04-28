@@ -31,7 +31,7 @@ import edu.utexas.tacc.tapis.apps.client.gen.model.RespChangeCount;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespNameArray;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespResourceUrl;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespApp;
-import edu.utexas.tacc.tapis.apps.client.gen.model.App;
+import edu.utexas.tacc.tapis.apps.client.gen.model.TapisApp;
 
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_COMPUTETOTAL;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
@@ -274,7 +274,7 @@ public class AppsClient
    * @return The app or null if app not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public App getApp(String appId, String appVersion, Boolean requireExecPerm, String selectStr1) throws TapisClientException
+  public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm, String selectStr1) throws TapisClientException
   {
     String selectStr = DEFAULT_SELECT_ALL;
     if (StringUtils.isBlank(selectStr1)) selectStr = selectStr1;
@@ -284,7 +284,7 @@ public class AppsClient
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
     // Postprocess the app
-    App app = postProcessApp(resp.getResult());
+    TapisApp app = postProcessApp(resp.getResult());
     return app;
   }
 
@@ -297,7 +297,7 @@ public class AppsClient
    * @return The app or null if app not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public App getApp(String appId, String appVersion, Boolean requireExecPerm) throws TapisClientException
+  public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm) throws TapisClientException
   {
     return getApp(appId, appVersion, requireExecPerm, DEFAULT_SELECT_ALL);
   }
@@ -310,7 +310,7 @@ public class AppsClient
    * @return The app or null if app not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public App getApp(String appId, String appVersion) throws TapisClientException
+  public TapisApp getApp(String appId, String appVersion) throws TapisClientException
   {
     return getApp(appId, appVersion, Boolean.FALSE, DEFAULT_SELECT_ALL);
   }
@@ -322,7 +322,7 @@ public class AppsClient
    * @return The app or null if app not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public App getApp(String appId) throws TapisClientException
+  public TapisApp getApp(String appId) throws TapisClientException
   {
     return getAppLatestVersion(appId, Boolean.FALSE, DEFAULT_SELECT_ALL);
   }
@@ -336,7 +336,7 @@ public class AppsClient
    * @return Latest version of the app
    * @throws TapisClientException - If api call throws an exception
    */
-  public App getAppLatestVersion(String appId, Boolean requireExecPerm, String selectStr1) throws TapisClientException
+  public TapisApp getAppLatestVersion(String appId, Boolean requireExecPerm, String selectStr1) throws TapisClientException
   {
     String selectStr = DEFAULT_SELECT_ALL;
     if (StringUtils.isBlank(selectStr1)) selectStr = selectStr1;
@@ -346,7 +346,7 @@ public class AppsClient
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
     // Postprocess the app
-    App app = postProcessApp(resp.getResult());
+    TapisApp app = postProcessApp(resp.getResult());
     return app;
   }
 
@@ -359,7 +359,7 @@ public class AppsClient
    * @return Apps accessible to the caller
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<App> getApps(String searchStr, String selectStr1) throws TapisClientException
+  public List<TapisApp> getApps(String searchStr, String selectStr1) throws TapisClientException
   {
     RespApps resp = null;
     String selectStr = DEFAULT_SELECT_SUMMARY;
@@ -371,7 +371,7 @@ public class AppsClient
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
     // Postprocess Apps in the result
-    for (App app : resp.getResult()) postProcessApp(app);
+    for (TapisApp app : resp.getResult()) postProcessApp(app);
     return resp.getResult();
   }
 
@@ -383,7 +383,7 @@ public class AppsClient
    * @return Apps accessible to the caller
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<App> searchApps(ReqSearchApps req, String selectStr1) throws TapisClientException
+  public List<TapisApp> searchApps(ReqSearchApps req, String selectStr1) throws TapisClientException
   {
     RespApps resp = null;
     String selectStr = DEFAULT_SELECT_SUMMARY;
@@ -560,7 +560,7 @@ public class AppsClient
    * @param app App to process
    * @return - Resulting App
    */
-  App postProcessApp(App app)
+  TapisApp postProcessApp(TapisApp app)
   {
     // If we have a notes attribute convert it from a LinkedTreeMap to a string with json.
     if (app != null && app.getNotes() != null)

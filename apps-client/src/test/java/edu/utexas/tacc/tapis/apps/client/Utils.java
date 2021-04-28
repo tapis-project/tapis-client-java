@@ -36,10 +36,10 @@ import edu.utexas.tacc.tapis.apps.client.gen.model.ParameterSet;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ParameterSetArchiveFilter;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RuntimeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RuntimeOptionEnum;
+import edu.utexas.tacc.tapis.apps.client.gen.model.TapisApp;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqCreateApp;
-import edu.utexas.tacc.tapis.apps.client.gen.model.App;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 
@@ -342,7 +342,7 @@ public final class Utils
    * @param tmpApp - app retrieved from the service
    * @param app0 - Data used to create the app
    */
-  public static void verifyAppAttributes(App tmpApp, String[] app0)
+  public static void verifyAppAttributes(TapisApp tmpApp, String[] app0)
   {
 //    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=appType, 5=ownerUser1,
 //              6=runtime, 7=runtimeVersion, 8=containerImage, 9=jobDescription,

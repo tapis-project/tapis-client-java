@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
-import edu.utexas.tacc.tapis.apps.client.gen.model.App;
+import edu.utexas.tacc.tapis.apps.client.gen.model.TapisApp;
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
 
 import static edu.utexas.tacc.tapis.apps.client.Utils.*;
@@ -190,7 +190,7 @@ public class UserTest
     String respUrl = Utils.createApp(usrClient, app0);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
-    App tmpApp = usrClient.getApp(app0[1], app0[2]);
+    TapisApp tmpApp = usrClient.getApp(app0[1], app0[2]);
     Assert.assertNotNull(tmpApp, "Failed to create item: " + app0[1]);
     System.out.println("Found item: " + app0[1]);
     verifyAppAttributes(tmpApp, app0);
@@ -220,7 +220,7 @@ public class UserTest
 //      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 //      // Verify attributes
 //      app0 = appF2;
-//      App tmpApp = usrClient.getApp(app0[1], app0[2]);
+//      TapisApp tmpApp = usrClient.getApp(app0[1], app0[2]);
 //      Assert.assertNotNull(tmpApp, "Failed to create item: " + app0[1]);
 //      System.out.println("Found item: " + app0[1]);
 //      Assert.assertEquals(tmpApp.getId(), app0[1]);
@@ -268,7 +268,7 @@ public class UserTest
     String[] app0 = apps.get(16);
     String respUrl = Utils.createApp(usrClient, app0);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
-    App tmpApp = usrClient.getApp(app0[1], app0[2]);
+    TapisApp tmpApp = usrClient.getApp(app0[1], app0[2]);
     Assert.assertNotNull(tmpApp, "Failed to create item: " + app0[1]);
     usrClient.changeAppOwner(app0[1], newOwnerUser);
     // Now that owner has given away ownership we need to be newOwnerUser or admin to get the app
@@ -289,11 +289,11 @@ public class UserTest
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Get list of all app names
-    List<App> appsList = usrClient.getApps(null, null);
+    List<TapisApp> appsList = usrClient.getApps(null, null);
     Assert.assertNotNull(appsList);
     Assert.assertFalse(appsList.isEmpty());
     var appNames = new ArrayList<String>();
-    for (App app : appsList) {
+    for (TapisApp app : appsList) {
       System.out.println("Found item: " + app.getId());
       appNames.add(app.getId());
     }
@@ -307,7 +307,7 @@ public class UserTest
     String respUrl = Utils.createApp(usrClient, app0);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     // Enabled should start off true, then become false and finally true again.
-    App tmpApp = usrClient.getApp(app0[1], app0[2]);
+    TapisApp tmpApp = usrClient.getApp(app0[1], app0[2]);
     Assert.assertTrue(tmpApp.getEnabled());
     int changeCount = usrClient.disableApp(tmpApp.getId());
     tmpApp = usrClient.getApp(app0[1], app0[2]);
