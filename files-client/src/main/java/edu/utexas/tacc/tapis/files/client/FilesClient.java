@@ -25,8 +25,8 @@ import edu.utexas.tacc.tapis.files.client.gen.model.FilePermissionResponse;
 import edu.utexas.tacc.tapis.files.client.gen.model.FileStringResponse;
 import edu.utexas.tacc.tapis.files.client.gen.model.HealthCheckResponse;
 import edu.utexas.tacc.tapis.files.client.gen.model.MkdirRequest;
-import edu.utexas.tacc.tapis.files.client.gen.model.MoveCopyRenameRequest;
-import edu.utexas.tacc.tapis.files.client.gen.model.MoveCopyRenameRequest.OperationEnum;
+import edu.utexas.tacc.tapis.files.client.gen.model.MoveCopyRequest;
+import edu.utexas.tacc.tapis.files.client.gen.model.MoveCopyRequest.OperationEnum;
 import edu.utexas.tacc.tapis.files.client.gen.model.StringResponse;
 import edu.utexas.tacc.tapis.files.client.gen.model.TransferTask;
 import edu.utexas.tacc.tapis.files.client.gen.model.TransferTaskListResponse;
@@ -223,18 +223,18 @@ public class FilesClient {
    *
    * @param systemId system
    * @param path path relative to system rootDir
-   * @param newName The new name of the file/folder
+   * @param newPAth The new path of the file/folder
    * @return FileStringResponse
    * @throws TapisClientException - If api call throws an exception
    */
-  public FileStringResponse rename(String systemId, String path, String newName)
+  public FileStringResponse moveCopy(String systemId, String path, String newPAth, OperationEnum operation)
           throws TapisClientException
   {
     FileStringResponse resp = null;
-    var renameReq = new MoveCopyRenameRequest();
-    renameReq.setOperation(OperationEnum.RENAME);
-    renameReq.setNewPath(newName);
-    try { resp = fileOperations.moveCopyRename(systemId, path, renameReq); }
+    var renameReq = new MoveCopyRequest();
+    renameReq.setOperation(operation);
+    renameReq.setNewPath(newPAth);
+    try { resp = fileOperations.moveCopy(systemId, path, renameReq); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp; else return null;
@@ -347,7 +347,7 @@ public class FilesClient {
    * @return FilePermission object
    * @throws TapisClientException - If api call throws an exception
    */
-  public FilePermission createFilePermissionForUser(String systemId, String path, CreatePermissionRequest req)
+  public FilePermission grantPermissions(String systemId, String path, CreatePermissionRequest req)
           throws TapisClientException
   {
     FilePermissionResponse resp = null;
@@ -368,7 +368,7 @@ public class FilesClient {
    * @return FilePermissionStringResponse
    * @throws TapisClientException - If api call throws an exception
    */
-  public String deleteFilePermissionForUser(String systemId, String path, String username)
+  public String removePermissions(String systemId, String path, String username)
           throws TapisClientException
   {
     StringResponse resp = null;

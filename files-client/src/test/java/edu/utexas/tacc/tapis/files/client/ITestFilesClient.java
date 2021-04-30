@@ -2,7 +2,7 @@ package edu.utexas.tacc.tapis.files.client;
 
 
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
-import edu.utexas.tacc.tapis.auth.client.gen.model.Token;
+import edu.utexas.tacc.tapis.auth.client.gen.model.TokenResponse;
 import edu.utexas.tacc.tapis.files.client.gen.model.FileInfo;
 import edu.utexas.tacc.tapis.files.client.gen.model.FilePermission;
 import edu.utexas.tacc.tapis.files.client.gen.model.MkdirRequest;

@@ -161,9 +161,9 @@ paths:
     put:
       tags:
       - file operations
-      summary: Move/copy/rename a file or folder
-      description: Move/Rename a file in {systemID} at path {path}.
-      operationId: moveCopyRename
+      summary: Move/copy a file or folder
+      description: Move/copy a file in {systemID} at path {path}.
+      operationId: moveCopy
       parameters:
       - name: systemId
         in: path
@@ -181,7 +181,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MoveCopyRenameRequest'
+              $ref: '#/components/schemas/MoveCopyRequest'
       responses:
         "200":
           description: OK
@@ -746,7 +746,7 @@ components:
           type: string
         metadata:
           type: object
-    MoveCopyRenameRequest:
+    MoveCopyRequest:
       required:
       - newPath
       - operation
@@ -757,7 +757,6 @@ components:
           enum:
           - MOVE
           - COPY
-          - RENAME
         newPath:
           type: string
           description: Paths must be absolute, ../.. is not allowed
@@ -803,19 +802,6 @@ components:
           type: string
         metadata:
           type: object
-    StringResponse:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        result:
-          type: string
-        version:
-          type: string
-        metadata:
-          type: object
     CreatePermissionRequest:
       required:
       - permission
@@ -829,6 +815,19 @@ components:
           enum:
           - READ
           - MODIFY
+    StringResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          type: string
+        version:
+          type: string
+        metadata:
+          type: object
     SharedFileObject:
       type: object
       properties:
@@ -975,21 +974,6 @@ components:
         endTime:
           type: string
           format: date-time
-    TransferTaskListResponse:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        result:
-          type: array
-          items:
-            $ref: '#/components/schemas/TransferTask'
-        version:
-          type: string
-        metadata:
-          type: object
     TransferTaskParent:
       type: object
       properties:
@@ -1084,3 +1068,18 @@ components:
           type: boolean
           description: Allow the full transfer to succeed even if this portion fails?
             Default is false
+    TransferTaskListResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransferTask'
+        version:
+          type: string
+        metadata:
+          type: object
