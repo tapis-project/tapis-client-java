@@ -1,5 +1,9 @@
 package edu.utexas.tacc.tapis.jobs.client;
 
+import java.util.List;
+
+
+
 import org.apache.commons.lang3.StringUtils;
 
 import edu.utexas.tacc.tapis.client.shared.Utils;
@@ -9,9 +13,14 @@ import edu.utexas.tacc.tapis.jobs.client.gen.ApiException;
 import edu.utexas.tacc.tapis.jobs.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.jobs.client.gen.api.JobsApi;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.Job;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.JobListDTO;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.JobStatusDisplay;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqSubmitJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespBasic;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJob;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJobList;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJobStatus;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.RespJobSearchAllAttributes;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespProbe;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespSubmitJob;
 
@@ -254,6 +263,60 @@ public class JobsClient
         return resp == null ? null : resp.getResult();
     }
 
+    /* ---------------------------------------------------------------------------- */
+    /* getJobStatus:                                                                      */
+    /* ---------------------------------------------------------------------------- */
+    public JobStatusDisplay getJobStatus(String jobUuid)
+     throws TapisClientException
+    {
+        RespGetJobStatus resp = null;
+        try {
+            // Get the API object using default networking.
+            var jobsApi = new JobsApi(_apiClient);
+            resp = jobsApi.getJobStatus(jobUuid,false);
+        }
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+        
+        return resp == null ? null : resp.getResult();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* getJobList:                                                                  */
+    /* ---------------------------------------------------------------------------- */
+    public List<JobListDTO> getJobList(int limit, int skip, int startAfter, String orderBy, boolean computeTotal, String select)
+     throws TapisClientException
+    {
+    	RespGetJobList resp = null;
+        try {
+            // Get the API object using default networking.
+            var jobsApi = new JobsApi(_apiClient);
+            resp = jobsApi.getJobList(limit, skip, startAfter, orderBy, computeTotal,false);
+        }
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+        
+        return resp == null ? null : resp.getResult();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* getJobSearchList:                                                            */
+    /* ---------------------------------------------------------------------------- */
+    public List<Job> getJobSearchList(int limit, int skip, int startAfter, String orderBy, boolean computeTotal, String select)
+     throws TapisClientException
+    {
+    	RespJobSearchAllAttributes resp = null;
+        try {
+            // Get the API object using default networking.
+            var jobsApi = new JobsApi(_apiClient);
+            resp = jobsApi.getJobSearchList(limit, skip, startAfter, orderBy, computeTotal,  select, false);
+        }
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+        
+        return resp == null ? null : resp.getResult();
+    }
+    
     /* **************************************************************************** */
     /*                            Public General Methods                            */
     /* **************************************************************************** */
