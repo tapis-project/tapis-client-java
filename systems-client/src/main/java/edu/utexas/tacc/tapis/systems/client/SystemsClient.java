@@ -249,6 +249,40 @@ public class SystemsClient
   }
 
   /**
+   * Update deleted attribute to true.
+   *
+   * @param id System id
+   * @return number of records modified as a result of the action
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public int deleteSystem(String id) throws TapisClientException
+  {
+    RespChangeCount resp = null;
+    try { resp = sysApi.deleteSystem(id); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
+    else return -1;
+  }
+
+  /**
+   * Update deleted to true.
+   *
+   * @param id System id
+   * @return number of records modified as a result of the action
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public int undeleteSystem(String id) throws TapisClientException
+  {
+    RespChangeCount resp = null;
+    try { resp = sysApi.undeleteSystem(id); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
+    else return -1;
+  }
+
+  /**
    * Change system owner given the system systemId and new owner systemId.
    *
    * @param systemId System systemId
@@ -446,26 +480,6 @@ public class SystemsClient
   }
 
   /**
-   * Delete a system given the system systemId.
-   * Return 1 if record was deleted
-   * Return 0 if record not present
-   *
-   * @param systemId System systemId
-   * @param confirm Confirm the action
-   * @return number of records modified as a result of the action
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public int deleteSystem(String systemId, Boolean confirm) throws TapisClientException
-  {
-    RespChangeCount resp = null;
-    try { resp = sysApi.deleteSystem(systemId, confirm); }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
-    else return -1;
-  }
-
-  /**
    * Check if resource is enabled
    *
    * @return boolean indicating if enabled
@@ -621,17 +635,22 @@ public class SystemsClient
   /**
    * Utility method to build a batch LogicalQueue
    */
-  public static LogicalQueue buildLogicalQueue(String name, String hpcQueueName, int maxJobs, int maxJobsPerUser, int maxNodeCount,
-                                               int maxCoresPerNode, int maxMemoryMB, int maxMinutes)
+  public static LogicalQueue buildLogicalQueue(String name, String hpcQueueName, int maxJobs, int maxJobsPerUser,
+                                 int minNodeCount, int maxNodeCount, int minCoresPerNode, int maxCoresPerNode,
+                                 int minMemoryMB, int maxMemoryMB, int minMinutes, int maxMinutes)
   {
     var q = new LogicalQueue();
     q.setName(name);
     q.setHpcQueueName(hpcQueueName);
     q.setMaxJobs(maxJobs);
     q.setMaxJobsPerUser(maxJobsPerUser);
+    q.setMinNodeCount(minNodeCount);
     q.setMaxNodeCount(maxNodeCount);
+    q.setMinCoresPerNode(minCoresPerNode);
     q.setMaxCoresPerNode(maxCoresPerNode);
+    q.setMinMemoryMB(minMemoryMB);
     q.setMaxMemoryMB(maxMemoryMB);
+    q.setMinMinutes(minMinutes);
     q.setMaxMinutes(maxMinutes);
     return q;
   }

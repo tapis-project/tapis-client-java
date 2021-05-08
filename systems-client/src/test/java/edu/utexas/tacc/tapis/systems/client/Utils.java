@@ -129,8 +129,8 @@ public final class Utils
           new JobRuntime().runtimeType(RuntimeTypeEnum.DOCKER).version("0.0.1runtime");
   public static final List<JobRuntime> jobRuntimes1 = new ArrayList<>(List.of(runtimeDocker));
 
-  public static final LogicalQueue q1 = SystemsClient.buildLogicalQueue("logicalQ1", "hpcQ1", 1, 1, 1, 1, 1, 1);
-  public static final LogicalQueue q2 = SystemsClient.buildLogicalQueue("logicalQ2", "hpcQ2", 2, 2, 2, 2, 2, 2);
+  public static final LogicalQueue q1 = SystemsClient.buildLogicalQueue("logicalQ1", "hpcQ1", 1, 1, 0, 1, 0, 1, 0, 1, 0, 1);
+  public static final LogicalQueue q2 = SystemsClient.buildLogicalQueue("logicalQ2", "hpcQ2", 2, 2, 0, 2, 0, 2, 0, 2, 0, 2);
   public static final List<LogicalQueue> jobQueues1 = new ArrayList<>(List.of(q1, q2));
 
   public static final List<String> tags1 = Arrays.asList("value1", "value2", "a",
