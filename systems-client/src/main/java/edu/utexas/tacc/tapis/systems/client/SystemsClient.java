@@ -266,7 +266,7 @@ public class SystemsClient
   }
 
   /**
-   * Update deleted to true.
+   * Update deleted to false.
    *
    * @param id System id
    * @return number of records modified as a result of the action
@@ -300,33 +300,15 @@ public class SystemsClient
   }
 
   /**
-   * Get a system using all supported parameters.
-   * Fetching of credentials is highly restricted. Only certain Tapis services are authorized.
-   * If authnMethod is null then default authn method for the system is used.
-   * Use of this method is highly restricted.
+   * Get a system by systemId without returning credentials
    *
    * @param systemId System systemId
-   * @param returnCredentials - Include credentials in returned system object
-   * @param authnMethod - Desired authn method used when fetching credentials, for default pass in null.
-   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
-   * @param selectStr1 - Attributes to be included in result. For example select=id,owner,host
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public TapisSystem getSystem(String systemId, Boolean returnCredentials, AuthnMethod authnMethod,
-                               Boolean requireExecPerm, String selectStr1)
-          throws TapisClientException
+  public TapisSystem getSystem(String systemId) throws TapisClientException
   {
-    String selectStr = DEFAULT_SELECT_ALL;
-    if (StringUtils.isBlank(selectStr1)) selectStr = selectStr1;
-    RespSystem resp = null;
-    String authnMethodStr = (authnMethod==null ? null : authnMethod.name());
-    try {resp = sysApi.getSystem(systemId, returnCredentials, authnMethodStr, requireExecPerm, selectStr); }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null) return null;
-    // Postprocess the TapisSystem
-    return postProcessSystem(resp.getResult());
+    return getSystem(systemId, false, null, false, DEFAULT_SELECT_ALL);
   }
 
   /**
@@ -347,18 +329,6 @@ public class SystemsClient
           throws TapisClientException
   {
     return getSystem(systemId, returnCredentials, authnMethod, requireExecPerm, DEFAULT_SELECT_ALL);
-  }
-
-  /**
-   * Get a system by systemId without returning credentials
-   *
-   * @param systemId System systemId
-   * @return The system or null if system not found
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public TapisSystem getSystem(String systemId) throws TapisClientException
-  {
-    return getSystem(systemId, false, null, false, DEFAULT_SELECT_ALL);
   }
 
   /**
@@ -393,33 +363,33 @@ public class SystemsClient
   }
 
   /**
-   * Get list of systems using all supported parameters: searchStr, limit, orderBy, sip, startAfter.
-   * For example search=(id.like.MySys*)~(enabled.eq.true)&limit=10&orderBy=id(asc)&startAfter=my.sys1
-   * Use only one of skip or startAfter
-   * When using startAfter orderBy must be specified.
+   * Get a system using all supported parameters.
+   * Fetching of credentials is highly restricted. Only certain Tapis services are authorized.
+   * If authnMethod is null then default authn method for the system is used.
+   * Use of this method is highly restricted.
+   *
+   * @param systemId System systemId
+   * @param returnCredentials - Include credentials in returned system object
+   * @param authnMethod - Desired authn method used when fetching credentials, for default pass in null.
+   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
+   * @param selectStr - Attributes to be included in result. For example select=id,owner,host
+   * @return The system or null if system not found
+   * @throws TapisClientException - If api call throws an exception
    */
-  public List<TapisSystem> getSystems(String searchStr, int limit, String orderBy, int skip, String startAfter,
-                                      String selectStr1)
+  public TapisSystem getSystem(String systemId, Boolean returnCredentials, AuthnMethod authnMethod,
+                               Boolean requireExecPerm, String selectStr)
           throws TapisClientException
   {
-    String selectStr = DEFAULT_SELECT_SUMMARY;
-    if (StringUtils.isBlank(selectStr1)) selectStr = selectStr1;
-    RespSystems resp = null;
-    try { resp = sysApi.getSystems(searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr); }
+    String selectStr1 = DEFAULT_SELECT_ALL;
+    if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
+    RespSystem resp = null;
+    String authnMethodStr = (authnMethod==null ? null : authnMethod.name());
+    try {resp = sysApi.getSystem(systemId, returnCredentials, authnMethodStr, requireExecPerm, selectStr1); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null) return Collections.emptyList();
-    // Postprocess TapisSystems in the result
-    for (TapisSystem tSys : resp.getResult()) postProcessSystem(tSys);
-    return resp.getResult();
-  }
-
-  /**
-   * Get list of systems using search. For example search=(id.like.MySys*)~(enabled.eq.true)
-   */
-  public List<TapisSystem> getSystems(String searchStr) throws TapisClientException
-  {
-    return getSystems(searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_SELECT_SUMMARY);
+    if (resp == null || resp.getResult() == null) return null;
+    // Postprocess the TapisSystem
+    return postProcessSystem(resp.getResult());
   }
 
   /**
@@ -431,6 +401,36 @@ public class SystemsClient
   }
 
   /**
+   * Get list of systems using search. For example search=(id.like.MySys*)~(enabled.eq.true)
+   */
+  public List<TapisSystem> getSystems(String searchStr) throws TapisClientException
+  {
+    return getSystems(searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_SELECT_SUMMARY, false);
+  }
+
+  /**
+   * Get list of systems using all supported parameters: searchStr, limit, orderBy, sip, startAfter.
+   * For example search=(id.like.MySys*)~(enabled.eq.true)&limit=10&orderBy=id(asc)&startAfter=my.sys1
+   * Use only one of skip or startAfter
+   * When using startAfter orderBy must be specified.
+   */
+  public List<TapisSystem> getSystems(String searchStr, int limit, String orderBy, int skip, String startAfter,
+                                      String selectStr, boolean showDeleted)
+          throws TapisClientException
+  {
+    String selectStr1 = DEFAULT_SELECT_SUMMARY;
+    if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
+    RespSystems resp = null;
+    try { resp = sysApi.getSystems(searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr1, showDeleted); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp == null || resp.getResult() == null) return Collections.emptyList();
+    // Postprocess TapisSystems in the result
+    for (TapisSystem tSys : resp.getResult()) postProcessSystem(tSys);
+    return resp.getResult();
+  }
+
+  /**
    * Dedicated search endpoint using all supported parameters
    * Search for systems using an array of strings that represent an SQL-like WHERE clause
    * and using query parameters for sorting.
@@ -439,13 +439,13 @@ public class SystemsClient
    * When using startAfter orderBy must be specified.
    */
   public List<TapisSystem> searchSystems(ReqSearchSystems req, int limit, String orderBy, int skip, String startAfter,
-                                         String selectStr1)
+                                         String selectStr)
           throws TapisClientException
   {
-    String selectStr = DEFAULT_SELECT_SUMMARY;
-    if (StringUtils.isBlank(selectStr1)) selectStr = selectStr1;
+    String selectStr1 = DEFAULT_SELECT_SUMMARY;
+    if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
     RespSystems resp = null;
-    try { resp = sysApi.searchSystemsRequestBody(req, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr); }
+    try { resp = sysApi.searchSystemsRequestBody(req, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr1); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null || resp.getResult() == null) return Collections.emptyList();
