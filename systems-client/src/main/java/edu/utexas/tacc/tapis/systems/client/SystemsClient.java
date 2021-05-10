@@ -409,7 +409,7 @@ public class SystemsClient
   }
 
   /**
-   * Get list of systems using all supported parameters: searchStr, limit, orderBy, sip, startAfter.
+   * Get list of systems using all supported parameters: searchStr, limit, orderBy, skip, startAfter, select, showDeleted
    * For example search=(id.like.MySys*)~(enabled.eq.true)&limit=10&orderBy=id(asc)&startAfter=my.sys1
    * Use only one of skip or startAfter
    * When using startAfter orderBy must be specified.
@@ -421,7 +421,10 @@ public class SystemsClient
     String selectStr1 = DEFAULT_SELECT_SUMMARY;
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
     RespSystems resp = null;
-    try { resp = sysApi.getSystems(searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr1, showDeleted); }
+    try
+    {
+      resp = sysApi.getSystems(searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr1, showDeleted);
+    }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return Collections.emptyList();
