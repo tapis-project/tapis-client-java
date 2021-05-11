@@ -1,19 +1,30 @@
 package edu.utexas.tacc.tapis.meta.client;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.gson.Gson;
+
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
+import edu.utexas.tacc.tapis.client.shared.ITapisClient;
 import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.meta.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.meta.client.gen.ApiException;
-import edu.utexas.tacc.tapis.meta.client.gen.api.*;
-import org.apache.commons.lang3.StringUtils;
+import edu.utexas.tacc.tapis.meta.client.gen.api.AggregationApi;
+import edu.utexas.tacc.tapis.meta.client.gen.api.CollectionApi;
+import edu.utexas.tacc.tapis.meta.client.gen.api.DbApi;
+import edu.utexas.tacc.tapis.meta.client.gen.api.DocumentApi;
+import edu.utexas.tacc.tapis.meta.client.gen.api.GeneralApi;
+import edu.utexas.tacc.tapis.meta.client.gen.api.IndexApi;
+import edu.utexas.tacc.tapis.meta.client.gen.api.RootApi;
 
-import java.util.Collections;
-import java.util.List;
 
-
-public class MetaClient {
+public class MetaClient 
+ implements ITapisClient
+{
   
   // Header keys for tapis.
   public static final String TAPIS_JWT_HEADER  = "X-Tapis-Token";
@@ -91,9 +102,9 @@ public class MetaClient {
   public RootApi getRootApi() { return rootApi; }
   public DbApi getDbApi() { return dbApi; }
   
-  public void setBasePath(String path) { apiClient.setBasePath(path); }
+  public MetaClient setBasePath(String path) { apiClient.setBasePath(path); return this;}
   
-  public void addDefaultHeader(String key, String value) { apiClient.addDefaultHeader(key, value); }
+  public MetaClient addDefaultHeader(String key, String value) { apiClient.addDefaultHeader(key, value); return this;}
   
   public void setUserAgent(String userAgent) { apiClient.setUserAgent(userAgent); }
   

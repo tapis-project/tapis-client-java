@@ -2,10 +2,9 @@ package edu.utexas.tacc.tapis.jobs.client;
 
 import java.util.List;
 
-
-
 import org.apache.commons.lang3.StringUtils;
 
+import edu.utexas.tacc.tapis.client.shared.ITapisClient;
 import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.jobs.client.gen.ApiClient;
@@ -27,6 +26,7 @@ import edu.utexas.tacc.tapis.jobs.client.gen.model.RespProbe;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespSubmitJob;
 
 public class JobsClient 
+ implements ITapisClient
 {
     /* **************************************************************************** */
     /*                                   Constants                                  */

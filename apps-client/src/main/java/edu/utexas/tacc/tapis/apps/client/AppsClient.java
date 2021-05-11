@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
+import edu.utexas.tacc.tapis.client.shared.ITapisClient;
 import edu.utexas.tacc.tapis.apps.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.apps.client.gen.ApiException;
 import edu.utexas.tacc.tapis.apps.client.gen.api.PermissionsApi;
@@ -35,6 +36,7 @@ import edu.utexas.tacc.tapis.apps.client.gen.model.TapisApp;
 
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_COMPUTETOTAL;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SEARCH;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_ALL;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_SUMMARY;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP;
@@ -48,6 +50,7 @@ import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
  * openapi-generator each time a build is run.
  */
 public class AppsClient
+ implements ITapisClient
 {
   // ************************************************************************
   // *********************** Constants **************************************
@@ -120,10 +123,10 @@ public class AppsClient
   public String getBasePath() { return apiClient.getBasePath(); }
 
   // Update base path for default client.
-  public void setBasePath(String basePath) { apiClient.setBasePath(basePath); }
+  public AppsClient setBasePath(String basePath) { apiClient.setBasePath(basePath); return this;}
 
   // Add http header to default client
-  public void addDefaultHeader(String key, String val) { apiClient.addDefaultHeader(key, val); }
+  public AppsClient addDefaultHeader(String key, String val) { apiClient.addDefaultHeader(key, val); return this;}
 
   /**
    *  Close connections and stop threads that can sometimes prevent JVM shutdown.
@@ -247,6 +250,40 @@ public class AppsClient
   }
 
   /**
+   * Update deleted attribute to true.
+   *
+   * @param id App id
+   * @return number of records modified as a result of the action
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public int deleteApp(String id) throws TapisClientException
+  {
+    RespChangeCount resp = null;
+    try { resp = appApi.deleteApp(id); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
+    else return -1;
+  }
+
+  /**
+   * Update deleted to false.
+   *
+   * @param id App id
+   * @return number of records modified as a result of the action
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public int undeleteApp(String id) throws TapisClientException
+  {
+    RespChangeCount resp = null;
+    try { resp = appApi.undeleteApp(id); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
+    else return -1;
+  }
+
+  /**
    * Change app owner given the app id and new owner id.
    *
    * @param id App id
@@ -265,27 +302,28 @@ public class AppsClient
   }
 
   /**
-   * Get a specific version of an app using all supported parameters.
+   * Get latest version of an app using minimal attributes
    *
    * @param appId Id of the application
-   * @param appVersion Version of the application
-   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
-   * @param selectStr1 - Attributes to be included in result. For example select=id,version,owner
    * @return The app or null if app not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm, String selectStr1) throws TapisClientException
+  public TapisApp getApp(String appId) throws TapisClientException
   {
-    String selectStr = DEFAULT_SELECT_ALL;
-    if (StringUtils.isBlank(selectStr1)) selectStr = selectStr1;
-    RespApp resp = null;
-    try {resp = appApi.getApp(appId, appVersion, requireExecPerm, selectStr); }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null) return null;
-    // Postprocess the app
-    TapisApp app = postProcessApp(resp.getResult());
-    return app;
+    return getAppLatestVersion(appId, Boolean.FALSE, DEFAULT_SELECT_ALL);
+  }
+
+  /**
+   * Get a specific version of an app using minimal attributes
+   *
+   * @param appId Id of the application
+   * @param appVersion Version of the application
+   * @return The app or null if app not found
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public TapisApp getApp(String appId, String appVersion) throws TapisClientException
+  {
+    return getApp(appId, appVersion, Boolean.FALSE, DEFAULT_SELECT_ALL);
   }
 
   /**
@@ -303,45 +341,21 @@ public class AppsClient
   }
 
   /**
-   * Get a specific version of an app using minimal attributes
+   * Get a specific version of an app using all supported parameters.
    *
    * @param appId Id of the application
    * @param appVersion Version of the application
-   * @return The app or null if app not found
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public TapisApp getApp(String appId, String appVersion) throws TapisClientException
-  {
-    return getApp(appId, appVersion, Boolean.FALSE, DEFAULT_SELECT_ALL);
-  }
-
-  /**
-   * Get latest version of an app using minimal attributes
-   *
-   * @param appId Id of the application
-   * @return The app or null if app not found
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public TapisApp getApp(String appId) throws TapisClientException
-  {
-    return getAppLatestVersion(appId, Boolean.FALSE, DEFAULT_SELECT_ALL);
-  }
-
-  /**
-   * Get latest version of an app using all supported parameters
-   *
-   * @param appId Id of the application
    * @param requireExecPerm Check for EXECUTE permission as well as READ permission
-   * @param selectStr1 - Attributes to be included in result. For example select=id,version,owner
-   * @return Latest version of the app
+   * @param selectStr - Attributes to be included in result. For example select=id,version,owner
+   * @return The app or null if app not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public TapisApp getAppLatestVersion(String appId, Boolean requireExecPerm, String selectStr1) throws TapisClientException
+  public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm, String selectStr) throws TapisClientException
   {
-    String selectStr = DEFAULT_SELECT_ALL;
-    if (StringUtils.isBlank(selectStr1)) selectStr = selectStr1;
+    String selectStr1 = DEFAULT_SELECT_ALL;
+    if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
     RespApp resp = null;
-    try {resp = appApi.getAppLatestVersion(appId, requireExecPerm, selectStr); }
+    try {resp = appApi.getApp(appId, appVersion, requireExecPerm, selectStr1); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
@@ -351,22 +365,92 @@ public class AppsClient
   }
 
   /**
-   * Retrieve applications. Use search query parameters to limit results.
+   * Get latest version of an app using all supported parameters
+   *
+   * @param appId Id of the application
+   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
+   * @param selectStr - Attributes to be included in result. For example select=id,version,owner
+   * @return Latest version of the app
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public TapisApp getAppLatestVersion(String appId, Boolean requireExecPerm, String selectStr) throws TapisClientException
+  {
+    String selectStr1 = DEFAULT_SELECT_ALL;
+    if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
+    RespApp resp = null;
+    try {resp = appApi.getAppLatestVersion(appId, requireExecPerm, selectStr1); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp == null || resp.getResult() == null) return null;
+    // Postprocess the app
+    TapisApp app = postProcessApp(resp.getResult());
+    return app;
+  }
+
+  /**
+   * Retrieve applications.
+   * Latest version of each app is returned.
+   *
+   * @return Apps accessible to the caller
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public List<TapisApp> getApps() throws TapisClientException
+  {
+    return getApps(DEFAULT_SEARCH);
+  }
+
+  /**
+   * Retrieve applications. Use search query parameter to limit results.
    * For example search=(id.like.MyApp*)~(enabled.eq.true)
-   * TODO/TBD: By default latest version of each app is returned.
+   * By default latest version of each app is returned.
    *
    * @param searchStr Search string. Empty or null to return all apps.
    * @return Apps accessible to the caller
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<TapisApp> getApps(String searchStr, String selectStr1) throws TapisClientException
+  public List<TapisApp> getApps(String searchStr) throws TapisClientException
+  {
+    return getApps(searchStr, DEFAULT_SELECT_SUMMARY);
+  }
+
+  /**
+   * Retrieve applications. Use search and select query parameters to limit results.
+   * For example search=(id.like.MyApp*)~(enabled.eq.true)
+   * By default latest version of each app is returned.
+   *
+   * @param searchStr Search string. Empty or null to return all apps.
+   * @param selectStr - Attributes to be included in result. For example select=id,owner
+   * @return Apps accessible to the caller
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public List<TapisApp> getApps(String searchStr, String selectStr) throws TapisClientException
+  {
+    return getApps(searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, selectStr, false);
+  }
+
+  /**
+   * Get list using all supported parameters: searchStr, limit, orderBy, skip, startAfter, select, showDeleted
+   * Retrieve applications. Use search and select query parameters to limit results.
+   * For example search=(id.like.MyApp*)~(enabled.eq.true)
+   * By default latest version of each app is returned.
+   *
+   * @param searchStr Search string. Empty or null to return all apps.
+   * @param selectStr - Attributes to be included in result. For example select=id,owner
+   * @param showDeleted Indicates if Applications marked as deleted should be included.
+   * @return Apps accessible to the caller
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public List<TapisApp> getApps(String searchStr, int limit, String orderBy, int skip, String startAfter,
+                                String selectStr, boolean showDeleted) throws TapisClientException
   {
     RespApps resp = null;
-    String selectStr = DEFAULT_SELECT_SUMMARY;
-    if (StringUtils.isBlank(selectStr1)) selectStr = selectStr1;
+    String selectStr1 = DEFAULT_SELECT_SUMMARY;
+    if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
 
-    try { resp = appApi.getApps(searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
-                                DEFAULT_COMPUTETOTAL, selectStr); }
+    try
+    {
+      resp = appApi.getApps(searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr1, showDeleted);
+    }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
@@ -377,42 +461,22 @@ public class AppsClient
 
   /**
    * Get apps using search based on an array of strings representing an SQL-like WHERE clause
-   * TODO/TBD: By default latest version of each app is returned.
+   * By default latest version of each app is returned.
    *
    * @param req Request body specifying SQL-like search strings.
    * @return Apps accessible to the caller
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<TapisApp> searchApps(ReqSearchApps req, String selectStr1) throws TapisClientException
+  public List<TapisApp> searchApps(ReqSearchApps req, String selectStr) throws TapisClientException
   {
     RespApps resp = null;
-    String selectStr = DEFAULT_SELECT_SUMMARY;
-    if (StringUtils.isBlank(selectStr1)) selectStr = selectStr1;
+    String selectStr1 = DEFAULT_SELECT_SUMMARY;
+    if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
     try { resp = appApi.searchAppsRequestBody(req, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
-                                              DEFAULT_COMPUTETOTAL, selectStr); }
+                                              DEFAULT_COMPUTETOTAL, selectStr1); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
-  }
-
-  /**
-   * Delete an app given the app id.
-   * @param confirm Confirm the action
-   * Return 1 if record was deleted
-   * Return 0 if record not present
-   *
-   * @param id App id
-   * @return number of records modified as a result of the action
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public int deleteApp(String id, Boolean confirm) throws TapisClientException
-  {
-    RespChangeCount resp = null;
-    try { resp = appApi.deleteApp(id, confirm); }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
-    else return -1;
   }
 
   /**

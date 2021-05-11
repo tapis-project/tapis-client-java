@@ -90,7 +90,7 @@ public class UserTest
     for (int i = 1; i <= numApps; i++)
     {
       String appId = apps.get(i)[1];
-      try { usrClient.deleteApp(appId, true); }
+      try { usrClient.deleteApp(appId); }
       catch (Exception e)
       {
         System.out.println("Caught exception when soft deleting app: "+ appId + " Exception: " + e);
@@ -99,7 +99,7 @@ public class UserTest
     // One app may have had owner changed so use new owner.
     String appId = apps.get(16)[1];
     usrClient = getClientUsr(serviceURL, newOwnerUserJWT);
-    try { usrClient.deleteApp(appId, true); }
+    try { usrClient.deleteApp(appId); }
     catch (Exception e)
     {
       System.out.println("Caught exception when soft deleting app: "+ appId + " Exception: " + e);
@@ -326,7 +326,7 @@ public class UserTest
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Delete the app
-    usrClient.deleteApp(app0[1], true);
+    usrClient.deleteApp(app0[1]);
     try {
       usrClient.getApp(app0[1], app0[2]);
       Assert.fail("App not deleted. App name: " + app0[1]);

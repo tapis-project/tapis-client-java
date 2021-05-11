@@ -16,7 +16,7 @@
     </parent>
 
     <artifactId>tapis-client-java</artifactId>
-    <version>1.11.78-SNAPSHOT</version>
+    <version>1.11.79-SNAPSHOT</version>
 
     <name>Tapis Client</name>
     <description>Top level java client</description>
