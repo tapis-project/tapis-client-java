@@ -1,49 +1,51 @@
 package edu.utexas.tacc.tapis.systems.client;
 
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_COMPUTETOTAL;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_ORDERBY;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SEARCH;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_ALL;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_SUMMARY;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
+
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import com.google.gson.internal.LinkedTreeMap;
+
 import com.google.gson.JsonObject;
+import com.google.gson.internal.LinkedTreeMap;
 
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
+import edu.utexas.tacc.tapis.client.shared.ITapisClient;
 import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
-import edu.utexas.tacc.tapis.systems.client.gen.api.GeneralApi;
-import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespBoolean;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystems;
 import edu.utexas.tacc.tapis.systems.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.systems.client.gen.ApiException;
 import edu.utexas.tacc.tapis.systems.client.gen.api.CredentialsApi;
+import edu.utexas.tacc.tapis.systems.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.PermissionsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.SystemsApi;
+import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
+import edu.utexas.tacc.tapis.systems.client.gen.model.CategoryEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
+import edu.utexas.tacc.tapis.systems.client.gen.model.DatatypeEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqSearchSystems;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespBasic;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespBoolean;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespChangeCount;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespNameArray;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespResourceUrl;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystems;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
-import edu.utexas.tacc.tapis.systems.client.gen.model.CategoryEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.DatatypeEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
-
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SEARCH;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_ORDERBY;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_COMPUTETOTAL;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_SUMMARY;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_ALL;
 
 /**
  * Class providing a convenient front-end to the automatically generated client code
@@ -52,6 +54,7 @@ import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_ALL;
  * openapi-generator each time a build is run.
  */
 public class SystemsClient
+ implements ITapisClient
 {
   // ************************************************************************
   // *********************** Constants **************************************
@@ -125,10 +128,10 @@ public class SystemsClient
   public String getBasePath() { return apiClient.getBasePath(); }
 
   // Update base path for default client.
-  public void setBasePath(String basePath) { apiClient.setBasePath(basePath); }
+  public SystemsClient setBasePath(String basePath) { apiClient.setBasePath(basePath); return this;}
 
   // Add http header to default client
-  public void addDefaultHeader(String key, String val) { apiClient.addDefaultHeader(key, val); }
+  public SystemsClient addDefaultHeader(String key, String val) { apiClient.addDefaultHeader(key, val); return this;}
 
   /**
    *  Close connections and stop threads that can sometimes prevent JVM shutdown.

@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
+import edu.utexas.tacc.tapis.client.shared.ITapisClient;
 import edu.utexas.tacc.tapis.apps.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.apps.client.gen.ApiException;
 import edu.utexas.tacc.tapis.apps.client.gen.api.PermissionsApi;
@@ -49,6 +50,7 @@ import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
  * openapi-generator each time a build is run.
  */
 public class AppsClient
+ implements ITapisClient
 {
   // ************************************************************************
   // *********************** Constants **************************************
@@ -121,10 +123,10 @@ public class AppsClient
   public String getBasePath() { return apiClient.getBasePath(); }
 
   // Update base path for default client.
-  public void setBasePath(String basePath) { apiClient.setBasePath(basePath); }
+  public AppsClient setBasePath(String basePath) { apiClient.setBasePath(basePath); return this;}
 
   // Add http header to default client
-  public void addDefaultHeader(String key, String val) { apiClient.addDefaultHeader(key, val); }
+  public AppsClient addDefaultHeader(String key, String val) { apiClient.addDefaultHeader(key, val); return this;}
 
   /**
    *  Close connections and stop threads that can sometimes prevent JVM shutdown.
