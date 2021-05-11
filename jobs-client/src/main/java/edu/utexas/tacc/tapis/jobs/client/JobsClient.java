@@ -12,6 +12,7 @@ import edu.utexas.tacc.tapis.jobs.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.jobs.client.gen.ApiException;
 import edu.utexas.tacc.tapis.jobs.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.jobs.client.gen.api.JobsApi;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.FileInfo;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.Job;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobListDTO;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobStatusDisplay;
@@ -19,6 +20,7 @@ import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqSubmitJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespBasic;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJobList;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJobOutputList;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJobStatus;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespJobSearchAllAttributes;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespProbe;
@@ -310,6 +312,24 @@ public class JobsClient
             // Get the API object using default networking.
             var jobsApi = new JobsApi(_apiClient);
             resp = jobsApi.getJobSearchList(limit, skip, startAfter, orderBy, computeTotal,  select, false);
+        }
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+        
+        return resp == null ? null : resp.getResult();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* getJobOutputList:                                                            */
+    /* ---------------------------------------------------------------------------- */
+    public List<FileInfo> getJobOutputList(String jobUuid, String path, int limit, int skip)
+     throws TapisClientException
+    {
+    	RespGetJobOutputList resp = null;
+        try {
+            // Get the API object using default networking.
+            var jobsApi = new JobsApi(_apiClient);
+            resp = jobsApi.getJobOutputList(jobUuid, path, limit, skip,false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
