@@ -869,6 +869,117 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+  /security/role/removePermFromAllRoles:
+    post:
+      tags:
+        - role
+      description: |-
+        Remove a permission from all roles in a tenant using a request body.  The tenant and permission must be specified in the request body.
+
+        Each role in the tenant is searched for the *exact* permission string and, where found, that permission is removed.  The matching algorithm is simple, character by character, string comparison.
+
+        Permissions are not interpreted.  For example, a permission that contains a wildcard (*) will only match a role's permission when the same wildcard is found in the exact same position.  The same rule applies to permission segments with multiple, comma separated components: a match requires the exact same ordering and spacing of components.
+
+        Only services are authorized to make this call.
+      operationId: removePermissionFromAllRoles
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqRemovePermissionFromAllRoles'
+        required: true
+      responses:
+        '200':
+          description: Permission removed from roles.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  /security/role/removePathPermFromAllRoles:
+    post:
+      tags:
+        - role
+      description: |-
+        Remove an extended permission from all roles in a tenant using a request body.  The tenant and permission must be specified in the request body.
+
+        Each role in the tenant is searched for the extended permission string and, where found, that permission is removed.  The matching algorithm is string comparison with wildcard semantics on the path component.  This is the same as an exact string match for all parts of the permission specification up to the path part.  A match on the path part, however, occurs when its path is a prefix of a role permission's path.  Consider the following permission specification:
+
+            files:mytenant:read:mysystem:/my/dir
+
+        which will match both of the following role permissions:
+
+            files:mytenant:read:mysystem:/my/dir/subdir/myfile
+            files:mytenant:read:mysystem:/my/dir33/yourfile
+
+        Note that a match to the second role permission might be a *false capture* if the intension was to remove all permissions to resources in the /my/dir subtree, but not those in other directories.  To avoid this potential problem, callers can make two calls, one to this endpoint with a permSpec that ends with a slash ("/") and one to the removePermissionFromeAllRoles endpoint with no trailing slash.  The former removes all children from the directory subtree, the latter removes the directory itself.
+
+        Only the Files service is authorized to make this call.
+      operationId: removePathPermissionFromAllRoles
+      parameters:
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqRemovePermissionFromAllRoles'
+        required: true
+      responses:
+        '200':
+          description: Path permission removed from roles.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespChangeCount'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   /security/ready:
     get:
       tags:
@@ -976,6 +1087,51 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
       security:
         - TapisJWT: []
+  '/security/user/defaultRole/{user}':
+    get:
+      tags:
+        - user
+      description: |-
+        Get a user's default role. The default role is implicitly created by the system when needed if it doesn't already exist. No authorization required.
+
+        A user's default role is constructed by prepending '$$' to the user's name.  This implies the maximum length of a user name is 58 since role names are limited to 60 characters.
+      operationId: getDefaultUserRole_1
+      parameters:
+        - name: user
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: The user's default role name.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
   /security/user:
     get:
       tags:
@@ -1975,51 +2131,6 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
       security:
         - TapisJWT: []
-  '/security/user/defaultRole/{user}':
-    get:
-      tags:
-        - user
-      description: |-
-        Get a user's default role. The default role is implicitly created by the system when needed if it doesn't already exist. No authorization required.
-
-        A user's default role is constructed by prepending '$$' to the user's name.  This implies the maximum length of a user name is 58 since role names are limited to 60 characters.
-      operationId: getDefaultUserRole_1
-      parameters:
-        - name: user
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
-      responses:
-        '200':
-          description: The user's default role name.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespName'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
   '/security/vault/secret/{secretType}/{secretName}':
     get:
       tags:
@@ -2192,6 +2303,25 @@ paths:
         - jwtsigning: limited to the tokens service
         - user: any user
         - service: any service
+        ### Generating Secrets
+        Passwords and public/private key pairs appropriate for Tapis use can be generated as part of this secret write call.  To direct SK to create a secret, assign the special value *<generate-secret>* to a key.  When SK detects this value, it generates a password or key pair depending on context, and replaces the *<generate-secret>* text with the generated secret.  In the case of a key pair, both the public and private keys are saved.
+
+        Key pairs are always generated for secrets of type JWTSigning, while passwords are generated for all other secret types unless the key is named *privateKey*.
+
+        To generate a key pair, insert the following key/value pair into the payload's data map:
+
+            key="privateKey", value="<generate-secret>"
+
+        When the key pair is generated, the above key/value item is replaced by these two key/value pairs:
+
+            key="privateKey", value=<private key in pem format>
+            key="publicKey",  value=<public key in pem format>
+
+        In non-JWTSigning secret types, passwords are generated whenever the following key/value pair is encountered in the payload's data map:
+
+            key=<name other than privateKey>, value="<generate-secret>"
+
+        The generated password simply replaces the item's value and the key name is left unchanged.
       operationId: writeSecret
       parameters:
         - name: secretType
@@ -3341,6 +3471,13 @@ components:
         oldPrefix:
           type: string
         newPrefix:
+          type: string
+    ReqRemovePermissionFromAllRoles:
+      type: object
+      properties:
+        tenant:
+          type: string
+        permSpec:
           type: string
     RespProbe:
       type: object
