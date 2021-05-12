@@ -2306,7 +2306,7 @@ paths:
         - service: any service
 
         ### Generating Secrets
-        Passwords and public/private key pairs appropriate for Tapis use can be generated as part of this secret write call.  To direct SK to create a secret, assign the special value "<generate-secret>" to a key.  When SK detects this value, it generates a password or key pair depending on context, and replaces the "<generate-secret>" text with the generated secret.  In the case of a key pair, both the public and private keys are saved.
+        Passwords and public/private key pairs appropriate for Tapis use can be generated as part of this secret write call.  To direct SK to create a secret, assign the special value `<generate-secret>` to a key.  When SK detects this value, it generates a password or key pair depending on context, and replaces the `<generate-secret>` text with the generated secret.  In the case of a key pair, both the public and private keys are saved.
 
         Key pairs are always generated for secrets of type JWTSigning, while passwords are generated for all other secret types unless the key is named *privateKey*.
 
