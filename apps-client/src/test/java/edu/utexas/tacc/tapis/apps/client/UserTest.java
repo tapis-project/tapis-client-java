@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gson.JsonObject;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqUpdateApp;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
@@ -374,6 +373,143 @@ public class UserTest
       Assert.fail();
     }
   }
+
+  // Test various cases when app is missing
+  //  - get app, isEnabled, enable/disable, delete/undelete, changeOwner
+  //  - get perms, grant perms, revoke perms
+  @Test
+  public void testMissingApp() throws Exception
+  {
+    String fakeAppName = "AMissingAppName";
+    String fakeUserName = "AMissingUserName";
+
+    boolean pass = false;
+
+    // Get App
+    try {
+      usrClient.getApp(fakeAppName);
+      Assert.fail("Missing App did not throw exception. App name: " + fakeAppName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // isEnabled
+    pass = false;
+    try {
+      usrClient.isEnabled(fakeAppName);
+      Assert.fail("Missing App did not throw exception. App name: " + fakeAppName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Enable App
+    pass = false;
+    try {
+      usrClient.enableApp(fakeAppName);
+      Assert.fail("Missing App did not throw exception. App name: " + fakeAppName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Disable App
+    pass = false;
+    try {
+      usrClient.disableApp(fakeAppName);
+      Assert.fail("Missing App did not throw exception. App name: " + fakeAppName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Delete App
+    pass = false;
+    try {
+      usrClient.deleteApp(fakeAppName);
+      Assert.fail("Missing App did not throw exception. App name: " + fakeAppName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Undelete App
+    pass = false;
+    try {
+      usrClient.undeleteApp(fakeAppName);
+      Assert.fail("Missing App did not throw exception. App name: " + fakeAppName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Change Owner
+    pass = false;
+    try {
+      usrClient.changeAppOwner(fakeAppName, newOwnerUser);
+      Assert.fail("Missing App did not throw exception. App name: " + fakeAppName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Get Perms
+    pass = false;
+    try {
+      usrClient.getAppPermissions(fakeAppName, testUser1);
+      Assert.fail("Missing App did not throw exception. App name: " + fakeAppName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Grant Perms
+    pass = false;
+    try {
+      usrClient.grantUserPermissions(fakeAppName, fakeUserName, testPerms);
+      Assert.fail("Missing App did not throw exception. App name: " + fakeAppName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Revoke Perms
+    pass = false;
+    try {
+      usrClient.revokeUserPermissions(fakeAppName, fakeUserName, testPerms);
+      Assert.fail("Missing App did not throw exception. App name: " + fakeAppName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Revoke Perm
+    pass = false;
+    try {
+      usrClient.revokeUserPermission(fakeAppName, fakeUserName, testREADPerm.get(0));
+      Assert.fail("Missing App did not throw exception. App name: " + fakeAppName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+  }
+
+
+  // =====================================================================
+  // =========  Private methods ==========================================
+  // =====================================================================
 
   private static ReqUpdateApp createPatchApp(String[] app)
   {
