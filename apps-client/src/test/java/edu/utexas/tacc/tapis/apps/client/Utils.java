@@ -110,11 +110,11 @@ public final class Utils
   public static final String containerImage = "containerImage";
   public static final boolean dynamicExecSystemTrue = true;
   public static final List<String> execSystemConstraints = Arrays.asList("Constraint1 AND", "Constraint2");
-  public static final String execSystemId = "tapisv3-exec";
+  public static final String execSystemId = "tapisv3-exec3";
   public static final String execSystemExecDir = "execSystemExecDir";
   public static final String execSystemInputDir = "execSystemInputDir";
   public static final String execSystemOutputDir = "execSystemOutputDir";
-  public static final String execSystemLogicalQueue = "execSystemLogicalQueue";
+  public static final String execSystemLogicalQueue = "dsnormal";
   public static final String archiveSystemId = "tapisv3-storage";
   public static final String archiveSystemIdNull = null;
   public static final String archiveSystemDir = "archiveSystemDir";
@@ -125,10 +125,10 @@ public final class Utils
   public static final int maxJobsPerUser = 1;
   public static final int maxJobsPerUserMAX = Integer.MAX_VALUE;
   public static final boolean strictFileInputsFalse = false;
-  public static final int nodeCount = 1;
-  public static final int coresPerNode = 1;
-  public static final int memoryMb = 1;
-  public static final int maxMinutes = 1;
+  public static final int nodeCount = 10;
+  public static final int coresPerNode = 10;
+  public static final int memoryMb = 32;
+  public static final int maxMinutes = 10;
   public static final boolean metaRequiredTrue = true;
   public static final boolean metaRequiredFalse = false;
   public static final boolean deletedFalse = false;
@@ -221,7 +221,7 @@ public final class Utils
       String[] app0 = {tenantName, appId, appVersion, "description "+suffix, appTypeBatch.name(), ownerUser1,
                        runtime.name(), runtimeVersion+suffix, containerImage+suffix, jobDescription+suffix,
                        execSystemId, execSystemExecDir+suffix, execSystemInputDir+suffix, execSystemOutputDir+suffix,
-                       execSystemLogicalQueue+suffix, archiveSystemId, archiveSystemDir+suffix};
+                       execSystemLogicalQueue, archiveSystemId, archiveSystemDir+suffix};
       apps.put(i, app0);
     }
     return apps;
