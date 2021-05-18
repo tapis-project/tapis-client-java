@@ -302,18 +302,24 @@ public class UserTest
   @Test
   public void testEnableDisable() throws Exception {
     String[] app0 = apps.get(17);
+    String appId = app0[1];
+    String appVer = app0[2];
     String respUrl = Utils.createApp(usrClient, app0);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     // Enabled should start off true, then become false and finally true again.
-    TapisApp tmpApp = usrClient.getApp(app0[1], app0[2]);
+    TapisApp tmpApp = usrClient.getApp(appId, appVer);
     Assert.assertTrue(tmpApp.getEnabled());
-    int changeCount = usrClient.disableApp(tmpApp.getId());
-    tmpApp = usrClient.getApp(app0[1], app0[2]);
-    Assert.assertFalse(tmpApp.getEnabled());
-    changeCount = usrClient.enableApp(tmpApp.getId());
-    tmpApp = usrClient.getApp(app0[1], app0[2]);
-    Assert.assertTrue(tmpApp.getEnabled());
+    Assert.assertTrue(usrClient.isEnabled(appId));
 
+    int changeCount = usrClient.disableApp(appId);
+    tmpApp = usrClient.getApp(appId, appVer);
+    Assert.assertFalse(tmpApp.getEnabled());
+    Assert.assertFalse(usrClient.isEnabled(appId));
+
+    changeCount = usrClient.enableApp(appId);
+    tmpApp = usrClient.getApp(appId, appVer);
+    Assert.assertTrue(tmpApp.getEnabled());
+    Assert.assertTrue(usrClient.isEnabled(appId));
   }
 
   @Test

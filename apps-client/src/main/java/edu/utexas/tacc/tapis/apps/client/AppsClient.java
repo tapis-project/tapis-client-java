@@ -494,7 +494,7 @@ public class AppsClient
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null)
     {
-      return resp.getResult();
+      return resp.getResult().getaBool();
     }
     else
     {
