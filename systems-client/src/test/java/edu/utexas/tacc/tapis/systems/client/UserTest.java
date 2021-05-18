@@ -3,6 +3,7 @@ package edu.utexas.tacc.tapis.systems.client;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
@@ -558,6 +559,144 @@ public class UserTest
       Assert.fail();
     }
   }
+
+  // Test various cases when system is missing
+  //  - get system, isEnabled, enable/disable, delete/undelete, changeOwner
+  //  - get perms, grant perms, revoke perms
+  // NOTE: Credential calls are not checked because they are not allowed for users
+  @Test
+  public void testMissingSystem() throws Exception
+  {
+    String fakeSystemName = "AMissingSystemName";
+    String fakeUserName = "AMissingUserName";
+
+    boolean pass = false;
+
+    // Get system
+    try {
+      usrClient.getSystem(fakeSystemName);
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // isEnabled
+    pass = false;
+    try {
+      usrClient.isEnabled(fakeSystemName);
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Enable system
+    pass = false;
+    try {
+      usrClient.enableSystem(fakeSystemName);
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Disable system
+    pass = false;
+    try {
+      usrClient.disableSystem(fakeSystemName);
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Delete system
+    pass = false;
+    try {
+      usrClient.deleteSystem(fakeSystemName);
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Undelete system
+    pass = false;
+    try {
+      usrClient.undeleteSystem(fakeSystemName);
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Change Owner
+    pass = false;
+    try {
+      usrClient.changeSystemOwner(fakeSystemName, newOwnerUser);
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Get Perms
+    pass = false;
+    try {
+      usrClient.getSystemPermissions(fakeSystemName, testUser1);
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Grant Perms
+    pass = false;
+    try {
+      usrClient.grantUserPermissions(fakeSystemName, fakeUserName, testPerms);
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Revoke Perms
+    pass = false;
+    try {
+      usrClient.revokeUserPermissions(fakeSystemName, fakeUserName, testPerms);
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Revoke Perm
+    pass = false;
+    try {
+      usrClient.revokeUserPermission(fakeSystemName, fakeUserName, testREADPerm.get(0));
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+  }
+
+
+  // =====================================================================
+  // =========  Private methods ==========================================
+  // =====================================================================
 
   private static ReqUpdateSystem createPatchSystem(String[] sys)
   {
