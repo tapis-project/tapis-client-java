@@ -487,18 +487,25 @@ public class UserTest
   public void testEnableDisable() throws Exception
   {
     String[] sys0 = systems.get(14);
+    String sysId = sys0[1];
     String respUrl =
             usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull));
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     // Enabled should start off true, then become false and finally true again.
-    TapisSystem tmpSys = usrClient.getSystem(sys0[1]);
+    TapisSystem tmpSys = usrClient.getSystem(sysId);
+    Assert.assertNotNull(tmpSys);
     Assert.assertTrue(tmpSys.getEnabled());
-    int changeCount = usrClient.disableSystem(tmpSys.getId());
-    tmpSys = usrClient.getSystem(sys0[1]);
+    Assert.assertTrue(usrClient.isEnabled(sysId));
+
+    int changeCount = usrClient.disableSystem(sysId);
+    tmpSys = usrClient.getSystem(sysId);
     Assert.assertFalse(tmpSys.getEnabled());
-    changeCount = usrClient.enableSystem(tmpSys.getId());
-    tmpSys = usrClient.getSystem(sys0[1]);
+    Assert.assertFalse(usrClient.isEnabled(sysId));
+
+    changeCount = usrClient.enableSystem(sysId);
+    tmpSys = usrClient.getSystem(sysId  );
     Assert.assertTrue(tmpSys.getEnabled());
+    Assert.assertTrue(usrClient.isEnabled(sysId));
   }
 
   @Test
