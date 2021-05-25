@@ -117,15 +117,16 @@ public class ITestFilesClient {
         client.insert(systemId, "test-directory-e2e/e2e-test-file3.txt", FileUtils.openInputStream(initialFile));
         client.insert(systemId, "test-directory-e2e/dir1/e2e-test-file3.txt", FileUtils.openInputStream(initialFile));
 
-        InputStream zip = client.getZip(systemId, "/test-directory-e2e");
-        Assert.assertNotNull(zip);
-        ZipInputStream zis = new ZipInputStream(zip);
+        FilesClient.StreamedFile zippedFile = client.getZip(systemId, "/test-directory-e2e");
+        Assert.assertNotNull(zippedFile);
+        ZipInputStream zis = new ZipInputStream(zippedFile.getInputStream());
         ZipEntry ze;
         int count=0;
         while ((ze = zis.getNextEntry()) != null) {
             System.out.println(ze.toString());
             count++;
         }
+        Assert.assertEquals(zippedFile.getName(), "test-directory-e2e.zip");
         Assert.assertEquals(count, 4);
     }
 

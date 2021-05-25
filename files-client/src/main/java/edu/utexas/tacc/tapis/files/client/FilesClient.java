@@ -237,18 +237,23 @@ public class FilesClient
    * @return transfer task
    * @throws TapisClientException - If api call throws an exception
    */
-  public InputStream getFileContents(String systemId, String path, HeaderByteRange range, boolean zip, long more)
+  public StreamedFile getFileContents(String systemId, String path, HeaderByteRange range, boolean zip, long more)
           throws TapisClientException
   {
       InputStream stream = null;
-      try {
+    String filename = null;
+
+    try {
         Call call = fileContents.getContentsCall(systemId, path, range, zip, more, null);
         Response response =  call.execute();
         stream = response.body().byteStream();
+        String contentDisposition = response.header("content-disposition");
+        String[] split = contentDisposition.split("filename=");
+        filename = split[1];
       }
       catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
       catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-      return stream;
+      return new StreamedFile(stream, filename);
   }
 
   /**
@@ -259,18 +264,23 @@ public class FilesClient
    * @return transfer task
    * @throws TapisClientException - If api call throws an exception
    */
-  public InputStream getZip(String systemId, String path)
+  public StreamedFile getZip(String systemId, String path)
       throws TapisClientException
   {
     InputStream zipStream = null;
+    String filename = null;
     try {
       Call call = fileContents.getContentsCall(systemId, path, null, true, null, null);
       Response response =  call.execute();
+      String contentDisposition = response.header("content-disposition");
+      //"attachment; filename=%s"
+      String[] split = contentDisposition.split("filename=");
+      filename = split[1];
       zipStream = response.body().byteStream();
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    return zipStream;
+    return new StreamedFile(zipStream, filename);
   }
 
 
@@ -543,6 +553,32 @@ public class FilesClient
 
     public HealthApi health() {
         return fileHealth;
+    }
+
+    public class StreamedFile {
+      private InputStream inputStream;
+      private String name;
+
+      public StreamedFile(InputStream is, String name) {
+        this.inputStream = is;
+        this.name = name;
+      }
+
+      public String getName() {
+        return name;
+      }
+
+      public void setName(String name) {
+        this.name = name;
+      }
+
+      public InputStream getInputStream() {
+        return inputStream;
+      }
+
+      public void setInputStream(InputStream inputStream) {
+        this.inputStream = inputStream;
+      }
     }
 
 
