@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ import okhttp3.Call;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -237,19 +239,20 @@ public class FilesClient
    * @return transfer task
    * @throws TapisClientException - If api call throws an exception
    */
-  public StreamedFile getFileContents(String systemId, String path, HeaderByteRange range, boolean zip, long more)
+  public StreamedFile getFileContents(String systemId, String path, boolean zip)
           throws TapisClientException
   {
       InputStream stream = null;
-    String filename = null;
+      String filename = FilenameUtils.getName(path);
 
-    try {
-        Call call = fileContents.getContentsCall(systemId, path, range, zip, more, null);
-        Response response =  call.execute();
-        stream = response.body().byteStream();
-        String contentDisposition = response.header("content-disposition");
-        String[] split = contentDisposition.split("filename=");
-        filename = split[1];
+      try {
+          Call call = fileContents.getContentsCall(systemId, path, null, zip, null, null);
+          Response response =  call.execute();
+          stream = response.body().byteStream();
+
+          if (zip) {
+            filename = FilenameUtils.removeExtension(filename) + ".zip";
+          }
       }
       catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
       catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -268,14 +271,11 @@ public class FilesClient
       throws TapisClientException
   {
     InputStream zipStream = null;
-    String filename = null;
+    String filename = FilenameUtils.getName(path);
     try {
       Call call = fileContents.getContentsCall(systemId, path, null, true, null, null);
       Response response =  call.execute();
-      String contentDisposition = response.header("content-disposition");
-      //"attachment; filename=%s"
-      String[] split = contentDisposition.split("filename=");
-      filename = split[1];
+      filename = FilenameUtils.removeExtension(path) + ".zip";
       zipStream = response.body().byteStream();
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
@@ -555,7 +555,7 @@ public class FilesClient
         return fileHealth;
     }
 
-    public class StreamedFile {
+    public static class StreamedFile {
       private InputStream inputStream;
       private String name;
 
