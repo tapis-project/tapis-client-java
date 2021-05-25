@@ -19,7 +19,10 @@ import org.testng.annotations.Test;
 
 import java.io.DataInputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 @Test(groups = {"e2e"})
 public class ITestFilesClient {
@@ -102,6 +105,28 @@ public class ITestFilesClient {
         client.insert(systemId, "test-directory-e2e/e2e-test-file.txt", FileUtils.openInputStream(initialFile));
         FilePermission perms = client.getFilePermissions(systemId, "/test-directory-e2e", null);
         Assert.assertNotNull(perms);
+    }
+
+    public void testZipper() throws Exception {
+        AuthClient authClient = new AuthClient(basepath);
+        String jwt = authClient.getToken(username, password);
+        FilesClient client = new FilesClient(basepath, jwt);
+        final File initialFile = new File("src/test/resources/e2etestfile.txt");
+        client.insert(systemId, "test-directory-e2e/e2e-test-file.txt", FileUtils.openInputStream(initialFile));
+        client.insert(systemId, "test-directory-e2e/e2e-test-file2.txt", FileUtils.openInputStream(initialFile));
+        client.insert(systemId, "test-directory-e2e/e2e-test-file3.txt", FileUtils.openInputStream(initialFile));
+        client.insert(systemId, "test-directory-e2e/dir1/e2e-test-file3.txt", FileUtils.openInputStream(initialFile));
+
+        InputStream zip = client.getZip(systemId, "/test-directory-e2e");
+        Assert.assertNotNull(zip);
+        ZipInputStream zis = new ZipInputStream(zip);
+        ZipEntry ze;
+        int count=0;
+        while ((ze = zis.getNextEntry()) != null) {
+            System.out.println(ze.toString());
+            count++;
+        }
+        Assert.assertEquals(count, 4);
     }
 
 
