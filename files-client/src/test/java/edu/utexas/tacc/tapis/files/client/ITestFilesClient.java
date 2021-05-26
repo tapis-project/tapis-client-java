@@ -112,10 +112,11 @@ public class ITestFilesClient {
         String jwt = authClient.getToken(username, password);
         FilesClient client = new FilesClient(basepath, jwt);
         final File initialFile = new File("src/test/resources/e2etestfile.txt");
+        client.delete(systemId, "/test-directory-e2e/");
         client.insert(systemId, "test-directory-e2e/e2e-test-file.txt", FileUtils.openInputStream(initialFile));
         client.insert(systemId, "test-directory-e2e/e2e-test-file2.txt", FileUtils.openInputStream(initialFile));
         client.insert(systemId, "test-directory-e2e/e2e-test-file3.txt", FileUtils.openInputStream(initialFile));
-        client.insert(systemId, "test-directory-e2e/dir1/e2e-test-file3.txt", FileUtils.openInputStream(initialFile));
+        client.insert(systemId, "test-directory-e2e/dir1/e2e-test-file4.txt", FileUtils.openInputStream(initialFile));
 
         FilesClient.StreamedFile zippedFile = client.getZip(systemId, "/test-directory-e2e/");
         Assert.assertNotNull(zippedFile);
@@ -137,7 +138,7 @@ public class ITestFilesClient {
         final File initialFile = new File("src/test/resources/e2etestfile.txt");
         client.insert(systemId, "test-directory-e2e/e2e-test-file.txt", FileUtils.openInputStream(initialFile));
 
-        FilesClient.StreamedFile streamedFile = client.getFileContents(systemId, "/test-directory-e2e/e2e-test-file.txt", false);
+        FilesClient.StreamedFile streamedFile = client.getFileContents(systemId, "/test-directory-e2e", true);
         Assert.assertNotNull(streamedFile);
         Assert.assertEquals(streamedFile.getName(), "e2e-test-file.txt");
     }

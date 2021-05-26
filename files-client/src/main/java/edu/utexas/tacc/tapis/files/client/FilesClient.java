@@ -233,15 +233,15 @@ public class FilesClient
    *
    * @param systemId system
    * @param path path relative to system rootDir
-   * @param range Range of bytes to send
    * @param zip Flag indicating if contents of a folder should be zipped
-   * @param more Send 1k of UTF-8 encoded string back starting at 'page' 1, e.g. more=1
    * @return transfer task
    * @throws TapisClientException - If api call throws an exception
    */
   public StreamedFile getFileContents(String systemId, String path, boolean zip)
           throws TapisClientException
   {
+
+      // TODO: Fix name
       InputStream stream = null;
       String filename = FilenameUtils.getName(path);
 
@@ -271,11 +271,12 @@ public class FilesClient
       throws TapisClientException
   {
     InputStream zipStream = null;
-    String filename = FilenameUtils.getName(path);
+    String filename = FilenameUtils.getName(StringUtils.stripEnd(path, "/"));
+
     try {
       Call call = fileContents.getContentsCall(systemId, path, null, true, null, null);
       Response response =  call.execute();
-      filename = FilenameUtils.removeExtension(path) + ".zip";
+      filename = FilenameUtils.removeExtension(filename) + ".zip";
       zipStream = response.body().byteStream();
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
