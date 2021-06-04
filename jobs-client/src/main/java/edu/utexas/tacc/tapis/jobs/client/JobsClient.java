@@ -1,5 +1,8 @@
 package edu.utexas.tacc.tapis.jobs.client;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +27,8 @@ import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJobStatus;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespJobSearchAllAttributes;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespProbe;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespSubmitJob;
+import okhttp3.Call;
+import okhttp3.Response;
 
 public class JobsClient 
  implements ITapisClient
@@ -335,6 +340,26 @@ public class JobsClient
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
         return resp == null ? null : resp.getResult();
+    }
+    /* ---------------------------------------------------------------------------- */
+    /* getJobOutputDownload:                                                        */
+    /* ---------------------------------------------------------------------------- */
+    public InputStream getJobOutputDownload(String jobUuid, String path, boolean compress, String format) throws TapisClientException, IOException {
+		
+    	       
+    	InputStream stream = null;
+       
+        	// Get the API object using default networking.
+            var jobsApi = new JobsApi(_apiClient);
+             try {
+				Call outputFile = jobsApi.getJobOutputDownloadCall(jobUuid, path, compress, format, false,null);
+						Response response =  outputFile.execute();
+		          stream = response.body().byteStream();
+             } catch (ApiException e) {
+				Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);
+			}
+           return stream;
+       
     }
     
     /* **************************************************************************** */

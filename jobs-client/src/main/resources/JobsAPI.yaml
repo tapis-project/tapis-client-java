@@ -217,6 +217,87 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
       security:
         - TapisJWT: []
+  '/jobs/{jobUuid}/output/download/{outputPath}':
+    get:
+      tags:
+        - jobs
+      description: >-
+        Download job's output files for previously submitted job by its UUID.
+        The job must be in a terminal state - FINISHED or FAILED.  
+
+
+        The caller must be the job owner, creator or a tenant administrator.
+
+        / must be appended after download end-point even if there is no
+        outputPath is specified 
+      operationId: getJobOutputDownload
+      parameters:
+        - name: jobUuid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: outputPath
+          in: path
+          required: true
+          schema:
+            type: string
+            default: ''
+        - name: compress
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: format
+          in: query
+          schema:
+            type: string
+            default: zip
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Job's output files downloaded.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Input error.
+          content:
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Job not found.
+          content:
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '500':
+          description: Server error.
+          content:
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   '/jobs/{jobUuid}/output/list/{outputPath}':
     get:
       tags:
