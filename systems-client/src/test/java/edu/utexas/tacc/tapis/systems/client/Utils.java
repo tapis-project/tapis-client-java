@@ -88,6 +88,7 @@ public final class Utils
   public static final String defaultDescription = null;
   public static final String defaultRootDir = null;
   public static final String defaultBucketName = null;
+  public static final List<JobRuntime> defaultJobRuntimes = null;
   public static final String defaultJobWorkingDir = null;
   public static final String defaultBatchScheduler = SchedulerTypeEnum.SLURM.toString();
   public static final String defaultBatchDefaultLogicalQueue = null;
@@ -97,7 +98,7 @@ public final class Utils
   public static final int defaultPort = -1;
   public static final boolean defaultUseProxy = false;
   public static final int defaultProxyPort = -1;
-  public static final String defaultProxyHost = "";
+  public static final String defaultProxyHost = null;
   public static final boolean defaultJobIsBatch = false;
   public static final int defaultJobMaxJobs = -1;
   public static final int defaultJobMaxJobsPerUser = -1;
@@ -281,6 +282,7 @@ public final class Utils
 
   /*
    * Make client call to create a system using minimal attributes for the system.
+   *  Use attributes from:
    *  String[] sys0 = 0=tenantName, 1=name, 2=description, 3=sysType, 4=ownerUser1, 5=host, 6=effUser, 7=password,
    *                  8=bucketName, 9=rootDir, 10=jobWorkingDir, 11=batchScheduler, 12=batchDefaultLogicalQueue
    */
@@ -292,13 +294,37 @@ public final class Utils
     rSys.setSystemType(SystemTypeEnum.valueOf(sys[3]));
     rSys.setHost(sys[5]);
     rSys.defaultAuthnMethod(AuthnEnum.valueOf(prot1AuthnMethod.name()));
-    rSys.canExec(canExecTrue);
-    rSys.setJobWorkingDir(sys[10]);
-    rSys.setJobRuntimes(jobRuntimes1);
+    rSys.canExec(canExecFalse);
     // If systemType is LINUX then rootDir is required
     if (sys[3].equals(SystemTypeEnum.LINUX.name())) rSys.rootDir(sys[9]);
     // If systemType is S3 then bucketName is required
     if (sys[3].equals(SystemTypeEnum.S3.name())) rSys.bucketName(sys[8]);
+    return clt.createSystem(rSys);
+  }
+
+  /*
+   * Make client call to create a system using minimal attributes for the system.
+   * Use attributes from sys
+   */
+  public static String createSystemMinimal2(SystemsClient clt, TapisSystem sys)
+          throws TapisClientException
+  {
+    ReqCreateSystem rSys = new ReqCreateSystem();
+    rSys.setId(sys.getId());
+    rSys.setSystemType(sys.getSystemType());
+    rSys.setHost(sys.getHost());
+    rSys.defaultAuthnMethod(sys.getDefaultAuthnMethod());
+    rSys.canExec(sys.getCanExec());
+    // If canExec is true then jobRuntimes must have an entry and jobWorkingDir must be set
+    if (Boolean.TRUE == sys.getCanExec())
+    {
+      rSys.setJobRuntimes(sys.getJobRuntimes());
+      rSys.setJobWorkingDir(sys.getJobWorkingDir());
+    }
+    // If systemType is LINUX then rootDir is required
+    if (sys.getSystemType() == SystemTypeEnum.LINUX) rSys.rootDir(sys.getRootDir());
+    // If systemType is S3 then bucketName is required
+    if (sys.getSystemType() == SystemTypeEnum.S3) rSys.bucketName(sys.getBucketName());
     return clt.createSystem(rSys);
   }
 
@@ -425,16 +451,16 @@ public final class Utils
    * @param tmpSys - system retrieved from the service
    * @param sys0 - Data used to create the system
    */
-  public static void verifySystemDefaults(TapisSystem tmpSys, String[] sys0)
+  public static void verifySystemDefaults(TapisSystem tmpSys, String[] sys0, String sysId)
   {
     // Verify required attributes
-    Assert.assertEquals(tmpSys.getId(), sys0[1]);
+    Assert.assertEquals(tmpSys.getId(), sysId);
     Assert.assertNotNull(tmpSys.getSystemType());
     Assert.assertEquals(tmpSys.getSystemType().name(), sys0[3]);
     Assert.assertEquals(tmpSys.getHost(), sys0[5]);
     Assert.assertNotNull(tmpSys.getDefaultAuthnMethod());
     Assert.assertEquals(tmpSys.getDefaultAuthnMethod().name(), prot1AuthnMethod.name());
-    Assert.assertEquals(tmpSys.getCanExec(), Boolean.valueOf(canExecTrue));
+    Assert.assertEquals(tmpSys.getCanExec(), Boolean.valueOf(canExecFalse));
 
     SchedulerTypeEnum schedulerType = (tmpSys.getBatchScheduler() == null) ? null : SchedulerTypeEnum.valueOf(defaultBatchScheduler);
     // If systemType is LINUX then rootDir is required
@@ -451,6 +477,7 @@ public final class Utils
     Assert.assertEquals(tmpSys.getEnabled(), Boolean.valueOf(defaultIsEnabled));
     // Effective user should result to requestor which in this case is testuser1
     Assert.assertEquals(tmpSys.getEffectiveUserId(), testUser1);
+    Assert.assertEquals(tmpSys.getJobRuntimes(), defaultJobRuntimes);
     Assert.assertNotNull(tmpSys.getPort());
     Assert.assertEquals(tmpSys.getPort().intValue(), defaultPort);
     Assert.assertNotNull(tmpSys.getUseProxy());
@@ -458,7 +485,7 @@ public final class Utils
     Assert.assertEquals(tmpSys.getProxyHost(), defaultProxyHost);
     Assert.assertNotNull(tmpSys.getProxyPort());
     Assert.assertEquals(tmpSys.getProxyPort().intValue(), defaultProxyPort);
-    Assert.assertEquals(tmpSys.getJobWorkingDir(), sys0[10]);
+    Assert.assertEquals(tmpSys.getJobWorkingDir(), defaultJobWorkingDir);
     Assert.assertNotNull(tmpSys.getJobEnvVariables());
     Assert.assertTrue(tmpSys.getJobEnvVariables().isEmpty());
     Assert.assertNotNull(tmpSys.getJobMaxJobs());

@@ -3,7 +3,6 @@ package edu.utexas.tacc.tapis.systems.client;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
@@ -46,9 +45,9 @@ import static edu.utexas.tacc.tapis.systems.client.Utils.*;
 public class UserTest
 {
   // Test data
-  // NOTE: We create a certain number of systems but during refactoring some end up not being used.
-  //       When creating a new test look for an unused system and remove it from the this list.
-  //  List of unused systems: 5, 6
+  // NOTE: We create a certain number of systems but during refactoring some ended up not being used.
+  //       When creating a new test look for an unused system and remove it from this list.
+  //  List of unused systems: 6
   //  If list is empty then increment numSystems by 1 and use it.
   int numSystems = 14;
   Map<Integer, String[]> systems = Utils.makeSystems(numSystems, "CltUsr");
@@ -317,8 +316,8 @@ public class UserTest
     verifySystemAttributes(tmpSys, sys0);
   }
 
-  // Create a system using minimal attributes:
-  //   name, systemType, host, defaultAuthnMethod, jobCanExec
+  // Create a system using minimal attributes for LINUX:
+  //   id, systemType, host, defaultAuthnMethod, rootDir, canExec=false
   // Confirm that defaults are as expected
   @Test
   public void testCreateAndGetSystemMinimal() throws Exception
@@ -338,7 +337,48 @@ public class UserTest
     TapisSystem tmpSys = usrClient.getSystem(sys0[1]);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
     System.out.println("Found item: " + sys0[1]);
-    Utils.verifySystemDefaults(tmpSys, sys0);
+    Utils.verifySystemDefaults(tmpSys, sys0, sys0[1]);
+  }
+
+  // Create a system using minimal attributes, get the system, use modified result to create new system.
+  // Confirm that defaults are as expected
+  @Test
+  public void testMinimalCreateGetCreate() throws Exception
+  {
+    // Create a LINUX system using minimal attributes
+    String[] sys0 = systems.get(5);
+    String newId = sys0[1] + "new";
+    System.out.println("Creating system with name: " + sys0[1]);
+    try {
+      String respUrl = Utils.createSystemMinimal(usrClient, sys0);
+      System.out.println("Created system: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
+
+    // Get the system and check the defaults
+    TapisSystem tmpSys = usrClient.getSystem(sys0[1]);
+    Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
+    System.out.println("Found item: " + sys0[1]);
+    Utils.verifySystemDefaults(tmpSys, sys0, sys0[1]);
+
+    // Modify result and create a new system
+    tmpSys.setId(newId);
+    try {
+      String respUrl = Utils.createSystemMinimal2(usrClient, tmpSys);
+      System.out.println("Created system: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
+    // Get the system and check the defaults
+    tmpSys = usrClient.getSystem(tmpSys.getId());
+    Assert.assertNotNull(tmpSys, "Failed to create item: " + newId);
+    System.out.println("Found item: " + newId);
+    Utils.verifySystemDefaults(tmpSys, sys0, newId);
   }
 
   @Test
@@ -367,6 +407,7 @@ public class UserTest
       System.out.println("Found item: " + sys0[1]);
       Assert.assertEquals(tmpSys.getId(), sys0[1]);
       Assert.assertEquals(tmpSys.getDescription(), sys0[2]);
+      Assert.assertNotNull(tmpSys.getSystemType());
       Assert.assertEquals(tmpSys.getSystemType().name(), sys0[3]);
       Assert.assertEquals(tmpSys.getOwner(), sys0[4]);
       Assert.assertEquals(tmpSys.getHost(), sys0[5]);
@@ -494,17 +535,19 @@ public class UserTest
     // Enabled should start off true, then become false and finally true again.
     TapisSystem tmpSys = usrClient.getSystem(sysId);
     Assert.assertNotNull(tmpSys);
-    Assert.assertTrue(tmpSys.getEnabled());
+    Assert.assertSame(Boolean.TRUE, tmpSys.getEnabled());
     Assert.assertTrue(usrClient.isEnabled(sysId));
 
     int changeCount = usrClient.disableSystem(sysId);
+    Assert.assertEquals(changeCount, 1);
     tmpSys = usrClient.getSystem(sysId);
-    Assert.assertFalse(tmpSys.getEnabled());
+    Assert.assertNotSame(Boolean.TRUE, tmpSys.getEnabled());
     Assert.assertFalse(usrClient.isEnabled(sysId));
 
     changeCount = usrClient.enableSystem(sysId);
-    tmpSys = usrClient.getSystem(sysId  );
-    Assert.assertTrue(tmpSys.getEnabled());
+    Assert.assertEquals(changeCount, 1);
+    tmpSys = usrClient.getSystem(sysId);
+    Assert.assertSame(Boolean.TRUE, tmpSys.getEnabled());
     Assert.assertTrue(usrClient.isEnabled(sysId));
   }
 
@@ -519,7 +562,7 @@ public class UserTest
     // Delete the system
     usrClient.deleteSystem(sys0[1]);
     try {
-      TapisSystem tmpSys2 = usrClient.getSystem(sys0[1]);
+      usrClient.getSystem(sys0[1]);
       Assert.fail("System not deleted. System name: " + sys0[1]);
     } catch (TapisClientException e) {
       Assert.assertEquals(e.getCode(), 404);
@@ -572,7 +615,7 @@ public class UserTest
   //  - get perms, grant perms, revoke perms
   // NOTE: Credential calls are not checked because they are not allowed for users
   @Test
-  public void testMissingSystem() throws Exception
+  public void testMissingSystem()
   {
     String fakeSystemName = "AMissingSystemName";
     String fakeUserName = "AMissingUserName";
