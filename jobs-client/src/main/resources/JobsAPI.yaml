@@ -41,6 +41,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespProbe'
+  /jobs/healthcheck:
+    get:
+      tags:
+        - general
+      description: Lightwieght health check for liveness. No authorization required.
+      operationId: checkHealth
+      responses:
+        '200':
+          description: Message received.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespProbe'
+        '503':
+          description: Service unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespProbe'
   /jobs/hello:
     get:
       tags:
@@ -62,25 +81,6 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
         '500':
           description: Server error.
-  /jobs/healthcheck:
-    get:
-      tags:
-        - general
-      description: Lightwieght health check for liveness. No authorization required.
-      operationId: checkHealth
-      responses:
-        '200':
-          description: Message received.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespProbe'
-        '503':
-          description: Service unavailable.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespProbe'
   '/jobs/{jobUuid}':
     get:
       tags:
@@ -108,6 +108,75 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespGetJob'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Job not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  '/jobs/{jobUuid}/history':
+    get:
+      tags:
+        - jobs
+      description: |-
+        Retrieve history of a previously submitted job by its UUID.
+
+        The caller must be the job owner, creator or a tenant administrator.
+      operationId: getJobHistory
+      parameters:
+        - name: jobUuid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            format: int32
+        - name: skip
+          in: query
+          schema:
+            type: integer
+            format: int32
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Job's history retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespJobHistory'
         '400':
           description: Input error.
           content:
@@ -228,8 +297,7 @@ paths:
 
         The caller must be the job owner, creator or a tenant administrator.
 
-        / must be appended after download end-point even if there is no
-        outputPath is specified 
+        The URL must ends with '/' even if there is no outputPath is specified. 
       operationId: getJobOutputDownload
       parameters:
         - name: jobUuid
@@ -304,13 +372,13 @@ paths:
         - jobs
       description: >-
         Retrieve job's output files list for previously submitted job by its
-        UUID. The job must be in a terminal state - FINISHED or FAILED.  
+        UUID. The job must be in a terminal state (FINISHED or FAILED or
+        CANCELLED)  
 
 
         The caller must be the job owner, creator or a tenant administrator.
 
-        / must be appended after list end-point even if there is no outputPath
-        is specified 
+        The URL must ends with '/' even if there is no outputPath is specified. 
       operationId: getJobOutputList
       parameters:
         - name: jobUuid
@@ -855,6 +923,23 @@ components:
       properties:
         name:
           type: string
+    JobHistoryDisplayDTO:
+      type: object
+    RespJobHistory:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobHistoryDisplayDTO'
     JobListDTO:
       type: object
       properties:
