@@ -16,6 +16,7 @@ import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
 
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPutSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerTypeEnum;
@@ -340,14 +341,14 @@ public class UserTest
     Utils.verifySystemDefaults(tmpSys, sys0, sys0[1]);
   }
 
-  // Create a system using minimal attributes, get the system, use modified result to create new system.
+  // Create a system using minimal attributes, get the system, use modified result to
+  //  create a new system and update the original system using PUT.
   // Confirm that defaults are as expected
   @Test
-  public void testMinimalCreateGetCreate() throws Exception
+  public void testMinimalCreateGetPutAndCreate() throws Exception
   {
     // Create a LINUX system using minimal attributes
     String[] sys0 = systems.get(5);
-    String newId = sys0[1] + "new";
     System.out.println("Creating system with name: " + sys0[1]);
     try {
       String respUrl = Utils.createSystemMinimal(usrClient, sys0);
@@ -365,6 +366,7 @@ public class UserTest
     Utils.verifySystemDefaults(tmpSys, sys0, sys0[1]);
 
     // Modify result and create a new system
+    String newId = sys0[1] + "new";
     tmpSys.setId(newId);
     try {
       String respUrl = Utils.createSystemMinimal2(usrClient, tmpSys);
@@ -379,6 +381,27 @@ public class UserTest
     Assert.assertNotNull(tmpSys, "Failed to create item: " + newId);
     System.out.println("Found item: " + newId);
     Utils.verifySystemDefaults(tmpSys, sys0, newId);
+
+    // Modify result and use PUT to update
+    tmpSys.setId(sys0[1]);
+    String newRootDir = "/new/root/dir";
+    tmpSys.setRootDir(newRootDir);
+    try {
+      ReqPutSystem reqPutSystem = SystemsClient.buildReqPutSystem(tmpSys);
+      String respUrl = usrClient.putSystem(tmpSys.getId(),  reqPutSystem);
+      System.out.println("Updated system using PUT. System: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
+    // Get the system and check the defaults
+    tmpSys = usrClient.getSystem(tmpSys.getId());
+    Assert.assertNotNull(tmpSys, "Failed to create item: " + newId);
+    System.out.println("Found item: " + tmpSys.getId());
+    // RootDir was the only modified attribute
+    sys0[9] = newRootDir;
+    Utils.verifySystemDefaults(tmpSys, sys0, sys0[1]);
   }
 
   @Test

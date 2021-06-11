@@ -12,6 +12,9 @@ import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
 import java.util.Collections;
 import java.util.List;
 
+import edu.utexas.tacc.tapis.systems.client.gen.model.AuthnEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerTypeEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SystemTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.JsonObject;
@@ -35,6 +38,7 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPutSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqSearchSystems;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespBasic;
@@ -202,7 +206,7 @@ public class SystemsClient
   }
 
   /**
-   * Update a system
+   * Update selected attributes of a system
    *
    * @return url pointing to updated resource
    * @throws TapisClientException - If api call throws an exception
@@ -212,6 +216,22 @@ public class SystemsClient
     // Submit the request and return the response
     RespResourceUrl resp = null;
     try { resp = sysApi.updateSystem(systemId, req); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
+  }
+
+  /**
+   * Update all attributes of a system
+   * NOTE: Not all attributes are updatable.
+   * @return url pointing to updated resource
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public String putSystem(String systemId, ReqPutSystem req) throws TapisClientException
+  {
+    // Submit the request and return the response
+    RespResourceUrl resp = null;
+    try { resp = sysApi.putSystem(systemId, req); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
@@ -659,6 +679,34 @@ public class SystemsClient
     q.setMinMinutes(minMinutes);
     q.setMaxMinutes(maxMinutes);
     return q;
+  }
+
+  /**
+   * Utility method to build a ReqPutSystem object using attributes from a TapisSystem.
+   */
+  public static ReqPutSystem buildReqPutSystem(TapisSystem sys)
+  {
+    ReqPutSystem rSys = new ReqPutSystem();
+    rSys.description(sys.getDescription());
+    rSys.setHost(sys.getHost());
+    rSys.effectiveUserId(sys.getEffectiveUserId());
+    rSys.defaultAuthnMethod(sys.getDefaultAuthnMethod());
+    rSys.authnCredential(sys.getAuthnCredential());
+    rSys.port(sys.getPort()).useProxy(sys.getUseProxy()).proxyHost(sys.getProxyHost()).proxyPort(sys.getProxyPort());
+    rSys.dtnSystemId(sys.getDtnSystemId());
+    rSys.dtnMountPoint(sys.getDtnMountPoint()).dtnMountSourcePath(sys.getDtnMountSourcePath());
+    rSys.setJobRuntimes(sys.getJobRuntimes());
+    rSys.jobWorkingDir(sys.getJobWorkingDir());
+    rSys.jobEnvVariables(sys.getJobEnvVariables());
+    rSys.jobMaxJobs(sys.getJobMaxJobs()).jobMaxJobsPerUser(sys.getJobMaxJobsPerUser());
+    rSys.jobIsBatch(sys.getJobIsBatch());
+    rSys.batchScheduler(sys.getBatchScheduler());
+    rSys.batchLogicalQueues(sys.getBatchLogicalQueues());
+    rSys.batchDefaultLogicalQueue(sys.getBatchDefaultLogicalQueue());
+    rSys.jobCapabilities(sys.getJobCapabilities());
+    rSys.tags(sys.getTags());
+    rSys.notes(sys.getNotes());
+    return rSys;
   }
 
   /**

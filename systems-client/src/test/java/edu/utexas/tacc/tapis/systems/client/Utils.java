@@ -272,7 +272,6 @@ public final class Utils
     rSys.jobMaxJobs(jobMaxJobs).jobMaxJobsPerUser(jobMaxJobsPerUser);
     rSys.jobIsBatch(jobIsBatchFalse);
     rSys.batchScheduler(SchedulerTypeEnum.fromValue(sys[11])).batchDefaultLogicalQueue(sys[12]);
-    rSys.setJobRuntimes(jobRuntimes1);
     rSys.batchLogicalQueues(jobQueues1);
     rSys.jobCapabilities(jobCaps1);
     rSys.tags(tags1);
@@ -328,6 +327,33 @@ public final class Utils
     return clt.createSystem(rSys);
   }
 
+// TODO: needed?
+//  /*
+//   * Make client call to update a system using minimal attributes for the system.
+//   * Use attributes from sys
+//   */
+//  public static String putSystemMinimal2(SystemsClient clt, TapisSystem sys)
+//          throws TapisClientException
+//  {
+//    ReqCreateSystem rSys = new ReqCreateSystem();
+//    rSys.setId(sys.getId());
+//    rSys.setSystemType(sys.getSystemType());
+//    rSys.setHost(sys.getHost());
+//    rSys.defaultAuthnMethod(sys.getDefaultAuthnMethod());
+//    rSys.canExec(sys.getCanExec());
+//    // If canExec is true then jobRuntimes must have an entry and jobWorkingDir must be set
+//    if (Boolean.TRUE == sys.getCanExec())
+//    {
+//      rSys.setJobRuntimes(sys.getJobRuntimes());
+//      rSys.setJobWorkingDir(sys.getJobWorkingDir());
+//    }
+//    // If systemType is LINUX then rootDir is required
+//    if (sys.getSystemType() == SystemTypeEnum.LINUX) rSys.rootDir(sys.getRootDir());
+//    // If systemType is S3 then bucketName is required
+//    if (sys.getSystemType() == SystemTypeEnum.S3) rSys.bucketName(sys.getBucketName());
+//    return clt.createSystem(rSys);
+//  }
+//
   public static SystemsClient getClientUsr(String serviceURL, String userJWT)
   {
     // Create the client each time due to issue with setting different headers needed by svc vs usr client
