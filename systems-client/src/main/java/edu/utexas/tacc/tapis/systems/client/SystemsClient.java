@@ -12,9 +12,6 @@ import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
 import java.util.Collections;
 import java.util.List;
 
-import edu.utexas.tacc.tapis.systems.client.gen.model.AuthnEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerTypeEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.SystemTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.JsonObject;
@@ -192,6 +189,7 @@ public class SystemsClient
   /**
    * Create a system
    *
+   * @param req - Pre-populated ReqCreateSystem instance
    * @return url pointing to created resource
    * @throws TapisClientException - If api call throws an exception
    */
@@ -208,6 +206,8 @@ public class SystemsClient
   /**
    * Update selected attributes of a system
    *
+   * @param systemId - Id of resource to be updated
+   * @param req - Pre-populated ReqUpdateSystem instance
    * @return url pointing to updated resource
    * @throws TapisClientException - If api call throws an exception
    */
@@ -224,6 +224,11 @@ public class SystemsClient
   /**
    * Update all attributes of a system
    * NOTE: Not all attributes are updatable.
+   * See the helper method buildReqPutSystem() for an example of how to build a pre-populated
+   *   ReqPutSystem instance from a TapisSystem instance.
+   *
+   * @param systemId - Id of resource to be updated
+   * @param req - Pre-populated ReqPutSystem instance
    * @return url pointing to updated resource
    * @throws TapisClientException - If api call throws an exception
    */
@@ -308,14 +313,15 @@ public class SystemsClient
   /**
    * Change system owner given the system systemId and new owner systemId.
    *
-   * @param systemId System systemId
+   * @param systemId System Id
+   * @param newOwnerId User Id of new owner
    * @return number of records modified as a result of the action
    * @throws TapisClientException - If api call throws an exception
    */
-  public int changeSystemOwner(String systemId, String newOwnerName) throws TapisClientException
+  public int changeSystemOwner(String systemId, String newOwnerId) throws TapisClientException
   {
     RespChangeCount resp = null;
-    try { resp = sysApi.changeSystemOwner(systemId, newOwnerName); }
+    try { resp = sysApi.changeSystemOwner(systemId, newOwnerId); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
@@ -705,7 +711,12 @@ public class SystemsClient
     rSys.batchDefaultLogicalQueue(sys.getBatchDefaultLogicalQueue());
     rSys.jobCapabilities(sys.getJobCapabilities());
     rSys.tags(sys.getTags());
-    rSys.notes(sys.getNotes());
+    // Notes requires special handling. It must be null or a JsonObject
+    Object notes = sys.getNotes();
+    if (notes == null) rSys.notes(null);
+    else if (notes instanceof String) rSys.notes(ClientTapisGsonUtils.getGson().fromJson((String) notes, JsonObject.class));
+    else if (notes instanceof JsonObject) rSys.notes(notes);
+    else rSys.notes(null);
     return rSys;
   }
 

@@ -382,10 +382,8 @@ public class UserTest
     System.out.println("Found item: " + newId);
     Utils.verifySystemDefaults(tmpSys, sys0, newId);
 
-    // Modify result and use PUT to update
+    // Do not modify result and use PUT to update. Nothing should change.
     tmpSys.setId(sys0[1]);
-    String newRootDir = "/new/root/dir";
-    tmpSys.setRootDir(newRootDir);
     try {
       ReqPutSystem reqPutSystem = SystemsClient.buildReqPutSystem(tmpSys);
       String respUrl = usrClient.putSystem(tmpSys.getId(),  reqPutSystem);
@@ -395,13 +393,29 @@ public class UserTest
       System.out.println("Caught exception: " + e);
       Assert.fail();
     }
-    // Get the system and check the defaults
+    // Get the system and check the defaults. Nothing should have changed.
     tmpSys = usrClient.getSystem(tmpSys.getId());
     Assert.assertNotNull(tmpSys, "Failed to create item: " + newId);
     System.out.println("Found item: " + tmpSys.getId());
-    // RootDir was the only modified attribute
-    sys0[9] = newRootDir;
-    Utils.verifySystemDefaults(tmpSys, sys0, sys0[1]);
+
+    // Modify result and use PUT to update. Verify updated attribute
+    tmpSys.setId(sys0[1]);
+    String newJobWorkDir = "/new/work/dir";
+    tmpSys.setJobWorkingDir(newJobWorkDir);
+    try {
+      ReqPutSystem reqPutSystem = SystemsClient.buildReqPutSystem(tmpSys);
+      String respUrl = usrClient.putSystem(tmpSys.getId(),  reqPutSystem);
+      System.out.println("Updated system using PUT. System: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
+    // Get the system and check the updated attribute.
+    tmpSys = usrClient.getSystem(tmpSys.getId());
+    Assert.assertNotNull(tmpSys, "Failed to create item: " + newId);
+    System.out.println("Found item: " + tmpSys.getId());
+    Assert.assertEquals(tmpSys.getJobWorkingDir(), newJobWorkDir, "Failed to update jobWorkingDir using PUT");
   }
 
   @Test
