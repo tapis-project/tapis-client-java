@@ -17,7 +17,7 @@ import edu.utexas.tacc.tapis.auth.client.AuthClient;
 
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPutSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPatchSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SystemTypeEnum;
@@ -425,7 +425,7 @@ public class UserTest
 //            "fakePasswordF", "bucketF", "/rootF", "jobLocalWorkDirF", "jobLocalArchDirF", "jobRemoteArchSystemF", "jobRemoteArchDirF"};
     String[] sysF2 = sys0.clone();
     sysF2[2] = "description PATCHED"; sysF2[5] = hostPatchedId; sysF2[6] = "effUserPATCHED";
-    ReqUpdateSystem rSystem = createPatchSystem(sysF2);
+    ReqPatchSystem rSystem = createPatchSystem(sysF2);
     System.out.println("Creating and updating system with name: " + sys0[1]);
     try {
       // Create a system
@@ -434,7 +434,7 @@ public class UserTest
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
       // Update the system
-      respUrl = usrClient.updateSystem(sys0[1], rSystem);
+      respUrl = usrClient.patchSystem(sys0[1], rSystem);
       System.out.println("Updated system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
       // Verify attributes
@@ -785,9 +785,9 @@ public class UserTest
   // =========  Private methods ==========================================
   // =====================================================================
 
-  private static ReqUpdateSystem createPatchSystem(String[] sys)
+  private static ReqPatchSystem createPatchSystem(String[] sys)
   {
-    ReqUpdateSystem pSys = new ReqUpdateSystem();
+    ReqPatchSystem pSys = new ReqPatchSystem();
     pSys.description(sys[2]);
     pSys.host(sys[5]);
     pSys.effectiveUserId(sys[6]);

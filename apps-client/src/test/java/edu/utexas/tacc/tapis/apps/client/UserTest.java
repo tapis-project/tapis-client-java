@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import edu.utexas.tacc.tapis.apps.client.gen.model.ReqUpdateApp;
+import edu.utexas.tacc.tapis.apps.client.gen.model.ReqPatchApp;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
@@ -205,7 +205,7 @@ public class UserTest
 //    appF2[2] = "description PATCHED";
 //    appF2[] = "pATCHED";
 //    appF2[] = ;
-//    ReqUpdateApp rApp = createPatchApp(appF2);
+//    ReqPatchApp rApp = createPatchApp(appF2);
 //    System.out.println("Creating and updating app with name: " + app0[1]);
 //    try {
 //      // Create a app
@@ -516,9 +516,9 @@ public class UserTest
   // =========  Private methods ==========================================
   // =====================================================================
 
-  private static ReqUpdateApp createPatchApp(String[] app)
+  private static ReqPatchApp createPatchApp(String[] app)
   {
-    ReqUpdateApp pApp = new ReqUpdateApp();
+    ReqPatchApp pApp = new ReqPatchApp();
     pApp.description(app[2]);
 //    pApp.jobCapabilities(jobCaps2);
     pApp.tags(tags2);
