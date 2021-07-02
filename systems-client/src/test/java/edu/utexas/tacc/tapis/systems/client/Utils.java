@@ -84,7 +84,7 @@ public final class Utils
   public static final String hostPatchedId = "patched.system.org";
   public static final String hostMinimalId = "minimal.system.org";
 
-  // Default system attributes
+  // Default attributes
   public static final String defaultDescription = null;
   public static final String defaultRootDir = null;
   public static final String defaultBucketName = null;
@@ -479,6 +479,7 @@ public final class Utils
    */
   public static void verifySystemDefaults(TapisSystem tmpSys, String[] sys0, String sysId)
   {
+    Assert.assertEquals(tmpSys.getTenant(), tenantName);
     // Verify required attributes
     Assert.assertEquals(tmpSys.getId(), sysId);
     Assert.assertNotNull(tmpSys.getSystemType());

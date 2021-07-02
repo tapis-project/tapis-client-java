@@ -82,8 +82,13 @@ public class UserTest
     // Get short term user JWT from tokens service
     var authClient = new AuthClient(baseURL);
     try {
-      ownerUserJWT = authClient.getToken(testUser1, testUser1);
-      newOwnerUserJWT = authClient.getToken(newOwnerUser, newOwnerUser);
+//      ownerUserJWT = authClient.getToken(testUser1, testUser1);
+//      newOwnerUserJWT = authClient.getToken(newOwnerUser, newOwnerUser);
+      // Sometimes auth or tokens service is down. Use long term tokens instead.
+      // Long term JWT for testuser1 - expires approx 1 July 2026
+      ownerUserJWT ="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiIwZDg0YWRlOC0yMzQwLTQzOGQtOGJiMy1jZTFhYjg0M2I1NjYiLCJpc3MiOiJodHRwczovL2Rldi5kZXZlbG9wLnRhcGlzLmlvL3YzL3Rva2VucyIsInN1YiI6InRlc3R1c2VyMUBkZXYiLCJ0YXBpcy90ZW5hbnRfaWQiOiJkZXYiLCJ0YXBpcy90b2tlbl90eXBlIjoiYWNjZXNzIiwidGFwaXMvZGVsZWdhdGlvbiI6ZmFsc2UsInRhcGlzL2RlbGVnYXRpb25fc3ViIjpudWxsLCJ0YXBpcy91c2VybmFtZSI6InRlc3R1c2VyMSIsInRhcGlzL2FjY291bnRfdHlwZSI6InVzZXIiLCJleHAiOjE3ODI4Mzg0MzZ9.OElQtm2H-BZTsmK1V-Ey36jgQJmzME4wfBu0QQ9CwnQ7IJT8qQMlU_cbFZPiNAfAj9xCpOC9-NskUE0ZzYcbvmFt-rzAwzjwLSS1Akx4B2aENsOEZLmLYnqo8eY_qde0rYbyVt0KtemsAZrx2Y7vrEiwWDKRyvAE-b52Knpc_Xoqmv9NcyinYi7Bi2x9S0IswGev3KZr2D4nwZAmTrgHQ3lp1NbyySJE0HKTXfr4P4gIo2FBFm0Kk_k9xJlJlcT4d2Jf-7YRtIMM9G8Y4sateVepxBA0v8F6b_OxX-LeEHeH-MeD-7MNLFayi2MIQGjXNB3J6Zrl6qWFBMDlxA8PDw";
+      // Long term JWT for testuser3 - expires approx 1 July 2026
+      newOwnerUserJWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJlNmIwMTRiOC05MGY1LTRjY2EtODhmYy1iYmIwYWJkMWZkODciLCJpc3MiOiJodHRwczovL2Rldi5kZXZlbG9wLnRhcGlzLmlvL3YzL3Rva2VucyIsInN1YiI6InRlc3R1c2VyM0BkZXYiLCJ0YXBpcy90ZW5hbnRfaWQiOiJkZXYiLCJ0YXBpcy90b2tlbl90eXBlIjoiYWNjZXNzIiwidGFwaXMvZGVsZWdhdGlvbiI6ZmFsc2UsInRhcGlzL2RlbGVnYXRpb25fc3ViIjpudWxsLCJ0YXBpcy91c2VybmFtZSI6InRlc3R1c2VyMyIsInRhcGlzL2FjY291bnRfdHlwZSI6InVzZXIiLCJleHAiOjE3ODI4Mzg2MjV9.yhAHhvFy5APE0gLw47qEv_aay3RmJZkd5Ik7WGmjh0QHrV9gCCxNIVGLKUSBOeKnocDLN9_dpGD0DL4OFiGcKrE9MaI9bYuL4j8BrxEf3Faa64B3IK38zml2Bx1nzpTAxkP6SJy6NENWFhbGg3MRa05oo8R2XctXoOBq8lb3I__zrwzKxQymF9L25hPzivBKaAkpIfVgsd2EGG8UdiExkK8yBRUDddK_I9BNn0VrzaJ0teLg_aOi-vyZN7JfT2VlQqgdMfvVGvH2O8Lt8BBvBs3dm7ODfSbxz1S5FHCYHvSV0H7h4lHA-yumU1I9vDi4K-_6gamHVfMMCqyYRLdJxA";
     } catch (Exception e) {
       throw new Exception("Exception while creating tokens or auth service", e);
     }

@@ -62,8 +62,13 @@ public class UserTest
     var authClient = new AuthClient(baseURL);
 //    var tokClient = new TokensClient(baseURL, filesSvcName, filesSvcPasswd);
     try {
-      ownerUserJWT = authClient.getToken(ownerUser1, ownerUser1);
-      newOwnerUserJWT = authClient.getToken(newOwnerUser, newOwnerUser);
+//      ownerUserJWT = authClient.getToken(ownerUser1, ownerUser1);
+//      newOwnerUserJWT = authClient.getToken(newOwnerUser, newOwnerUser);
+      // Sometimes auth or tokens service is down. Use long term tokens instead.
+      // Long term JWT for testuser1 - expires approx 1 July 2026
+      ownerUserJWT ="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiIwZDg0YWRlOC0yMzQwLTQzOGQtOGJiMy1jZTFhYjg0M2I1NjYiLCJpc3MiOiJodHRwczovL2Rldi5kZXZlbG9wLnRhcGlzLmlvL3YzL3Rva2VucyIsInN1YiI6InRlc3R1c2VyMUBkZXYiLCJ0YXBpcy90ZW5hbnRfaWQiOiJkZXYiLCJ0YXBpcy90b2tlbl90eXBlIjoiYWNjZXNzIiwidGFwaXMvZGVsZWdhdGlvbiI6ZmFsc2UsInRhcGlzL2RlbGVnYXRpb25fc3ViIjpudWxsLCJ0YXBpcy91c2VybmFtZSI6InRlc3R1c2VyMSIsInRhcGlzL2FjY291bnRfdHlwZSI6InVzZXIiLCJleHAiOjE3ODI4Mzg0MzZ9.OElQtm2H-BZTsmK1V-Ey36jgQJmzME4wfBu0QQ9CwnQ7IJT8qQMlU_cbFZPiNAfAj9xCpOC9-NskUE0ZzYcbvmFt-rzAwzjwLSS1Akx4B2aENsOEZLmLYnqo8eY_qde0rYbyVt0KtemsAZrx2Y7vrEiwWDKRyvAE-b52Knpc_Xoqmv9NcyinYi7Bi2x9S0IswGev3KZr2D4nwZAmTrgHQ3lp1NbyySJE0HKTXfr4P4gIo2FBFm0Kk_k9xJlJlcT4d2Jf-7YRtIMM9G8Y4sateVepxBA0v8F6b_OxX-LeEHeH-MeD-7MNLFayi2MIQGjXNB3J6Zrl6qWFBMDlxA8PDw";
+      // Long term JWT for testuser3 - expires approx 1 July 2026
+      newOwnerUserJWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJlNmIwMTRiOC05MGY1LTRjY2EtODhmYy1iYmIwYWJkMWZkODciLCJpc3MiOiJodHRwczovL2Rldi5kZXZlbG9wLnRhcGlzLmlvL3YzL3Rva2VucyIsInN1YiI6InRlc3R1c2VyM0BkZXYiLCJ0YXBpcy90ZW5hbnRfaWQiOiJkZXYiLCJ0YXBpcy90b2tlbl90eXBlIjoiYWNjZXNzIiwidGFwaXMvZGVsZWdhdGlvbiI6ZmFsc2UsInRhcGlzL2RlbGVnYXRpb25fc3ViIjpudWxsLCJ0YXBpcy91c2VybmFtZSI6InRlc3R1c2VyMyIsInRhcGlzL2FjY291bnRfdHlwZSI6InVzZXIiLCJleHAiOjE3ODI4Mzg2MjV9.yhAHhvFy5APE0gLw47qEv_aay3RmJZkd5Ik7WGmjh0QHrV9gCCxNIVGLKUSBOeKnocDLN9_dpGD0DL4OFiGcKrE9MaI9bYuL4j8BrxEf3Faa64B3IK38zml2Bx1nzpTAxkP6SJy6NENWFhbGg3MRa05oo8R2XctXoOBq8lb3I__zrwzKxQymF9L25hPzivBKaAkpIfVgsd2EGG8UdiExkK8yBRUDddK_I9BNn0VrzaJ0teLg_aOi-vyZN7JfT2VlQqgdMfvVGvH2O8Lt8BBvBs3dm7ODfSbxz1S5FHCYHvSV0H7h4lHA-yumU1I9vDi4K-_6gamHVfMMCqyYRLdJxA";
 //      filesServiceJWT = tokClient.getSvcToken(adminTenantName, filesSvcName, DEFAULT_TARGET_SITE);
     } catch (Exception e) {
       throw new Exception("Exception while creating tokens or auth service", e);
@@ -141,14 +146,15 @@ public class UserTest
     }
   }
 
-  // Create a app using minimal attributes:
-  //   id, version
+  // Create an app using minimal attributes
+  // Confirm that defaults are as expected
   @Test
-  public void testCreateAppMinimal()
+  public void testCreateAndGetAppMinimal() throws Exception
   {
     // Create an app using only required attributes
     String[] app0 = apps.get(14);
-    System.out.println("Creating app with name: " + app0[1]);
+    String appId = app0[1];
+    System.out.println("Creating app with name: " + appId);
     app0[3] = null; app0[4] = null; app0[5] = null;
 
     try {
@@ -159,7 +165,91 @@ public class UserTest
       System.out.println("Caught exception: " + e);
       Assert.fail();
     }
+
+    // Get the app and check the defaults
+    TapisApp tmpApp = usrClient.getApp(appId);
+    Assert.assertNotNull(tmpApp, "Failed to create item: " + appId);
+    System.out.println("Found item: " + appId);
+    Utils.verifyAppDefaults(tmpApp, appId);
   }
+
+  // Create a system using minimal attributes, get the system, use modified result to
+  //  create a new system and update the original system using PUT.
+  // Confirm that defaults are as expected
+  @Test
+  public void testMinimalCreateGetPutAndCreate() throws Exception
+  {
+//    // Create a LINUX system using minimal attributes
+//    String[] sys0 = systems.get(5);
+//    System.out.println("Creating system with name: " + sys0[1]);
+//    try {
+//      String respUrl = Utils.createSystemMinimal(usrClient, sys0);
+//      System.out.println("Created system: " + respUrl);
+//      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+//    } catch (Exception e) {
+//      System.out.println("Caught exception: " + e);
+//      Assert.fail();
+//    }
+//
+//    // Get the system and check the defaults
+//    TapisSystem tmpSys = usrClient.getSystem(sys0[1]);
+//    Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
+//    System.out.println("Found item: " + sys0[1]);
+//    Utils.verifySystemDefaults(tmpSys, sys0, sys0[1]);
+//
+//    // Modify result and create a new system
+//    String newId = sys0[1] + "new";
+//    tmpSys.setId(newId);
+//    try {
+//      String respUrl = Utils.createSystemMinimal2(usrClient, tmpSys);
+//      System.out.println("Created system: " + respUrl);
+//      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+//    } catch (Exception e) {
+//      System.out.println("Caught exception: " + e);
+//      Assert.fail();
+//    }
+//    // Get the system and check the defaults
+//    tmpSys = usrClient.getSystem(tmpSys.getId());
+//    Assert.assertNotNull(tmpSys, "Failed to create item: " + newId);
+//    System.out.println("Found item: " + newId);
+//    Utils.verifySystemDefaults(tmpSys, sys0, newId);
+//
+//    // Do not modify result and use PUT to update. Nothing should change.
+//    tmpSys.setId(sys0[1]);
+//    try {
+//      ReqPutSystem reqPutSystem = SystemsClient.buildReqPutSystem(tmpSys);
+//      String respUrl = usrClient.putSystem(tmpSys.getId(),  reqPutSystem);
+//      System.out.println("Updated system using PUT. System: " + respUrl);
+//      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+//    } catch (Exception e) {
+//      System.out.println("Caught exception: " + e);
+//      Assert.fail();
+//    }
+//    // Get the system and check the defaults. Nothing should have changed.
+//    tmpSys = usrClient.getSystem(tmpSys.getId());
+//    Assert.assertNotNull(tmpSys, "Failed to create item: " + newId);
+//    System.out.println("Found item: " + tmpSys.getId());
+//
+//    // Modify result and use PUT to update. Verify updated attribute
+//    tmpSys.setId(sys0[1]);
+//    String newJobWorkDir = "/new/work/dir";
+//    tmpSys.setJobWorkingDir(newJobWorkDir);
+//    try {
+//      ReqPutSystem reqPutSystem = SystemsClient.buildReqPutSystem(tmpSys);
+//      String respUrl = usrClient.putSystem(tmpSys.getId(),  reqPutSystem);
+//      System.out.println("Updated system using PUT. System: " + respUrl);
+//      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+//    } catch (Exception e) {
+//      System.out.println("Caught exception: " + e);
+//      Assert.fail();
+//    }
+//    // Get the system and check the updated attribute.
+//    tmpSys = usrClient.getSystem(tmpSys.getId());
+//    Assert.assertNotNull(tmpSys, "Failed to create item: " + newId);
+//    System.out.println("Found item: " + tmpSys.getId());
+//    Assert.assertEquals(tmpSys.getJobWorkingDir(), newJobWorkDir, "Failed to update jobWorkingDir using PUT");
+  }
+
 
   @Test(expectedExceptions = {TapisClientException.class}, expectedExceptionsMessageRegExp = "^APPAPI_APP_EXISTS.*")
   public void testCreateAppAlreadyExists() throws Exception {

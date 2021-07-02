@@ -82,9 +82,18 @@ public final class Utils
   public static final String TAPIS_ENV_FILES_SVC_PASSWORD = "TAPIS_FILES_SERVICE_PASSWORD";
   public static final String TAPIS_ENV_SVC_PORT = "TAPIS_SERVICE_PORT";
 
-  // Default system attributes
+  // Default attributes
   public static final String defaultDescription = null;
   public static final String defaultNotesStr = "{}";
+  public static final boolean defaultIsEnabled = true;
+  public static final boolean defaultDeleted = false;
+  public static final RuntimeEnum defaultRuntime = RuntimeEnum.DOCKER;
+  public static final String defaultRuntimeVersion = null;
+  public static final String defaultContainerImage = "containerImage";
+  public static final int defaultMaxJobs = 0;
+  public static final int defaultMaxJobsPerUser = 0;
+  public static final boolean defaultStrictFileInputs = false;
+  public static final boolean defaultDynamicExecSystem = false;
 
   public static final List<String> tags1 = Arrays.asList("value1", "value2", "a",
           "Long tag (1 3 2) special chars [_ $ - & * % @ + = ! ^ ? < > , . ( ) { } / \\ | ]. Backslashes must be escaped.");
@@ -107,7 +116,6 @@ public final class Utils
   public static final List<RuntimeOptionEnum> runtimeOptions1 = new ArrayList<>(List.of(RuntimeOptionEnum.SINGULARITY_RUN));
   public static final List<RuntimeOptionEnum> runtimeOptions2 = new ArrayList<>(List.of(RuntimeOptionEnum.SINGULARITY_START));
   public static final List<RuntimeOptionEnum> runtimeOptionsNull = null;
-  public static final String containerImage = "containerImage";
   public static final boolean dynamicExecSystemTrue = true;
   public static final List<String> execSystemConstraints = Arrays.asList("Constraint1 AND", "Constraint2");
   public static final String execSystemId = "tapisv3-exec3";
@@ -219,7 +227,7 @@ public final class Utils
 //              10=execSystemId, 11=execSystemExecDir, 12=execSystemInputDir, 13=execSystemOutputDir,
 //              14=execSystemLogicalQueue, 15=archiveSystemId, 16=archiveSystemDir};
       String[] app0 = {tenantName, appId, appVersion, "description "+suffix, appTypeBatch.name(), ownerUser1,
-                       runtime.name(), runtimeVersion+suffix, containerImage+suffix, jobDescription+suffix,
+                       runtime.name(), runtimeVersion+suffix, defaultContainerImage, jobDescription+suffix,
                        execSystemId, execSystemExecDir+suffix, execSystemInputDir+suffix, execSystemOutputDir+suffix,
                        execSystemLogicalQueue, archiveSystemId, archiveSystemDir+suffix};
       apps.put(i, app0);
@@ -319,18 +327,31 @@ public final class Utils
     return clt.createApp(rApp);
   }
 
+  /**
+   * Create an application using only required attributes.
+   * In simplest case these are required: id, version, appType, containerImage, execSystemId
+   *
+   * @param clt - Apps client
+   * @param app - Array of attributes that can be represented as strings.
+   * @return a minimal containerized App that specifies the execSystemId
+   * @throws TapisClientException - on error
+   */
   public static String createAppMinimal(AppsClient clt, String[] app) throws TapisClientException
   {
     ReqCreateApp rApp = new ReqCreateApp();
+    // Id, version and type are always required
     rApp.setId(app[1]);
     rApp.setVersion(app[2]);
     rApp.setAppType(appTypeBatch);
-    rApp.setContainerImage(containerImage);
+    // Containerized so container image must be set. NOTE: currently only containerized supported
+    rApp.setContainerImage(defaultContainerImage);
     // === Start Job Attributes
     JobAttributes jobAttrs = new JobAttributes();
+    // dynamiceExecSystem defaults to false so execSystemId must be set. This is the simplest minimal App
     jobAttrs.setExecSystemId(app[10]);
     rApp.setJobAttributes(jobAttrs);
 
+    // Use client to create the app
     return clt.createApp(rApp);
   }
 
@@ -549,5 +570,94 @@ public final class Utils
 //    appClientSvc.addDefaultHeader("X-Tapis-User", appOwner);
 //    appClientSvc.addDefaultHeader("X-Tapis-Tenant", tenantName);
     return new AppsClient(serviceURL, userJWT);
+  }
+
+  /**
+   * Verify the required attributes for a TapisApp
+   *   and verify that other attributes are set to expected defaults.
+   //    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=appType, 5=ownerUser1,
+   //              6=runtime, 7=runtimeVersion, 8=containerImage, 9=jobDescription,
+   //              10=execSystemId, 11=execSystemExecDir, 12=execSystemInputDir, 13=execSystemOutputDir,
+   //              14=execSystemLogicalQueue, 15=archiveSystemId, 16=archiveSystemDir};
+   String[] app0 = {tenantName, appId, appVersion, "description "+suffix, appTypeBatch.name(), ownerUser1,
+   runtime.name(), runtimeVersion+suffix, containerImage+suffix, jobDescription+suffix,
+   execSystemId, execSystemExecDir+suffix, execSystemInputDir+suffix, execSystemOutputDir+suffix,
+   execSystemLogicalQueue, archiveSystemId, archiveSystemDir+suffix};
+   * @param tmpApp - app retrieved from the service
+   */
+  public static void verifyAppDefaults(TapisApp tmpApp, String appId)
+  {
+    Assert.assertEquals(tmpApp.getTenant(), tenantName);
+    // Verify required attributes
+    Assert.assertEquals(tmpApp.getId(), appId);
+    Assert.assertEquals(tmpApp.getVersion(), appVersion);
+    Assert.assertNotNull(tmpApp.getAppType());
+    Assert.assertEquals(tmpApp.getAppType().name(), appTypeBatch.name());
+    Assert.assertNotNull(tmpApp.getJobAttributes());
+
+    // Verify optional attributes have been set to defaults
+    // Owner should have defaulted to user who created the system
+    Assert.assertEquals(tmpApp.getOwner(), ownerUser1);
+    Assert.assertEquals(tmpApp.getDescription(), defaultDescription);
+    Assert.assertEquals(tmpApp.getEnabled(), Boolean.valueOf(defaultIsEnabled));
+    Assert.assertEquals(tmpApp.getRuntime(), defaultRuntime);
+    Assert.assertEquals(tmpApp.getRuntimeVersion(), defaultRuntimeVersion);
+    Assert.assertNull(tmpApp.getRuntimeOptions());
+    Assert.assertEquals(tmpApp.getContainerImage(), defaultContainerImage);
+    Assert.assertNotNull(tmpApp.getMaxJobs());
+    Assert.assertEquals(tmpApp.getMaxJobs().intValue(), maxJobsMAX);
+    Assert.assertNotNull(tmpApp.getMaxJobsPerUser());
+    Assert.assertEquals(tmpApp.getMaxJobsPerUser().intValue(), maxJobsPerUserMAX);
+    Assert.assertEquals(tmpApp.getStrictFileInputs(), Boolean.valueOf(defaultStrictFileInputs));
+    Assert.assertNotNull(tmpApp.getTags());
+    Assert.assertTrue(tmpApp.getTags().isEmpty());
+    Assert.assertNotNull(tmpApp.getNotes());
+    Assert.assertEquals((String) tmpApp.getNotes(), defaultNotesStr);
+    Assert.assertEquals(tmpApp.getDeleted(), Boolean.valueOf(defaultDeleted));
+    // jobAttributes
+    JobAttributes jobAttrs = tmpApp.getJobAttributes();
+    Assert.assertEquals(jobAttrs.getDescription(), defaultDescription);
+    Assert.assertNotNull(jobAttrs.getDynamicExecSystem());
+    Assert.assertFalse(jobAttrs.getDynamicExecSystem());
+    Assert.assertNull(jobAttrs.getExecSystemExecDir());
+    Assert.assertNull(jobAttrs.getExecSystemInputDir());
+    Assert.assertNull(jobAttrs.getExecSystemOutputDir());
+    Assert.assertNull(jobAttrs.getExecSystemLogicalQueue());
+    Assert.assertNull(jobAttrs.getArchiveSystemId());
+    Assert.assertNull(jobAttrs.getArchiveSystemDir());
+    Assert.assertNotNull(jobAttrs.getArchiveOnAppError());
+    Assert.assertTrue(jobAttrs.getArchiveOnAppError());
+    Assert.assertNotNull(jobAttrs.getFileInputDefinitions());
+    Assert.assertTrue(jobAttrs.getFileInputDefinitions().isEmpty());
+    Assert.assertNotNull(jobAttrs.getNodeCount());
+    Assert.assertEquals(jobAttrs.getNodeCount().intValue(), 1);
+    Assert.assertNotNull(jobAttrs.getCoresPerNode());
+    Assert.assertEquals(jobAttrs.getCoresPerNode().intValue(), 1);
+    Assert.assertNotNull(jobAttrs.getMemoryMB());
+    Assert.assertEquals(jobAttrs.getMemoryMB().intValue(), 100);
+    Assert.assertNotNull(jobAttrs.getMaxMinutes());
+    Assert.assertEquals(jobAttrs.getMaxMinutes().intValue(), 10);
+    Assert.assertNotNull(jobAttrs.getSubscriptions());
+    Assert.assertTrue(jobAttrs.getSubscriptions().isEmpty());
+    Assert.assertNotNull(jobAttrs.getTags());
+    Assert.assertTrue(jobAttrs.getTags().isEmpty());
+    // jobAttributes.parameterSet
+    ParameterSet parmSet = jobAttrs.getParameterSet();
+    Assert.assertNotNull(parmSet);
+    Assert.assertNotNull(parmSet.getAppArgs());
+    Assert.assertTrue(parmSet.getAppArgs().isEmpty());
+    Assert.assertNotNull(parmSet.getSchedulerOptions());
+    Assert.assertTrue(parmSet.getSchedulerOptions().isEmpty());
+    Assert.assertNotNull(parmSet.getEnvVariables());
+    Assert.assertTrue(parmSet.getEnvVariables().isEmpty());
+    // parameterSet.archiveFilter
+    ParameterSetArchiveFilter archiveFilter = parmSet.getArchiveFilter();
+    Assert.assertNotNull(archiveFilter);
+    Assert.assertNotNull(archiveFilter.getIncludes());
+    Assert.assertTrue(archiveFilter.getIncludes().isEmpty());
+    Assert.assertNotNull(archiveFilter.getExcludes());
+    Assert.assertTrue(archiveFilter.getExcludes().isEmpty());
+    Assert.assertNotNull(archiveFilter.getIncludeLaunchFiles());
+    Assert.assertTrue(archiveFilter.getIncludeLaunchFiles());
   }
 }
