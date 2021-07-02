@@ -10,6 +10,7 @@ import edu.utexas.tacc.tapis.apps.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ArgMetaSpec;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ArgSpec;
 import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
+import edu.utexas.tacc.tapis.apps.client.gen.model.ReqPutApp;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespApps;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespBasic;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespBoolean;
@@ -180,6 +181,8 @@ public class AppsClient implements ITapisClient
 
   /**
    * Create an app
+   * See the helper method buildReqCreateApp() for an example of how to build a pre-populated
+   *   ReqCreateApp instance from a TapisApp instance.
    *
    * @param req Request body specifying attributes
    * @return url pointing to created resource
@@ -204,11 +207,33 @@ public class AppsClient implements ITapisClient
    * @return url pointing to updated resource
    * @throws TapisClientException - If api call throws an exception
    */
-  public String updateApp(String id, String version, ReqPatchApp req) throws TapisClientException
+  public String patchApp(String id, String version, ReqPatchApp req) throws TapisClientException
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
     try { resp = appApi.patchApp(id, version, req); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
+  }
+
+  /**
+   * Update all attributes of an application
+   * NOTE: Not all attributes are updatable.
+   * See the helper method buildReqPutApp() for an example of how to build a pre-populated
+   *   ReqPutApp instance from a TapisApp instance.
+   *
+   * @param id - Id of resource to be updated
+   * @param version Version of the application
+   * @param req - Pre-populated ReqPutApp instance
+   * @return url pointing to updated resource
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public String putApp(String id, String version, ReqPutApp req) throws TapisClientException
+  {
+    // Submit the request and return the response
+    RespResourceUrl resp = null;
+    try { resp = appApi.putApp(id, version, req); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
@@ -581,6 +606,61 @@ public class AppsClient implements ITapisClient
   // -----------------------------------------------------------------------
   // --------------------------- Utility Methods ---------------------------
   // -----------------------------------------------------------------------
+
+  /**
+   * Utility method to build a ReqCreateApp object using attributes from a TapisApp.
+   */
+  public static ReqCreateApp buildReqCreateApp(TapisApp app)
+  {
+    if (app == null) return null;
+    ReqCreateApp rApp = new ReqCreateApp();
+    rApp.id(app.getId());
+    rApp.version(app.getVersion());
+    rApp.description(app.getDescription());
+    rApp.appType(app.getAppType());
+    rApp.owner(app.getOwner());
+    rApp.enabled(app.getEnabled());
+    rApp.runtime(app.getRuntime());
+    rApp.runtimeVersion(app.getRuntimeVersion());
+    rApp.runtimeOptions(app.getRuntimeOptions());
+    rApp.containerImage(app.getContainerImage());
+    rApp.maxJobs(app.getMaxJobs()).maxJobsPerUser(app.getMaxJobsPerUser());
+    rApp.strictFileInputs(app.getStrictFileInputs());
+    rApp.jobAttributes(app.getJobAttributes());
+    rApp.tags(app.getTags());
+    // Notes requires special handling. It must be null or a JsonObject
+    Object notes = app.getNotes();
+    if (notes == null) rApp.notes(null);
+    else if (notes instanceof String) rApp.notes(ClientTapisGsonUtils.getGson().fromJson((String) notes, JsonObject.class));
+    else if (notes instanceof JsonObject) rApp.notes(notes);
+    else rApp.notes(null);
+    return rApp;
+  }
+
+  /**
+   * Utility method to build a ReqPutApp object using attributes from a TapisApp.
+   */
+  public static ReqPutApp buildReqPutApp(TapisApp app)
+  {
+    if (app == null) return null;
+    ReqPutApp rApp = new ReqPutApp();
+    rApp.description(app.getDescription());
+    rApp.runtime(app.getRuntime());
+    rApp.runtimeVersion(app.getRuntimeVersion());
+    rApp.runtimeOptions(app.getRuntimeOptions());
+    rApp.containerImage(app.getContainerImage());
+    rApp.maxJobs(app.getMaxJobs()).maxJobsPerUser(app.getMaxJobsPerUser());
+    rApp.strictFileInputs(app.getStrictFileInputs());
+    rApp.jobAttributes(app.getJobAttributes());
+    rApp.tags(app.getTags());
+    // Notes requires special handling. It must be null or a JsonObject
+    Object notes = app.getNotes();
+    if (notes == null) rApp.notes(null);
+    else if (notes instanceof String) rApp.notes(ClientTapisGsonUtils.getGson().fromJson((String) notes, JsonObject.class));
+    else if (notes instanceof JsonObject) rApp.notes(notes);
+    else rApp.notes(null);
+    return rApp;
+  }
 
   /**
    * Utility method to build an ArgSpec given value, metaName, metaRequired and metaKeyValuePairs

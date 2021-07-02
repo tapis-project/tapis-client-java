@@ -86,9 +86,9 @@ public class UserTest
 //      newOwnerUserJWT = authClient.getToken(newOwnerUser, newOwnerUser);
       // Sometimes auth or tokens service is down. Use long term tokens instead.
       // Long term JWT for testuser1 - expires approx 1 July 2026
-      ownerUserJWT ="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiIwZDg0YWRlOC0yMzQwLTQzOGQtOGJiMy1jZTFhYjg0M2I1NjYiLCJpc3MiOiJodHRwczovL2Rldi5kZXZlbG9wLnRhcGlzLmlvL3YzL3Rva2VucyIsInN1YiI6InRlc3R1c2VyMUBkZXYiLCJ0YXBpcy90ZW5hbnRfaWQiOiJkZXYiLCJ0YXBpcy90b2tlbl90eXBlIjoiYWNjZXNzIiwidGFwaXMvZGVsZWdhdGlvbiI6ZmFsc2UsInRhcGlzL2RlbGVnYXRpb25fc3ViIjpudWxsLCJ0YXBpcy91c2VybmFtZSI6InRlc3R1c2VyMSIsInRhcGlzL2FjY291bnRfdHlwZSI6InVzZXIiLCJleHAiOjE3ODI4Mzg0MzZ9.OElQtm2H-BZTsmK1V-Ey36jgQJmzME4wfBu0QQ9CwnQ7IJT8qQMlU_cbFZPiNAfAj9xCpOC9-NskUE0ZzYcbvmFt-rzAwzjwLSS1Akx4B2aENsOEZLmLYnqo8eY_qde0rYbyVt0KtemsAZrx2Y7vrEiwWDKRyvAE-b52Knpc_Xoqmv9NcyinYi7Bi2x9S0IswGev3KZr2D4nwZAmTrgHQ3lp1NbyySJE0HKTXfr4P4gIo2FBFm0Kk_k9xJlJlcT4d2Jf-7YRtIMM9G8Y4sateVepxBA0v8F6b_OxX-LeEHeH-MeD-7MNLFayi2MIQGjXNB3J6Zrl6qWFBMDlxA8PDw";
+      ownerUserJWT = testUser1JWT;
       // Long term JWT for testuser3 - expires approx 1 July 2026
-      newOwnerUserJWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJlNmIwMTRiOC05MGY1LTRjY2EtODhmYy1iYmIwYWJkMWZkODciLCJpc3MiOiJodHRwczovL2Rldi5kZXZlbG9wLnRhcGlzLmlvL3YzL3Rva2VucyIsInN1YiI6InRlc3R1c2VyM0BkZXYiLCJ0YXBpcy90ZW5hbnRfaWQiOiJkZXYiLCJ0YXBpcy90b2tlbl90eXBlIjoiYWNjZXNzIiwidGFwaXMvZGVsZWdhdGlvbiI6ZmFsc2UsInRhcGlzL2RlbGVnYXRpb25fc3ViIjpudWxsLCJ0YXBpcy91c2VybmFtZSI6InRlc3R1c2VyMyIsInRhcGlzL2FjY291bnRfdHlwZSI6InVzZXIiLCJleHAiOjE3ODI4Mzg2MjV9.yhAHhvFy5APE0gLw47qEv_aay3RmJZkd5Ik7WGmjh0QHrV9gCCxNIVGLKUSBOeKnocDLN9_dpGD0DL4OFiGcKrE9MaI9bYuL4j8BrxEf3Faa64B3IK38zml2Bx1nzpTAxkP6SJy6NENWFhbGg3MRa05oo8R2XctXoOBq8lb3I__zrwzKxQymF9L25hPzivBKaAkpIfVgsd2EGG8UdiExkK8yBRUDddK_I9BNn0VrzaJ0teLg_aOi-vyZN7JfT2VlQqgdMfvVGvH2O8Lt8BBvBs3dm7ODfSbxz1S5FHCYHvSV0H7h4lHA-yumU1I9vDi4K-_6gamHVfMMCqyYRLdJxA";
+      newOwnerUserJWT = testUser3JWT;
     } catch (Exception e) {
       throw new Exception("Exception while creating tokens or auth service", e);
     }
@@ -318,7 +318,7 @@ public class UserTest
 
     TapisSystem tmpSys = usrClient.getSystem(sys0[1]);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
-    System.out.println("Found item: " + sys0[1]);
+    System.out.println("Found item: " + tmpSys.getId());
     verifySystemAttributes(tmpSys, sys0);
   }
 
@@ -342,7 +342,7 @@ public class UserTest
     // Get the system and check the defaults
     TapisSystem tmpSys = usrClient.getSystem(sys0[1]);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
-    System.out.println("Found item: " + sys0[1]);
+    System.out.println("Found item: " + tmpSys.getId());
     Utils.verifySystemDefaults(tmpSys, sys0, sys0[1]);
   }
 
@@ -354,7 +354,8 @@ public class UserTest
   {
     // Create a LINUX system using minimal attributes
     String[] sys0 = systems.get(5);
-    System.out.println("Creating system with name: " + sys0[1]);
+    String sysId = sys0[1];
+    System.out.println("Creating system with id: " + sysId);
     try {
       String respUrl = Utils.createSystemMinimal(usrClient, sys0);
       System.out.println("Created system: " + respUrl);
@@ -365,95 +366,102 @@ public class UserTest
     }
 
     // Get the system and check the defaults
-    TapisSystem tmpSys = usrClient.getSystem(sys0[1]);
-    Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
-    System.out.println("Found item: " + sys0[1]);
-    Utils.verifySystemDefaults(tmpSys, sys0, sys0[1]);
+    TapisSystem tmpSys = usrClient.getSystem(sysId);
+    Assert.assertNotNull(tmpSys, "Failed to create item: " + sysId);
+    System.out.println("Found item: " + tmpSys.getId());
+    Utils.verifySystemDefaults(tmpSys, sys0, sysId);
 
     // Modify result and create a new system
-    String newId = sys0[1] + "new";
+    String newId = sysId + "new";
     tmpSys.setId(newId);
     try {
-      String respUrl = Utils.createSystemMinimal2(usrClient, tmpSys);
+      String respUrl = Utils.createSystemFromTapisSystem(usrClient, tmpSys);
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
       System.out.println("Caught exception: " + e);
       Assert.fail();
     }
-    // Get the system and check the defaults
-    tmpSys = usrClient.getSystem(tmpSys.getId());
+    // Get the new system and check the defaults
+    tmpSys = usrClient.getSystem(newId);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + newId);
-    System.out.println("Found item: " + newId);
+    System.out.println("Found item: " + tmpSys.getId());
     Utils.verifySystemDefaults(tmpSys, sys0, newId);
 
-    // Do not modify result and use PUT to update. Nothing should change.
-    tmpSys.setId(sys0[1]);
+    // For the new system do not modify result and use PUT to update. Nothing should change.
+    tmpSys.setId(newId);
     try {
       ReqPutSystem reqPutSystem = SystemsClient.buildReqPutSystem(tmpSys);
-      String respUrl = usrClient.putSystem(tmpSys.getId(),  reqPutSystem);
+      String respUrl = usrClient.putSystem(newId,  reqPutSystem);
       System.out.println("Updated system using PUT. System: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
       System.out.println("Caught exception: " + e);
       Assert.fail();
     }
-    // Get the system and check the defaults. Nothing should have changed.
-    tmpSys = usrClient.getSystem(tmpSys.getId());
+    // Get the new system and check the defaults. Nothing should have changed.
+    tmpSys = usrClient.getSystem(newId);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + newId);
     System.out.println("Found item: " + tmpSys.getId());
+    Utils.verifySystemDefaults(tmpSys, sys0, newId);
 
-    // Modify result and use PUT to update. Verify updated attribute
-    tmpSys.setId(sys0[1]);
+    // For the new system modify result and use PUT to update. Verify updated attribute
+    tmpSys.setId(newId);
     String newJobWorkDir = "/new/work/dir";
     tmpSys.setJobWorkingDir(newJobWorkDir);
     try {
       ReqPutSystem reqPutSystem = SystemsClient.buildReqPutSystem(tmpSys);
-      String respUrl = usrClient.putSystem(tmpSys.getId(),  reqPutSystem);
+      String respUrl = usrClient.putSystem(newId,  reqPutSystem);
       System.out.println("Updated system using PUT. System: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
       System.out.println("Caught exception: " + e);
       Assert.fail();
     }
-    // Get the system and check the updated attribute.
-    tmpSys = usrClient.getSystem(tmpSys.getId());
+    // Get the new system and check the updated attribute.
+    tmpSys = usrClient.getSystem(newId);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + newId);
     System.out.println("Found item: " + tmpSys.getId());
     Assert.assertEquals(tmpSys.getJobWorkingDir(), newJobWorkDir, "Failed to update jobWorkingDir using PUT");
   }
 
   @Test
-  public void testUpdateSystem() {
+  public void testPatchSystem() {
     String[] sys0 = systems.get(8);
+    String sysId = sys0[1];
 //    private static final String[] sysF2 = {tenantName, "CsysF", "description PATCHED", sysType, ownerUser, "hostPATCHED", "effUserPATCHED",
 //            "fakePasswordF", "bucketF", "/rootF", "jobLocalWorkDirF", "jobLocalArchDirF", "jobRemoteArchSystemF", "jobRemoteArchDirF"};
+    String newDescription = "description PATCHED";
+    String newEffUser = "effUserPATCHED";
     String[] sysF2 = sys0.clone();
-    sysF2[2] = "description PATCHED"; sysF2[5] = hostPatchedId; sysF2[6] = "effUserPATCHED";
-    ReqPatchSystem rSystem = createPatchSystem(sysF2);
-    System.out.println("Creating and updating system with name: " + sys0[1]);
+    sysF2[2] = newDescription;
+    sysF2[5] = hostPatchedId;
+    sysF2[6] = newEffUser;
+    // Create a patch system request that updates: description, host, effUser, authnMethod, port, userProxy, proxyHost,
+    //                                             proxyPort, jobCaps, tags, notes
+    ReqPatchSystem rSystem = createPatchSystem(newDescription, hostPatchedId, newEffUser);
+    System.out.println("Creating and updating system with id: " + sysId);
     try {
       // Create a system
-      String respUrl =
-              usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull));
+      String respUrl = usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull));
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
       // Update the system
-      respUrl = usrClient.patchSystem(sys0[1], rSystem);
-      System.out.println("Updated system: " + respUrl);
+      respUrl = usrClient.patchSystem(sysId, rSystem);
+      System.out.println("Patched system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
       // Verify attributes
       sys0 = sysF2;
-      TapisSystem tmpSys = usrClient.getSystem(sys0[1]);
-      Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
-      System.out.println("Found item: " + sys0[1]);
-      Assert.assertEquals(tmpSys.getId(), sys0[1]);
-      Assert.assertEquals(tmpSys.getDescription(), sys0[2]);
+      TapisSystem tmpSys = usrClient.getSystem(sysId);
+      Assert.assertNotNull(tmpSys, "Failed to create item: " + sysId);
+      System.out.println("Found item: " + tmpSys.getId());
+      Assert.assertEquals(tmpSys.getId(), sysId);
+      Assert.assertEquals(tmpSys.getDescription(), newDescription);
       Assert.assertNotNull(tmpSys.getSystemType());
       Assert.assertEquals(tmpSys.getSystemType().name(), sys0[3]);
       Assert.assertEquals(tmpSys.getOwner(), sys0[4]);
-      Assert.assertEquals(tmpSys.getHost(), sys0[5]);
-      Assert.assertEquals(tmpSys.getEffectiveUserId(), sys0[6]);
+      Assert.assertEquals(tmpSys.getHost(), hostPatchedId);
+      Assert.assertEquals(tmpSys.getEffectiveUserId(), newEffUser);
       Assert.assertEquals(tmpSys.getBucketName(), sys0[8]);
       Assert.assertEquals(tmpSys.getRootDir(), sys0[9]);
       Assert.assertEquals(tmpSys.getJobWorkingDir(), sys0[10]);
@@ -790,12 +798,12 @@ public class UserTest
   // =========  Private methods ==========================================
   // =====================================================================
 
-  private static ReqPatchSystem createPatchSystem(String[] sys)
+  private static ReqPatchSystem createPatchSystem(String newDescription, String newHost, String newEffUsr)
   {
     ReqPatchSystem pSys = new ReqPatchSystem();
-    pSys.description(sys[2]);
-    pSys.host(sys[5]);
-    pSys.effectiveUserId(sys[6]);
+    pSys.description(newDescription);
+    pSys.host(newHost);
+    pSys.effectiveUserId(newEffUsr);
     pSys.defaultAuthnMethod(AuthnEnum.valueOf(prot2AuthnMethod.name()));
     pSys.port(prot2Port).useProxy(prot2UseProxy).proxyHost(prot2ProxyHost).proxyPort(prot2ProxyPort);
     pSys.jobCapabilities(jobCaps2);

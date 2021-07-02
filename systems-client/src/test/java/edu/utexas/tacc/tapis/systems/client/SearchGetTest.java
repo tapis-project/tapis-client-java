@@ -82,11 +82,14 @@ public class SearchGetTest
     System.out.println("Using Authenticator URL: " + baseURL);
     System.out.println("Using Tokens URL: " + baseURL);
     // Get short term user JWT from tokens service
-    var authClient = new AuthClient(baseURL);
+//    var authClient = new AuthClient(baseURL);
     try {
-      testUser1JWT = authClient.getToken(testUser1, testUser1);
-      testUser2JWT = authClient.getToken(testUser2, testUser2);
-      adminUserJWT = authClient.getToken(adminUser, adminUser);
+//      testUser1JWT = authClient.getToken(testUser1, testUser1);
+//      testUser2JWT = authClient.getToken(testUser2, testUser2);
+//      adminUserJWT = authClient.getToken(adminUser, adminUser);
+      testUser1JWT = Utils.testUser1JWT;
+      testUser2JWT = Utils.testUser2JWT;
+      adminUserJWT = Utils.adminUserJWT;
     } catch (Exception e) {
       throw new Exception("Exception while creating tokens or auth service", e);
     }
@@ -359,7 +362,7 @@ public class SearchGetTest
     {
       for (int i = start; i <= end; i++)
       {
-        String sysName = getSysName(testKey, i);
+        String sysName = getSysId(testKey, i);
         assertEquals(searchResults.get(idx-1).getId(), sysName, "Incorrect system name at position: " + (idx));
         idx++;
       }
@@ -368,7 +371,7 @@ public class SearchGetTest
     {
       for (int i = start; i >= end; i--)
       {
-        String sysName = getSysName(testKey, i);
+        String sysName = getSysId(testKey, i);
         assertEquals(searchResults.get(idx-1).getId(), sysName, "Incorrect system name at position: " + (idx));
         idx++;
       }

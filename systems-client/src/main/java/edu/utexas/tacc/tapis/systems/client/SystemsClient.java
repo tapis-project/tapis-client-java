@@ -187,6 +187,8 @@ public class SystemsClient implements ITapisClient
 
   /**
    * Create a system
+   * See the helper method buildReqCreateSystem() for an example of how to build a pre-populated
+   *   ReqCreateSystem instance from a TapisSystem instance.
    *
    * @param req - Pre-populated ReqCreateSystem instance
    * @return url pointing to created resource
@@ -716,27 +718,50 @@ public class SystemsClient implements ITapisClient
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
   }
 
+  // ************************************************************************
+  // *********************** Utility Methods ********************************
+  // ************************************************************************
+
   /**
-   * Utility method to build a batch LogicalQueue
+   * Utility method to build a ReqCreateSystem object using attributes from a TapisSystem.
    */
-  public static LogicalQueue buildLogicalQueue(String name, String hpcQueueName, int maxJobs, int maxJobsPerUser,
-                                 int minNodeCount, int maxNodeCount, int minCoresPerNode, int maxCoresPerNode,
-                                 int minMemoryMB, int maxMemoryMB, int minMinutes, int maxMinutes)
+  public static ReqCreateSystem buildReqCreateSystem(TapisSystem sys)
   {
-    var q = new LogicalQueue();
-    q.setName(name);
-    q.setHpcQueueName(hpcQueueName);
-    q.setMaxJobs(maxJobs);
-    q.setMaxJobsPerUser(maxJobsPerUser);
-    q.setMinNodeCount(minNodeCount);
-    q.setMaxNodeCount(maxNodeCount);
-    q.setMinCoresPerNode(minCoresPerNode);
-    q.setMaxCoresPerNode(maxCoresPerNode);
-    q.setMinMemoryMB(minMemoryMB);
-    q.setMaxMemoryMB(maxMemoryMB);
-    q.setMinMinutes(minMinutes);
-    q.setMaxMinutes(maxMinutes);
-    return q;
+    if (sys == null) return null;
+    ReqCreateSystem rSys = new ReqCreateSystem();
+    rSys.id(sys.getId());
+    rSys.description(sys.getDescription());
+    rSys.systemType(sys.getSystemType());
+    rSys.owner(sys.getOwner());
+    rSys.host(sys.getHost());
+    rSys.enabled(sys.getEnabled());
+    rSys.effectiveUserId(sys.getEffectiveUserId());
+    rSys.defaultAuthnMethod(sys.getDefaultAuthnMethod());
+    rSys.authnCredential(sys.getAuthnCredential());
+    rSys.bucketName(sys.getBucketName());
+    rSys.rootDir(sys.getRootDir());
+    rSys.port(sys.getPort()).useProxy(sys.getUseProxy()).proxyHost(sys.getProxyHost()).proxyPort(sys.getProxyPort());
+    rSys.dtnSystemId(sys.getDtnSystemId());
+    rSys.dtnMountPoint(sys.getDtnMountPoint()).dtnMountSourcePath(sys.getDtnMountSourcePath());
+    rSys.isDtn(sys.getIsDtn());
+    rSys.canExec(sys.getCanExec());
+    rSys.jobRuntimes(sys.getJobRuntimes());
+    rSys.jobWorkingDir(sys.getJobWorkingDir());
+    rSys.jobEnvVariables(sys.getJobEnvVariables());
+    rSys.jobMaxJobs(sys.getJobMaxJobs()).jobMaxJobsPerUser(sys.getJobMaxJobsPerUser());
+    rSys.jobIsBatch(sys.getJobIsBatch());
+    rSys.batchScheduler(sys.getBatchScheduler());
+    rSys.batchLogicalQueues(sys.getBatchLogicalQueues());
+    rSys.batchDefaultLogicalQueue(sys.getBatchDefaultLogicalQueue());
+    rSys.jobCapabilities(sys.getJobCapabilities());
+    rSys.tags(sys.getTags());
+    // Notes requires special handling. It must be null or a JsonObject
+    Object notes = sys.getNotes();
+    if (notes == null) rSys.notes(null);
+    else if (notes instanceof String) rSys.notes(ClientTapisGsonUtils.getGson().fromJson((String) notes, JsonObject.class));
+    else if (notes instanceof JsonObject) rSys.notes(notes);
+    else rSys.notes(null);
+    return rSys;
   }
 
   /**
@@ -744,16 +769,17 @@ public class SystemsClient implements ITapisClient
    */
   public static ReqPutSystem buildReqPutSystem(TapisSystem sys)
   {
+    if (sys == null) return null;
     ReqPutSystem rSys = new ReqPutSystem();
     rSys.description(sys.getDescription());
-    rSys.setHost(sys.getHost());
+    rSys.host(sys.getHost());
     rSys.effectiveUserId(sys.getEffectiveUserId());
     rSys.defaultAuthnMethod(sys.getDefaultAuthnMethod());
     rSys.authnCredential(sys.getAuthnCredential());
     rSys.port(sys.getPort()).useProxy(sys.getUseProxy()).proxyHost(sys.getProxyHost()).proxyPort(sys.getProxyPort());
     rSys.dtnSystemId(sys.getDtnSystemId());
     rSys.dtnMountPoint(sys.getDtnMountPoint()).dtnMountSourcePath(sys.getDtnMountSourcePath());
-    rSys.setJobRuntimes(sys.getJobRuntimes());
+    rSys.jobRuntimes(sys.getJobRuntimes());
     rSys.jobWorkingDir(sys.getJobWorkingDir());
     rSys.jobEnvVariables(sys.getJobEnvVariables());
     rSys.jobMaxJobs(sys.getJobMaxJobs()).jobMaxJobsPerUser(sys.getJobMaxJobsPerUser());
@@ -776,7 +802,7 @@ public class SystemsClient implements ITapisClient
    * Utility method to build a credential object given secrets.
    */
   public static Credential buildCredential(String password, String privateKey, String publicKey,
-                                    String accessKey, String accessSecret, String certificate)
+                                           String accessKey, String accessSecret, String certificate)
   {
     var cred = new Credential();
     cred.setPassword(password);
@@ -786,6 +812,29 @@ public class SystemsClient implements ITapisClient
     cred.setAccessSecret(accessSecret);
     cred.setCertificate(certificate);
     return cred;
+  }
+
+  /**
+   * Utility method to build a batch LogicalQueue
+   */
+  public static LogicalQueue buildLogicalQueue(String name, String hpcQueueName, int maxJobs, int maxJobsPerUser,
+                                               int minNodeCount, int maxNodeCount, int minCoresPerNode, int maxCoresPerNode,
+                                               int minMemoryMB, int maxMemoryMB, int minMinutes, int maxMinutes)
+  {
+    var q = new LogicalQueue();
+    q.setName(name);
+    q.setHpcQueueName(hpcQueueName);
+    q.setMaxJobs(maxJobs);
+    q.setMaxJobsPerUser(maxJobsPerUser);
+    q.setMinNodeCount(minNodeCount);
+    q.setMaxNodeCount(maxNodeCount);
+    q.setMinCoresPerNode(minCoresPerNode);
+    q.setMaxCoresPerNode(maxCoresPerNode);
+    q.setMinMemoryMB(minMemoryMB);
+    q.setMaxMemoryMB(maxMemoryMB);
+    q.setMinMinutes(minMinutes);
+    q.setMaxMinutes(maxMinutes);
+    return q;
   }
 
   /**

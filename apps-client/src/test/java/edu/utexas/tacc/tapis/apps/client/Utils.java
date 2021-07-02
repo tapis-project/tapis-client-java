@@ -68,6 +68,13 @@ public final class Utils
   public static final String ownerUser2 = testUser2;
   public static final String adminTenantName = "admin";
   public static final String filesSvcName = "files";
+
+  // Long term JWT for testuser1 - expires approx 1 July 2026
+  public static final String testUser1JWT ="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiIwZDg0YWRlOC0yMzQwLTQzOGQtOGJiMy1jZTFhYjg0M2I1NjYiLCJpc3MiOiJodHRwczovL2Rldi5kZXZlbG9wLnRhcGlzLmlvL3YzL3Rva2VucyIsInN1YiI6InRlc3R1c2VyMUBkZXYiLCJ0YXBpcy90ZW5hbnRfaWQiOiJkZXYiLCJ0YXBpcy90b2tlbl90eXBlIjoiYWNjZXNzIiwidGFwaXMvZGVsZWdhdGlvbiI6ZmFsc2UsInRhcGlzL2RlbGVnYXRpb25fc3ViIjpudWxsLCJ0YXBpcy91c2VybmFtZSI6InRlc3R1c2VyMSIsInRhcGlzL2FjY291bnRfdHlwZSI6InVzZXIiLCJleHAiOjE3ODI4Mzg0MzZ9.OElQtm2H-BZTsmK1V-Ey36jgQJmzME4wfBu0QQ9CwnQ7IJT8qQMlU_cbFZPiNAfAj9xCpOC9-NskUE0ZzYcbvmFt-rzAwzjwLSS1Akx4B2aENsOEZLmLYnqo8eY_qde0rYbyVt0KtemsAZrx2Y7vrEiwWDKRyvAE-b52Knpc_Xoqmv9NcyinYi7Bi2x9S0IswGev3KZr2D4nwZAmTrgHQ3lp1NbyySJE0HKTXfr4P4gIo2FBFm0Kk_k9xJlJlcT4d2Jf-7YRtIMM9G8Y4sateVepxBA0v8F6b_OxX-LeEHeH-MeD-7MNLFayi2MIQGjXNB3J6Zrl6qWFBMDlxA8PDw";
+  // Long term JWT for testuser3 - expires approx 1 July 2026
+  public static final String testUser3JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJlNmIwMTRiOC05MGY1LTRjY2EtODhmYy1iYmIwYWJkMWZkODciLCJpc3MiOiJodHRwczovL2Rldi5kZXZlbG9wLnRhcGlzLmlvL3YzL3Rva2VucyIsInN1YiI6InRlc3R1c2VyM0BkZXYiLCJ0YXBpcy90ZW5hbnRfaWQiOiJkZXYiLCJ0YXBpcy90b2tlbl90eXBlIjoiYWNjZXNzIiwidGFwaXMvZGVsZWdhdGlvbiI6ZmFsc2UsInRhcGlzL2RlbGVnYXRpb25fc3ViIjpudWxsLCJ0YXBpcy91c2VybmFtZSI6InRlc3R1c2VyMyIsInRhcGlzL2FjY291bnRfdHlwZSI6InVzZXIiLCJleHAiOjE3ODI4Mzg2MjV9.yhAHhvFy5APE0gLw47qEv_aay3RmJZkd5Ik7WGmjh0QHrV9gCCxNIVGLKUSBOeKnocDLN9_dpGD0DL4OFiGcKrE9MaI9bYuL4j8BrxEf3Faa64B3IK38zml2Bx1nzpTAxkP6SJy6NENWFhbGg3MRa05oo8R2XctXoOBq8lb3I__zrwzKxQymF9L25hPzivBKaAkpIfVgsd2EGG8UdiExkK8yBRUDddK_I9BNn0VrzaJ0teLg_aOi-vyZN7JfT2VlQqgdMfvVGvH2O8Lt8BBvBs3dm7ODfSbxz1S5FHCYHvSV0H7h4lHA-yumU1I9vDi4K-_6gamHVfMMCqyYRLdJxA";
+
+
   // TAPIS_BASE_URL_SUFFIX should be set according to the dev, staging or prod environment
   // dev     -> develop.tapis.io
   // staging -> staging.tapis.io
@@ -330,10 +337,15 @@ public final class Utils
   /**
    * Create an application using only required attributes.
    * In simplest case these are required: id, version, appType, containerImage, execSystemId
+   * Use attributes from a string array.
+   *    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=appType, 5=ownerUser1,
+   *              6=runtime, 7=runtimeVersion, 8=containerImage, 9=jobDescription,
+   *              10=execSystemId, 11=execSystemExecDir, 12=execSystemInputDir, 13=execSystemOutputDir,
+   *              14=execSystemLogicalQueue, 15=archiveSystemId, 16=archiveSystemDir};
    *
    * @param clt - Apps client
    * @param app - Array of attributes that can be represented as strings.
-   * @return a minimal containerized App that specifies the execSystemId
+   * @return Response from the createApp client call
    * @throws TapisClientException - on error
    */
   public static String createAppMinimal(AppsClient clt, String[] app) throws TapisClientException
@@ -356,10 +368,23 @@ public final class Utils
   }
 
   /**
-   * Verify most attributes for an App using default create data for following attributes:
-   *     port, useProxy, proxyHost, proxyPort, defaultAuthnMethod, transferMethods,
-   *     canExec, jobWorkingDir, jobMaxJobs, jobMaxJobsPerUser, jobIsBatch, batchScheduler, batchDefaultLogicalQueue,
-   *     jobEnvVariables, jobLogicalQueues, capabilities, tags, notes
+   * Create an application based on attributes from a TapisApp.
+   *
+   * @param clt - Apps client
+   * @param app - TapisApp
+   * @return Response from the createApp client call
+   * @throws TapisClientException - on error
+   */
+  public static String createAppFromTapisApp(AppsClient clt, TapisApp app) throws TapisClientException
+  {
+    ReqCreateApp rApp = makeReqCreateAppFromTapisApp(app);
+    // Use client to create the app
+    return clt.createApp(rApp);
+  }
+
+  /**
+   * Verify most attributes for an App
+   *
    * @param tmpApp - app retrieved from the service
    * @param app0 - Data used to create the app
    */
@@ -424,6 +449,7 @@ public final class Utils
     }
     for (FileInputDefinition itemSeedItem : fileInputDefinitions)
     {
+      Assert.assertNotNull(itemSeedItem.getMeta());
       Assert.assertTrue(metaNamesFound.contains(itemSeedItem.getMeta().getName()),
               "List of fileInputs did not contain an item with metaName: " + itemSeedItem.getMeta().getName());
     }
@@ -659,5 +685,24 @@ public final class Utils
     Assert.assertTrue(archiveFilter.getExcludes().isEmpty());
     Assert.assertNotNull(archiveFilter.getIncludeLaunchFiles());
     Assert.assertTrue(archiveFilter.getIncludeLaunchFiles());
+  }
+
+  /*
+   * Generate a full ReqCreateApp using attributes from a TapisApp
+   */
+  private static ReqCreateApp makeReqCreateAppFromTapisApp(TapisApp app) throws TapisClientException
+  {
+    ReqCreateApp rApp = new ReqCreateApp();
+    // Id, version and type
+    rApp.setId(app.getId());
+    rApp.setVersion(app.getVersion());
+    rApp.setAppType(app.getAppType());
+    rApp.setDescription(app.getDescription());
+    rApp.setOwner(app.getOwner());
+    rApp.setContainerImage(app.getContainerImage());
+// TODO ???
+    rApp.setJobAttributes(app.getJobAttributes());
+
+    return rApp;
   }
 }

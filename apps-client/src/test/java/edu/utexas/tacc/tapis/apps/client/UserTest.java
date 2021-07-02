@@ -4,7 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gson.JsonObject;
+import edu.utexas.tacc.tapis.apps.client.gen.model.ArgSpec;
+import edu.utexas.tacc.tapis.apps.client.gen.model.FileInputDefinition;
+import edu.utexas.tacc.tapis.apps.client.gen.model.JobAttributes;
+import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
+import edu.utexas.tacc.tapis.apps.client.gen.model.NotificationSubscription;
+import edu.utexas.tacc.tapis.apps.client.gen.model.ParameterSet;
+import edu.utexas.tacc.tapis.apps.client.gen.model.ParameterSetArchiveFilter;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqPatchApp;
+import edu.utexas.tacc.tapis.apps.client.gen.model.ReqPutApp;
+import edu.utexas.tacc.tapis.apps.client.gen.model.RuntimeOptionEnum;
+import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
@@ -13,7 +24,6 @@ import org.testng.annotations.Test;
 
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.apps.client.gen.model.TapisApp;
-import edu.utexas.tacc.tapis.auth.client.AuthClient;
 
 import static edu.utexas.tacc.tapis.apps.client.Utils.*;
 
@@ -59,16 +69,16 @@ public class UserTest
     System.out.println("Using Authenticator URL: " + baseURL);
     System.out.println("Using Tokens URL: " + baseURL);
     // Get short term user JWT from tokens service
-    var authClient = new AuthClient(baseURL);
+//    var authClient = new AuthClient(baseURL);
 //    var tokClient = new TokensClient(baseURL, filesSvcName, filesSvcPasswd);
     try {
 //      ownerUserJWT = authClient.getToken(ownerUser1, ownerUser1);
 //      newOwnerUserJWT = authClient.getToken(newOwnerUser, newOwnerUser);
       // Sometimes auth or tokens service is down. Use long term tokens instead.
       // Long term JWT for testuser1 - expires approx 1 July 2026
-      ownerUserJWT ="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiIwZDg0YWRlOC0yMzQwLTQzOGQtOGJiMy1jZTFhYjg0M2I1NjYiLCJpc3MiOiJodHRwczovL2Rldi5kZXZlbG9wLnRhcGlzLmlvL3YzL3Rva2VucyIsInN1YiI6InRlc3R1c2VyMUBkZXYiLCJ0YXBpcy90ZW5hbnRfaWQiOiJkZXYiLCJ0YXBpcy90b2tlbl90eXBlIjoiYWNjZXNzIiwidGFwaXMvZGVsZWdhdGlvbiI6ZmFsc2UsInRhcGlzL2RlbGVnYXRpb25fc3ViIjpudWxsLCJ0YXBpcy91c2VybmFtZSI6InRlc3R1c2VyMSIsInRhcGlzL2FjY291bnRfdHlwZSI6InVzZXIiLCJleHAiOjE3ODI4Mzg0MzZ9.OElQtm2H-BZTsmK1V-Ey36jgQJmzME4wfBu0QQ9CwnQ7IJT8qQMlU_cbFZPiNAfAj9xCpOC9-NskUE0ZzYcbvmFt-rzAwzjwLSS1Akx4B2aENsOEZLmLYnqo8eY_qde0rYbyVt0KtemsAZrx2Y7vrEiwWDKRyvAE-b52Knpc_Xoqmv9NcyinYi7Bi2x9S0IswGev3KZr2D4nwZAmTrgHQ3lp1NbyySJE0HKTXfr4P4gIo2FBFm0Kk_k9xJlJlcT4d2Jf-7YRtIMM9G8Y4sateVepxBA0v8F6b_OxX-LeEHeH-MeD-7MNLFayi2MIQGjXNB3J6Zrl6qWFBMDlxA8PDw";
+      ownerUserJWT = testUser1JWT;
       // Long term JWT for testuser3 - expires approx 1 July 2026
-      newOwnerUserJWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJlNmIwMTRiOC05MGY1LTRjY2EtODhmYy1iYmIwYWJkMWZkODciLCJpc3MiOiJodHRwczovL2Rldi5kZXZlbG9wLnRhcGlzLmlvL3YzL3Rva2VucyIsInN1YiI6InRlc3R1c2VyM0BkZXYiLCJ0YXBpcy90ZW5hbnRfaWQiOiJkZXYiLCJ0YXBpcy90b2tlbl90eXBlIjoiYWNjZXNzIiwidGFwaXMvZGVsZWdhdGlvbiI6ZmFsc2UsInRhcGlzL2RlbGVnYXRpb25fc3ViIjpudWxsLCJ0YXBpcy91c2VybmFtZSI6InRlc3R1c2VyMyIsInRhcGlzL2FjY291bnRfdHlwZSI6InVzZXIiLCJleHAiOjE3ODI4Mzg2MjV9.yhAHhvFy5APE0gLw47qEv_aay3RmJZkd5Ik7WGmjh0QHrV9gCCxNIVGLKUSBOeKnocDLN9_dpGD0DL4OFiGcKrE9MaI9bYuL4j8BrxEf3Faa64B3IK38zml2Bx1nzpTAxkP6SJy6NENWFhbGg3MRa05oo8R2XctXoOBq8lb3I__zrwzKxQymF9L25hPzivBKaAkpIfVgsd2EGG8UdiExkK8yBRUDddK_I9BNn0VrzaJ0teLg_aOi-vyZN7JfT2VlQqgdMfvVGvH2O8Lt8BBvBs3dm7ODfSbxz1S5FHCYHvSV0H7h4lHA-yumU1I9vDi4K-_6gamHVfMMCqyYRLdJxA";
+      newOwnerUserJWT = testUser3JWT;
 //      filesServiceJWT = tokClient.getSvcToken(adminTenantName, filesSvcName, DEFAULT_TARGET_SITE);
     } catch (Exception e) {
       throw new Exception("Exception while creating tokens or auth service", e);
@@ -169,87 +179,88 @@ public class UserTest
     // Get the app and check the defaults
     TapisApp tmpApp = usrClient.getApp(appId);
     Assert.assertNotNull(tmpApp, "Failed to create item: " + appId);
-    System.out.println("Found item: " + appId);
+    System.out.println("Found item: " + tmpApp.getId());
     Utils.verifyAppDefaults(tmpApp, appId);
   }
 
-  // Create a system using minimal attributes, get the system, use modified result to
-  //  create a new system and update the original system using PUT.
+  // Create an app using minimal attributes, get the app, use modified result to
+  //  create a new app and update the original app using PUT.
   // Confirm that defaults are as expected
   @Test
   public void testMinimalCreateGetPutAndCreate() throws Exception
   {
-//    // Create a LINUX system using minimal attributes
-//    String[] sys0 = systems.get(5);
-//    System.out.println("Creating system with name: " + sys0[1]);
-//    try {
-//      String respUrl = Utils.createSystemMinimal(usrClient, sys0);
-//      System.out.println("Created system: " + respUrl);
-//      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
-//    } catch (Exception e) {
-//      System.out.println("Caught exception: " + e);
-//      Assert.fail();
-//    }
-//
-//    // Get the system and check the defaults
-//    TapisSystem tmpSys = usrClient.getSystem(sys0[1]);
-//    Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
-//    System.out.println("Found item: " + sys0[1]);
-//    Utils.verifySystemDefaults(tmpSys, sys0, sys0[1]);
-//
-//    // Modify result and create a new system
-//    String newId = sys0[1] + "new";
-//    tmpSys.setId(newId);
-//    try {
-//      String respUrl = Utils.createSystemMinimal2(usrClient, tmpSys);
-//      System.out.println("Created system: " + respUrl);
-//      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
-//    } catch (Exception e) {
-//      System.out.println("Caught exception: " + e);
-//      Assert.fail();
-//    }
-//    // Get the system and check the defaults
-//    tmpSys = usrClient.getSystem(tmpSys.getId());
-//    Assert.assertNotNull(tmpSys, "Failed to create item: " + newId);
-//    System.out.println("Found item: " + newId);
-//    Utils.verifySystemDefaults(tmpSys, sys0, newId);
-//
-//    // Do not modify result and use PUT to update. Nothing should change.
-//    tmpSys.setId(sys0[1]);
-//    try {
-//      ReqPutSystem reqPutSystem = SystemsClient.buildReqPutSystem(tmpSys);
-//      String respUrl = usrClient.putSystem(tmpSys.getId(),  reqPutSystem);
-//      System.out.println("Updated system using PUT. System: " + respUrl);
-//      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
-//    } catch (Exception e) {
-//      System.out.println("Caught exception: " + e);
-//      Assert.fail();
-//    }
-//    // Get the system and check the defaults. Nothing should have changed.
-//    tmpSys = usrClient.getSystem(tmpSys.getId());
-//    Assert.assertNotNull(tmpSys, "Failed to create item: " + newId);
-//    System.out.println("Found item: " + tmpSys.getId());
-//
-//    // Modify result and use PUT to update. Verify updated attribute
-//    tmpSys.setId(sys0[1]);
-//    String newJobWorkDir = "/new/work/dir";
-//    tmpSys.setJobWorkingDir(newJobWorkDir);
-//    try {
-//      ReqPutSystem reqPutSystem = SystemsClient.buildReqPutSystem(tmpSys);
-//      String respUrl = usrClient.putSystem(tmpSys.getId(),  reqPutSystem);
-//      System.out.println("Updated system using PUT. System: " + respUrl);
-//      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
-//    } catch (Exception e) {
-//      System.out.println("Caught exception: " + e);
-//      Assert.fail();
-//    }
-//    // Get the system and check the updated attribute.
-//    tmpSys = usrClient.getSystem(tmpSys.getId());
-//    Assert.assertNotNull(tmpSys, "Failed to create item: " + newId);
-//    System.out.println("Found item: " + tmpSys.getId());
-//    Assert.assertEquals(tmpSys.getJobWorkingDir(), newJobWorkDir, "Failed to update jobWorkingDir using PUT");
-  }
+    // Create a BATCH app using minimal attributes
+    String[] app0 = apps.get(5);
+    String appId = app0[1];
+    System.out.println("Creating app with name: " + appId);
+    try {
+      String respUrl = Utils.createAppMinimal(usrClient, app0);
+      System.out.println("Created app: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
 
+    // Get the app and check the defaults
+    TapisApp tmpApp = usrClient.getApp(appId);
+    Assert.assertNotNull(tmpApp, "Failed to create item: " + appId);
+    System.out.println("Found item: " + tmpApp.getId());
+    Utils.verifyAppDefaults(tmpApp, appId);
+
+    // Modify result and create a new app
+    String newId = appId + "new";
+    tmpApp.setId(newId);
+    try {
+      String respUrl = Utils.createAppFromTapisApp(usrClient, tmpApp);
+      System.out.println("Created system: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
+    // Get the app and check the defaults
+    tmpApp = usrClient.getApp(newId);
+    Assert.assertNotNull(tmpApp, "Failed to create item: " + newId);
+    System.out.println("Found item: " + tmpApp.getId());
+    Utils.verifyAppDefaults(tmpApp, newId);
+
+    // For the new app do not modify result and use PUT to update. Nothing should change.
+    tmpApp.setId(newId);
+    try {
+      ReqPutApp reqPutApp = AppsClient.buildReqPutApp(tmpApp);
+      String respUrl = usrClient.putApp(newId, tmpApp.getVersion(),  reqPutApp);
+      System.out.println("Updated application using PUT. Application: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
+    // Get the new app and check the defaults. Nothing should have changed.
+    tmpApp = usrClient.getApp(newId);
+    Assert.assertNotNull(tmpApp, "Failed to create item: " + newId);
+    System.out.println("Found item: " + tmpApp.getId());
+    Utils.verifyAppDefaults(tmpApp, newId);
+
+    // For the new app modify result and use PUT to update. Verify updated attribute
+    tmpApp.setId(newId);
+    String newContainerImage = defaultContainerImage + "New";
+    tmpApp.setContainerImage(newContainerImage);
+    try {
+      ReqPutApp reqPutApp = AppsClient.buildReqPutApp(tmpApp);
+      String respUrl = usrClient.putApp(newId, tmpApp.getVersion(),  reqPutApp);
+      System.out.println("Updated application using PUT. App: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
+    // Get the new app and check the updated attribute.
+    tmpApp = usrClient.getApp(newId);
+    Assert.assertNotNull(tmpApp, "Failed to create item: " + newId);
+    System.out.println("Found item: " + tmpApp.getId());
+    Assert.assertEquals(tmpApp.getContainerImage(), newContainerImage, "Failed to update containerImage using PUT");
+  }
 
   @Test(expectedExceptions = {TapisClientException.class}, expectedExceptionsMessageRegExp = "^APPAPI_APP_EXISTS.*")
   public void testCreateAppAlreadyExists() throws Exception {
@@ -280,89 +291,244 @@ public class UserTest
 
     TapisApp tmpApp = usrClient.getApp(app0[1], app0[2]);
     Assert.assertNotNull(tmpApp, "Failed to create item: " + app0[1]);
-    System.out.println("Found item: " + app0[1]);
+    System.out.println("Found item: " + tmpApp.getId());
     verifyAppAttributes(tmpApp, app0);
   }
 
   @Test
-  public void testUpdateApp() {
-//    String[] app0 = apps.get(15);
-////    String[] app0 = {tenantName, appId, appVersion, "description "+suffix, appTypeBatch.name(), ownerUser1,
-////            runtime.name(), runtimeVersion+suffix, containerImage+suffix, jobDescription+suffix,
-////            execSystemId, execSystemExecDir+suffix, execSystemInputDir+suffix, execSystemOutputDir+suffix,
-////            execSystemLogicalQueue+suffix, archiveSystemId, archiveSystemDir+suffix};
-//    String[] appF2 = app0.clone();
-//    appF2[2] = "description PATCHED";
-//    appF2[] = "pATCHED";
-//    appF2[] = ;
-//    ReqPatchApp rApp = createPatchApp(appF2);
-//    System.out.println("Creating and updating app with name: " + app0[1]);
-//    try {
-//      // Create a app
-//      String respUrl = Utils.createApp(usrClient, app0);
-//      System.out.println("Created app: " + respUrl);
-//      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
-//      // Update the app
-//      respUrl = usrClient.updateApp(app0[1], app0[2], rApp);
-//      System.out.println("Updated app: " + respUrl);
-//      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
-//      // Verify attributes
-//      app0 = appF2;
-//      TapisApp tmpApp = usrClient.getApp(app0[1], app0[2]);
-//      Assert.assertNotNull(tmpApp, "Failed to create item: " + app0[1]);
-//      System.out.println("Found item: " + app0[1]);
-//      Assert.assertEquals(tmpApp.getId(), app0[1]);
-//      Assert.assertEquals(tmpApp.getDescription(), app0[2]);
-////      Assert.assertEquals(tmpApp.getAppType().name(), app0[3]);
-//      Assert.assertEquals(tmpApp.getOwner(), app0[4]);
-//      // Verify capabilities
-////      List<Capability> jobCaps = tmpApp.getJobCapabilities();
-////      Assert.assertNotNull(jobCaps);
-////      Assert.assertEquals(jobCaps.size(), jobCaps2.size());
-////      var capNamesFound = new ArrayList<String>();
-////      for (Capability capFound : jobCaps) {capNamesFound.add(capFound.getName());}
-////      for (Capability capSeed : jobCaps2)
-////      {
-////        Assert.assertTrue(capNamesFound.contains(capSeed.getName()), "List of capabilities did not contain a capability named: " + capSeed.getName());
-////      }
-//      // Verify tags
-//      List<String> tmpTags = tmpApp.getTags();
-//      Assert.assertNotNull(tmpTags, "Tags value was null");
-//      Assert.assertEquals(tmpTags.size(), tags2.size(), "Wrong number of tags");
-//      for (String tagStr : tags2)
-//      {
-//        Assert.assertTrue(tmpTags.contains(tagStr));
-//        System.out.println("Found tag: " + tagStr);
-//      }
-//      // Verify notes
-//      String tmpNotesStr = (String) tmpApp.getNotes();
-//      System.out.println("Found notes: " + tmpNotesStr);
-//      JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(tmpNotesStr, JsonObject.class);
-//      Assert.assertNotNull(tmpNotes);
-//      System.out.println("Found notes: " + tmpNotesStr);
-//      Assert.assertTrue(tmpNotes.has("project"));
-//      Assert.assertEquals(tmpNotes.get("project").getAsString(), notes2JO.get("project").getAsString());
-//      Assert.assertTrue(tmpNotes.has("testdata"));
-//      Assert.assertEquals(tmpNotes.get("testdata").getAsString(), notes2JO.get("testdata").getAsString());
-//    } catch (Exception e) {
-//      System.out.println("Caught exception: " + e);
-//      Assert.fail();
-//    }
+  public void testPatchApp() {
+    String[] app0 = apps.get(8);
+    String appId = app0[1];
+    String appVersion = app0[2];
+//    String[] app0 = {tenantName, appId, appVersion, "description "+suffix, appTypeBatch.name(), ownerUser1,
+//            runtime.name(), runtimeVersion+suffix, containerImage+suffix, jobDescription+suffix,
+//            execSystemId, execSystemExecDir+suffix, execSystemInputDir+suffix, execSystemOutputDir+suffix,
+//            execSystemLogicalQueue+suffix, archiveSystemId, archiveSystemDir+suffix};
+    String newDescription = "description PATCHED";
+    String newContainerImage = "containerImagePATCHED";
+    String[] appF2 = app0.clone();
+    appF2[3] = newDescription;
+    appF2[8] = newContainerImage;
+    // Create a patch app request that updates: description, containerImage, tags, notes.
+    ReqPatchApp rApp = createPatchApp(newDescription, newContainerImage);
+    System.out.println("Creating and updating app with name: " + appId);
+    try {
+      // Create an app
+      String respUrl = Utils.createApp(usrClient, app0);
+      System.out.println("Created app: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+      // Update the app
+      respUrl = usrClient.patchApp(appId, appVersion, rApp);
+      System.out.println("Patched app: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+      // Verify patched attributes
+      app0 = appF2;
+      TapisApp tmpApp = usrClient.getApp(appId);
+      Assert.assertNotNull(tmpApp, "Failed to create item: " + appId);
+      System.out.println("Found item: " + tmpApp.getId());
+      Assert.assertEquals(tmpApp.getId(), appId);
+      Assert.assertEquals(tmpApp.getVersion(), appVersion);
+      Assert.assertEquals(tmpApp.getDescription(), newDescription);
+      Assert.assertEquals(tmpApp.getContainerImage(), newContainerImage);
+      // Verify tags
+      List<String> tmpTags = tmpApp.getTags();
+      Assert.assertNotNull(tmpTags, "Tags value was null");
+      Assert.assertEquals(tmpTags.size(), tags2.size(), "Wrong number of tags");
+      for (String tagStr : tags2)
+      {
+        Assert.assertTrue(tmpTags.contains(tagStr), "List of tags did not contain a tag named: " + tagStr);
+        System.out.println("Found tag: " + tagStr);
+      }
+      // Verify notes
+      String tmpNotesStr = (String) tmpApp.getNotes();
+      System.out.println("Found notes: " + tmpNotesStr);
+      JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(tmpNotesStr, JsonObject.class);
+      Assert.assertNotNull(tmpNotes);
+      System.out.println("Found notes: " + tmpNotesStr);
+      Assert.assertTrue(tmpNotes.has("project"), "Notes json did not contain project");
+      Assert.assertEquals(tmpNotes.get("project").getAsString(), notes2JO.get("project").getAsString());
+      Assert.assertTrue(tmpNotes.has("testdata"), "Notes json did not contain testdata");
+      Assert.assertEquals(tmpNotes.get("testdata").getAsString(), notes2JO.get("testdata").getAsString());
+
+      // Verify unpatched attributes
+      // TODO currently this is mostly copy/paste from Utils.verifyAppAttributes()
+      // TODO can we use Utils.verifyAppAttrs? or maybe refactor to have a verifyCommonAttrs?
+      Assert.assertEquals(tmpApp.getTenant(), tenantName);
+      Assert.assertEquals(tmpApp.getId(), appId);
+      Assert.assertEquals(tmpApp.getVersion(), appVersion);
+      Assert.assertNotNull(tmpApp.getAppType());
+      Assert.assertEquals(tmpApp.getAppType().name(), app0[4]);
+      Assert.assertEquals(tmpApp.getOwner(), app0[5]);
+      Assert.assertEquals(tmpApp.getEnabled(), Boolean.valueOf(isEnabledTrue));
+      Assert.assertNotNull(tmpApp.getRuntime());
+      Assert.assertEquals(tmpApp.getRuntime().name(), app0[6]);
+      Assert.assertEquals(tmpApp.getRuntimeVersion(), app0[7]);
+      // Verify runtimeOptions
+      List<RuntimeOptionEnum> rtOps = tmpApp.getRuntimeOptions();
+      Assert.assertNotNull(rtOps);
+      for (RuntimeOptionEnum rtOption : runtimeOptions1)
+      {
+        Assert.assertTrue(rtOps.contains(rtOption), "List of runtime options did not contain: " + rtOption.name());
+      }
+      Assert.assertEquals(tmpApp.getMaxJobs(), Integer.valueOf(maxJobsMAX));
+      Assert.assertEquals(tmpApp.getMaxJobsPerUser(), Integer.valueOf(maxJobsPerUserMAX));
+      Assert.assertEquals(tmpApp.getStrictFileInputs(), Boolean.valueOf(strictFileInputsFalse));
+      // ========== JobAttributes
+      JobAttributes jobAttributes = tmpApp.getJobAttributes();
+      Assert.assertNotNull(jobAttributes);
+      Assert.assertEquals(jobAttributes.getDescription(), app0[9]);
+      Assert.assertEquals(jobAttributes.getDynamicExecSystem(), Boolean.valueOf(dynamicExecSystemTrue));
+      Assert.assertEquals(jobAttributes.getExecSystemId(), app0[10]);
+      Assert.assertEquals(jobAttributes.getExecSystemExecDir(), app0[11]);
+      Assert.assertEquals(jobAttributes.getExecSystemInputDir(), app0[12]);
+      Assert.assertEquals(jobAttributes.getExecSystemOutputDir(), app0[13]);
+      Assert.assertEquals(jobAttributes.getExecSystemLogicalQueue(), app0[14]);
+      Assert.assertEquals(jobAttributes.getArchiveSystemId(), app0[15]);
+      Assert.assertEquals(jobAttributes.getArchiveSystemDir(), app0[16]);
+      Assert.assertEquals(jobAttributes.getArchiveOnAppError(), Boolean.valueOf(archiveOnAppErrorTrue));
+      Assert.assertEquals(jobAttributes.getNodeCount(), Integer.valueOf(nodeCount));
+      Assert.assertEquals(jobAttributes.getCoresPerNode(), Integer.valueOf(coresPerNode));
+      Assert.assertEquals(jobAttributes.getMemoryMB(), Integer.valueOf(memoryMb));
+      Assert.assertEquals(jobAttributes.getMaxMinutes(), Integer.valueOf(maxMinutes));
+      // TODO Verify fileInputs
+      // TODO only meta.name is checked
+      List<FileInputDefinition> tFileInputs = jobAttributes.getFileInputDefinitions();
+      Assert.assertNotNull(tFileInputs, "FileInputs list should not be null.");
+      Assert.assertEquals(tFileInputs.size(), fileInputDefinitions.size(), "Wrong number of FileInputs");
+      var metaNamesFound = new ArrayList<String>();
+      for (FileInputDefinition itemFound : tFileInputs)
+      {
+        Assert.assertNotNull(itemFound.getMeta(), "FileInput meta value should not be null.");
+        metaNamesFound.add(itemFound.getMeta().getName());
+      }
+      for (FileInputDefinition itemSeedItem : fileInputDefinitions)
+      {
+        Assert.assertNotNull(itemSeedItem.getMeta());
+        Assert.assertTrue(metaNamesFound.contains(itemSeedItem.getMeta().getName()),
+                "List of fileInputs did not contain an item with metaName: " + itemSeedItem.getMeta().getName());
+      }
+      // TODO Verify notificationSubscriptions
+      // TODO: Filter is checked but not mechanisms
+      List<NotificationSubscription> tSubscriptions = jobAttributes.getSubscriptions();
+      Assert.assertNotNull(tSubscriptions, "Subscriptions list should not be null.");
+      Assert.assertEquals(tSubscriptions.size(), notifList1.size(), "Wrong number of Subscriptions");
+      var filtersFound = new ArrayList<String>();
+      for (NotificationSubscription itemFound : tSubscriptions)
+      {
+        Assert.assertNotNull(itemFound.getFilter(), "Subscription filter should not be null.");
+        filtersFound.add(itemFound.getFilter());
+      }
+      for (NotificationSubscription itemSeedItem : notifList1)
+      {
+        Assert.assertTrue(filtersFound.contains(itemSeedItem.getFilter()),
+                "List of subscriptions did not contain a filter: " + itemSeedItem.getFilter());
+      }
+      // Verify jobTags
+      List<String> tmpJobTags = jobAttributes.getTags();
+      Assert.assertNotNull(tmpJobTags, "jobTags value was null");
+      Assert.assertEquals(tmpJobTags.size(), jobTags.size(), "Wrong number of jobTags");
+      for (String tagStr : jobTags)
+      {
+        Assert.assertTrue(tmpJobTags.contains(tagStr));
+        System.out.println("Found jobTag: " + tagStr);
+      }
+      // ========== ParameterSet
+      ParameterSet parameterSet = jobAttributes.getParameterSet();
+      Assert.assertNotNull(parameterSet, "ParameterSet should not be null.");
+      // TODO Verify appArgs
+//    // TODO Arg value is checked but not arg metadata
+      List<ArgSpec> tmpArgs = parameterSet.getAppArgs();
+      Assert.assertNotNull(tmpArgs, "Fetched appArgs was null");
+      Assert.assertEquals(tmpArgs.size(), appArgs.size());
+      var argValuesFound = new ArrayList<String>();
+      for (ArgSpec itemFound : tmpArgs) {argValuesFound.add(itemFound.getArg());}
+      for (ArgSpec itemSeedItem : appArgs)
+      {
+        Assert.assertTrue(argValuesFound.contains(itemSeedItem.getArg()),
+                "List of appArgs did not contain an item with arg value: " + itemSeedItem.getArg());
+      }
+      // Verify containerArgs
+      // TODO: Check metadata
+      tmpArgs = parameterSet.getContainerArgs();
+      Assert.assertNotNull(tmpArgs, "Fetched containerArgs was null");
+      Assert.assertEquals(tmpArgs.size(), containerArgs.size());
+      argValuesFound = new ArrayList<>();
+      for (ArgSpec itemFound : tmpArgs) {argValuesFound.add(itemFound.getArg());}
+      for (ArgSpec itemSeedItem : containerArgs)
+      {
+        Assert.assertTrue(argValuesFound.contains(itemSeedItem.getArg()),
+                "List of containerArgs did not contain an item with arg value: " + itemSeedItem.getArg());
+      }
+      // Verify schedulerOptions
+      // TODO: Check metadata
+      tmpArgs = parameterSet.getSchedulerOptions();
+      Assert.assertNotNull(tmpArgs, "Fetched schedulerOptions was null");
+      Assert.assertEquals(tmpArgs.size(), schedulerOptions.size());
+      argValuesFound = new ArrayList<>();
+      for (ArgSpec itemFound : tmpArgs) {argValuesFound.add(itemFound.getArg());}
+      for (ArgSpec itemSeedItem : schedulerOptions)
+      {
+        Assert.assertTrue(argValuesFound.contains(itemSeedItem.getArg()),
+                "List of schedulerOptions did not contain an item with arg value: " + itemSeedItem.getArg());
+      }
+      // Verify envVariables
+      List<KeyValuePair> tmpEnvVariables = parameterSet.getEnvVariables();
+      Assert.assertNotNull(tmpEnvVariables, "ParameterSet envVariables value was null");
+      Assert.assertEquals(tmpEnvVariables.size(), envVariables.size(), "Wrong number of envVariables");
+      List<String> kvFoundList = new ArrayList<>();
+      for (KeyValuePair kv : tmpEnvVariables)
+      {
+        kvFoundList.add(kv.getKey() + "=" + kv.getValue());
+        System.out.println("Found envVariable: " + kv.getKey() + "=" + kv.getValue());
+      }
+      for (KeyValuePair kv : envVariables)
+      {
+        String kvStr = kv.getKey() + "=" + kv.getValue();
+        Assert.assertTrue(kvFoundList.contains(kvStr),
+                "List of envVariables did not contain an item with key=value of : " + kvStr);
+      }
+      // Verify archiveFilter includes and excludes
+      ParameterSetArchiveFilter archiveFilter = parameterSet.getArchiveFilter();
+      Assert.assertNotNull(archiveFilter, "ParameterSetArchiveFilter was null");
+      List<String> tmpFileList = archiveFilter.getIncludes();
+      Assert.assertNotNull(tmpFileList, "includes list from ParameterSetArchiveFilter was null");
+      Assert.assertEquals(tmpFileList.size(), archiveIncludes.size(), "Wrong number of archiveIncludes");
+      for (String tmpStr : archiveIncludes)
+      {
+        Assert.assertTrue(tmpFileList.contains(tmpStr));
+        System.out.println("Found archiveInclude: " + tmpStr);
+      }
+      tmpFileList = archiveFilter.getExcludes();
+      Assert.assertNotNull(tmpFileList, "excludes list from ParameterSetArchiveFilter was null");
+      Assert.assertEquals(tmpFileList.size(), archiveExcludes.size(), "Wrong number of archiveExcludes");
+      for (String tmpStr : archiveExcludes)
+      {
+        Assert.assertTrue(tmpFileList.contains(tmpStr));
+        System.out.println("Found archiveExclude: " + tmpStr);
+      }
+      Assert.assertNotNull(tmpApp.getCreated(), "Fetched created timestamp should not be null.");
+      Assert.assertNotNull(tmpApp.getUpdated(), "Fetched updated timestamp should not be null.");
+    }
+    catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
   }
 
   @Test
   public void testChangeOwner() throws Exception {
     // Create the app
     String[] app0 = apps.get(16);
+    String appId = app0[1];
     String respUrl = Utils.createApp(usrClient, app0);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
-    TapisApp tmpApp = usrClient.getApp(app0[1], app0[2]);
-    Assert.assertNotNull(tmpApp, "Failed to create item: " + app0[1]);
-    usrClient.changeAppOwner(app0[1], newOwnerUser);
+    TapisApp tmpApp = usrClient.getApp(appId, app0[2]);
+    Assert.assertNotNull(tmpApp, "Failed to create item: " + appId);
+    usrClient.changeAppOwner(appId, newOwnerUser);
     // Now that owner has given away ownership we need to be newOwnerUser or admin to get the app
-    tmpApp = Utils.getClientUsr(serviceURL, newOwnerUserJWT).getApp(app0[1], app0[2]);
-    Assert.assertNotNull(tmpApp, "Unable to get app after change of owner. App: " + app0[1]);
-    System.out.println("Found item: " + app0[1]);
+    tmpApp = Utils.getClientUsr(serviceURL, newOwnerUserJWT).getApp(appId, app0[2]);
+    Assert.assertNotNull(tmpApp, "Unable to get app after change of owner. App: " + appId);
+    System.out.println("Found item: " + tmpApp.getId());
     Assert.assertEquals(tmpApp.getOwner(), newOwnerUser);
   }
 
@@ -398,16 +564,21 @@ public class UserTest
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     // Enabled should start off true, then become false and finally true again.
     TapisApp tmpApp = usrClient.getApp(appId, appVer);
+    Assert.assertNotNull(tmpApp.getEnabled());
     Assert.assertTrue(tmpApp.getEnabled());
     Assert.assertTrue(usrClient.isEnabled(appId));
 
     int changeCount = usrClient.disableApp(appId);
+    Assert.assertEquals(changeCount, 1, "ChangeCount should be 1");
     tmpApp = usrClient.getApp(appId, appVer);
+    Assert.assertNotNull(tmpApp.getEnabled());
     Assert.assertFalse(tmpApp.getEnabled());
     Assert.assertFalse(usrClient.isEnabled(appId));
 
     changeCount = usrClient.enableApp(appId);
+    Assert.assertEquals(changeCount, 1, "ChangeCount should be 1");
     tmpApp = usrClient.getApp(appId, appVer);
+    Assert.assertNotNull(tmpApp.getEnabled());
     Assert.assertTrue(tmpApp.getEnabled());
     Assert.assertTrue(usrClient.isEnabled(appId));
   }
@@ -416,14 +587,15 @@ public class UserTest
   public void testDelete() throws Exception {
     // Create the app
     String[] app0 = apps.get(6);
+    String appId = app0[1];
     String respUrl = Utils.createApp(usrClient, app0);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Delete the app
-    usrClient.deleteApp(app0[1]);
+    usrClient.deleteApp(appId);
     try {
-      usrClient.getApp(app0[1], app0[2]);
-      Assert.fail("App not deleted. App name: " + app0[1]);
+      usrClient.getApp(appId, app0[2]);
+      Assert.fail("App not deleted. App name: " + appId);
     } catch (TapisClientException e) {
       Assert.assertEquals(e.getCode(), 404);
     }
@@ -433,17 +605,18 @@ public class UserTest
   @Test
   public void testUserPerms() {
     String[] app0 = apps.get(10);
+    String appId = app0[1];
     // Create a app
-    System.out.println("Creating app with name: " + app0[1]);
+    System.out.println("Creating app with name: " + appId);
     try {
       String respUrl = Utils.createApp(usrClient, app0);
       System.out.println("Created app: " + respUrl);
       System.out.println("Testing perms for user: " + newPermsUser);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
       // Create user perms for the app
-      usrClient.grantUserPermissions(app0[1], newPermsUser, testPerms);
+      usrClient.grantUserPermissions(appId, newPermsUser, testPerms);
       // Get the app perms for the user and make sure permissions are there
-      List<String> userPerms = usrClient.getAppPermissions(app0[1], newPermsUser);
+      List<String> userPerms = usrClient.getAppPermissions(appId, newPermsUser);
       Assert.assertNotNull(userPerms, "Null returned when retrieving perms.");
       for (String perm : userPerms) {
         System.out.println("After grant found user perm: " + perm);
@@ -453,9 +626,9 @@ public class UserTest
         if (!userPerms.contains(perm)) Assert.fail("User perms should contain permission: " + perm);
       }
       // Remove perms for the user
-      usrClient.revokeUserPermissions(app0[1], newPermsUser, testPerms);
+      usrClient.revokeUserPermissions(appId, newPermsUser, testPerms);
       // Get the app perms for the user and make sure permissions are gone.
-      userPerms = usrClient.getAppPermissions(app0[1], newPermsUser);
+      userPerms = usrClient.getAppPermissions(appId, newPermsUser);
       Assert.assertNotNull(userPerms, "Null returned when retrieving perms.");
       for (String perm : userPerms) {
         System.out.println("After revoke found user perm: " + perm);
@@ -473,7 +646,7 @@ public class UserTest
   //  - get app, isEnabled, enable/disable, delete/undelete, changeOwner
   //  - get perms, grant perms, revoke perms
   @Test
-  public void testMissingApp() throws Exception
+  public void testMissingApp()
   {
     String fakeAppName = "AMissingAppName";
     String fakeUserName = "AMissingUserName";
@@ -606,11 +779,11 @@ public class UserTest
   // =========  Private methods ==========================================
   // =====================================================================
 
-  private static ReqPatchApp createPatchApp(String[] app)
+  private static ReqPatchApp createPatchApp(String newDescription, String newContainerImage)
   {
     ReqPatchApp pApp = new ReqPatchApp();
-    pApp.description(app[2]);
-//    pApp.jobCapabilities(jobCaps2);
+    pApp.description(newDescription);
+    pApp.containerImage(newContainerImage);
     pApp.tags(tags2);
     pApp.notes(notes2JO);
     return pApp;
