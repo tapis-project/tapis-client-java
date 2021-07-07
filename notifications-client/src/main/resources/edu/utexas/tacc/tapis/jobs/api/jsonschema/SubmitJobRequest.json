@@ -1,0 +1,180 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://tapis.tacc.utexas.edu/SubmitJobRequest",
+    "description": "Top-level schema for job submission request",
+    "additionalProperties": false,
+    "type": "object",
+        "properties": {
+          "name": {
+            "$comment": "Required human readable job name",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "owner": {
+            "$comment": "User ID under which the job runs",
+            "type": "string",
+            "maxLength": 64
+          },
+          "tenant": {
+            "$comment": "Tenant of job owner",
+            "type": "string",
+            "maxLength": 24
+          },
+          "description": {
+            "$comment": "Human readable job description",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "appId": {
+            "$comment": "Unique name of application to be executed",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "appVersion": {
+            "$comment": "Application version to be executed",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "archiveOnAppError": {
+            "$comment": "Whether archiving should proceed even if application reports an error, default=true",
+            "type": "boolean"
+          },
+          "dynamicExecSystem": {
+            "$comment": "Whether the best fit execution system should be chosen using execSystemConstraints, default=false",
+            "type": "boolean"
+          },
+          "execSystemId": {
+            "$comment": "Execution system ID",
+            "type": "string",
+            "maxLength": 80
+          },
+          "execSystemExecDir": {
+            "$comment": "Directory into which application assets are staged, default=${jobWorkingDir}/jobs/${jobID} where ${jobWorkingDir} = execution system working directory and ${jobID} = uuid of job assigned by Jobs service",
+            
+            "type": "string",
+            "maxLength": 4096
+          },
+          "execSystemInputDir": {
+            "$comment": "Directory into which input files are staged, default=${jobWorkingDir}/jobs/${jobID} where ${jobWorkingDir} = execution system working directory and ${jobID} = uuid of job assigned by Jobs service",
+            "type": "string",
+            "maxLength": 4096
+          },
+          "execSystemOutputDir": {
+            "$comment": "Directory into which application writes its output, default=${jobWorkingDir}/jobs/${jobID}/output where ${jobWorkingDir} = execution system working directory and ${jobID} = uuid of job assigned by Jobs service",
+            "type": "string",
+            "maxLength": 4096
+          },
+          "execSystemLogicalQueue": {
+            "$comment": "Tapis-defined queue that corresponds to a batch queue on the execution system",
+            "type": "string",
+            "maxLength": 80
+          },
+          "archiveSystemId": {
+            "$comment": "Archive system ID",
+            "type": "string",
+            "maxLength": 80
+          },
+          "archiveSystemDir": {
+            "$comment": "Directory into which output files are archived after application execution",
+            "type": "string",
+            "maxLength": 4096
+          },
+          "nodeCount": {
+            "$comment": "Number of nodes required for application execution, default=1",
+            "type": "integer"
+          },
+          "coresPerNode": {
+            "$comment": "Number of cores to use on each node, default=1",
+            "type": "integer"
+          },
+          "memoryMB": {
+            "$comment": "Megabytes of memory to use on each node, default=100",
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxMinutes": {
+            "$comment": "Maximum number of minutes allowed for job execution, default=10",
+            "type": "integer",
+            "minimum": 1
+          },
+          "fileInputs": {
+            "$comment": "Input files staged for the application",
+            "type": "array",
+            "items": {"$ref": "resource:///edu/utexas/tacc/tapis/shared/jsonschema/defs/TapisDefinitions.json#/$defs/InputSpec"},
+            "uniqueItems": true
+          },
+          "parameterSet": {
+            "$comment": "Runtime parameters organized by category",
+            "type": "object",
+            "$ref": "#/$defs/Parameters"
+          },
+          "execSystemConstraints": {
+            "$comment": "Constraints applied against execution system capabilities to validate application/system compatibility",
+            "type": "object",
+            "$ref": "resource:///edu/utexas/tacc/tapis/shared/jsonschema/defs/TapisDefinitions.json#/$defs/Constraint"
+          },
+          "subscriptions": {
+            "$comment": "Subscribe to the job's events",
+            "type": "array",
+            "items": {"$ref": "resource:///edu/utexas/tacc/tapis/shared/jsonschema/defs/TapisDefinitions.json#/$defs/NotificationSubscription"},
+            "uniqueItems": true
+          },
+          "tags": {
+            "$comment": "An array of user-chosen strings that can be associated with a job",
+            "type": "array",
+            "items": {"type": "string", "minLength": 1, "maxLength": 126},
+            "uniqueItems": true
+          }
+        },
+    "required": [
+        "name",
+        "appId",
+        "appVersion"
+    ],
+    "$defs": {
+        "Parameters": {
+            "type": "object",
+                "properties": {
+                    "appArgs": {
+                        "$comment": "Command line arguments passed to the user application",
+                        "type": "array",
+                        "items": {"$ref": "resource:///edu/utexas/tacc/tapis/shared/jsonschema/defs/TapisDefinitions.json#/$defs/ArgSpec"},
+                        "uniqueItems": true
+                    },
+                    "containerArgs": {
+                        "$comment": "Command line arguments passed to the container runtime when running a container",
+                        "type": "array",
+                        "items": {"$ref": "resource:///edu/utexas/tacc/tapis/shared/jsonschema/defs/TapisDefinitions.json#/$defs/ArgSpec"},
+                        "uniqueItems": true
+                    },
+                    "schedulerOptions": {
+                        "$comment": "Arguments passed to the HPC batch scheduler",
+                        "type": "array",
+                        "items": {"$ref": "resource:///edu/utexas/tacc/tapis/shared/jsonschema/defs/TapisDefinitions.json#/$defs/ArgSpec"},
+                        "uniqueItems": true
+                    },
+                    "envVariables": {
+                        "$comment": "Environment variables passed into the application container on start up",
+                        "type": "array",
+                        "items": {"$ref": "resource:///edu/utexas/tacc/tapis/shared/jsonschema/defs/TapisDefinitions.json#/$defs/KeyValuePair"},
+                        "uniqueItems": true
+                    },
+                    "archiveFilter": {
+                        "$comment": "Output files to include and exclude from archiving, wildcard and regex support, default=all files in execSystemOutputDir",
+                        "type": "object",
+                        "properties": {
+                            "includes": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+                            "excludes": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+                            "includeLaunchFiles": {"type": "boolean"}
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "additionalProperties": false
+        }
+    }
+}
