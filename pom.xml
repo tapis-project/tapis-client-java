@@ -111,7 +111,7 @@
     </profiles>
 
     <modules>
-        <module>shared</module>
+        <module>shared-clientlib</module>
         <module>auth-client</module>
         <module>security-client</module>
         <module>tokens-client</module>

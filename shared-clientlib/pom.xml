@@ -5,7 +5,7 @@
     <artifactId>tapis-client-java</artifactId>
     <version>1.11.94-SNAPSHOT</version>
   </parent>
-  <artifactId>shared</artifactId>
+  <artifactId>shared-clientlib</artifactId>
   <name>Tapis Client Shared</name>
   <description>Shared code for Java clients</description>
   <dependencies>
@@ -31,6 +31,6 @@
         </configuration>
       </plugin>
     </plugins>
-    <finalName>shared</finalName>
+    <finalName>shared-clientlib</finalName>
   </build>
 </project>
