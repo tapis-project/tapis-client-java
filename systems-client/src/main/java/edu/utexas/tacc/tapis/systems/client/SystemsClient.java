@@ -1,24 +1,27 @@
 package edu.utexas.tacc.tapis.systems.client;
 
+import java.util.Collections;
 import java.util.List;
 
-import com.google.gson.JsonObject;
-import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
-import edu.utexas.tacc.tapis.systems.client.gen.api.GeneralApi;
-import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.internal.LinkedTreeMap;
+import com.google.gson.JsonObject;
 
+import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
+import edu.utexas.tacc.tapis.systems.client.gen.api.GeneralApi;
+import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespBoolean;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystems;
 import edu.utexas.tacc.tapis.systems.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.systems.client.gen.ApiException;
 import edu.utexas.tacc.tapis.systems.client.gen.api.CredentialsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.PermissionsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.SystemsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqSearchSystems;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespBasic;
@@ -26,10 +29,8 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.RespChangeCount;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespNameArray;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespResourceUrl;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystemsArray;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystemsSearch;
-import edu.utexas.tacc.tapis.systems.client.gen.model.TSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
 import edu.utexas.tacc.tapis.systems.client.gen.model.CategoryEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.DatatypeEnum;
@@ -41,6 +42,8 @@ import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SEARCH;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SORTBY;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_COMPUTETOTAL;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_SUMMARY;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_ALL;
 
 /**
  * Class providing a convenient front-end to the automatically generated client code
@@ -119,10 +122,29 @@ public class SystemsClient
   public ApiClient getApiClient() { return apiClient; }
 
   // Update base path for default client.
+  public String getBasePath() { return apiClient.getBasePath(); }
+
+  // Update base path for default client.
   public void setBasePath(String basePath) { apiClient.setBasePath(basePath); }
 
   // Add http header to default client
   public void addDefaultHeader(String key, String val) { apiClient.addDefaultHeader(key, val); }
+
+  /**
+   *  Close connections and stop threads that can sometimes prevent JVM shutdown.
+   */
+  public void close()
+  {
+    try {
+      // Best effort attempt to shut things down.
+      var okClient = apiClient.getHttpClient();
+      if (okClient != null)
+      {
+        var pool = okClient.connectionPool();
+        if (pool != null) pool.evictAll();
+      }
+    } catch (Exception e) {}
+  }
 
   // -----------------------------------------------------------------------
   // ------------------------- Systems -------------------------------------
@@ -170,7 +192,7 @@ public class SystemsClient
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
-    try { resp = sysApi.createSystem(req, false); }
+    try { resp = sysApi.createSystem(req); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
@@ -186,10 +208,44 @@ public class SystemsClient
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
-    try { resp = sysApi.updateSystem(systemId, req, false); }
+    try { resp = sysApi.updateSystem(systemId, req); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
+  }
+
+  /**
+   * Update enabled attribute to true.
+   *
+   * @param id System id
+   * @return number of records modified as a result of the action
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public int enableSystem(String id) throws TapisClientException
+  {
+    RespChangeCount resp = null;
+    try { resp = sysApi.enableSystem(id); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
+    else return -1;
+  }
+
+  /**
+   * Update enabled attribute to false.
+   *
+   * @param id System id
+   * @return number of records modified as a result of the action
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public int disableSystem(String id) throws TapisClientException
+  {
+    RespChangeCount resp = null;
+    try { resp = sysApi.disableSystem(id); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
+    else return -1;
   }
 
   /**
@@ -202,7 +258,7 @@ public class SystemsClient
   public int changeSystemOwner(String systemId, String newOwnerName) throws TapisClientException
   {
     RespChangeCount resp = null;
-    try { resp = sysApi.changeSystemOwner(systemId, newOwnerName, false); }
+    try { resp = sysApi.changeSystemOwner(systemId, newOwnerName); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
@@ -222,18 +278,19 @@ public class SystemsClient
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public TSystem getSystem(String systemId, Boolean returnCredentials, AuthnMethod authnMethod, Boolean requireExecPerm)
+  public TapisSystem getSystem(String systemId, Boolean returnCredentials, AuthnMethod authnMethod, Boolean requireExecPerm)
           throws TapisClientException
   {
+    // TODO: Allow caller to specify selectStr
+    String selectStr = DEFAULT_SELECT_ALL;
     RespSystem resp = null;
     String authnMethodStr = (authnMethod==null ? null : authnMethod.name());
-    try {resp = sysApi.getSystem(systemId, false, returnCredentials, authnMethodStr, requireExecPerm); }
+    try {resp = sysApi.getSystem(systemId, returnCredentials, authnMethodStr, requireExecPerm, selectStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
-    // Postprocess the TSystem
-    TSystem tSys = postProcessSystem(resp.getResult());
-    return tSys;
+    // Postprocess the TapisSystem
+    return postProcessSystem(resp.getResult());
   }
 
   /**
@@ -243,7 +300,7 @@ public class SystemsClient
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public TSystem getSystem(String systemId) throws TapisClientException
+  public TapisSystem getSystem(String systemId) throws TapisClientException
   {
     return getSystem(systemId, false, null, false);
   }
@@ -260,33 +317,36 @@ public class SystemsClient
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public TSystem getSystemWithCredentials(String systemId, AuthnMethod authnMethod) throws TapisClientException
+  public TapisSystem getSystemWithCredentials(String systemId, AuthnMethod authnMethod) throws TapisClientException
   {
     return getSystem(systemId, true, authnMethod, false);
   }
 
   /**
    * Get list of systems using all supported parameters: searchStr, limit, sortBy, sip, startAfter.
-   * For example search=(id.like.MySys*)~(enabled.eq.true)&limit=10&sortBy=seqId(asc)&startAfter=101
+   * For example search=(id.like.MySys*)~(enabled.eq.true)&limit=10&sortBy=id(asc)&startAfter=my.sys1
    * Use only one of skip or startAfter
    * When using startAfter sortBy must be specified.
    */
-  public List<TSystem> getSystems(String searchStr, int limit, String sortBy, int skip, String startAfter) throws TapisClientException
+  public List<TapisSystem> getSystems(String searchStr, int limit,
+                                      String sortBy, int skip, String startAfter) throws TapisClientException
   {
-    RespSystemsArray resp = null;
-    try { resp = sysApi.getSystems(false, searchStr, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL); }
+    // TODO: Allow caller to specify selectStr
+    String selectStr = DEFAULT_SELECT_SUMMARY;
+    RespSystems resp = null;
+    try { resp = sysApi.getSystems(searchStr, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null) return null;
-    // Postprocess TSystems in the result
-    for (TSystem tSys : resp.getResult()) postProcessSystem(tSys);
+    if (resp == null || resp.getResult() == null) return Collections.emptyList();
+    // Postprocess TapisSystems in the result
+    for (TapisSystem tSys : resp.getResult()) postProcessSystem(tSys);
     return resp.getResult();
   }
 
   /**
    * Get list of systems using search. For example search=(id.like.MySys*)~(enabled.eq.true)
    */
-  public List<TSystem> getSystems(String searchStr) throws TapisClientException
+  public List<TapisSystem> getSystems(String searchStr) throws TapisClientException
   {
     return getSystems(searchStr, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER);
   }
@@ -294,7 +354,7 @@ public class SystemsClient
   /**
    * Get list of all systems
    */
-  public List<TSystem> getSystems() throws TapisClientException
+  public List<TapisSystem> getSystems() throws TapisClientException
   {
     return getSystems(DEFAULT_SEARCH);
   }
@@ -303,27 +363,29 @@ public class SystemsClient
    * Dedicated search endpoint using all supported parameters
    * Search for systems using an array of strings that represent an SQL-like WHERE clause
    * and using query parameters for sorting.
-   * For example limit=10&sortBy=seqId(asc)&startAfter=101
+   * For example limit=10&sortBy=id(asc)&startAfter=my.sys1
    * Use only one of skip or startAfter
    * When using startAfter sortBy must be specified.
    */
-  public List<TSystem> searchSystems(ReqSearchSystems req, int limit, String sortBy, int skip, String startAfter) throws TapisClientException
+  public List<TapisSystem> searchSystems(ReqSearchSystems req, int limit, String sortBy, int skip, String startAfter) throws TapisClientException
   {
-    RespSystemsSearch resp = null;
-    try { resp = sysApi.searchSystemsRequestBody(req, false, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL); }
+    // TODO: Allow caller to specify selectStr
+    String selectStr = DEFAULT_SELECT_SUMMARY;
+    RespSystems resp = null;
+    try { resp = sysApi.searchSystemsRequestBody(req, limit, sortBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null || resp.getResult().getSearch() == null) return null;
-    // Postprocess TSystems in the result
-    for (TSystem tSys : resp.getResult().getSearch()) postProcessSystem(tSys);
-    return resp.getResult().getSearch();
+    if (resp == null || resp.getResult() == null || resp.getResult() == null) return Collections.emptyList();
+    // Postprocess TapisSystems in the result
+    for (TapisSystem tSys : resp.getResult()) postProcessSystem(tSys);
+    return resp.getResult();
   }
 
   /**
    * Dedicated search endpoint using requestBody only
    * Search for systems using an array of strings that represent an SQL-like WHERE clause
    */
-  public List<TSystem> searchSystems(ReqSearchSystems req) throws TapisClientException
+  public List<TapisSystem> searchSystems(ReqSearchSystems req) throws TapisClientException
   {
     return searchSystems(req, DEFAULT_LIMIT, DEFAULT_SORTBY, DEFAULT_SKIP, DEFAULT_STARTAFTER);
   }
@@ -332,15 +394,15 @@ public class SystemsClient
    * Dedicated search endpoint for retrieving systems that match a list of constraint conditions
    * The constraint conditions are passed in as an array of strings that represent an SQL-like WHERE clause
    */
-  public List<TSystem> matchConstraints(ReqMatchConstraints req) throws TapisClientException
+  public List<TapisSystem> matchConstraints(ReqMatchConstraints req) throws TapisClientException
   {
-    RespSystemsArray resp = null;
-    try { resp = sysApi.matchConstraints(req, false); }
+    RespSystems resp = null;
+    try { resp = sysApi.matchConstraints(req); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null) return null;
-    // Postprocess TSystems in the result
-    for (TSystem tSys : resp.getResult()) postProcessSystem(tSys);
+    if (resp == null || resp.getResult() == null) return Collections.emptyList();
+    // Postprocess TapisSystems in the result
+    for (TapisSystem tSys : resp.getResult()) postProcessSystem(tSys);
     return resp.getResult();
   }
 
@@ -350,18 +412,43 @@ public class SystemsClient
    * Return 0 if record not present
    *
    * @param systemId System systemId
+   * @param confirm Confirm the action
    * @return number of records modified as a result of the action
    * @throws TapisClientException - If api call throws an exception
    */
-  public int deleteSystem(String systemId) throws TapisClientException
+  public int deleteSystem(String systemId, Boolean confirm) throws TapisClientException
   {
     RespChangeCount resp = null;
-    try { resp = sysApi.deleteSystem(systemId, false); }
+    try { resp = sysApi.deleteSystem(systemId, confirm); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
     else return -1;
   }
+
+  /**
+   * Check if resource is enabled
+   *
+   * @return boolean indicating if enabled
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public boolean isEnabled(String systemId) throws TapisClientException
+  {
+    // Submit the request and return the response
+    RespBoolean resp = null;
+    try { resp = sysApi.isEnabled(systemId); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null)
+    {
+      return resp.getResult();
+    }
+    else
+    {
+      throw new TapisClientException("isEnabled did not return a result");
+    }
+  }
+
 
   // -----------------------------------------------------------------------
   // --------------------------- Permissions -------------------------------
@@ -379,7 +466,7 @@ public class SystemsClient
     var req = new ReqPerms();
     req.setPermissions(permissions);
     // Submit the request
-    try { permsApi.grantUserPerms(systemId, userName, req, false); }
+    try { permsApi.grantUserPerms(systemId, userName, req); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
   }
@@ -390,10 +477,17 @@ public class SystemsClient
   public List<String> getSystemPermissions(String systemId, String userName) throws TapisClientException
   {
     RespNameArray resp = null;
-    try { resp = permsApi.getUserPerms(systemId, userName, false); }
+    try { resp = permsApi.getUserPerms(systemId, userName); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null) return resp.getResult().getNames(); else return null;
+    if (resp != null && resp.getResult() != null)
+    {
+      return resp.getResult().getNames();
+    }
+    else
+    {
+      return Collections.emptyList();
+    }
   }
 
   /**
@@ -408,7 +502,7 @@ public class SystemsClient
     var req = new ReqPerms();
     req.setPermissions(permissions);
     // Submit the request
-    try { permsApi.revokeUserPerms(systemId, userName, req, false); }
+    try { permsApi.revokeUserPerms(systemId, userName, req); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
   }
@@ -422,7 +516,7 @@ public class SystemsClient
           throws TapisClientException
   {
     // Submit the request
-    try { permsApi.revokeUserPerm(systemId, userName, permission, false); }
+    try { permsApi.revokeUserPerm(systemId, userName, permission); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
   }
@@ -439,7 +533,7 @@ public class SystemsClient
   public void updateUserCredential(String systemId, String userName, Credential req) throws TapisClientException
   {
     // Submit the request
-    try { credsApi.createUserCredential(systemId, userName, req, false); }
+    try { credsApi.createUserCredential(systemId, userName, req); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
   }
@@ -455,7 +549,7 @@ public class SystemsClient
   {
     RespCredential resp = null;
     String authnMethodStr = (authnMethod==null ? null : authnMethod.name());
-    try {resp = credsApi.getUserCredential(systemId, userName, false, authnMethodStr); }
+    try {resp = credsApi.getUserCredential(systemId, userName, authnMethodStr); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null) return resp.getResult(); else return null;
@@ -480,7 +574,7 @@ public class SystemsClient
           throws TapisClientException
   {
     // Submit the request
-    try { credsApi.removeUserCredential(systemId, userName, false); }
+    try { credsApi.removeUserCredential(systemId, userName); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
   }
@@ -541,10 +635,10 @@ public class SystemsClient
   /**
    * Do any client side postprocessing of a returned system.
    * Currently this just involves transforming the notes attribute into a json string
-   * @param tSys - TSystem to process
-   * @return - Resulting TSystem
+   * @param tSys - TapisSystem to process
+   * @return - Resulting TapisSystem
    */
-  TSystem postProcessSystem(TSystem tSys)
+  TapisSystem postProcessSystem(TapisSystem tSys)
   {
     // If we have a notes attribute convert it from a LinkedTreeMap to a string with json.
     if (tSys != null && tSys.getNotes() != null)

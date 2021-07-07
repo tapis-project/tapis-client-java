@@ -3,7 +3,7 @@
   <parent>
     <groupId>edu.utexas.tacc.tapis</groupId>
     <artifactId>tapis-client-java</artifactId>
-    <version>1.11.40-SNAPSHOT</version>
+    <version>1.11.70-SNAPSHOT</version>
   </parent>
 
   <artifactId>apps-client</artifactId>
@@ -12,6 +12,18 @@
   <description>Java client for Apps Service</description>
 
   <properties>
+    <!-- Location of openapi spec. Default is dev branch -->
+    <!-- NOTE: In order to try out openapi updates using a local file do something similar to the following:
+     mvn clean install
+     cd apps-client
+     cp ../../openapi-apps/AppsAPI.yaml target/
+     mvn install -DspecPath="/home/scblack/src_git/github/dev/tapis-client-java/apps-client/target/AppsAPI.yaml"
+
+          or if yaml committed to local branch then do:
+     mvn install -DspecPath="https://raw.githubusercontent.com/tapis-project/openapi-apps/local/AppsAPI.yaml"
+     -->
+    <specPath>https://raw.githubusercontent.com/tapis-project/openapi-apps/dev/AppsAPI.yaml</specPath>
+
     <!-- Skip integration tests by default -->
     <!-- To run tests TAPIS_FILES_SVC_PASSWORD must be set in the env -->
     <!-- Use following command to run integration tests -->
@@ -42,27 +54,7 @@
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
     
-    <!-- NOTE: THE CALLED SCRIPT INTRODUCES HIDDEN DEPENDENCIES -->
-    <!--       These dependencies include curl.      -->
     <plugins>
-      <!-- Run script to download latest openapi spec -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>${exec-maven-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>Download openapi file</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>${basedir}/gen_spec.sh</executable>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
       <!-- Build generated client code using openapi-generator -->
       <plugin>
         <groupId>org.openapitools</groupId>
@@ -74,8 +66,8 @@
               <goal>generate</goal>
             </goals>
             <configuration>
-              <!-- Use the openapi spec here. Tapis live-docs website should also get spec from here -->
-              <inputSpec>${project.basedir}/target/AppsAPI.yaml</inputSpec>
+              <!-- Location of openapi spec -->
+              <inputSpec>${specPath}</inputSpec>
               <enablePostProcessFile>true</enablePostProcessFile>
               <output>${project.build.directory}/generated-sources/openapi</output>
               <generatorName>java</generatorName>

@@ -3,7 +3,6 @@ package edu.utexas.tacc.tapis.security.client;
 import java.util.Arrays;
 import java.util.List;
 
-import edu.utexas.tacc.tapis.security.client.gen.model.ReqUserIsAdmin;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.utexas.tacc.tapis.client.shared.Utils;
@@ -32,6 +31,7 @@ import edu.utexas.tacc.tapis.security.client.gen.model.ReqUpdateRoleName;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqUpdateRoleOwner;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqUserHasRole;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqUserHasRoleMulti;
+import edu.utexas.tacc.tapis.security.client.gen.model.ReqUserIsAdmin;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqUserIsPermitted;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqUserIsPermittedMulti;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqValidateServicePwd;
