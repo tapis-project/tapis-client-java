@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.utexas.tacc.tapis</groupId>
   <artifactId>shared</artifactId>
-  <version>1.11.93</version>
+  <version>1.11.94</version>
   <name>Tapis Client Shared</name>
   <description>Shared code for Java clients</description>
   <url>https://github.com/tapis-project/tapis-client-java/shared</url>
@@ -203,7 +203,6 @@
     <flyway-maven-plugin.version>6.0.8</flyway-maven-plugin.version>
     <httpmime.version>4.5.8</httpmime.version>
     <okhttp.version>2.7.5</okhttp.version>
-    <jcraft.version>0.1.55</jcraft.version>
     <commons-codec.version>1.15</commons-codec.version>
     <hk2.version>2.6.1</hk2.version>
     <tapis-client-java.version>[1.11.92,2.0)</tapis-client-java.version>
@@ -212,7 +211,7 @@
     <apache-sshd.version>2.7.0</apache-sshd.version>
     <mockito-core.version>3.0.0</mockito-core.version>
     <javax.websocket-api.version>1.1</javax.websocket-api.version>
-    <build.timestamp>2021-07-05T15:11:46Z</build.timestamp>
+    <build.timestamp>2021-07-08T15:17:19Z</build.timestamp>
     <statefulj.version>3.0</statefulj.version>
     <java-source.version>1.15</java-source.version>
     <reactor-rabbitmq.version>1.5.2</reactor-rabbitmq.version>
