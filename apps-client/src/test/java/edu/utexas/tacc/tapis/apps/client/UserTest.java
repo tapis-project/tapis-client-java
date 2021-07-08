@@ -6,7 +6,7 @@ import java.util.Map;
 
 import com.google.gson.JsonObject;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ArgSpec;
-import edu.utexas.tacc.tapis.apps.client.gen.model.FileInputDefinition;
+import edu.utexas.tacc.tapis.apps.client.gen.model.FileInput;
 import edu.utexas.tacc.tapis.apps.client.gen.model.JobAttributes;
 import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.apps.client.gen.model.NotificationSubscription;
@@ -392,16 +392,16 @@ public class UserTest
       Assert.assertEquals(jobAttributes.getMaxMinutes(), Integer.valueOf(maxMinutes));
       // TODO Verify fileInputs
       // TODO only meta.name is checked
-      List<FileInputDefinition> tFileInputs = jobAttributes.getFileInputDefinitions();
+      List<FileInput> tFileInputs = jobAttributes.getFileInputs();
       Assert.assertNotNull(tFileInputs, "FileInputs list should not be null.");
-      Assert.assertEquals(tFileInputs.size(), fileInputDefinitions.size(), "Wrong number of FileInputs");
+      Assert.assertEquals(tFileInputs.size(), fileInputs.size(), "Wrong number of FileInputs");
       var metaNamesFound = new ArrayList<String>();
-      for (FileInputDefinition itemFound : tFileInputs)
+      for (FileInput itemFound : tFileInputs)
       {
         Assert.assertNotNull(itemFound.getMeta(), "FileInput meta value should not be null.");
         metaNamesFound.add(itemFound.getMeta().getName());
       }
-      for (FileInputDefinition itemSeedItem : fileInputDefinitions)
+      for (FileInput itemSeedItem : fileInputs)
       {
         Assert.assertNotNull(itemSeedItem.getMeta());
         Assert.assertTrue(metaNamesFound.contains(itemSeedItem.getMeta().getName()),

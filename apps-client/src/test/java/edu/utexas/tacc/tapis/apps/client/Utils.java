@@ -26,7 +26,7 @@ import com.google.gson.JsonObject;
 import edu.utexas.tacc.tapis.apps.client.gen.model.AppTypeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ArgMetaSpec;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ArgSpec;
-import edu.utexas.tacc.tapis.apps.client.gen.model.FileInputDefinition;
+import edu.utexas.tacc.tapis.apps.client.gen.model.FileInput;
 import edu.utexas.tacc.tapis.apps.client.gen.model.JobAttributes;
 import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.apps.client.gen.model.NotificationMechanism;
@@ -165,14 +165,14 @@ public final class Utils
   public static final List<KeyValuePair> kvPairsFinA1 = new ArrayList<>(List.of(kv1,kv2,kv3));
   public static final ArgMetaSpec argMetaFinA1 = new ArgMetaSpec().name("finA1").description("File input A1")
                                                          .required(metaRequiredTrue).keyValuePairs(kvPairsFinA1);
-  public static final FileInputDefinition finA1 = new FileInputDefinition().sourceUrl(srcA1).targetPath("/targetA1")
+  public static final FileInput finA1 = new FileInput().sourceUrl(srcA1).targetPath("/targetA1")
                                                          .inPlace(inPlaceTrue).meta(argMetaFinA1);
   public static final List<KeyValuePair> kvPairsFinB1 = new ArrayList<>(List.of(kv1,kv2,kv3));
   public static final ArgMetaSpec argMetaFinB1 = new ArgMetaSpec().name("finB1").description("File input B1")
           .required(metaRequiredTrue).keyValuePairs(kvPairsFinB1);
-  public static final FileInputDefinition finB1 = new FileInputDefinition().sourceUrl(srcB1).targetPath("/targetB1")
+  public static final FileInput finB1 = new FileInput().sourceUrl(srcB1).targetPath("/targetB1")
           .inPlace(inPlaceTrue).meta(argMetaFinB1);
-  public static final List<FileInputDefinition> fileInputDefinitions = new ArrayList<>(List.of(finA1, finB1));
+  public static final List<FileInput> fileInputs = new ArrayList<>(List.of(finA1, finB1));
 
   public static final NotificationMechanism notifMechA1 =
           new NotificationMechanism().mechanism(NotificationMechanismEnum.WEBHOOK).webhookURL("webhookUrlA1")
@@ -317,7 +317,7 @@ public final class Utils
     // ====== End Parameter Set
     jobAttrs.setParameterSet(parameterSet);
 
-    jobAttrs.setFileInputDefinitions(fileInputDefinitions);
+    jobAttrs.setFileInputs(fileInputs);
     jobAttrs.setNodeCount(nodeCount);
     jobAttrs.setCoresPerNode(coresPerNode);
     jobAttrs.setMemoryMB(memoryMb);
@@ -438,16 +438,16 @@ public final class Utils
 
     // TODO Verify fileInputs
     // TODO only meta.name is checked
-    List<FileInputDefinition> tFileInputs = jobAttributes.getFileInputDefinitions();
+    List<FileInput> tFileInputs = jobAttributes.getFileInputs();
     Assert.assertNotNull(tFileInputs, "FileInputs list should not be null.");
-    Assert.assertEquals(tFileInputs.size(), fileInputDefinitions.size(), "Wrong number of FileInputs");
+    Assert.assertEquals(tFileInputs.size(), fileInputs.size(), "Wrong number of FileInputs");
     var metaNamesFound = new ArrayList<String>();
-    for (FileInputDefinition itemFound : tFileInputs)
+    for (FileInput itemFound : tFileInputs)
     {
       Assert.assertNotNull(itemFound.getMeta(), "FileInput meta value should not be null.");
       metaNamesFound.add(itemFound.getMeta().getName());
     }
-    for (FileInputDefinition itemSeedItem : fileInputDefinitions)
+    for (FileInput itemSeedItem : fileInputs)
     {
       Assert.assertNotNull(itemSeedItem.getMeta());
       Assert.assertTrue(metaNamesFound.contains(itemSeedItem.getMeta().getName()),
@@ -653,8 +653,8 @@ public final class Utils
     Assert.assertNull(jobAttrs.getArchiveSystemDir());
     Assert.assertNotNull(jobAttrs.getArchiveOnAppError());
     Assert.assertTrue(jobAttrs.getArchiveOnAppError());
-    Assert.assertNotNull(jobAttrs.getFileInputDefinitions());
-    Assert.assertTrue(jobAttrs.getFileInputDefinitions().isEmpty());
+    Assert.assertNotNull(jobAttrs.getFileInputs());
+    Assert.assertTrue(jobAttrs.getFileInputs().isEmpty());
     Assert.assertNotNull(jobAttrs.getNodeCount());
     Assert.assertEquals(jobAttrs.getNodeCount().intValue(), 1);
     Assert.assertNotNull(jobAttrs.getCoresPerNode());
