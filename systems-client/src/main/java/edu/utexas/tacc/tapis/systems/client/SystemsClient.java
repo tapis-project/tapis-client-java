@@ -12,6 +12,7 @@ import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
 import java.util.Collections;
 import java.util.List;
 
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateCredential;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.JsonObject;
@@ -662,7 +663,7 @@ public class SystemsClient implements ITapisClient
    * @param req Request containing credentials (password, keys, etc).
    * @throws TapisClientException - If api call throws an exception
    */
-  public void updateUserCredential(String systemId, String userName, Credential req) throws TapisClientException
+  public void updateUserCredential(String systemId, String userName, ReqCreateCredential req) throws TapisClientException
   {
     // Submit the request
     try { credsApi.createUserCredential(systemId, userName, req); }
@@ -728,7 +729,7 @@ public class SystemsClient implements ITapisClient
   public static ReqCreateSystem buildReqCreateSystem(TapisSystem sys)
   {
     if (sys == null) return null;
-    ReqCreateSystem rSys = new ReqCreateSystem();
+    var rSys = new ReqCreateSystem();
     rSys.id(sys.getId());
     rSys.description(sys.getDescription());
     rSys.systemType(sys.getSystemType());
@@ -737,7 +738,7 @@ public class SystemsClient implements ITapisClient
     rSys.enabled(sys.getEnabled());
     rSys.effectiveUserId(sys.getEffectiveUserId());
     rSys.defaultAuthnMethod(sys.getDefaultAuthnMethod());
-    rSys.authnCredential(sys.getAuthnCredential());
+    rSys.authnCredential(buildReqCreateCredential(sys.getAuthnCredential()));
     rSys.bucketName(sys.getBucketName());
     rSys.rootDir(sys.getRootDir());
     rSys.port(sys.getPort()).useProxy(sys.getUseProxy()).proxyHost(sys.getProxyHost()).proxyPort(sys.getProxyPort());
@@ -770,12 +771,12 @@ public class SystemsClient implements ITapisClient
   public static ReqPutSystem buildReqPutSystem(TapisSystem sys)
   {
     if (sys == null) return null;
-    ReqPutSystem rSys = new ReqPutSystem();
+    var rSys = new ReqPutSystem();
     rSys.description(sys.getDescription());
     rSys.host(sys.getHost());
     rSys.effectiveUserId(sys.getEffectiveUserId());
     rSys.defaultAuthnMethod(sys.getDefaultAuthnMethod());
-    rSys.authnCredential(sys.getAuthnCredential());
+    rSys.authnCredential(buildReqCreateCredential(sys.getAuthnCredential()));
     rSys.port(sys.getPort()).useProxy(sys.getUseProxy()).proxyHost(sys.getProxyHost()).proxyPort(sys.getProxyPort());
     rSys.dtnSystemId(sys.getDtnSystemId());
     rSys.dtnMountPoint(sys.getDtnMountPoint()).dtnMountSourcePath(sys.getDtnMountSourcePath());
@@ -812,6 +813,22 @@ public class SystemsClient implements ITapisClient
     cred.setAccessSecret(accessSecret);
     cred.setCertificate(certificate);
     return cred;
+  }
+
+  /**
+   * Utility method to build a ReqCreateCredential using attributes from a Credential.
+   */
+  public static ReqCreateCredential buildReqCreateCredential(Credential credential)
+  {
+    if (credential == null) return null;
+    var rCred = new ReqCreateCredential();
+    rCred.password(credential.getPassword());
+    rCred.publicKey(credential.getPublicKey());
+    rCred.privateKey(credential.getPrivateKey());
+    rCred.accessKey(credential.getAccessKey());
+    rCred.accessSecret(credential.getAccessSecret());
+    rCred.certificate(credential.getCertificate());
+    return rCred;
   }
 
   /**
