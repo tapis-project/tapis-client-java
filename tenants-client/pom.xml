@@ -25,6 +25,12 @@
     <!-- NOTE: THE CALLED SCRIPT INTRODUCES HIDDEN DEPENDENCIES -->
     <!--       These dependencies include Docker and curl.      -->
     <plugins>
+      <!-- Capture the git commit hash and branch identifiers. -->
+      <!-- See parent pom for configuration details. -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+      </plugin>
       <!-- Run script to download latest tenants openapi_v3.yml and generate bundled json file  -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
