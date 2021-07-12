@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.utexas.tacc.tapis</groupId>
   <artifactId>tapis-client-java</artifactId>
-  <version>1.11.96</version>
+  <version>1.11.97</version>
   <packaging>pom</packaging>
   <name>Tapis Client</name>
   <description>Top level java client</description>
@@ -128,7 +128,7 @@
     </developer>
   </developers>
   <modules>
-    <module>shared</module>
+    <module>shared-clientlib</module>
     <module>auth-client</module>
     <module>security-client</module>
     <module>tokens-client</module>
@@ -225,7 +225,7 @@
     <apache-sshd.version>2.7.0</apache-sshd.version>
     <mockito-core.version>3.0.0</mockito-core.version>
     <javax.websocket-api.version>1.1</javax.websocket-api.version>
-    <build.timestamp>2021-07-09T20:03:45Z</build.timestamp>
+    <build.timestamp>2021-07-12T01:28:15Z</build.timestamp>
     <statefulj.version>3.0</statefulj.version>
     <java-source.version>1.15</java-source.version>
     <reactor-rabbitmq.version>1.5.2</reactor-rabbitmq.version>
@@ -419,7 +419,28 @@
     <testOutputDirectory>target/test-classes</testOutputDirectory>
     <resources>
       <resource>
+        <targetPath>.</targetPath>
+        <filtering>true</filtering>
         <directory>src/main/resources</directory>
+        <includes>
+          <include>**/tapis.version</include>
+          <include>**/tapis.fullversion</include>
+          <include>**/git.info</include>
+          <include>**/build.time</include>
+        </includes>
+      </resource>
+      <resource>
+        <filtering>false</filtering>
+        <directory>src/main/resources</directory>
+        <includes>
+          <include>**/*</include>
+        </includes>
+        <excludes>
+          <exclude>**/tapis.version</exclude>
+          <exclude>**/tapis.fullversion</exclude>
+          <exclude>**/git.info</exclude>
+          <exclude>**/build.time</exclude>
+        </excludes>
       </resource>
     </resources>
     <testResources>
@@ -428,7 +449,15 @@
       </testResource>
     </testResources>
     <directory>target</directory>
-    <finalName>tapis-client-java-1.11.96</finalName>
+    <finalName>tapis-client-java-1.11.97</finalName>
+    <plugins>
+      <plugin>
+        <groupId>com.amashchenko.maven.plugin</groupId>
+        <artifactId>gitflow-maven-plugin</artifactId>
+        <version>1.14.0</version>
+        <extensions>false</extensions>
+      </plugin>
+    </plugins>
   </build>
   <reporting>
     <outputDirectory>target/site</outputDirectory>
