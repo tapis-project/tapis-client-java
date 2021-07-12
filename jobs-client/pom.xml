@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>shared</artifactId>
+            <artifactId>shared-clientlib</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
