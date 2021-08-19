@@ -16,17 +16,22 @@ import edu.utexas.tacc.tapis.jobs.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.jobs.client.gen.api.JobsApi;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.FileInfo;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.Job;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.JobCancelDisplay;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.JobHistoryDisplayDTO;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobListDTO;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobStatusDisplay;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqSubmitJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespBasic;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.RespCancelJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJobList;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJobOutputList;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJobStatus;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.RespJobHistory;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespJobSearchAllAttributes;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespProbe;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespSubmitJob;
+
 import okhttp3.Call;
 import okhttp3.Response;
 
@@ -289,6 +294,44 @@ public class JobsClient
     }
     
     /* ---------------------------------------------------------------------------- */
+    /* cancelJob:                                                                      */
+    /* ---------------------------------------------------------------------------- */
+    public JobCancelDisplay cancelJob(String jobUuid)
+     throws TapisClientException
+    {
+        RespCancelJob resp = null;
+        try {
+            // Get the API object using default networking.
+            var jobsApi = new JobsApi(_apiClient);
+            resp = jobsApi.cancelJob(jobUuid, false);
+            		
+        }
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+        
+        return resp == null ? null : resp.getResult();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* getJobHistory:                                                               */
+    /* ---------------------------------------------------------------------------- */
+   public List<JobHistoryDisplayDTO> getJobHistory(String jobUuid, int limit, String orderBy, int skip, String startAfter, int totalCount)
+     throws TapisClientException
+    {
+        RespJobHistory resp = null;
+        try {
+            // Get the API object using default networking.
+            var jobsApi = new JobsApi(_apiClient);
+            resp = jobsApi.getJobHistory(jobUuid, limit, skip, false);
+            		
+            		
+        }
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+        
+        return resp == null ? null : resp.getResult();
+    }
+    /* ---------------------------------------------------------------------------- */
     /* getJobList:                                                                  */
     /* ---------------------------------------------------------------------------- */
     public List<JobListDTO> getJobList(int limit, int skip, int startAfter, String orderBy, boolean computeTotal, String select)
@@ -348,6 +391,8 @@ public class JobsClient
 		
     	       
     	InputStream stream = null;
+    	
+    	
        
         	// Get the API object using default networking.
             var jobsApi = new JobsApi(_apiClient);
