@@ -33,8 +33,10 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.JobRuntime;
 import edu.utexas.tacc.tapis.systems.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSchedulerProfile;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RuntimeTypeEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SystemTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
@@ -65,11 +67,11 @@ public final class Utils
   public static final String sysType = SystemTypeEnum.LINUX.name();
 
   // Long term JWTs expire approx 1 July 2026
-  public static final String testUser1JWT ="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiIwZDg0YWRlOC0yMzQwLTQzOGQtOGJiMy1jZTFhYjg0M2I1NjYiLCJpc3MiOiJodHRwczovL2Rldi5kZXZlbG9wLnRhcGlzLmlvL3YzL3Rva2VucyIsInN1YiI6InRlc3R1c2VyMUBkZXYiLCJ0YXBpcy90ZW5hbnRfaWQiOiJkZXYiLCJ0YXBpcy90b2tlbl90eXBlIjoiYWNjZXNzIiwidGFwaXMvZGVsZWdhdGlvbiI6ZmFsc2UsInRhcGlzL2RlbGVnYXRpb25fc3ViIjpudWxsLCJ0YXBpcy91c2VybmFtZSI6InRlc3R1c2VyMSIsInRhcGlzL2FjY291bnRfdHlwZSI6InVzZXIiLCJleHAiOjE3ODI4Mzg0MzZ9.OElQtm2H-BZTsmK1V-Ey36jgQJmzME4wfBu0QQ9CwnQ7IJT8qQMlU_cbFZPiNAfAj9xCpOC9-NskUE0ZzYcbvmFt-rzAwzjwLSS1Akx4B2aENsOEZLmLYnqo8eY_qde0rYbyVt0KtemsAZrx2Y7vrEiwWDKRyvAE-b52Knpc_Xoqmv9NcyinYi7Bi2x9S0IswGev3KZr2D4nwZAmTrgHQ3lp1NbyySJE0HKTXfr4P4gIo2FBFm0Kk_k9xJlJlcT4d2Jf-7YRtIMM9G8Y4sateVepxBA0v8F6b_OxX-LeEHeH-MeD-7MNLFayi2MIQGjXNB3J6Zrl6qWFBMDlxA8PDw";
-  public static final String testUser2JWT ="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJlZGU2OWJlYy0wNGJlLTRjMjAtYTJlNy04MTg5ZWVlNWQxZmYiLCJpc3MiOiJodHRwczovL2Rldi5kZXZlbG9wLnRhcGlzLmlvL3YzL3Rva2VucyIsInN1YiI6InRlc3R1c2VyMkBkZXYiLCJ0YXBpcy90ZW5hbnRfaWQiOiJkZXYiLCJ0YXBpcy90b2tlbl90eXBlIjoiYWNjZXNzIiwidGFwaXMvZGVsZWdhdGlvbiI6ZmFsc2UsInRhcGlzL2RlbGVnYXRpb25fc3ViIjpudWxsLCJ0YXBpcy91c2VybmFtZSI6InRlc3R1c2VyMiIsInRhcGlzL2FjY291bnRfdHlwZSI6InVzZXIiLCJleHAiOjE3ODI5Mzg2MzJ9.NOT-8Fj60QKsOaQ9udgdDDe18ElQq69Z7hgdNQX79Hr_QyZMzR3kkYQv-GPwK0UksKiSrhwBTQ-kglZnZODIePTRhEcpW_9g5PB5oJceJjhKg-eBdf4-ntUl6ATPme1dYfIhuWZaWLMASYHwQhbC7LLen2n8sdC9Up0afhnsJhkcXD4IRdxKgZhtWe2VzTRlL03SGj_VMzJJfKCd3D1n6-JRR9K3LR2-unTdJCk3FSyoQNrapVvhfhnv6fmTRk6zfDehZQEcWGlhoquqeE0EupDvpgJHSE9wk8IDFEO089BOxqG2gcgCZ39XYd-FWZOdLNqcwDo6plrIgzNW-Obsdw";
-  public static final String testUser3JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJlNmIwMTRiOC05MGY1LTRjY2EtODhmYy1iYmIwYWJkMWZkODciLCJpc3MiOiJodHRwczovL2Rldi5kZXZlbG9wLnRhcGlzLmlvL3YzL3Rva2VucyIsInN1YiI6InRlc3R1c2VyM0BkZXYiLCJ0YXBpcy90ZW5hbnRfaWQiOiJkZXYiLCJ0YXBpcy90b2tlbl90eXBlIjoiYWNjZXNzIiwidGFwaXMvZGVsZWdhdGlvbiI6ZmFsc2UsInRhcGlzL2RlbGVnYXRpb25fc3ViIjpudWxsLCJ0YXBpcy91c2VybmFtZSI6InRlc3R1c2VyMyIsInRhcGlzL2FjY291bnRfdHlwZSI6InVzZXIiLCJleHAiOjE3ODI4Mzg2MjV9.yhAHhvFy5APE0gLw47qEv_aay3RmJZkd5Ik7WGmjh0QHrV9gCCxNIVGLKUSBOeKnocDLN9_dpGD0DL4OFiGcKrE9MaI9bYuL4j8BrxEf3Faa64B3IK38zml2Bx1nzpTAxkP6SJy6NENWFhbGg3MRa05oo8R2XctXoOBq8lb3I__zrwzKxQymF9L25hPzivBKaAkpIfVgsd2EGG8UdiExkK8yBRUDddK_I9BNn0VrzaJ0teLg_aOi-vyZN7JfT2VlQqgdMfvVGvH2O8Lt8BBvBs3dm7ODfSbxz1S5FHCYHvSV0H7h4lHA-yumU1I9vDi4K-_6gamHVfMMCqyYRLdJxA";
-  public static final String adminUserJWT ="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiIxM2RiMzhkZC1lZmYxLTQ4MTctOTIwMC01OWQxOGU0ZjRlNTQiLCJpc3MiOiJodHRwczovL2Rldi5kZXZlbG9wLnRhcGlzLmlvL3YzL3Rva2VucyIsInN1YiI6InRlc3RhZG1pbkBkZXYiLCJ0YXBpcy90ZW5hbnRfaWQiOiJkZXYiLCJ0YXBpcy90b2tlbl90eXBlIjoiYWNjZXNzIiwidGFwaXMvZGVsZWdhdGlvbiI6ZmFsc2UsInRhcGlzL2RlbGVnYXRpb25fc3ViIjpudWxsLCJ0YXBpcy91c2VybmFtZSI6InRlc3RhZG1pbiIsInRhcGlzL2FjY291bnRfdHlwZSI6InVzZXIiLCJleHAiOjE3ODI5Mzg3Mjh9.ARsriL0quLQapm4QGMdnv9U0a24ze8OGr6CO7RczYgMHtNPiK-WzeZE6EtV1R3Sit2JTcYu-SScF7CxPwKDfVIoDNnfUKIPtfocE5CvyTpwbvhO7zWW5u012l7ECzcLPyRhmIWfCEuNI_EzsGPcicg_XHzmoFoJiLWjtJsZo2Hp5TArNTErxqZPclGQ65L0TMbSpdA4i7u_7NBVvJnm0s3qGYUAksatgLflP0n7HHVCO784Ix6B3JZkAKjJNFN2zfz2fz42DsTLxBzS1MIV_ff8pPtDoRiK5AByOhll1YfM_FO0U9j6o9JK61Vuzb9c1sSfYkS5NN0t4mOs5AYvDGg";
-  public static final String filesSvcJWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiIyY2Y2ZjFmMy04ZmI5LTQ5MTItYTAxMi0yNzlkZjkzMTgzNGMiLCJpc3MiOiJodHRwczovL2FkbWluLmRldmVsb3AudGFwaXMuaW8vdjMvdG9rZW5zIiwic3ViIjoiZmlsZXNAYWRtaW4iLCJ0YXBpcy90ZW5hbnRfaWQiOiJhZG1pbiIsInRhcGlzL3Rva2VuX3R5cGUiOiJhY2Nlc3MiLCJ0YXBpcy9kZWxlZ2F0aW9uIjpmYWxzZSwidGFwaXMvZGVsZWdhdGlvbl9zdWIiOm51bGwsInRhcGlzL3VzZXJuYW1lIjoiZmlsZXMiLCJ0YXBpcy9hY2NvdW50X3R5cGUiOiJzZXJ2aWNlIiwiZXhwIjoxNzgyOTM4MzQ4LCJ0YXBpcy90YXJnZXRfc2l0ZSI6InRhY2MifQ.QpxxMDUeahFMa4BuHDDtVAjj_4x3YuWXUaBJOIL6E-uqJ_G8nNiCKSuju-jAfjIJiVUXQeGty4TmWgvAeVDF_gp2du3iOhddAZxgOXUE6gTHeRiljuE_sBy9uQkx5lUJ9KMFqIUlewJcofzGscWgl-xrYmYNbkuVJ5cctLMJA1ed3XwFL0aQa5ZWvZNmdR9zOCDBFuNSJ0ruxmvOnRCJ4PZ4kiZ4IMLhr9NrTXmfTYCEUyBMdaFZkcNSDGHfdLhUMwalyBvjPZoDH1IDRrHkrF6zsey3n2H69NZtzME7qqrttitdjvFuDVDM57tDHJH2g0oO9H0BOFOupQxQA2gERg";
+  public static final String testUser1JWT ="eyJ0eXATODO";
+  public static final String testUser2JWT ="eyJ0eXATODO";
+  public static final String testUser3JWT = "eyJ0eXATODO";
+  public static final String adminUserJWT ="eyJ0eXATODO";
+  public static final String filesSvcJWT = "eyJ0eXATODO";
 
   // TAPIS_BASE_URL_SUFFIX should be set according to the dev, staging or prod environment
   // dev     -> develop.tapis.io
@@ -100,6 +102,7 @@ public final class Utils
   public static final String defaultJobWorkingDir = null;
   public static final String defaultBatchScheduler = SchedulerTypeEnum.SLURM.toString();
   public static final String defaultBatchDefaultLogicalQueue = null;
+  public static final String defaultBatchSchedulerProfile = null;
   public static final String defaultEffectiveUserId = "${apiUserId}";
   public static final String defaultNotesStr = "{}";
   public static final boolean defaultIsEnabled = true;
@@ -184,7 +187,10 @@ public final class Utils
   public static final Credential credNull = null;
 
   public static final String sysNamePrefix = "CSys";
+  public static final String schedProfileNamePrefix = "CTestSchedProfile";
 
+  public static final List<String> modulesToLoad = Arrays.asList("value1", "value2");
+  public static final List<SchedulerHiddenOptionEnum> hiddenOptions = Arrays.asList(SchedulerHiddenOptionEnum.MEM);
   // Strings for searches involving special characters
   public static final String specialChar7Str = ",()~*!\\"; // These 7 may need escaping
   public static final String specialChar7LikeSearchStr = "\\,\\(\\)\\~\\*\\!\\\\"; // All need escaping for LIKE/NLIKE
@@ -213,15 +219,39 @@ public final class Utils
       String hostName = "host" + key + iStr + ".test.org";
       // Constructor initializes all attributes except for JobCapabilities and Credential
       // String[] sys0 = 0=tenantName, 1=name, 2=description, 3=sysType, 4=ownerUser1, 5=host, 6=effUser, 7=password,
-      //                 8=bucketName, 9=rootDir, 10=jobWorkingDir, 11=batchScheduler, 12=batchDefaultLogicalQueue
+      //                 8=bucketName, 9=rootDir, 10=jobWorkingDir, 11=batchScheduler, 12=batchDefaultLogicalQueue,
+      //                 13=batchSchedulerProfile
       String[] sys0 = {tenantName, id, "description "+suffix, sysType, testUser1, hostName, "effUser"+suffix,
               "fakePassword"+suffix,"bucket"+suffix, "/root"+suffix, "jobWorkDir"+suffix, SchedulerTypeEnum.SLURM.name(),
-              "batchDefaultLogicalQueue"+suffix};
+              "batchDefaultLogicalQueue"+suffix, "batchSchedulerProfile"+suffix};
       systems.put(i, sys0);
     }
     return systems;
   }
 
+  /**
+   * Create an array of SchedulerProfile objects in memory
+   * Names will be of format TestSchedProfile_K_NNN where K is the key and NNN runs from 000 to 999
+   * We need a key because maven runs the tests in parallel so each set of profiles created by an integration
+   *   test will need its own namespace.
+   * @param n number of objects to create
+   * @return array of objects
+   */
+  public static Map<Integer, String[]> makeSchedulerProfiles(int n, String key)
+  {
+    Map<Integer, String[]> profiles = new HashMap<>();
+    for (int i = 1; i <= n; i++)
+    {
+      // Suffix which should be unique for each profile within each integration test
+      String iStr = String.format("%03d", i);
+      String suffix = key + "_" + iStr;
+      String name = getSchedulerProfileName(key, i);
+      String moduleLoadCmd = "module load" + suffix;
+      String[] p0 = {tenantName, name, "description "+suffix, testUser1, moduleLoadCmd};
+      profiles.put(i, p0);
+    }
+    return profiles;
+  }
   public static String getFilesSvcPassword()
   {
     String s = System.getenv(TAPIS_ENV_FILES_SVC_PASSWORD);
@@ -280,7 +310,7 @@ public final class Utils
     rSys.jobMaxJobs(jobMaxJobs).jobMaxJobsPerUser(jobMaxJobsPerUser);
     rSys.jobIsBatch(jobIsBatchFalse);
     rSys.batchScheduler(SchedulerTypeEnum.fromValue(sys[11])).batchDefaultLogicalQueue(sys[12]);
-    rSys.batchLogicalQueues(jobQueues1);
+    rSys.batchSchedulerProfile(sys[13]).batchLogicalQueues(jobQueues1);
     rSys.jobCapabilities(jobCaps1);
     rSys.tags(tags1);
     rSys.notes(notes1JO);
@@ -320,6 +350,21 @@ public final class Utils
     return clt.createSystem(rSys);
   }
 
+  /*
+   * Build a ReqCreateSchedulerProfile object to be used for client call to create a profile give most attributes.
+   */
+  public static ReqCreateSchedulerProfile createReqSchedulerProfile(String[] profile)
+  {
+    ReqCreateSchedulerProfile rProfile = new ReqCreateSchedulerProfile();
+    rProfile.setName(profile[1]);
+    rProfile.description(profile[2]);
+    rProfile.owner(profile[3]);
+    rProfile.moduleLoadCommand(profile[4]);
+    rProfile.modulesToLoad(modulesToLoad);
+    rProfile.hiddenOptions(hiddenOptions);
+    return rProfile;
+  }
+
   public static SystemsClient getClientUsr(String serviceURL, String userJWT)
   {
     // Create the client each time due to issue with setting different headers needed by svc vs usr client
@@ -338,11 +383,17 @@ public final class Utils
     return sysNamePrefix + "_" + suffix;
   }
 
+  public static String getSchedulerProfileName(String key, int idx)
+  {
+    String suffix = key + "_" + String.format("%03d", idx);
+    return schedProfileNamePrefix + "_" + suffix;
+  }
+
   /**
    * Verify most attributes for a TapisSystem using default create data for following attributes:
    *     port, useProxy, proxyHost, proxyPort, defaultAuthnMethod,
    *     canExec, jobWorkingDir, jobMaxJobs, jobMaxJobsPerUser, jobIsBatch, batchScheduler, batchDefaultLogicalQueue,
-   *     jobEnvVariables, jobLogicalQueues, capabilities, tags, notes
+   *     batchSchedulerProfile, jobEnvVariables, jobLogicalQueues, capabilities, tags, notes
    * @param tmpSys - system retrieved from the service
    * @param sys0 - Data used to create the system
    */
@@ -377,6 +428,7 @@ public final class Utils
     Assert.assertEquals(tmpSys.getJobIsBatch(), Boolean.valueOf(jobIsBatchFalse));
     Assert.assertEquals(tmpSys.getBatchScheduler(), SchedulerTypeEnum.valueOf(sys0[11]));
     Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), sys0[12]);
+    Assert.assertEquals(tmpSys.getBatchSchedulerProfile(), sys0[13]);
     // Verify jobEnvVariables
     List<KeyValuePair> tmpJobEnvVariables = tmpSys.getJobEnvVariables();
     Assert.assertNotNull(tmpJobEnvVariables, "JobEnvVariables value was null");
@@ -488,6 +540,7 @@ public final class Utils
     Assert.assertEquals(tmpSys.getJobIsBatch(), Boolean.valueOf(defaultJobIsBatch));
     Assert.assertEquals(tmpSys.getBatchScheduler(), schedulerType);
     Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), defaultBatchDefaultLogicalQueue);
+    Assert.assertEquals(tmpSys.getBatchSchedulerProfile(), defaultBatchSchedulerProfile);
     Assert.assertNotNull(tmpSys.getBatchLogicalQueues());
     Assert.assertTrue(tmpSys.getBatchLogicalQueues().isEmpty());
     Assert.assertNotNull(tmpSys.getJobCapabilities());

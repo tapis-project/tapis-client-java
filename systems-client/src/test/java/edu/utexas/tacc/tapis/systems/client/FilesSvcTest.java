@@ -74,13 +74,13 @@ public class FilesSvcTest
     System.out.println("Using Authenticator URL: " + baseURL);
     System.out.println("Using Tokens URL: " + baseURL);
     // Get short term user JWT from tokens service
-//    var authClient = new AuthClient(baseURL);
+    var authClient = new AuthClient(baseURL);
 //    var tokClient = new TokensClient(baseURL, filesSvcName, filesSvcPasswd);
     try {
       // Sometimes auth or tokens service is down. Use long term tokens instead.
-//      userJWT = authClient.getToken(testUser1, testUser1);
+      userJWT = authClient.getToken(testUser1, testUser1);
 //      filesServiceJWT = tokClient.getSvcToken(adminTenantName, filesSvcName, DEFAULT_TARGET_SITE);
-      userJWT = testUser1JWT;
+//      userJWT = testUser1JWT;
       filesServiceJWT = filesSvcJWT;
     } catch (Exception e) {
       throw new Exception("Exception while creating tokens or auth service", e);

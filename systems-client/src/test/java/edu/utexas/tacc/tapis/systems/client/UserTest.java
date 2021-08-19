@@ -1,10 +1,12 @@
 package edu.utexas.tacc.tapis.systems.client;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import com.google.gson.JsonObject;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerProfile;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
@@ -45,14 +47,17 @@ import static edu.utexas.tacc.tapis.systems.client.Utils.*;
 @Test(groups={"integration"})
 public class UserTest
 {
-  // Test data
+  // Test data (systems and scheduler profiles)
   // NOTE: We create a certain number of systems but during refactoring some ended up not being used.
   //       When creating a new test look for an unused system and remove it from this list.
   //  List of unused systems: 6
   //  If list is empty then increment numSystems by 1 and use it.
   int numSystems = 14;
   Map<Integer, String[]> systems = Utils.makeSystems(numSystems, "CltUsr");
-  
+
+  int numSchedulerProfiles = 7;
+  Map<Integer, String[]> schedulerProfiles = Utils.makeSchedulerProfiles(numSchedulerProfiles, "CltUsr");
+
   private static final String newOwnerUser = testUser3;
   private static final String newPermsUser = testUser4;
 
@@ -82,13 +87,13 @@ public class UserTest
     // Get short term user JWT from tokens service
     var authClient = new AuthClient(baseURL);
     try {
-//      ownerUserJWT = authClient.getToken(testUser1, testUser1);
-//      newOwnerUserJWT = authClient.getToken(newOwnerUser, newOwnerUser);
+      ownerUserJWT = authClient.getToken(testUser1, testUser1);
+      newOwnerUserJWT = authClient.getToken(newOwnerUser, newOwnerUser);
       // Sometimes auth or tokens service is down. Use long term tokens instead.
       // Long term JWT for testuser1 - expires approx 1 July 2026
-      ownerUserJWT = testUser1JWT;
+//      ownerUserJWT = testUser1JWT;
       // Long term JWT for testuser3 - expires approx 1 July 2026
-      newOwnerUserJWT = testUser3JWT;
+//      newOwnerUserJWT = testUser3JWT;
     } catch (Exception e) {
       throw new Exception("Exception while creating tokens or auth service", e);
     }
@@ -109,6 +114,8 @@ public class UserTest
     System.out.println("****** Executing AfterSuite teardown method for class: " + this.getClass().getSimpleName());
     usrClient = getClientUsr(serviceURL, ownerUserJWT);
     // Remove all objects created by tests, ignore any exceptions
+
+    // Delete systems
     // This is a soft delete but still should be done to clean up SK artifacts.
     for (int i = 1; i <= numSystems; i++)
     {
@@ -122,6 +129,21 @@ public class UserTest
         System.out.println("Caught exception when soft deleting system: "+ systemId + " Exception: " + e);
       }
     }
+
+    // Delete scheduler profiles. This is a hard delete
+    for (int i = 1; i <= numSchedulerProfiles; i++)
+    {
+      String name = schedulerProfiles.get(i)[1];
+      try
+      {
+        usrClient.deleteSchedulerProfile(name);
+      }
+      catch (Exception e)
+      {
+        System.out.println("Caught exception when deleting scheduler profile: "+ name + " Exception: " + e);
+      }
+    }
+
     // One system may have had owner changed so use new owner.
     String systemId = systems.get(9)[1];
     usrClient = getClientUsr(serviceURL, newOwnerUserJWT);
@@ -156,6 +178,10 @@ public class UserTest
       Assert.fail();
     }
   }
+
+  // ******************************************************************
+  //   Systems
+  // ******************************************************************
 
   @Test
   public void testCreateSystem() {
@@ -208,7 +234,7 @@ public class UserTest
     catch (TapisClientException tce)
     {
       System.out.println("Caught exception: " + tce.getMessage());
-      Assert.assertTrue(tce.getMessage().contains("SYSLIB_OBJSTORE_NOBUCKET_INPUT"));
+      Assert.assertTrue(tce.getMessage().contains("SYSLIB_S3_NOBUCKET_INPUT"));
       pass = true;
     }
     Assert.assertTrue(pass, "Should not be able to create system with S3 and no bucketName");
@@ -223,7 +249,7 @@ public class UserTest
     catch (TapisClientException tce)
     {
       System.out.println("Caught exception: " + tce.getMessage());
-      Assert.assertTrue(tce.getMessage().contains("SYSLIB_OBJSTORE_CANEXEC_INPUT"));
+      Assert.assertTrue(tce.getMessage().contains("SYSLIB_S3_CANEXEC_INPUT"));
       pass = true;
     }
     Assert.assertTrue(pass, "Should not be able to create system of type S3 with canExec=true");
@@ -312,8 +338,7 @@ public class UserTest
   @Test
   public void testGetSystem() throws Exception {
     String[] sys0 = systems.get(7);
-    String respUrl =
-            usrClient.createSystem(createReqSystem(sys0, prot1Port, AuthnMethod.PKI_KEYS, credNull));
+    String respUrl = usrClient.createSystem(createReqSystem(sys0, prot1Port, AuthnMethod.PKI_KEYS, credNull));
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     TapisSystem tmpSys = usrClient.getSystem(sys0[1]);
@@ -467,7 +492,7 @@ public class UserTest
       Assert.assertEquals(tmpSys.getJobWorkingDir(), sys0[10]);
       Assert.assertEquals(tmpSys.getBatchScheduler(), SchedulerTypeEnum.valueOf(sys0[11]));
       Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), sys0[12]);
-// TODO logical queues?      Assert.assertEquals(tmpSys.getJobRemoteArchiveDir(), sys0[13]);
+      Assert.assertEquals(tmpSys.getBatchSchedulerProfile(), sys0[13]);
       Assert.assertNotNull(tmpSys.getPort());
       Assert.assertEquals(tmpSys.getPort().intValue(), prot2Port);
       Assert.assertNotNull(tmpSys.getUseProxy());
@@ -793,6 +818,116 @@ public class UserTest
     Assert.assertTrue(pass);
   }
 
+  // ******************************************************************
+  //   Scheduler Profiles
+  // ******************************************************************
+
+  @Test
+  public void testCreateSchedulerProfile() throws Exception
+  {
+    // Create a profile
+    String[] p0 = schedulerProfiles.get(1);
+    System.out.println("Creating scheduler profile with name: " + p0[1]);
+    try {
+      String respUrl = usrClient.createSchedulerProfile(createReqSchedulerProfile(p0));
+      System.out.println("Created scheduler profile: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
+  }
+
+  @Test
+  public void testGetSchedulerProfile() throws Exception
+  {
+    String[] p0 = schedulerProfiles.get(2);
+    System.out.println("Creating scheduler profile with name: " + p0[1]);
+    try {
+      String respUrl = usrClient.createSchedulerProfile(createReqSchedulerProfile(p0));
+      System.out.println("Created scheduler profile: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
+
+    SchedulerProfile tmpProfile = usrClient.getSchedulerProfile(p0[1]);
+    Assert.assertNotNull(tmpProfile, "Failed to create item: " + p0[1]);
+    System.out.println("Scheduler Profile retrieved: " + tmpProfile.getName());
+    Assert.assertEquals(tmpProfile.getName(), p0[1]);
+    Assert.assertEquals(tmpProfile.getDescription(), p0[2]);
+    Assert.assertEquals(tmpProfile.getOwner(), p0[3]);
+    Assert.assertEquals(tmpProfile.getModuleLoadCommand(), p0[4]);
+
+    Assert.assertNotNull(tmpProfile.getModulesToLoad());
+    Assert.assertEquals(tmpProfile.getModulesToLoad().size(), modulesToLoad.size());
+
+    Assert.assertNotNull(tmpProfile.getHiddenOptions());
+    Assert.assertFalse(tmpProfile.getHiddenOptions().isEmpty());
+    Assert.assertEquals(tmpProfile.getHiddenOptions().size(), hiddenOptions.size());
+  }
+
+  @Test
+  public void testDeleteSchedulerProfile() throws Exception
+  {
+    String[] p0 = schedulerProfiles.get(3);
+    System.out.println("Creating scheduler profile with name: " + p0[1]);
+    try {
+      String respUrl = usrClient.createSchedulerProfile(createReqSchedulerProfile(p0));
+      System.out.println("Created scheduler profile: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
+    usrClient.deleteSchedulerProfile(p0[1]);
+    boolean pass = false;
+    try
+    {
+      usrClient.getSchedulerProfile(p0[1]);
+    }
+    catch (TapisClientException e)
+    {
+      System.out.println("Caught TapisClientExcpetion as expected: " + e.getMessage());
+      Assert.assertTrue(e.getMessage().contains("SYSAPI_PRF_NOT_FOUND"));
+      pass = true;
+    }
+    Assert.assertTrue(pass, "Profile not deleted or incorrect exception.");
+  }
+
+  @Test
+  public void testGetSchedulerProfiles() throws Exception {
+    String[] p1 = schedulerProfiles.get(4);
+    String[] p2 = schedulerProfiles.get(5);
+    try {
+      System.out.println("Creating scheduler profile with name: " + p1[1]);
+      String respUrl = usrClient.createSchedulerProfile(createReqSchedulerProfile(p1));
+      System.out.println("Created scheduler profile: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+      System.out.println("Creating scheduler profile with name: " + p2[1]);
+      respUrl = usrClient.createSchedulerProfile(createReqSchedulerProfile(p2));
+      System.out.println("Created scheduler profile: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
+
+    List<SchedulerProfile> profiles = usrClient.getSchedulerProfiles();
+    Assert.assertNotNull(profiles, "getSchedulerProfiles returned null");
+    Assert.assertFalse(profiles.isEmpty(), "getSchedulerProfiles returned empty list");
+    var profileNamesFound = new HashSet<String>();
+    for (SchedulerProfile profile : profiles)
+    {
+      profileNamesFound.add(profile.getName());
+      System.out.println("Found item with name: " + profile.getName());
+    }
+    Assert.assertTrue(profileNamesFound.contains(p1[1]),
+            "getSchedulerProfiles did not return item with name: " + p1[1]);
+    Assert.assertTrue(profileNamesFound.contains(p2[1]),
+            "getSchedulerProfiles did not return item with name: " + p2[1]);
+  }
 
   // =====================================================================
   // =========  Private methods ==========================================

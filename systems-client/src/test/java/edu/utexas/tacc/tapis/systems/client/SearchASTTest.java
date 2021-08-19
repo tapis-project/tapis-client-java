@@ -64,14 +64,14 @@ public class SearchASTTest
     System.out.println("Using Authenticator URL: " + baseURL);
     System.out.println("Using Tokens URL: " + baseURL);
     // Get short term user JWT from tokens service
-//    var authClient = new AuthClient(baseURL);
+    var authClient = new AuthClient(baseURL);
     try {
-//      testUser1JWT = authClient.getToken(testUser1, testUser1);
-//      testUser2JWT = authClient.getToken(testUser2, testUser2);
-//      adminUserJWT = authClient.getToken(adminUser, adminUser);
-      testUser1JWT = Utils.testUser1JWT;
-      testUser2JWT = Utils.testUser2JWT;
-      adminUserJWT = Utils.adminUserJWT;
+      testUser1JWT = authClient.getToken(testUser1, testUser1);
+      testUser2JWT = authClient.getToken(testUser2, testUser2);
+      adminUserJWT = authClient.getToken(adminUser, adminUser);
+//      testUser1JWT = Utils.testUser1JWT;
+//      testUser2JWT = Utils.testUser2JWT;
+//      adminUserJWT = Utils.adminUserJWT;
     } catch (Exception e) {
       throw new Exception("Exception while creating tokens or auth service", e);
     }
@@ -196,6 +196,7 @@ public class SearchASTTest
     validCaseInputs.put( 6,new CaseData(1, String.format("job_working_dir = '%s'",sys0.getJobWorkingDir())));
     validCaseInputs.put( 7,new CaseData(numSystems, sysNameLikeAll + " AND batch_scheduler = " + SchedulerTypeEnum.SLURM.name()));
     validCaseInputs.put( 8,new CaseData(1, String.format("batch_default_logical_queue = '%s'",sys0.getBatchDefaultLogicalQueue())));
+    validCaseInputs.put( 9,new CaseData(1, String.format("batch_scheduler_profile = '%s'",sys0.getBatchSchedulerProfile())));
     validCaseInputs.put(10,new CaseData(numSystems/2, sysNameLikeAll + String.format(" AND owner = '%s'",testUser1)));  // Half owned by one user
     validCaseInputs.put(11,new CaseData(numSystems/2, sysNameLikeAll + String.format(" AND owner = '%s'",testUser2))); // and half owned by another
     validCaseInputs.put(12,new CaseData(numSystems, sysNameLikeAll + " AND enabled = true"));  // All are enabled

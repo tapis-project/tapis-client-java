@@ -82,14 +82,14 @@ public class SearchGetTest
     System.out.println("Using Authenticator URL: " + baseURL);
     System.out.println("Using Tokens URL: " + baseURL);
     // Get short term user JWT from tokens service
-//    var authClient = new AuthClient(baseURL);
+    var authClient = new AuthClient(baseURL);
     try {
-//      testUser1JWT = authClient.getToken(testUser1, testUser1);
-//      testUser2JWT = authClient.getToken(testUser2, testUser2);
-//      adminUserJWT = authClient.getToken(adminUser, adminUser);
-      testUser1JWT = Utils.testUser1JWT;
-      testUser2JWT = Utils.testUser2JWT;
-      adminUserJWT = Utils.adminUserJWT;
+      testUser1JWT = authClient.getToken(testUser1, testUser1);
+      testUser2JWT = authClient.getToken(testUser2, testUser2);
+      adminUserJWT = authClient.getToken(adminUser, adminUser);
+//      testUser1JWT = Utils.testUser1JWT;
+//      testUser2JWT = Utils.testUser2JWT;
+//      adminUserJWT = Utils.adminUserJWT;
     } catch (Exception e) {
       throw new Exception("Exception while creating tokens or auth service", e);
     }
@@ -103,6 +103,7 @@ public class SearchGetTest
 
 // String[] sys0 = 0=tenantName, 1=name, 2=description, 3=sysType, 4=testUser1, 5=host, 6=effUser, 7=password,
 //                 8=bucketName, 9=rootDir, 10=jobWorkingDir, 11=batchScheduler, 12=batchDefaultLogicalQueue
+//                 13=batchSchedulerProfile
     // For half the systems change the owner, batchScheduler
     for (int i = numSystems/2 + 1; i <= numSystems; i++)
     {
@@ -221,6 +222,7 @@ public class SearchGetTest
     validCaseInputs.put( 6,new CaseData(1, "job_working_dir.eq." + sys0.getJobWorkingDir()));
     validCaseInputs.put( 7,new CaseData(numSystems/2, "(id.like." + sysNameLikeAll + ")~(batch_scheduler.eq." + SchedulerTypeEnum.CONDOR.name() + ")"));
     validCaseInputs.put( 8,new CaseData(1, "batch_default_logical_queue.eq." + sys0.getBatchDefaultLogicalQueue()));
+    validCaseInputs.put( 9,new CaseData(1, "batch_scheduler_profile.eq." + sys0.getBatchSchedulerProfile()));
     validCaseInputs.put(10,new CaseData(numSystems/2, "(id.like." + sysNameLikeAll + ")~(owner.eq." + testUser1 + ")"));  // Half owned by one user
     validCaseInputs.put(11,new CaseData(numSystems/2, "(id.like." + sysNameLikeAll + ")~(owner.eq." + testUser2 + ")")); // and half owned by another
     validCaseInputs.put(12,new CaseData(numSystems, "(id.like." + sysNameLikeAll + ")~(enabled.eq.true)"));  // All are enabled
