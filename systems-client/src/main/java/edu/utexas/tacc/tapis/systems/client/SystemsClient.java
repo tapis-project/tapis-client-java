@@ -785,6 +785,23 @@ public class SystemsClient implements ITapisClient
     else return resp.getResult();
   }
 
+  /**
+   * Delete a scheduler profile.
+   *
+   * @param name - name of profile
+   * @return number of records modified as a result of the action
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public int deleteSchedulerProfile(String name) throws TapisClientException
+  {
+    RespChangeCount resp = null;
+    try { resp = schedulerProfilesApi.deleteSchedulerProfile(name); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
+    else return -1;
+  }
+
   // ************************************************************************
   // *********************** Utility Methods ********************************
   // ************************************************************************
