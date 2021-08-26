@@ -3,8 +3,10 @@ package edu.utexas.tacc.tapis.security.client;
 import java.util.Arrays;
 import java.util.List;
 
+import edu.utexas.tacc.tapis.security.client.gen.model.ReqRemovePermissionFromAllRoles;
 import org.apache.commons.lang3.StringUtils;
 
+import edu.utexas.tacc.tapis.client.shared.ITapisClient;
 import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.security.client.gen.ApiClient;
@@ -62,7 +64,8 @@ import edu.utexas.tacc.tapis.security.client.model.SKSecretMetaParms;
 import edu.utexas.tacc.tapis.security.client.model.SKSecretReadParms;
 import edu.utexas.tacc.tapis.security.client.model.SKSecretWriteParms;
 
-public class SKClient 
+public class SKClient
+ implements ITapisClient
 {
     /* **************************************************************************** */
     /*                                   Constants                                  */
@@ -1053,6 +1056,52 @@ public class SKClient
         
         // Return result value.
         return resp.getResult().getName();
+    }
+
+    /* ---------------------------------------------------------------------------- */
+    /* removePathPermissionFromAllRoles                                             */
+    /* ---------------------------------------------------------------------------- */
+    public int removePathPermissionFromAllRoles(String tenant, String permSpec)
+        throws TapisClientException
+    {
+        // Make the REST call.
+        RespChangeCount resp = null;
+        try {
+            // Get the API object using default networking.
+            var roleApi = new RoleApi(_apiClient);
+            var req = new ReqRemovePermissionFromAllRoles();
+            req.setTenant(tenant);
+            req.setPermSpec(permSpec);
+            resp = roleApi.removePathPermissionFromAllRoles(req, false);
+        }
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+
+        // Return result value.
+        return resp.getResult().getChanges();
+    }
+
+    /* ---------------------------------------------------------------------------- */
+    /* removepermissionFromAllRoles                                             */
+    /* ---------------------------------------------------------------------------- */
+    public int removePermissionFromAllRoles(String tenant, String permSpec)
+        throws TapisClientException
+    {
+        // Make the REST call.
+        RespChangeCount resp = null;
+        try {
+            // Get the API object using default networking.
+            var roleApi = new RoleApi(_apiClient);
+            var req = new ReqRemovePermissionFromAllRoles();
+            req.setTenant(tenant);
+            req.setPermSpec(permSpec);
+            resp = roleApi.removePermissionFromAllRoles(req, false);
+        }
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+
+        // Return result value.
+        return resp.getResult().getChanges();
     }
     
     /* **************************************************************************** */

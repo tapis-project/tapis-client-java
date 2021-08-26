@@ -1,16 +1,18 @@
 package edu.utexas.tacc.tapis.notifications.client;
 
-import edu.utexas.tacc.tapis.notifications.client.gen.ApiClient;
-import edu.utexas.tacc.tapis.notifications.client.gen.Configuration;
-
-import edu.utexas.tacc.tapis.notifications.client.gen.api.HealthApi;
-import edu.utexas.tacc.tapis.notifications.client.gen.api.TopicsApi;
-import edu.utexas.tacc.tapis.notifications.client.gen.api.QueuesApi;
-import edu.utexas.tacc.tapis.notifications.client.gen.api.SubscriptionsApi;
-
 import org.apache.commons.lang3.StringUtils;
 
-public class NotificationsClient {
+import edu.utexas.tacc.tapis.client.shared.ITapisClient;
+import edu.utexas.tacc.tapis.notifications.client.gen.ApiClient;
+import edu.utexas.tacc.tapis.notifications.client.gen.Configuration;
+import edu.utexas.tacc.tapis.notifications.client.gen.api.HealthApi;
+import edu.utexas.tacc.tapis.notifications.client.gen.api.QueuesApi;
+import edu.utexas.tacc.tapis.notifications.client.gen.api.SubscriptionsApi;
+import edu.utexas.tacc.tapis.notifications.client.gen.api.TopicsApi;
+
+public class NotificationsClient 
+ implements ITapisClient
+{
 
     public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
 
@@ -73,5 +75,19 @@ public class NotificationsClient {
         return queuesApi;
     }
 
+    /** Close connections and stop threads that can sometimes prevent JVM shutdown.
+     */
+    public void close()
+    {
+        try {
+            // Best effort attempt to shut things down.
+            var okClient = getApiClient().getHttpClient();
+            if (okClient != null) {
+                var pool = okClient.connectionPool();
+                if (pool != null) pool.evictAll();
+            }
+        } catch (Exception e) {}      
+    }
+    
 
 }

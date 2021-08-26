@@ -4,7 +4,7 @@
     <parent>
         <groupId>edu.utexas.tacc.tapis</groupId>
         <artifactId>tapis-client-java</artifactId>
-        <version>1.11.70-SNAPSHOT</version>
+        <version>2.0.6-SNAPSHOT</version>
     </parent>
 
 	<artifactId>security-client</artifactId>
@@ -15,7 +15,7 @@
 	<dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>shared</artifactId>
+            <artifactId>shared-clientlib</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

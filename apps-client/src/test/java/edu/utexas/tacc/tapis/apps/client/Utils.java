@@ -26,7 +26,7 @@ import com.google.gson.JsonObject;
 import edu.utexas.tacc.tapis.apps.client.gen.model.AppTypeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ArgMetaSpec;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ArgSpec;
-import edu.utexas.tacc.tapis.apps.client.gen.model.FileInputDefinition;
+import edu.utexas.tacc.tapis.apps.client.gen.model.FileInput;
 import edu.utexas.tacc.tapis.apps.client.gen.model.JobAttributes;
 import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.apps.client.gen.model.NotificationMechanism;
@@ -36,10 +36,10 @@ import edu.utexas.tacc.tapis.apps.client.gen.model.ParameterSet;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ParameterSetArchiveFilter;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RuntimeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RuntimeOptionEnum;
+import edu.utexas.tacc.tapis.apps.client.gen.model.TapisApp;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqCreateApp;
-import edu.utexas.tacc.tapis.apps.client.gen.model.App;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 
@@ -68,6 +68,13 @@ public final class Utils
   public static final String ownerUser2 = testUser2;
   public static final String adminTenantName = "admin";
   public static final String filesSvcName = "files";
+
+  // Long term JWT for testuser1 - expires approx 1 July 2026
+  public static final String testUser1JWT ="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiIwZDg0YWRlOC0yMzQwLTQzOGQtOGJiMy1jZTFhYjg0M2I1NjYiLCJpc3MiOiJodHRwczovL2Rldi5kZXZlbG9wLnRhcGlzLmlvL3YzL3Rva2VucyIsInN1YiI6InRlc3R1c2VyMUBkZXYiLCJ0YXBpcy90ZW5hbnRfaWQiOiJkZXYiLCJ0YXBpcy90b2tlbl90eXBlIjoiYWNjZXNzIiwidGFwaXMvZGVsZWdhdGlvbiI6ZmFsc2UsInRhcGlzL2RlbGVnYXRpb25fc3ViIjpudWxsLCJ0YXBpcy91c2VybmFtZSI6InRlc3R1c2VyMSIsInRhcGlzL2FjY291bnRfdHlwZSI6InVzZXIiLCJleHAiOjE3ODI4Mzg0MzZ9.OElQtm2H-BZTsmK1V-Ey36jgQJmzME4wfBu0QQ9CwnQ7IJT8qQMlU_cbFZPiNAfAj9xCpOC9-NskUE0ZzYcbvmFt-rzAwzjwLSS1Akx4B2aENsOEZLmLYnqo8eY_qde0rYbyVt0KtemsAZrx2Y7vrEiwWDKRyvAE-b52Knpc_Xoqmv9NcyinYi7Bi2x9S0IswGev3KZr2D4nwZAmTrgHQ3lp1NbyySJE0HKTXfr4P4gIo2FBFm0Kk_k9xJlJlcT4d2Jf-7YRtIMM9G8Y4sateVepxBA0v8F6b_OxX-LeEHeH-MeD-7MNLFayi2MIQGjXNB3J6Zrl6qWFBMDlxA8PDw";
+  // Long term JWT for testuser3 - expires approx 1 July 2026
+  public static final String testUser3JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJlNmIwMTRiOC05MGY1LTRjY2EtODhmYy1iYmIwYWJkMWZkODciLCJpc3MiOiJodHRwczovL2Rldi5kZXZlbG9wLnRhcGlzLmlvL3YzL3Rva2VucyIsInN1YiI6InRlc3R1c2VyM0BkZXYiLCJ0YXBpcy90ZW5hbnRfaWQiOiJkZXYiLCJ0YXBpcy90b2tlbl90eXBlIjoiYWNjZXNzIiwidGFwaXMvZGVsZWdhdGlvbiI6ZmFsc2UsInRhcGlzL2RlbGVnYXRpb25fc3ViIjpudWxsLCJ0YXBpcy91c2VybmFtZSI6InRlc3R1c2VyMyIsInRhcGlzL2FjY291bnRfdHlwZSI6InVzZXIiLCJleHAiOjE3ODI4Mzg2MjV9.yhAHhvFy5APE0gLw47qEv_aay3RmJZkd5Ik7WGmjh0QHrV9gCCxNIVGLKUSBOeKnocDLN9_dpGD0DL4OFiGcKrE9MaI9bYuL4j8BrxEf3Faa64B3IK38zml2Bx1nzpTAxkP6SJy6NENWFhbGg3MRa05oo8R2XctXoOBq8lb3I__zrwzKxQymF9L25hPzivBKaAkpIfVgsd2EGG8UdiExkK8yBRUDddK_I9BNn0VrzaJ0teLg_aOi-vyZN7JfT2VlQqgdMfvVGvH2O8Lt8BBvBs3dm7ODfSbxz1S5FHCYHvSV0H7h4lHA-yumU1I9vDi4K-_6gamHVfMMCqyYRLdJxA";
+
+
   // TAPIS_BASE_URL_SUFFIX should be set according to the dev, staging or prod environment
   // dev     -> develop.tapis.io
   // staging -> staging.tapis.io
@@ -82,9 +89,18 @@ public final class Utils
   public static final String TAPIS_ENV_FILES_SVC_PASSWORD = "TAPIS_FILES_SERVICE_PASSWORD";
   public static final String TAPIS_ENV_SVC_PORT = "TAPIS_SERVICE_PORT";
 
-  // Default system attributes
+  // Default attributes
   public static final String defaultDescription = null;
   public static final String defaultNotesStr = "{}";
+  public static final boolean defaultIsEnabled = true;
+  public static final boolean defaultDeleted = false;
+  public static final RuntimeEnum defaultRuntime = RuntimeEnum.DOCKER;
+  public static final String defaultRuntimeVersion = null;
+  public static final String defaultContainerImage = "containerImage";
+  public static final int defaultMaxJobs = 0;
+  public static final int defaultMaxJobsPerUser = 0;
+  public static final boolean defaultStrictFileInputs = false;
+  public static final boolean defaultDynamicExecSystem = false;
 
   public static final List<String> tags1 = Arrays.asList("value1", "value2", "a",
           "Long tag (1 3 2) special chars [_ $ - & * % @ + = ! ^ ? < > , . ( ) { } / \\ | ]. Backslashes must be escaped.");
@@ -104,17 +120,16 @@ public final class Utils
   public static final boolean isEnabledTrue = true;
   public static final RuntimeEnum runtime = RuntimeEnum.DOCKER;
   public static final String runtimeVersion = "0.0.1";
-  public static final List<RuntimeOptionEnum> runtimeOptions1 = new ArrayList<>(List.of(RuntimeOptionEnum.RUN));
-  public static final List<RuntimeOptionEnum> runtimeOptions2 = new ArrayList<>(List.of(RuntimeOptionEnum.START));
+  public static final List<RuntimeOptionEnum> runtimeOptions1 = new ArrayList<>(List.of(RuntimeOptionEnum.SINGULARITY_RUN));
+  public static final List<RuntimeOptionEnum> runtimeOptions2 = new ArrayList<>(List.of(RuntimeOptionEnum.SINGULARITY_START));
   public static final List<RuntimeOptionEnum> runtimeOptionsNull = null;
-  public static final String containerImage = "containerImage";
   public static final boolean dynamicExecSystemTrue = true;
   public static final List<String> execSystemConstraints = Arrays.asList("Constraint1 AND", "Constraint2");
-  public static final String execSystemId = "tapisv3-exec";
+  public static final String execSystemId = "tapisv3-exec3";
   public static final String execSystemExecDir = "execSystemExecDir";
   public static final String execSystemInputDir = "execSystemInputDir";
   public static final String execSystemOutputDir = "execSystemOutputDir";
-  public static final String execSystemLogicalQueue = "execSystemLogicalQueue";
+  public static final String execSystemLogicalQueue = "dsnormal";
   public static final String archiveSystemId = "tapisv3-storage";
   public static final String archiveSystemIdNull = null;
   public static final String archiveSystemDir = "archiveSystemDir";
@@ -125,10 +140,10 @@ public final class Utils
   public static final int maxJobsPerUser = 1;
   public static final int maxJobsPerUserMAX = Integer.MAX_VALUE;
   public static final boolean strictFileInputsFalse = false;
-  public static final int nodeCount = 1;
-  public static final int coresPerNode = 1;
-  public static final int memoryMb = 1;
-  public static final int maxMinutes = 1;
+  public static final int nodeCount = 10;
+  public static final int coresPerNode = 10;
+  public static final int memoryMb = 32;
+  public static final int maxMinutes = 10;
   public static final boolean metaRequiredTrue = true;
   public static final boolean metaRequiredFalse = false;
   public static final boolean deletedFalse = false;
@@ -150,14 +165,14 @@ public final class Utils
   public static final List<KeyValuePair> kvPairsFinA1 = new ArrayList<>(List.of(kv1,kv2,kv3));
   public static final ArgMetaSpec argMetaFinA1 = new ArgMetaSpec().name("finA1").description("File input A1")
                                                          .required(metaRequiredTrue).keyValuePairs(kvPairsFinA1);
-  public static final FileInputDefinition finA1 = new FileInputDefinition().sourceUrl(srcA1).targetPath("/targetA1")
+  public static final FileInput finA1 = new FileInput().sourceUrl(srcA1).targetPath("/targetA1")
                                                          .inPlace(inPlaceTrue).meta(argMetaFinA1);
   public static final List<KeyValuePair> kvPairsFinB1 = new ArrayList<>(List.of(kv1,kv2,kv3));
   public static final ArgMetaSpec argMetaFinB1 = new ArgMetaSpec().name("finB1").description("File input B1")
           .required(metaRequiredTrue).keyValuePairs(kvPairsFinB1);
-  public static final FileInputDefinition finB1 = new FileInputDefinition().sourceUrl(srcB1).targetPath("/targetB1")
+  public static final FileInput finB1 = new FileInput().sourceUrl(srcB1).targetPath("/targetB1")
           .inPlace(inPlaceTrue).meta(argMetaFinB1);
-  public static final List<FileInputDefinition> fileInputDefinitions = new ArrayList<>(List.of(finA1, finB1));
+  public static final List<FileInput> fileInputs = new ArrayList<>(List.of(finA1, finB1));
 
   public static final NotificationMechanism notifMechA1 =
           new NotificationMechanism().mechanism(NotificationMechanismEnum.WEBHOOK).webhookURL("webhookUrlA1")
@@ -219,9 +234,9 @@ public final class Utils
 //              10=execSystemId, 11=execSystemExecDir, 12=execSystemInputDir, 13=execSystemOutputDir,
 //              14=execSystemLogicalQueue, 15=archiveSystemId, 16=archiveSystemDir};
       String[] app0 = {tenantName, appId, appVersion, "description "+suffix, appTypeBatch.name(), ownerUser1,
-                       runtime.name(), runtimeVersion+suffix, containerImage+suffix, jobDescription+suffix,
+                       runtime.name(), runtimeVersion+suffix, defaultContainerImage, jobDescription+suffix,
                        execSystemId, execSystemExecDir+suffix, execSystemInputDir+suffix, execSystemOutputDir+suffix,
-                       execSystemLogicalQueue+suffix, archiveSystemId, archiveSystemDir+suffix};
+                       execSystemLogicalQueue, archiveSystemId, archiveSystemDir+suffix};
       apps.put(i, app0);
     }
     return apps;
@@ -302,7 +317,7 @@ public final class Utils
     // ====== End Parameter Set
     jobAttrs.setParameterSet(parameterSet);
 
-    jobAttrs.setFileInputDefinitions(fileInputDefinitions);
+    jobAttrs.setFileInputs(fileInputs);
     jobAttrs.setNodeCount(nodeCount);
     jobAttrs.setCoresPerNode(coresPerNode);
     jobAttrs.setMemoryMB(memoryMb);
@@ -319,30 +334,61 @@ public final class Utils
     return clt.createApp(rApp);
   }
 
+  /**
+   * Create an application using only required attributes.
+   * In simplest case these are required: id, version, appType, containerImage, execSystemId
+   * Use attributes from a string array.
+   *    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=appType, 5=ownerUser1,
+   *              6=runtime, 7=runtimeVersion, 8=containerImage, 9=jobDescription,
+   *              10=execSystemId, 11=execSystemExecDir, 12=execSystemInputDir, 13=execSystemOutputDir,
+   *              14=execSystemLogicalQueue, 15=archiveSystemId, 16=archiveSystemDir};
+   *
+   * @param clt - Apps client
+   * @param app - Array of attributes that can be represented as strings.
+   * @return Response from the createApp client call
+   * @throws TapisClientException - on error
+   */
   public static String createAppMinimal(AppsClient clt, String[] app) throws TapisClientException
   {
     ReqCreateApp rApp = new ReqCreateApp();
+    // Id, version and type are always required
     rApp.setId(app[1]);
     rApp.setVersion(app[2]);
     rApp.setAppType(appTypeBatch);
-    rApp.setContainerImage(containerImage);
+    // Containerized so container image must be set. NOTE: currently only containerized supported
+    rApp.setContainerImage(defaultContainerImage);
     // === Start Job Attributes
     JobAttributes jobAttrs = new JobAttributes();
+    // dynamiceExecSystem defaults to false so execSystemId must be set. This is the simplest minimal App
     jobAttrs.setExecSystemId(app[10]);
     rApp.setJobAttributes(jobAttrs);
 
+    // Use client to create the app
     return clt.createApp(rApp);
   }
 
   /**
-   * Verify most attributes for an App using default create data for following attributes:
-   *     port, useProxy, proxyHost, proxyPort, defaultAuthnMethod, transferMethods,
-   *     canExec, jobWorkingDir, jobMaxJobs, jobMaxJobsPerUser, jobIsBatch, batchScheduler, batchDefaultLogicalQueue,
-   *     jobEnvVariables, jobLogicalQueues, capabilities, tags, notes
+   * Create an application based on attributes from a TapisApp.
+   *
+   * @param clt - Apps client
+   * @param app - TapisApp
+   * @return Response from the createApp client call
+   * @throws TapisClientException - on error
+   */
+  public static String createAppFromTapisApp(AppsClient clt, TapisApp app) throws TapisClientException
+  {
+    ReqCreateApp rApp = makeReqCreateAppFromTapisApp(app);
+    // Use client to create the app
+    return clt.createApp(rApp);
+  }
+
+  /**
+   * Verify most attributes for an App
+   *
    * @param tmpApp - app retrieved from the service
    * @param app0 - Data used to create the app
    */
-  public static void verifyAppAttributes(App tmpApp, String[] app0)
+  public static void verifyAppAttributes(TapisApp tmpApp, String[] app0)
   {
 //    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=appType, 5=ownerUser1,
 //              6=runtime, 7=runtimeVersion, 8=containerImage, 9=jobDescription,
@@ -392,17 +438,18 @@ public final class Utils
 
     // TODO Verify fileInputs
     // TODO only meta.name is checked
-    List<FileInputDefinition> tFileInputs = jobAttributes.getFileInputDefinitions();
+    List<FileInput> tFileInputs = jobAttributes.getFileInputs();
     Assert.assertNotNull(tFileInputs, "FileInputs list should not be null.");
-    Assert.assertEquals(tFileInputs.size(), fileInputDefinitions.size(), "Wrong number of FileInputs");
+    Assert.assertEquals(tFileInputs.size(), fileInputs.size(), "Wrong number of FileInputs");
     var metaNamesFound = new ArrayList<String>();
-    for (FileInputDefinition itemFound : tFileInputs)
+    for (FileInput itemFound : tFileInputs)
     {
       Assert.assertNotNull(itemFound.getMeta(), "FileInput meta value should not be null.");
       metaNamesFound.add(itemFound.getMeta().getName());
     }
-    for (FileInputDefinition itemSeedItem : fileInputDefinitions)
+    for (FileInput itemSeedItem : fileInputs)
     {
+      Assert.assertNotNull(itemSeedItem.getMeta());
       Assert.assertTrue(metaNamesFound.contains(itemSeedItem.getMeta().getName()),
               "List of fileInputs did not contain an item with metaName: " + itemSeedItem.getMeta().getName());
     }
@@ -549,5 +596,113 @@ public final class Utils
 //    appClientSvc.addDefaultHeader("X-Tapis-User", appOwner);
 //    appClientSvc.addDefaultHeader("X-Tapis-Tenant", tenantName);
     return new AppsClient(serviceURL, userJWT);
+  }
+
+  /**
+   * Verify the required attributes for a TapisApp
+   *   and verify that other attributes are set to expected defaults.
+   //    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=appType, 5=ownerUser1,
+   //              6=runtime, 7=runtimeVersion, 8=containerImage, 9=jobDescription,
+   //              10=execSystemId, 11=execSystemExecDir, 12=execSystemInputDir, 13=execSystemOutputDir,
+   //              14=execSystemLogicalQueue, 15=archiveSystemId, 16=archiveSystemDir};
+   String[] app0 = {tenantName, appId, appVersion, "description "+suffix, appTypeBatch.name(), ownerUser1,
+   runtime.name(), runtimeVersion+suffix, containerImage+suffix, jobDescription+suffix,
+   execSystemId, execSystemExecDir+suffix, execSystemInputDir+suffix, execSystemOutputDir+suffix,
+   execSystemLogicalQueue, archiveSystemId, archiveSystemDir+suffix};
+   * @param tmpApp - app retrieved from the service
+   */
+  public static void verifyAppDefaults(TapisApp tmpApp, String appId)
+  {
+    Assert.assertEquals(tmpApp.getTenant(), tenantName);
+    // Verify required attributes
+    Assert.assertEquals(tmpApp.getId(), appId);
+    Assert.assertEquals(tmpApp.getVersion(), appVersion);
+    Assert.assertNotNull(tmpApp.getAppType());
+    Assert.assertEquals(tmpApp.getAppType().name(), appTypeBatch.name());
+    Assert.assertNotNull(tmpApp.getJobAttributes());
+
+    // Verify optional attributes have been set to defaults
+    // Owner should have defaulted to user who created the system
+    Assert.assertEquals(tmpApp.getOwner(), ownerUser1);
+    Assert.assertEquals(tmpApp.getDescription(), defaultDescription);
+    Assert.assertEquals(tmpApp.getEnabled(), Boolean.valueOf(defaultIsEnabled));
+    Assert.assertEquals(tmpApp.getRuntime(), defaultRuntime);
+    Assert.assertEquals(tmpApp.getRuntimeVersion(), defaultRuntimeVersion);
+    Assert.assertNull(tmpApp.getRuntimeOptions());
+    Assert.assertEquals(tmpApp.getContainerImage(), defaultContainerImage);
+    Assert.assertNotNull(tmpApp.getMaxJobs());
+    Assert.assertEquals(tmpApp.getMaxJobs().intValue(), maxJobsMAX);
+    Assert.assertNotNull(tmpApp.getMaxJobsPerUser());
+    Assert.assertEquals(tmpApp.getMaxJobsPerUser().intValue(), maxJobsPerUserMAX);
+    Assert.assertEquals(tmpApp.getStrictFileInputs(), Boolean.valueOf(defaultStrictFileInputs));
+    Assert.assertNotNull(tmpApp.getTags());
+    Assert.assertTrue(tmpApp.getTags().isEmpty());
+    Assert.assertNotNull(tmpApp.getNotes());
+    Assert.assertEquals((String) tmpApp.getNotes(), defaultNotesStr);
+    Assert.assertEquals(tmpApp.getDeleted(), Boolean.valueOf(defaultDeleted));
+    // jobAttributes
+    JobAttributes jobAttrs = tmpApp.getJobAttributes();
+    Assert.assertEquals(jobAttrs.getDescription(), defaultDescription);
+    Assert.assertNotNull(jobAttrs.getDynamicExecSystem());
+    Assert.assertFalse(jobAttrs.getDynamicExecSystem());
+    Assert.assertNull(jobAttrs.getExecSystemExecDir());
+    Assert.assertNull(jobAttrs.getExecSystemInputDir());
+    Assert.assertNull(jobAttrs.getExecSystemOutputDir());
+    Assert.assertNull(jobAttrs.getExecSystemLogicalQueue());
+    Assert.assertNull(jobAttrs.getArchiveSystemId());
+    Assert.assertNull(jobAttrs.getArchiveSystemDir());
+    Assert.assertNotNull(jobAttrs.getArchiveOnAppError());
+    Assert.assertTrue(jobAttrs.getArchiveOnAppError());
+    Assert.assertNotNull(jobAttrs.getFileInputs());
+    Assert.assertTrue(jobAttrs.getFileInputs().isEmpty());
+    Assert.assertNotNull(jobAttrs.getNodeCount());
+    Assert.assertEquals(jobAttrs.getNodeCount().intValue(), 1);
+    Assert.assertNotNull(jobAttrs.getCoresPerNode());
+    Assert.assertEquals(jobAttrs.getCoresPerNode().intValue(), 1);
+    Assert.assertNotNull(jobAttrs.getMemoryMB());
+    Assert.assertEquals(jobAttrs.getMemoryMB().intValue(), 100);
+    Assert.assertNotNull(jobAttrs.getMaxMinutes());
+    Assert.assertEquals(jobAttrs.getMaxMinutes().intValue(), 10);
+    Assert.assertNotNull(jobAttrs.getSubscriptions());
+    Assert.assertTrue(jobAttrs.getSubscriptions().isEmpty());
+    Assert.assertNotNull(jobAttrs.getTags());
+    Assert.assertTrue(jobAttrs.getTags().isEmpty());
+    // jobAttributes.parameterSet
+    ParameterSet parmSet = jobAttrs.getParameterSet();
+    Assert.assertNotNull(parmSet);
+    Assert.assertNotNull(parmSet.getAppArgs());
+    Assert.assertTrue(parmSet.getAppArgs().isEmpty());
+    Assert.assertNotNull(parmSet.getSchedulerOptions());
+    Assert.assertTrue(parmSet.getSchedulerOptions().isEmpty());
+    Assert.assertNotNull(parmSet.getEnvVariables());
+    Assert.assertTrue(parmSet.getEnvVariables().isEmpty());
+    // parameterSet.archiveFilter
+    ParameterSetArchiveFilter archiveFilter = parmSet.getArchiveFilter();
+    Assert.assertNotNull(archiveFilter);
+    Assert.assertNotNull(archiveFilter.getIncludes());
+    Assert.assertTrue(archiveFilter.getIncludes().isEmpty());
+    Assert.assertNotNull(archiveFilter.getExcludes());
+    Assert.assertTrue(archiveFilter.getExcludes().isEmpty());
+    Assert.assertNotNull(archiveFilter.getIncludeLaunchFiles());
+    Assert.assertTrue(archiveFilter.getIncludeLaunchFiles());
+  }
+
+  /*
+   * Generate a full ReqCreateApp using attributes from a TapisApp
+   */
+  private static ReqCreateApp makeReqCreateAppFromTapisApp(TapisApp app) throws TapisClientException
+  {
+    ReqCreateApp rApp = new ReqCreateApp();
+    // Id, version and type
+    rApp.setId(app.getId());
+    rApp.setVersion(app.getVersion());
+    rApp.setAppType(app.getAppType());
+    rApp.setDescription(app.getDescription());
+    rApp.setOwner(app.getOwner());
+    rApp.setContainerImage(app.getContainerImage());
+// TODO ???
+    rApp.setJobAttributes(app.getJobAttributes());
+
+    return rApp;
   }
 }

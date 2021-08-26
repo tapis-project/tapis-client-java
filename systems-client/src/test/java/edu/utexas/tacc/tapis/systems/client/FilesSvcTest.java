@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 
 import java.util.Map;
 
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_ALL;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_TARGET_SITE;
 
 import static edu.utexas.tacc.tapis.systems.client.Utils.*;
@@ -74,10 +75,13 @@ public class FilesSvcTest
     System.out.println("Using Tokens URL: " + baseURL);
     // Get short term user JWT from tokens service
     var authClient = new AuthClient(baseURL);
-    var tokClient = new TokensClient(baseURL, filesSvcName, filesSvcPasswd);
+//    var tokClient = new TokensClient(baseURL, filesSvcName, filesSvcPasswd);
     try {
+      // Sometimes auth or tokens service is down. Use long term tokens instead.
       userJWT = authClient.getToken(testUser1, testUser1);
-      filesServiceJWT = tokClient.getSvcToken(adminTenantName, filesSvcName, DEFAULT_TARGET_SITE);
+//      filesServiceJWT = tokClient.getSvcToken(adminTenantName, filesSvcName, DEFAULT_TARGET_SITE);
+//      userJWT = testUser1JWT;
+      filesServiceJWT = filesSvcJWT;
     } catch (Exception e) {
       throw new Exception("Exception while creating tokens or auth service", e);
     }
@@ -95,7 +99,7 @@ public class FilesSvcTest
       String[] sys0 = systems.get(i);
       System.out.println("Creating system with name: " + sys0[1]);
       try {
-        ReqCreateSystem rSys = Utils.createReqSystem(sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC);
+        ReqCreateSystem rSys = Utils.createReqSystem(sys0, prot1Port, prot1AuthnMethod, cred0);
         String respUrl = sysClient.createSystem(rSys);
         System.out.println("Created system: " + respUrl);
         Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
@@ -125,7 +129,7 @@ public class FilesSvcTest
       String systemId = systems.get(i)[1];
       try
       {
-        sysClient.deleteSystem(systemId, true);
+        sysClient.deleteSystem(systemId);
       }
       catch (Exception e)
       {
@@ -191,7 +195,7 @@ public class FilesSvcTest
     sys0 = systems.get(2);
     // This should succeed
     sysClient = getClientFilesSvc(tenantName, testUser2, filesServiceJWT);
-    tmpSys = sysClient.getSystem(sys0[1], false, null, true);
+    tmpSys = sysClient.getSystem(sys0[1], false, null, true, DEFAULT_SELECT_ALL);
     Assert.assertNotNull(tmpSys, "Failed to find item: " + sys0[1]);
     System.out.println("Found item: " + sys0[1]);
     // Verify most attributes
@@ -201,7 +205,7 @@ public class FilesSvcTest
     // this should fail
     sysClient = getClientFilesSvc(tenantName, testUser3, filesServiceJWT);
     try {
-      sysClient.getSystem(sys0[1], false, null, true);
+      sysClient.getSystem(sys0[1], false, null, true, DEFAULT_SELECT_ALL);
       Assert.fail("Fetch of system did not require EXECUTE permission as expected");
     } catch (TapisClientException tce) {
       Assert.assertTrue(tce.getTapisMessage().contains("SYSLIB_UNAUTH"), "Wrong exception message: " + tce.getTapisMessage());
@@ -216,7 +220,7 @@ public class FilesSvcTest
 //    String[] sys0 = systems.get(2);
 //    System.out.println("Creating system with name: " + sys0[1]);
 //    try {
-//      String respUrl = Utils.createSystem(getClientUsr(serviceURL, ownerUserJWT), sys0, prot1Port, prot1AuthnMethod, null, prot1TxfrMethodsC);
+//      String respUrl = Utils.createSystem(getClientUsr(serviceURL, ownerUserJWT), sys0, prot1Port, prot1AuthnMethod, null);
 //      System.out.println("Created system: " + respUrl);
 //      System.out.println("Testing credentials for user: " + newPermsUser);
 //      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);

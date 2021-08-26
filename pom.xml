@@ -8,7 +8,7 @@
     <parent>
         <groupId>edu.utexas.tacc.tapis</groupId>
         <artifactId>tapis-bom</artifactId>
-        <version>[1.11,2.0)</version>
+        <version>[2.0,3.0)</version>
         <!-- Set empty relative path to avoid maven warning and -->
         <!--   ensure parent is found in local repository if that -->
         <!--   is the only place it exists. -->
@@ -16,7 +16,7 @@
     </parent>
 
     <artifactId>tapis-client-java</artifactId>
-    <version>1.11.70-SNAPSHOT</version>
+    <version>2.0.6-SNAPSHOT</version>
 
     <name>Tapis Client</name>
     <description>Top level java client</description>
@@ -111,7 +111,7 @@
     </profiles>
 
     <modules>
-        <module>shared</module>
+        <module>shared-clientlib</module>
         <module>auth-client</module>
         <module>security-client</module>
         <module>tokens-client</module>
@@ -123,5 +123,55 @@
         <module>jobs-client</module>
         <module>notifications-client</module>
     </modules>
+    <build>
+        <plugins>
+            <!--  gitflow-maven-plugin supports various git workflow steps, such as gitflow:release-start-->
+            <!--    gitflow:release-finish, gitflow:feature-start, gitflow:feature-finish-->
+            <!-- For configuration see parent pom tapis-bom.xml -->
+            <plugin>
+                <groupId>com.amashchenko.maven.plugin</groupId>
+                <artifactId>gitflow-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
 
+    <resources>
+      <!-- Write the project version number to the specified file. -->
+      <!-- Setting the targetPath puts the file into the jar at the -->
+      <!-- specified root-relative directory. The the modified -->
+      <!-- tapis.version file is always copied to the target/classes -->
+      <!-- directory. Do the same for other data that we want to -->
+      <!-- capture. A jar and war file will contain these files -->
+      <!-- as long as the templated files are in the configured -->
+      <!-- directory in the child project. -->
+      <resource>
+        <directory>src/main/resources</directory>
+        <targetPath>.</targetPath>
+        <filtering>true</filtering>
+        <includes>
+          <include>**/tapis.version</include>
+          <include>**/tapis.fullversion</include>
+          <include>**/git.info</include>
+          <include>**/build.time</include>
+        </includes>
+      </resource>
+
+      <!-- For some reason, we have to tell maven, surefire or testng -->
+      <!-- that all main/resources need to be copied to some target -->
+      <!-- directory. We also have to tell them to NOT undo filtering -->
+      <!-- for the files that we explicitly filter above. Good stuff. -->
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+        <includes>
+          <include>**/*</include>
+        </includes>
+        <excludes>
+          <exclude>**/tapis.version</exclude>
+          <exclude>**/tapis.fullversion</exclude>
+          <exclude>**/git.info</exclude>
+          <exclude>**/build.time</exclude>
+        </excludes>
+      </resource>
+    </resources>
+  </build>
 </project>

@@ -1,10 +1,12 @@
 package edu.utexas.tacc.tapis.systems.client;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import com.google.gson.JsonObject;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerProfile;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
@@ -16,14 +18,14 @@ import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
 
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUpdateSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPutSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPatchSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SystemTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.AuthnEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
-import edu.utexas.tacc.tapis.systems.client.gen.model.TransferMethodEnum;
 import edu.utexas.tacc.tapis.systems.client.SystemsClient.AuthnMethod;
 
 import static edu.utexas.tacc.tapis.systems.client.Utils.*;
@@ -45,14 +47,17 @@ import static edu.utexas.tacc.tapis.systems.client.Utils.*;
 @Test(groups={"integration"})
 public class UserTest
 {
-  // Test data
-  // NOTE: We create a certain number of systems but during refactoring some end up not being used.
-  //       When creating a new test look for an unused system and remove it from the this list.
-  //  List of unused systems: 5, 6
+  // Test data (systems and scheduler profiles)
+  // NOTE: We create a certain number of systems but during refactoring some ended up not being used.
+  //       When creating a new test look for an unused system and remove it from this list.
+  //  List of unused systems: 6
   //  If list is empty then increment numSystems by 1 and use it.
   int numSystems = 14;
   Map<Integer, String[]> systems = Utils.makeSystems(numSystems, "CltUsr");
-  
+
+  int numSchedulerProfiles = 7;
+  Map<Integer, String[]> schedulerProfiles = Utils.makeSchedulerProfiles(numSchedulerProfiles, "CltUsr");
+
   private static final String newOwnerUser = testUser3;
   private static final String newPermsUser = testUser4;
 
@@ -84,6 +89,11 @@ public class UserTest
     try {
       ownerUserJWT = authClient.getToken(testUser1, testUser1);
       newOwnerUserJWT = authClient.getToken(newOwnerUser, newOwnerUser);
+      // Sometimes auth or tokens service is down. Use long term tokens instead.
+      // Long term JWT for testuser1 - expires approx 1 July 2026
+//      ownerUserJWT = testUser1JWT;
+      // Long term JWT for testuser3 - expires approx 1 July 2026
+//      newOwnerUserJWT = testUser3JWT;
     } catch (Exception e) {
       throw new Exception("Exception while creating tokens or auth service", e);
     }
@@ -104,25 +114,42 @@ public class UserTest
     System.out.println("****** Executing AfterSuite teardown method for class: " + this.getClass().getSimpleName());
     usrClient = getClientUsr(serviceURL, ownerUserJWT);
     // Remove all objects created by tests, ignore any exceptions
+
+    // Delete systems
     // This is a soft delete but still should be done to clean up SK artifacts.
     for (int i = 1; i <= numSystems; i++)
     {
       String systemId = systems.get(i)[1];
       try
       {
-        usrClient.deleteSystem(systemId, true);
+        usrClient.deleteSystem(systemId);
       }
       catch (Exception e)
       {
         System.out.println("Caught exception when soft deleting system: "+ systemId + " Exception: " + e);
       }
     }
+
+    // Delete scheduler profiles. This is a hard delete
+    for (int i = 1; i <= numSchedulerProfiles; i++)
+    {
+      String name = schedulerProfiles.get(i)[1];
+      try
+      {
+        usrClient.deleteSchedulerProfile(name);
+      }
+      catch (Exception e)
+      {
+        System.out.println("Caught exception when deleting scheduler profile: "+ name + " Exception: " + e);
+      }
+    }
+
     // One system may have had owner changed so use new owner.
     String systemId = systems.get(9)[1];
     usrClient = getClientUsr(serviceURL, newOwnerUserJWT);
     try
     {
-      usrClient.deleteSystem(systemId, true);
+      usrClient.deleteSystem(systemId);
     }
     catch (Exception e)
     {
@@ -152,6 +179,10 @@ public class UserTest
     }
   }
 
+  // ******************************************************************
+  //   Systems
+  // ******************************************************************
+
   @Test
   public void testCreateSystem() {
     // Create a system
@@ -159,7 +190,7 @@ public class UserTest
     System.out.println("Creating system with name: " + sys0[1]);
     try {
       String respUrl =
-              usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull, prot1TxfrMethodsC));
+              usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull));
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
@@ -175,7 +206,7 @@ public class UserTest
     System.out.println("Creating system with name: " + sys0[1]);
     try {
       String respUrl =
-              usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull, prot1TxfrMethodsC));
+              usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull));
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     } catch (Exception e) {
@@ -184,18 +215,19 @@ public class UserTest
     }
     // Now attempt to create it again, should throw exception
     System.out.println("Creating system with name: " + sys0[1]);
-    usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull, prot1TxfrMethodsC));
+    usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull));
     Assert.fail("Exception should have been thrown");
   }
 
   // Test various restrictions on system attributes at system creation time
   public void testSystemCreateRestrictions() {
     String[] sys0 = systems.get(4);
-    ReqCreateSystem rSys = createReqSystem(sys0, prot1Port, prot1AuthnMethod, null, prot1TxfrMethodsC);
+    ReqCreateSystem rSys = createReqSystem(sys0, prot1Port, prot1AuthnMethod, null);
 
-    // Attempt to create a system with transfer methods including S3 and no bucketName
+    // Attempt to create an S3 system with no bucketName
     boolean pass = false;
-    System.out.println("Attempting to create system with S3 and no bucketName. System name: " + sys0[1]);
+    System.out.println("Attempting to create S3 system with no bucketName. System name: " + sys0[1]);
+    rSys.setSystemType(SystemTypeEnum.S3);
     rSys.setBucketName(null);
     rSys.setCanExec(false);
     try { usrClient.createSystem(rSys); }
@@ -207,20 +239,20 @@ public class UserTest
     }
     Assert.assertTrue(pass, "Should not be able to create system with S3 and no bucketName");
 
-    // Attempt to create an OBJECT_STORE system with canExec=true
+    // Attempt to create an S3 system with canExec=true
+    rSys.setSystemType(SystemTypeEnum.S3);
     rSys.setBucketName(sys0[8]);
     rSys.setCanExec(true);
     pass = false;
-    System.out.println("Attempting to create system of type OBJECT_STORE with canExec=true. System name: " + sys0[1]);
-    rSys.setSystemType(SystemTypeEnum.OBJECT_STORE);
+    System.out.println("Attempting to create system of type S3 with canExec=true. System name: " + sys0[1]);
     try { usrClient.createSystem(rSys); }
     catch (TapisClientException tce)
     {
       System.out.println("Caught exception: " + tce.getMessage());
-      Assert.assertTrue(tce.getMessage().contains("SYSLIB_OBJSTORE_CANEXEC_INPUT"));
+      Assert.assertTrue(tce.getMessage().contains("SYSLIB_S3_CANEXEC_INPUT"));
       pass = true;
     }
-    Assert.assertTrue(pass, "Should not be able to create system of type OBJECT_STORE with canExec=true");
+    Assert.assertTrue(pass, "Should not be able to create system of type S3 with canExec=true");
     rSys.setSystemType(SystemTypeEnum.LINUX);
 
     // Test that authn method of CERT and static owner is not allowed
@@ -228,7 +260,7 @@ public class UserTest
     System.out.println("Attempting to create system with authnMethod=CERT and static owner. System name: " + sys0[1]);
     try
     {
-      usrClient.createSystem(createReqSystem(sys0, prot1Port, AuthnMethod.CERT, credNull, prot1TxfrMethodsC));
+      usrClient.createSystem(createReqSystem(sys0, prot1Port, AuthnMethod.CERT, credNull));
     }
     catch (TapisClientException tce)
     {
@@ -247,7 +279,7 @@ public class UserTest
                                            "fakeAccessKey", "fakeAccessSecret", "fakeCert");
     try
     {
-      usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, cred0, prot1TxfrMethodsC));
+      usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, cred0));
     }
     catch (TapisClientException tce)
     {
@@ -306,18 +338,17 @@ public class UserTest
   @Test
   public void testGetSystem() throws Exception {
     String[] sys0 = systems.get(7);
-    String respUrl =
-            usrClient.createSystem(createReqSystem(sys0, prot1Port, AuthnMethod.PKI_KEYS, credNull, prot1TxfrMethodsC));
+    String respUrl = usrClient.createSystem(createReqSystem(sys0, prot1Port, AuthnMethod.PKI_KEYS, credNull));
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     TapisSystem tmpSys = usrClient.getSystem(sys0[1]);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
-    System.out.println("Found item: " + sys0[1]);
+    System.out.println("Found item: " + tmpSys.getId());
     verifySystemAttributes(tmpSys, sys0);
   }
 
-  // Create a system using minimal attributes:
-  //   name, systemType, host, defaultAuthnMethod, jobCanExec
+  // Create a system using minimal attributes for LINUX:
+  //   id, systemType, host, defaultAuthnMethod, rootDir, canExec=false
   // Confirm that defaults are as expected
   @Test
   public void testCreateAndGetSystemMinimal() throws Exception
@@ -336,46 +367,132 @@ public class UserTest
     // Get the system and check the defaults
     TapisSystem tmpSys = usrClient.getSystem(sys0[1]);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
-    System.out.println("Found item: " + sys0[1]);
-    Utils.verifySystemDefaults(tmpSys, sys0);
+    System.out.println("Found item: " + tmpSys.getId());
+    Utils.verifySystemDefaults(tmpSys, sys0, sys0[1]);
+  }
+
+  // Create a system using minimal attributes, get the system, use modified result to
+  //  create a new system and update the original system using PUT.
+  // Confirm that defaults are as expected
+  @Test
+  public void testMinimalCreateGetPutAndCreate() throws Exception
+  {
+    // Create a LINUX system using minimal attributes
+    String[] sys0 = systems.get(5);
+    String sysId = sys0[1];
+    System.out.println("Creating system with id: " + sysId);
+    try {
+      String respUrl = Utils.createSystemMinimal(usrClient, sys0);
+      System.out.println("Created system: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
+
+    // Get the system and check the defaults
+    TapisSystem tmpSys = usrClient.getSystem(sysId);
+    Assert.assertNotNull(tmpSys, "Failed to create item: " + sysId);
+    System.out.println("Found item: " + tmpSys.getId());
+    Utils.verifySystemDefaults(tmpSys, sys0, sysId);
+
+    // Modify result and create a new system
+    String newId = sysId + "new";
+    tmpSys.setId(newId);
+    try {
+      String respUrl = Utils.createSystemFromTapisSystem(usrClient, tmpSys);
+      System.out.println("Created system: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
+    // Get the new system and check the defaults
+    tmpSys = usrClient.getSystem(newId);
+    Assert.assertNotNull(tmpSys, "Failed to create item: " + newId);
+    System.out.println("Found item: " + tmpSys.getId());
+    Utils.verifySystemDefaults(tmpSys, sys0, newId);
+
+    // For the new system do not modify result and use PUT to update. Nothing should change.
+    tmpSys.setId(newId);
+    try {
+      ReqPutSystem reqPutSystem = SystemsClient.buildReqPutSystem(tmpSys);
+      String respUrl = usrClient.putSystem(newId,  reqPutSystem);
+      System.out.println("Updated system using PUT. System: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
+    // Get the new system and check the defaults. Nothing should have changed.
+    tmpSys = usrClient.getSystem(newId);
+    Assert.assertNotNull(tmpSys, "Failed to create item: " + newId);
+    System.out.println("Found item: " + tmpSys.getId());
+    Utils.verifySystemDefaults(tmpSys, sys0, newId);
+
+    // For the new system modify result and use PUT to update. Verify updated attribute
+    tmpSys.setId(newId);
+    String newJobWorkDir = "/new/work/dir";
+    tmpSys.setJobWorkingDir(newJobWorkDir);
+    try {
+      ReqPutSystem reqPutSystem = SystemsClient.buildReqPutSystem(tmpSys);
+      String respUrl = usrClient.putSystem(newId,  reqPutSystem);
+      System.out.println("Updated system using PUT. System: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
+    // Get the new system and check the updated attribute.
+    tmpSys = usrClient.getSystem(newId);
+    Assert.assertNotNull(tmpSys, "Failed to create item: " + newId);
+    System.out.println("Found item: " + tmpSys.getId());
+    Assert.assertEquals(tmpSys.getJobWorkingDir(), newJobWorkDir, "Failed to update jobWorkingDir using PUT");
   }
 
   @Test
-  public void testUpdateSystem() {
+  public void testPatchSystem() {
     String[] sys0 = systems.get(8);
+    String sysId = sys0[1];
 //    private static final String[] sysF2 = {tenantName, "CsysF", "description PATCHED", sysType, ownerUser, "hostPATCHED", "effUserPATCHED",
 //            "fakePasswordF", "bucketF", "/rootF", "jobLocalWorkDirF", "jobLocalArchDirF", "jobRemoteArchSystemF", "jobRemoteArchDirF"};
+    String newDescription = "description PATCHED";
+    String newEffUser = "effUserPATCHED";
     String[] sysF2 = sys0.clone();
-    sysF2[2] = "description PATCHED"; sysF2[5] = hostPatchedId; sysF2[6] = "effUserPATCHED";
-    ReqUpdateSystem rSystem = createPatchSystem(sysF2);
-    System.out.println("Creating and updating system with name: " + sys0[1]);
+    sysF2[2] = newDescription;
+    sysF2[5] = hostPatchedId;
+    sysF2[6] = newEffUser;
+    // Create a patch system request that updates: description, host, effUser, authnMethod, port, userProxy, proxyHost,
+    //                                             proxyPort, jobCaps, tags, notes
+    ReqPatchSystem rSystem = createPatchSystem(newDescription, hostPatchedId, newEffUser);
+    System.out.println("Creating and updating system with id: " + sysId);
     try {
       // Create a system
-      String respUrl =
-              usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull, prot1TxfrMethodsC));
+      String respUrl = usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull));
       System.out.println("Created system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
       // Update the system
-      respUrl = usrClient.updateSystem(sys0[1], rSystem);
-      System.out.println("Updated system: " + respUrl);
+      respUrl = usrClient.patchSystem(sysId, rSystem);
+      System.out.println("Patched system: " + respUrl);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
       // Verify attributes
       sys0 = sysF2;
-      TapisSystem tmpSys = usrClient.getSystem(sys0[1]);
-      Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
-      System.out.println("Found item: " + sys0[1]);
-      Assert.assertEquals(tmpSys.getId(), sys0[1]);
-      Assert.assertEquals(tmpSys.getDescription(), sys0[2]);
+      TapisSystem tmpSys = usrClient.getSystem(sysId);
+      Assert.assertNotNull(tmpSys, "Failed to create item: " + sysId);
+      System.out.println("Found item: " + tmpSys.getId());
+      Assert.assertEquals(tmpSys.getId(), sysId);
+      Assert.assertEquals(tmpSys.getDescription(), newDescription);
+      Assert.assertNotNull(tmpSys.getSystemType());
       Assert.assertEquals(tmpSys.getSystemType().name(), sys0[3]);
       Assert.assertEquals(tmpSys.getOwner(), sys0[4]);
-      Assert.assertEquals(tmpSys.getHost(), sys0[5]);
-      Assert.assertEquals(tmpSys.getEffectiveUserId(), sys0[6]);
+      Assert.assertEquals(tmpSys.getHost(), hostPatchedId);
+      Assert.assertEquals(tmpSys.getEffectiveUserId(), newEffUser);
       Assert.assertEquals(tmpSys.getBucketName(), sys0[8]);
       Assert.assertEquals(tmpSys.getRootDir(), sys0[9]);
       Assert.assertEquals(tmpSys.getJobWorkingDir(), sys0[10]);
       Assert.assertEquals(tmpSys.getBatchScheduler(), SchedulerTypeEnum.valueOf(sys0[11]));
       Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), sys0[12]);
-// TODO logical queues?      Assert.assertEquals(tmpSys.getJobRemoteArchiveDir(), sys0[13]);
+      Assert.assertEquals(tmpSys.getBatchSchedulerProfile(), sys0[13]);
       Assert.assertNotNull(tmpSys.getPort());
       Assert.assertEquals(tmpSys.getPort().intValue(), prot2Port);
       Assert.assertNotNull(tmpSys.getUseProxy());
@@ -385,13 +502,6 @@ public class UserTest
       Assert.assertEquals(tmpSys.getProxyPort().intValue(), prot2ProxyPort);
       Assert.assertNotNull(tmpSys.getDefaultAuthnMethod());
       Assert.assertEquals(tmpSys.getDefaultAuthnMethod().name(), prot2AuthnMethod.name());
-      // Verify transfer methods
-      List<TransferMethodEnum> tMethodsList = tmpSys.getTransferMethods();
-      Assert.assertNotNull(tMethodsList, "TransferMethods list should not be null");
-      for (TransferMethodEnum txfrMethod : prot2TxfrMethodsT)
-      {
-        Assert.assertTrue(tMethodsList.contains(txfrMethod), "List of transfer methods did not contain: " + txfrMethod.name());
-      }
       // Verify capabilities
       List<Capability> jobCaps = tmpSys.getJobCapabilities();
       Assert.assertNotNull(jobCaps);
@@ -436,14 +546,14 @@ public class UserTest
     // Create the system
     String[] sys0 = systems.get(9);
     String respUrl =
-            usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, null, prot1TxfrMethodsC));
+            usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, null));
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     TapisSystem tmpSys = usrClient.getSystem(sys0[1]);
     Assert.assertNotNull(tmpSys, "Failed to create item: " + sys0[1]);
     usrClient.changeSystemOwner(sys0[1], newOwnerUser);
     // Now that owner has given away ownership they should no longer be able to modify or read.
     try {
-      usrClient.deleteSystem(sys0[1], true);
+      usrClient.deleteSystem(sys0[1]);
       Assert.fail("Original owner should not have permission to update system after change of ownership. System name: " +
                   sys0[1] + " Old owner: " + testUser1 + " New Owner: " + newOwnerUser);
     } catch (TapisClientException e) {
@@ -465,15 +575,15 @@ public class UserTest
     // Create 2 systems
     String[] sys1 = systems.get(10);
     String respUrl =
-            usrClient.createSystem(createReqSystem(sys1, prot1Port, prot1AuthnMethod, credNull, prot1TxfrMethodsC));
+            usrClient.createSystem(createReqSystem(sys1, prot1Port, prot1AuthnMethod, credNull));
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     String[] sys2 = systems.get(11);
     respUrl =
-            usrClient.createSystem(createReqSystem(sys2, prot1Port, prot1AuthnMethod, credNull, prot1TxfrMethodsC));
+            usrClient.createSystem(createReqSystem(sys2, prot1Port, prot1AuthnMethod, credNull));
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Get list of all systems
-    List<TapisSystem> systemsList = usrClient.getSystems(null, -1, null, -1, null);
+    List<TapisSystem> systemsList = usrClient.getSystems(null, -1, null, -1, null, null, false);
     Assert.assertNotNull(systemsList);
     Assert.assertFalse(systemsList.isEmpty());
     var systemNames = new ArrayList<String>();
@@ -493,18 +603,27 @@ public class UserTest
   public void testEnableDisable() throws Exception
   {
     String[] sys0 = systems.get(14);
+    String sysId = sys0[1];
     String respUrl =
-            usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull, prot1TxfrMethodsC));
+            usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull));
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
     // Enabled should start off true, then become false and finally true again.
-    TapisSystem tmpSys = usrClient.getSystem(sys0[1]);
-    Assert.assertTrue(tmpSys.getEnabled());
-    int changeCount = usrClient.disableSystem(tmpSys.getId());
-    tmpSys = usrClient.getSystem(sys0[1]);
-    Assert.assertFalse(tmpSys.getEnabled());
-    changeCount = usrClient.enableSystem(tmpSys.getId());
-    tmpSys = usrClient.getSystem(sys0[1]);
-    Assert.assertTrue(tmpSys.getEnabled());
+    TapisSystem tmpSys = usrClient.getSystem(sysId);
+    Assert.assertNotNull(tmpSys);
+    Assert.assertSame(Boolean.TRUE, tmpSys.getEnabled());
+    Assert.assertTrue(usrClient.isEnabled(sysId));
+
+    int changeCount = usrClient.disableSystem(sysId);
+    Assert.assertEquals(changeCount, 1);
+    tmpSys = usrClient.getSystem(sysId);
+    Assert.assertNotSame(Boolean.TRUE, tmpSys.getEnabled());
+    Assert.assertFalse(usrClient.isEnabled(sysId));
+
+    changeCount = usrClient.enableSystem(sysId);
+    Assert.assertEquals(changeCount, 1);
+    tmpSys = usrClient.getSystem(sysId);
+    Assert.assertSame(Boolean.TRUE, tmpSys.getEnabled());
+    Assert.assertTrue(usrClient.isEnabled(sysId));
   }
 
   @Test
@@ -512,13 +631,13 @@ public class UserTest
     // Create the system
     String[] sys0 = systems.get(12);
     String respUrl =
-            usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull, prot1TxfrMethodsC));
+            usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull));
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Delete the system
-    usrClient.deleteSystem(sys0[1], true);
+    usrClient.deleteSystem(sys0[1]);
     try {
-      TapisSystem tmpSys2 = usrClient.getSystem(sys0[1]);
+      usrClient.getSystem(sys0[1]);
       Assert.fail("System not deleted. System name: " + sys0[1]);
     } catch (TapisClientException e) {
       Assert.assertEquals(e.getCode(), 404);
@@ -533,7 +652,7 @@ public class UserTest
     System.out.println("Creating system with name: " + sys0[1]);
     try {
       String respUrl =
-              usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull, prot1TxfrMethodsC));
+              usrClient.createSystem(createReqSystem(sys0, prot1Port, prot1AuthnMethod, credNull));
       System.out.println("Created system: " + respUrl);
       System.out.println("Testing perms for user: " + newPermsUser);
       Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
@@ -566,14 +685,261 @@ public class UserTest
     }
   }
 
-  private static ReqUpdateSystem createPatchSystem(String[] sys)
+  // Test various cases when system is missing
+  //  - get system, isEnabled, enable/disable, delete/undelete, changeOwner
+  //  - get perms, grant perms, revoke perms
+  // NOTE: Credential calls are not checked because they are not allowed for users
+  @Test
+  public void testMissingSystem()
   {
-    ReqUpdateSystem pSys = new ReqUpdateSystem();
-    pSys.description(sys[2]);
-    pSys.host(sys[5]);
-    pSys.effectiveUserId(sys[6]);
+    String fakeSystemName = "AMissingSystemName";
+    String fakeUserName = "AMissingUserName";
+
+    boolean pass = false;
+
+    // Get system
+    try {
+      usrClient.getSystem(fakeSystemName);
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // isEnabled
+    pass = false;
+    try {
+      usrClient.isEnabled(fakeSystemName);
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Enable system
+    pass = false;
+    try {
+      usrClient.enableSystem(fakeSystemName);
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Disable system
+    pass = false;
+    try {
+      usrClient.disableSystem(fakeSystemName);
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Delete system
+    pass = false;
+    try {
+      usrClient.deleteSystem(fakeSystemName);
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Undelete system
+    pass = false;
+    try {
+      usrClient.undeleteSystem(fakeSystemName);
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Change Owner
+    pass = false;
+    try {
+      usrClient.changeSystemOwner(fakeSystemName, newOwnerUser);
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Get Perms
+    pass = false;
+    try {
+      usrClient.getSystemPermissions(fakeSystemName, testUser1);
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Grant Perms
+    pass = false;
+    try {
+      usrClient.grantUserPermissions(fakeSystemName, fakeUserName, testPerms);
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Revoke Perms
+    pass = false;
+    try {
+      usrClient.revokeUserPermissions(fakeSystemName, fakeUserName, testPerms);
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+
+    // Revoke Perm
+    pass = false;
+    try {
+      usrClient.revokeUserPermission(fakeSystemName, fakeUserName, testREADPerm.get(0));
+      Assert.fail("Missing system did not throw exception. System name: " + fakeSystemName);
+    } catch (TapisClientException e) {
+      Assert.assertEquals(e.getCode(), 404);
+      pass = true;
+    }
+    Assert.assertTrue(pass);
+  }
+
+  // ******************************************************************
+  //   Scheduler Profiles
+  // ******************************************************************
+
+  @Test
+  public void testCreateSchedulerProfile() throws Exception
+  {
+    // Create a profile
+    String[] p0 = schedulerProfiles.get(1);
+    System.out.println("Creating scheduler profile with name: " + p0[1]);
+    try {
+      String respUrl = usrClient.createSchedulerProfile(createReqSchedulerProfile(p0));
+      System.out.println("Created scheduler profile: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
+  }
+
+  @Test
+  public void testGetSchedulerProfile() throws Exception
+  {
+    String[] p0 = schedulerProfiles.get(2);
+    System.out.println("Creating scheduler profile with name: " + p0[1]);
+    try {
+      String respUrl = usrClient.createSchedulerProfile(createReqSchedulerProfile(p0));
+      System.out.println("Created scheduler profile: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
+
+    SchedulerProfile tmpProfile = usrClient.getSchedulerProfile(p0[1]);
+    Assert.assertNotNull(tmpProfile, "Failed to create item: " + p0[1]);
+    System.out.println("Scheduler Profile retrieved: " + tmpProfile.getName());
+    Assert.assertEquals(tmpProfile.getName(), p0[1]);
+    Assert.assertEquals(tmpProfile.getDescription(), p0[2]);
+    Assert.assertEquals(tmpProfile.getOwner(), p0[3]);
+    Assert.assertEquals(tmpProfile.getModuleLoadCommand(), p0[4]);
+
+    Assert.assertNotNull(tmpProfile.getModulesToLoad());
+    Assert.assertEquals(tmpProfile.getModulesToLoad().size(), modulesToLoad.size());
+
+    Assert.assertNotNull(tmpProfile.getHiddenOptions());
+    Assert.assertFalse(tmpProfile.getHiddenOptions().isEmpty());
+    Assert.assertEquals(tmpProfile.getHiddenOptions().size(), hiddenOptions.size());
+  }
+
+  @Test
+  public void testDeleteSchedulerProfile() throws Exception
+  {
+    String[] p0 = schedulerProfiles.get(3);
+    System.out.println("Creating scheduler profile with name: " + p0[1]);
+    try {
+      String respUrl = usrClient.createSchedulerProfile(createReqSchedulerProfile(p0));
+      System.out.println("Created scheduler profile: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
+    usrClient.deleteSchedulerProfile(p0[1]);
+    boolean pass = false;
+    try
+    {
+      usrClient.getSchedulerProfile(p0[1]);
+    }
+    catch (TapisClientException e)
+    {
+      System.out.println("Caught TapisClientExcpetion as expected: " + e.getMessage());
+      Assert.assertTrue(e.getMessage().contains("SYSAPI_PRF_NOT_FOUND"));
+      pass = true;
+    }
+    Assert.assertTrue(pass, "Profile not deleted or incorrect exception.");
+  }
+
+  @Test
+  public void testGetSchedulerProfiles() throws Exception {
+    String[] p1 = schedulerProfiles.get(4);
+    String[] p2 = schedulerProfiles.get(5);
+    try {
+      System.out.println("Creating scheduler profile with name: " + p1[1]);
+      String respUrl = usrClient.createSchedulerProfile(createReqSchedulerProfile(p1));
+      System.out.println("Created scheduler profile: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+      System.out.println("Creating scheduler profile with name: " + p2[1]);
+      respUrl = usrClient.createSchedulerProfile(createReqSchedulerProfile(p2));
+      System.out.println("Created scheduler profile: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
+
+    List<SchedulerProfile> profiles = usrClient.getSchedulerProfiles();
+    Assert.assertNotNull(profiles, "getSchedulerProfiles returned null");
+    Assert.assertFalse(profiles.isEmpty(), "getSchedulerProfiles returned empty list");
+    var profileNamesFound = new HashSet<String>();
+    for (SchedulerProfile profile : profiles)
+    {
+      profileNamesFound.add(profile.getName());
+      System.out.println("Found item with name: " + profile.getName());
+    }
+    Assert.assertTrue(profileNamesFound.contains(p1[1]),
+            "getSchedulerProfiles did not return item with name: " + p1[1]);
+    Assert.assertTrue(profileNamesFound.contains(p2[1]),
+            "getSchedulerProfiles did not return item with name: " + p2[1]);
+  }
+
+  // =====================================================================
+  // =========  Private methods ==========================================
+  // =====================================================================
+
+  private static ReqPatchSystem createPatchSystem(String newDescription, String newHost, String newEffUsr)
+  {
+    ReqPatchSystem pSys = new ReqPatchSystem();
+    pSys.description(newDescription);
+    pSys.host(newHost);
+    pSys.effectiveUserId(newEffUsr);
     pSys.defaultAuthnMethod(AuthnEnum.valueOf(prot2AuthnMethod.name()));
-    pSys.transferMethods(prot2TxfrMethodsU);
     pSys.port(prot2Port).useProxy(prot2UseProxy).proxyHost(prot2ProxyHost).proxyPort(prot2ProxyPort);
     pSys.jobCapabilities(jobCaps2);
     pSys.tags(tags2);

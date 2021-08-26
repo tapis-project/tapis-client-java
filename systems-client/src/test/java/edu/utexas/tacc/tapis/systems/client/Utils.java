@@ -33,11 +33,12 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.JobRuntime;
 import edu.utexas.tacc.tapis.systems.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSchedulerProfile;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RuntimeTypeEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SystemTypeEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.TransferMethodEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
@@ -45,7 +46,6 @@ import org.testng.Assert;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,12 +61,18 @@ public final class Utils
   public static final String testUser2 = "testuser2";
   public static final String testUser3 = "testuser3";
   public static final String testUser4 = "testuser4";
-  public static final String testUser9 = "testuser9";
-  // testuser9 must be given role "$!tenant_admin"
-  public static final String adminUser = testUser9;
+  public static final String adminUser = "testadmin";
   public static final String adminTenantName = "admin";
   public static final String filesSvcName = "files";
   public static final String sysType = SystemTypeEnum.LINUX.name();
+
+  // Long term JWTs expire approx 1 July 2026
+  public static final String testUser1JWT ="eyJ0eXATODO";
+  public static final String testUser2JWT ="eyJ0eXATODO";
+  public static final String testUser3JWT = "eyJ0eXATODO";
+  public static final String adminUserJWT ="eyJ0eXATODO";
+  public static final String filesSvcJWT = "eyJ0eXATODO";
+
   // TAPIS_BASE_URL_SUFFIX should be set according to the dev, staging or prod environment
   // dev     -> develop.tapis.io
   // staging -> staging.tapis.io
@@ -88,20 +94,22 @@ public final class Utils
   public static final String hostPatchedId = "patched.system.org";
   public static final String hostMinimalId = "minimal.system.org";
 
-  // Default system attributes
+  // Default attributes
   public static final String defaultDescription = null;
   public static final String defaultRootDir = null;
   public static final String defaultBucketName = null;
+  public static final List<JobRuntime> defaultJobRuntimes = null;
   public static final String defaultJobWorkingDir = null;
   public static final String defaultBatchScheduler = SchedulerTypeEnum.SLURM.toString();
   public static final String defaultBatchDefaultLogicalQueue = null;
+  public static final String defaultBatchSchedulerProfile = null;
   public static final String defaultEffectiveUserId = "${apiUserId}";
   public static final String defaultNotesStr = "{}";
   public static final boolean defaultIsEnabled = true;
   public static final int defaultPort = -1;
   public static final boolean defaultUseProxy = false;
   public static final int defaultProxyPort = -1;
-  public static final String defaultProxyHost = "";
+  public static final String defaultProxyHost = null;
   public static final boolean defaultJobIsBatch = false;
   public static final int defaultJobMaxJobs = -1;
   public static final int defaultJobMaxJobsPerUser = -1;
@@ -113,14 +121,6 @@ public final class Utils
   public static final int defaultQMinutes = -1;
   public static final int defaultCapPrecedence = 100;
 
-  public static final List<TransferMethodEnum> prot1TxfrMethodsC =
-          Arrays.asList(TransferMethodEnum.SFTP, TransferMethodEnum.S3);
-  public static final List<TransferMethodEnum> prot1TxfrMethodsT =
-          Arrays.asList(TransferMethodEnum.SFTP, TransferMethodEnum.S3);
-  public static final List<TransferMethodEnum> prot2TxfrMethodsU =
-          Collections.singletonList(TransferMethodEnum.SFTP);
-  public static final List<TransferMethodEnum> prot2TxfrMethodsT =
-          Collections.singletonList(TransferMethodEnum.SFTP);
   public static final SystemsClient.AuthnMethod prot1AuthnMethod = SystemsClient.AuthnMethod.PKI_KEYS;
   public static final SystemsClient.AuthnMethod prot2AuthnMethod = SystemsClient.AuthnMethod.ACCESS_KEY;
   public static final boolean canExecTrue = true;
@@ -141,8 +141,8 @@ public final class Utils
           new JobRuntime().runtimeType(RuntimeTypeEnum.DOCKER).version("0.0.1runtime");
   public static final List<JobRuntime> jobRuntimes1 = new ArrayList<>(List.of(runtimeDocker));
 
-  public static final LogicalQueue q1 = SystemsClient.buildLogicalQueue("logicalQ1", "hpcQ1", 1, 1, 1, 1, 1, 1);
-  public static final LogicalQueue q2 = SystemsClient.buildLogicalQueue("logicalQ2", "hpcQ2", 2, 2, 2, 2, 2, 2);
+  public static final LogicalQueue q1 = SystemsClient.buildLogicalQueue("logicalQ1", "hpcQ1", 1, 1, 0, 1, 0, 1, 0, 1, 0, 1);
+  public static final LogicalQueue q2 = SystemsClient.buildLogicalQueue("logicalQ2", "hpcQ2", 2, 2, 0, 2, 0, 2, 0, 2, 0, 2);
   public static final List<LogicalQueue> jobQueues1 = new ArrayList<>(List.of(q1, q2));
 
   public static final List<String> tags1 = Arrays.asList("value1", "value2", "a",
@@ -187,7 +187,10 @@ public final class Utils
   public static final Credential credNull = null;
 
   public static final String sysNamePrefix = "CSys";
+  public static final String schedProfileNamePrefix = "CTestSchedProfile";
 
+  public static final List<String> modulesToLoad = Arrays.asList("value1", "value2");
+  public static final List<SchedulerHiddenOptionEnum> hiddenOptions = Arrays.asList(SchedulerHiddenOptionEnum.MEM);
   // Strings for searches involving special characters
   public static final String specialChar7Str = ",()~*!\\"; // These 7 may need escaping
   public static final String specialChar7LikeSearchStr = "\\,\\(\\)\\~\\*\\!\\\\"; // All need escaping for LIKE/NLIKE
@@ -210,21 +213,45 @@ public final class Utils
     for (int i = 1; i <= n; i++)
     {
       // Suffix which should be unique for each system within each integration test
-      String iStr = String.format("%03d", i+1);
+      String iStr = String.format("%03d", i);
       String suffix = key + "_" + iStr;
-      String name = getSysName(key, i);
+      String id = getSysId(key, i);
       String hostName = "host" + key + iStr + ".test.org";
       // Constructor initializes all attributes except for JobCapabilities and Credential
       // String[] sys0 = 0=tenantName, 1=name, 2=description, 3=sysType, 4=ownerUser1, 5=host, 6=effUser, 7=password,
-      //                 8=bucketName, 9=rootDir, 10=jobWorkingDir, 11=batchScheduler, 12=batchDefaultLogicalQueue
-      String[] sys0 = {tenantName, name, "description "+suffix, sysType, testUser1, hostName, "effUser"+suffix,
-              "fakePassword"+suffix,"bucket"+suffix, "/root"+suffix, "jobWorkDir"+suffix, "SLURM",
-              "batchDefaultLogicalQueue"+suffix};
+      //                 8=bucketName, 9=rootDir, 10=jobWorkingDir, 11=batchScheduler, 12=batchDefaultLogicalQueue,
+      //                 13=batchSchedulerProfile
+      String[] sys0 = {tenantName, id, "description "+suffix, sysType, testUser1, hostName, "effUser"+suffix,
+              "fakePassword"+suffix,"bucket"+suffix, "/root"+suffix, "jobWorkDir"+suffix, SchedulerTypeEnum.SLURM.name(),
+              "batchDefaultLogicalQueue"+suffix, "batchSchedulerProfile"+suffix};
       systems.put(i, sys0);
     }
     return systems;
   }
 
+  /**
+   * Create an array of SchedulerProfile objects in memory
+   * Names will be of format TestSchedProfile_K_NNN where K is the key and NNN runs from 000 to 999
+   * We need a key because maven runs the tests in parallel so each set of profiles created by an integration
+   *   test will need its own namespace.
+   * @param n number of objects to create
+   * @return array of objects
+   */
+  public static Map<Integer, String[]> makeSchedulerProfiles(int n, String key)
+  {
+    Map<Integer, String[]> profiles = new HashMap<>();
+    for (int i = 1; i <= n; i++)
+    {
+      // Suffix which should be unique for each profile within each integration test
+      String iStr = String.format("%03d", i);
+      String suffix = key + "_" + iStr;
+      String name = getSchedulerProfileName(key, i);
+      String moduleLoadCmd = "module load" + suffix;
+      String[] p0 = {tenantName, name, "description "+suffix, testUser1, moduleLoadCmd};
+      profiles.put(i, p0);
+    }
+    return profiles;
+  }
   public static String getFilesSvcPassword()
   {
     String s = System.getenv(TAPIS_ENV_FILES_SVC_PASSWORD);
@@ -260,10 +287,9 @@ public final class Utils
    * Build a ReqCreateSystem object to be used for client call to create a system given most attributes for the system.
    */
   public static ReqCreateSystem createReqSystem(String[] sys, int port, SystemsClient.AuthnMethod authnMethod,
-                                                Credential credential, List<TransferMethodEnum> txfrMethods)
+                                                Credential credential)
   {
     var accMethod = authnMethod != null ? authnMethod : prot1AuthnMethod;
-    var tMethods = txfrMethods != null ? txfrMethods : prot1TxfrMethodsC;
     ReqCreateSystem rSys = new ReqCreateSystem();
     rSys.setId(sys[1]);
     rSys.description(sys[2]);
@@ -273,10 +299,9 @@ public final class Utils
     rSys.enabled(true);
     rSys.effectiveUserId(sys[6]);
     rSys.defaultAuthnMethod(AuthnEnum.valueOf(accMethod.name()));
-    rSys.authnCredential(credential);
+    rSys.authnCredential(SystemsClient.buildReqCreateCredential(credential));
     rSys.bucketName(sys[8]);
     rSys.rootDir(sys[9]);
-    rSys.setTransferMethods(tMethods);
     rSys.port(port).useProxy(prot1UseProxy).proxyHost(prot1ProxyHost).proxyPort(prot1ProxyPort);
     rSys.canExec(canExecTrue);
     rSys.setJobRuntimes(jobRuntimes1);
@@ -285,8 +310,7 @@ public final class Utils
     rSys.jobMaxJobs(jobMaxJobs).jobMaxJobsPerUser(jobMaxJobsPerUser);
     rSys.jobIsBatch(jobIsBatchFalse);
     rSys.batchScheduler(SchedulerTypeEnum.fromValue(sys[11])).batchDefaultLogicalQueue(sys[12]);
-    rSys.setJobRuntimes(jobRuntimes1);
-    rSys.batchLogicalQueues(jobQueues1);
+    rSys.batchSchedulerProfile(sys[13]).batchLogicalQueues(jobQueues1);
     rSys.jobCapabilities(jobCaps1);
     rSys.tags(tags1);
     rSys.notes(notes1JO);
@@ -295,6 +319,7 @@ public final class Utils
 
   /*
    * Make client call to create a system using minimal attributes for the system.
+   *  Use attributes from:
    *  String[] sys0 = 0=tenantName, 1=name, 2=description, 3=sysType, 4=ownerUser1, 5=host, 6=effUser, 7=password,
    *                  8=bucketName, 9=rootDir, 10=jobWorkingDir, 11=batchScheduler, 12=batchDefaultLogicalQueue
    */
@@ -306,14 +331,38 @@ public final class Utils
     rSys.setSystemType(SystemTypeEnum.valueOf(sys[3]));
     rSys.setHost(sys[5]);
     rSys.defaultAuthnMethod(AuthnEnum.valueOf(prot1AuthnMethod.name()));
-    rSys.canExec(canExecTrue);
-    rSys.setJobWorkingDir(sys[10]);
-    rSys.setJobRuntimes(jobRuntimes1);
+    rSys.canExec(canExecFalse);
     // If systemType is LINUX then rootDir is required
     if (sys[3].equals(SystemTypeEnum.LINUX.name())) rSys.rootDir(sys[9]);
-    // If systemType is OBJECT_STORE then bucketName is required
-    if (sys[3].equals(SystemTypeEnum.OBJECT_STORE.name())) rSys.bucketName(sys[8]);
+    // If systemType is S3 then bucketName is required
+    if (sys[3].equals(SystemTypeEnum.S3.name())) rSys.bucketName(sys[8]);
     return clt.createSystem(rSys);
+  }
+
+  /*
+   * Make client call to create a system using attributes from a TapisSystem.
+   * Use attributes from sys
+   */
+  public static String createSystemFromTapisSystem(SystemsClient clt, TapisSystem sys)
+          throws TapisClientException
+  {
+    ReqCreateSystem rSys = SystemsClient.buildReqCreateSystem(sys);
+    return clt.createSystem(rSys);
+  }
+
+  /*
+   * Build a ReqCreateSchedulerProfile object to be used for client call to create a profile give most attributes.
+   */
+  public static ReqCreateSchedulerProfile createReqSchedulerProfile(String[] profile)
+  {
+    ReqCreateSchedulerProfile rProfile = new ReqCreateSchedulerProfile();
+    rProfile.setName(profile[1]);
+    rProfile.description(profile[2]);
+    rProfile.owner(profile[3]);
+    rProfile.moduleLoadCommand(profile[4]);
+    rProfile.modulesToLoad(modulesToLoad);
+    rProfile.hiddenOptions(hiddenOptions);
+    return rProfile;
   }
 
   public static SystemsClient getClientUsr(String serviceURL, String userJWT)
@@ -328,17 +377,23 @@ public final class Utils
     return new SystemsClient(serviceURL, userJWT);
   }
 
-  public static String getSysName(String key, int idx)
+  public static String getSysId(String key, int idx)
   {
     String suffix = key + "_" + String.format("%03d", idx);
     return sysNamePrefix + "_" + suffix;
   }
 
+  public static String getSchedulerProfileName(String key, int idx)
+  {
+    String suffix = key + "_" + String.format("%03d", idx);
+    return schedProfileNamePrefix + "_" + suffix;
+  }
+
   /**
    * Verify most attributes for a TapisSystem using default create data for following attributes:
-   *     port, useProxy, proxyHost, proxyPort, defaultAuthnMethod, transferMethods,
+   *     port, useProxy, proxyHost, proxyPort, defaultAuthnMethod,
    *     canExec, jobWorkingDir, jobMaxJobs, jobMaxJobsPerUser, jobIsBatch, batchScheduler, batchDefaultLogicalQueue,
-   *     jobEnvVariables, jobLogicalQueues, capabilities, tags, notes
+   *     batchSchedulerProfile, jobEnvVariables, jobLogicalQueues, capabilities, tags, notes
    * @param tmpSys - system retrieved from the service
    * @param sys0 - Data used to create the system
    */
@@ -363,13 +418,6 @@ public final class Utils
     Assert.assertEquals(tmpSys.getProxyHost(), prot1ProxyHost);
     Assert.assertNotNull(tmpSys.getProxyPort());
     Assert.assertEquals(tmpSys.getProxyPort().intValue(), prot1ProxyPort);
-    // Verify transfer methods
-    List<TransferMethodEnum> tMethodsList = tmpSys.getTransferMethods();
-    Assert.assertNotNull(tMethodsList, "TransferMethods list should not be null");
-    for (TransferMethodEnum txfrMethod : prot1TxfrMethodsT)
-    {
-      Assert.assertTrue(tMethodsList.contains(txfrMethod), "List of transfer methods did not contain: " + txfrMethod.name());
-    }
     Assert.assertEquals(tmpSys.getCanExec(), Boolean.valueOf(canExecTrue));
     Assert.assertEquals(tmpSys.getJobWorkingDir(), sys0[10]);
     // TODO check jobRuntimes
@@ -380,6 +428,7 @@ public final class Utils
     Assert.assertEquals(tmpSys.getJobIsBatch(), Boolean.valueOf(jobIsBatchFalse));
     Assert.assertEquals(tmpSys.getBatchScheduler(), SchedulerTypeEnum.valueOf(sys0[11]));
     Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), sys0[12]);
+    Assert.assertEquals(tmpSys.getBatchSchedulerProfile(), sys0[13]);
     // Verify jobEnvVariables
     List<KeyValuePair> tmpJobEnvVariables = tmpSys.getJobEnvVariables();
     Assert.assertNotNull(tmpJobEnvVariables, "JobEnvVariables value was null");
@@ -446,23 +495,24 @@ public final class Utils
    * @param tmpSys - system retrieved from the service
    * @param sys0 - Data used to create the system
    */
-  public static void verifySystemDefaults(TapisSystem tmpSys, String[] sys0)
+  public static void verifySystemDefaults(TapisSystem tmpSys, String[] sys0, String sysId)
   {
+    Assert.assertEquals(tmpSys.getTenant(), tenantName);
     // Verify required attributes
-    Assert.assertEquals(tmpSys.getId(), sys0[1]);
+    Assert.assertEquals(tmpSys.getId(), sysId);
     Assert.assertNotNull(tmpSys.getSystemType());
     Assert.assertEquals(tmpSys.getSystemType().name(), sys0[3]);
     Assert.assertEquals(tmpSys.getHost(), sys0[5]);
     Assert.assertNotNull(tmpSys.getDefaultAuthnMethod());
     Assert.assertEquals(tmpSys.getDefaultAuthnMethod().name(), prot1AuthnMethod.name());
-    Assert.assertEquals(tmpSys.getCanExec(), Boolean.valueOf(canExecTrue));
+    Assert.assertEquals(tmpSys.getCanExec(), Boolean.valueOf(canExecFalse));
 
     SchedulerTypeEnum schedulerType = (tmpSys.getBatchScheduler() == null) ? null : SchedulerTypeEnum.valueOf(defaultBatchScheduler);
     // If systemType is LINUX then rootDir is required
     if (tmpSys.getSystemType() == SystemTypeEnum.LINUX) Assert.assertEquals(tmpSys.getRootDir(), sys0[9]);
     else Assert.assertEquals(tmpSys.getRootDir(), defaultRootDir);
-    // If systemType is OBJECT_STORE then bucketName is required
-    if (tmpSys.getSystemType() == SystemTypeEnum.OBJECT_STORE) Assert.assertEquals(tmpSys.getBucketName(), sys0[8]);
+    // If systemType is S3 then bucketName is required
+    if (tmpSys.getSystemType() == SystemTypeEnum.S3) Assert.assertEquals(tmpSys.getBucketName(), sys0[8]);
     else Assert.assertEquals(tmpSys.getBucketName(), defaultBucketName);
 
     // Verify optional attributes have been set to defaults
@@ -472,8 +522,7 @@ public final class Utils
     Assert.assertEquals(tmpSys.getEnabled(), Boolean.valueOf(defaultIsEnabled));
     // Effective user should result to requestor which in this case is testuser1
     Assert.assertEquals(tmpSys.getEffectiveUserId(), testUser1);
-    Assert.assertNotNull(tmpSys.getTransferMethods());
-    Assert.assertTrue(tmpSys.getTransferMethods().isEmpty());
+    Assert.assertEquals(tmpSys.getJobRuntimes(), defaultJobRuntimes);
     Assert.assertNotNull(tmpSys.getPort());
     Assert.assertEquals(tmpSys.getPort().intValue(), defaultPort);
     Assert.assertNotNull(tmpSys.getUseProxy());
@@ -481,7 +530,7 @@ public final class Utils
     Assert.assertEquals(tmpSys.getProxyHost(), defaultProxyHost);
     Assert.assertNotNull(tmpSys.getProxyPort());
     Assert.assertEquals(tmpSys.getProxyPort().intValue(), defaultProxyPort);
-    Assert.assertEquals(tmpSys.getJobWorkingDir(), sys0[10]);
+    Assert.assertEquals(tmpSys.getJobWorkingDir(), defaultJobWorkingDir);
     Assert.assertNotNull(tmpSys.getJobEnvVariables());
     Assert.assertTrue(tmpSys.getJobEnvVariables().isEmpty());
     Assert.assertNotNull(tmpSys.getJobMaxJobs());
@@ -491,6 +540,7 @@ public final class Utils
     Assert.assertEquals(tmpSys.getJobIsBatch(), Boolean.valueOf(defaultJobIsBatch));
     Assert.assertEquals(tmpSys.getBatchScheduler(), schedulerType);
     Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), defaultBatchDefaultLogicalQueue);
+    Assert.assertEquals(tmpSys.getBatchSchedulerProfile(), defaultBatchSchedulerProfile);
     Assert.assertNotNull(tmpSys.getBatchLogicalQueues());
     Assert.assertTrue(tmpSys.getBatchLogicalQueues().isEmpty());
     Assert.assertNotNull(tmpSys.getJobCapabilities());

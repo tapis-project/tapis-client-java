@@ -6,9 +6,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.Gson;
 
+import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
+import edu.utexas.tacc.tapis.client.shared.ITapisClient;
 import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
-import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.tokens.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.tokens.client.gen.ApiException;
 import edu.utexas.tacc.tapis.tokens.client.gen.api.TokensApi;
@@ -27,6 +28,7 @@ import edu.utexas.tacc.tapis.tokens.client.model.TokenResponsePackage;
  * openapi-generator each time a build is run.
  */
 public class TokensClient
+ implements ITapisClient
 {
   // ************************************************************************
   // *********************** Constants **************************************
@@ -104,8 +106,25 @@ public class TokensClient
   public ApiClient getApiClient() { return apiClient; }
 
   // addDefaultHeader: Add http header to client
-  public void addDefaultHeader(String key, String val) { apiClient.addDefaultHeader(key, val); }
+  public TokensClient addDefaultHeader(String key, String val) { apiClient.addDefaultHeader(key, val); return this;}
 
+  // Update base path for default client.
+  public TokensClient setBasePath(String basePath) { apiClient.setBasePath(basePath); return this;}
+  
+  /** Close connections and stop threads that can sometimes prevent JVM shutdown.
+   */
+  public void close()
+  {
+      try {
+          // Best effort attempt to shut things down.
+          var okClient = apiClient.getHttpClient();
+          if (okClient != null) {
+              var pool = okClient.connectionPool();
+              if (pool != null) pool.evictAll();
+          }
+      } catch (Exception e) {}      
+  }
+  
   /** The general token request handler that allows all possible token parameters.
    * The parameters can specify that both an access and a refresh token be returned.
    * Each returned token has associated expiration information.  The result object
