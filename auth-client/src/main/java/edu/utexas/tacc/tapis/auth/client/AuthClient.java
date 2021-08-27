@@ -8,6 +8,7 @@ import edu.utexas.tacc.tapis.auth.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.auth.client.model.GetTokenParms;
 import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
+import edu.utexas.tacc.tapis.client.shared.ITapisClient;
 
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.Gson;
@@ -22,6 +23,7 @@ import java.util.Map;
  * openapi-generator each time a build is run.
  */
 public class AuthClient
+  implements ITapisClient
 {
   // ************************************************************************
   // *********************** Constants **************************************
@@ -83,8 +85,25 @@ public class AuthClient
   /**
    * addDefaultHeader: Add http header to client
    */
-  public void addDefaultHeader(String key, String val) { apiClient.addDefaultHeader(key, val); }
+  public AuthClient addDefaultHeader(String key, String val) { apiClient.addDefaultHeader(key, val); return this;}
 
+  // Update base path for default client.
+  public AuthClient setBasePath(String basePath) { apiClient.setBasePath(basePath); return this;}
+  
+  /** Close connections and stop threads that can sometimes prevent JVM shutdown.
+   */
+  public void close()
+  {
+      try {
+          // Best effort attempt to shut things down.
+          var okClient = apiClient.getHttpClient();
+          if (okClient != null) {
+              var pool = okClient.connectionPool();
+              if (pool != null) pool.evictAll();
+          }
+      } catch (Exception e) {}      
+  }
+  
   /**
    * The create_token request handler that gets a token from the authenticator service based on
    * the parameters provided. Null is return if invalid information is returned by the

@@ -17,7 +17,7 @@ public class Utils
   // Defaults for searching and sorting
   public static final String DEFAULT_SEARCH = "";
   public static final int DEFAULT_LIMIT = -1;
-  public static final String DEFAULT_SORTBY = "";
+  public static final String DEFAULT_ORDERBY = "";
   public static final int DEFAULT_SKIP = -1;
   public static final String DEFAULT_STARTAFTER = "";
   public static final boolean DEFAULT_COMPUTETOTAL = false;

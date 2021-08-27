@@ -24,7 +24,6 @@ import static edu.utexas.tacc.tapis.systems.client.Utils.getClientUsr;
 import static edu.utexas.tacc.tapis.systems.client.Utils.testUser1;
 import static edu.utexas.tacc.tapis.systems.client.Utils.testUser2;
 import static edu.utexas.tacc.tapis.systems.client.Utils.prot1AuthnMethod;
-import static edu.utexas.tacc.tapis.systems.client.Utils.prot1TxfrMethodsC;
 import static edu.utexas.tacc.tapis.systems.client.Utils.specialChar7Str;
 import static org.testng.Assert.assertEquals;
 
@@ -117,13 +116,13 @@ public class MatchConstraintsTest
 //        // Create half the systems owned by ownerUser1 and half by ownerUser2
 //        if (i <= numSystems / 2)
 //        {
-//          rSys = Utils.createReqSystem(sys0, port, prot1AuthnMethod, null, prot1TxfrMethodsC);
+//          rSys = Utils.createReqSystem(sys0, port, prot1AuthnMethod, null);
 //          getClientUsr(serviceURL, ownerUser1JWT).createSystem(rSys);
 //          tmpSys = getClientUsr(serviceURL, ownerUser1JWT).getSystem(sys0[1]);
 //        }
 //        else
 //        {
-//          rSys = Utils.createReqSystem(sys0, port, prot1AuthnMethod, null, prot1TxfrMethodsC);
+//          rSys = Utils.createReqSystem(sys0, port, prot1AuthnMethod, null);
 //          getClientUsr(serviceURL, ownerUser2JWT).createSystem(rSys);
 //          tmpSys = getClientUsr(serviceURL, ownerUser2JWT).getSystem(sys0[1]);
 //        }
