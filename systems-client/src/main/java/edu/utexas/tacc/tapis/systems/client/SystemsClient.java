@@ -971,16 +971,15 @@ public class SystemsClient implements ITapisClient
   /**
    * Utility method to map a SchedulerHiddenOptionEnum to the string used by the scheduler.
    * @param hiddenOptionEnum - Scheduler hidden option enum
-   * @return String containing the option as expected by the batch scheduler
+   * @return String containing the option as expected by the batch scheduler. Empty string if no mapping found.
    */
   public static String getSchedulerHiddenOptionValue(SchedulerHiddenOptionEnum hiddenOptionEnum)
   {
-    String retVal = null;
-    switch (hiddenOptionEnum)
+    return switch (hiddenOptionEnum)
     {
-      case MEM -> retVal = "--mem";
-    }
-    return retVal;
+      case MEM -> "--mem";
+      default -> "";
+    };
   }
 
   // ************************************************************************
