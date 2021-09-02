@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gson.JsonObject;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerProfile;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
@@ -866,6 +867,7 @@ public class UserTest
     Assert.assertNotNull(tmpProfile.getHiddenOptions());
     Assert.assertFalse(tmpProfile.getHiddenOptions().isEmpty());
     Assert.assertEquals(tmpProfile.getHiddenOptions().size(), hiddenOptions.size());
+    Assert.assertTrue(tmpProfile.getHiddenOptions().contains(SchedulerHiddenOptionEnum.MEM));
   }
 
   @Test
@@ -922,6 +924,7 @@ public class UserTest
     {
       profileNamesFound.add(profile.getName());
       System.out.println("Found item with name: " + profile.getName());
+      Assert.assertTrue(profile.getHiddenOptions().contains(SchedulerHiddenOptionEnum.MEM));
     }
     Assert.assertTrue(profileNamesFound.contains(p1[1]),
             "getSchedulerProfiles did not return item with name: " + p1[1]);

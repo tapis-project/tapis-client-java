@@ -66,13 +66,12 @@ public final class Utils
   public static final String filesSvcName = "files";
   public static final String sysType = SystemTypeEnum.LINUX.name();
 
-  // Long term JWTs expire approx 1 July 2026
+  // Long term JWTs expire approx 1 Sep 2022 (DEV Env only)
   public static final String testUser1JWT ="eyJ0eXATODO";
   public static final String testUser2JWT ="eyJ0eXATODO";
   public static final String testUser3JWT = "eyJ0eXATODO";
   public static final String adminUserJWT ="eyJ0eXATODO";
-  public static final String filesSvcJWT = "eyJ0eXATODO";
-
+  public static final String filesSvcJWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJmMDA1Njg5Mi1iMGYyLTRkMjQtYjNjNy1hM2I2ODYxOGY3MzQiLCJpc3MiOiJodHRwczovL2FkbWluLmRldmVsb3AudGFwaXMuaW8vdjMvdG9rZW5zIiwic3ViIjoiZmlsZXNAYWRtaW4iLCJ0YXBpcy90ZW5hbnRfaWQiOiJhZG1pbiIsInRhcGlzL3Rva2VuX3R5cGUiOiJhY2Nlc3MiLCJ0YXBpcy9kZWxlZ2F0aW9uIjpmYWxzZSwidGFwaXMvZGVsZWdhdGlvbl9zdWIiOm51bGwsInRhcGlzL3VzZXJuYW1lIjoiZmlsZXMiLCJ0YXBpcy9hY2NvdW50X3R5cGUiOiJzZXJ2aWNlIiwiZXhwIjoxNjYyMTQ0MTg2LCJ0YXBpcy90YXJnZXRfc2l0ZSI6InRhY2MifQ.DpNR3WEh91b05-aBCMn2CjqvznP80rgCLvDi4Z1J8uTPXgOBrIjDrmBT8cT2W3sJ12Fp4N5Twlf90TPAisHdpkzaPxOH-9LvMplDAkw7AZ_3BIkqBLLTKRNMkFvm35D_pTV3Az9fu_zL0u-yD8QM_sWqD7VXCimAC3h8LO7NBOR3dT8tNeVvfs-JI_emeG1yA3eN29YiSg2vpHrPWRZY3MVX8UG_YhSO0HS34OT6V2WwLqJfQ_BXUdEOC8ru_jK1b9Grs0_uYLaPEvs_RJ8egRNg8UKc6kiLSSMZ4L3wEfGZvrXuGTFG0Av99h89hSOfUlw1byUp_CJq9erFfqRhpg";
   // TAPIS_BASE_URL_SUFFIX should be set according to the dev, staging or prod environment
   // dev     -> develop.tapis.io
   // staging -> staging.tapis.io
@@ -255,11 +254,11 @@ public final class Utils
   public static String getFilesSvcPassword()
   {
     String s = System.getenv(TAPIS_ENV_FILES_SVC_PASSWORD);
-    if (StringUtils.isBlank(s))
-    {
-      System.out.println("ERROR: Files service password must be set using environment variable:  " + TAPIS_ENV_FILES_SVC_PASSWORD);
-      System.exit(1);
-    }
+//    if (StringUtils.isBlank(s))
+//    {
+//      System.out.println("ERROR: Files service password must be set using environment variable:  " + TAPIS_ENV_FILES_SVC_PASSWORD);
+//      System.exit(1);
+//    }
     return s;
   }
   public static String getServicePort()
