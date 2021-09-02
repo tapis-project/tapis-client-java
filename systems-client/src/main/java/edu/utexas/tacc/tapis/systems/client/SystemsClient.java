@@ -16,6 +16,7 @@ import edu.utexas.tacc.tapis.systems.client.gen.api.SchedulerProfilesApi;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfile;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfiles;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerProfile;
 import org.apache.commons.lang3.StringUtils;
 
@@ -965,6 +966,21 @@ public class SystemsClient implements ITapisClient
     cap.setPrecedence(precedence);
     cap.setValue(value);
     return cap;
+  }
+
+  /**
+   * Utility method to map a SchedulerHiddenOptionEnum to the string used by the scheduler.
+   * @param hiddenOptionEnum - Scheduler hidden option enum
+   * @return String containing the option as expected by the batch scheduler
+   */
+  public static String getSchedulerHiddenOptionValue(SchedulerHiddenOptionEnum hiddenOptionEnum)
+  {
+    String retVal = null;
+    switch (hiddenOptionEnum)
+    {
+      case MEM -> retVal = "--mem";
+    }
+    return retVal;
   }
 
   // ************************************************************************
