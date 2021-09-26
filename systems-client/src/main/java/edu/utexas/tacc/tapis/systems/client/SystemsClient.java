@@ -7,6 +7,7 @@ import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SEARCH;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_ALL;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_SUMMARY;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP_CREDENTIAL_CHECK;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
 
 import java.util.Collections;
@@ -206,7 +207,20 @@ public class SystemsClient implements ITapisClient
    */
   public String createSystem(ReqCreateSystem req) throws TapisClientException
   {
-    Boolean skipCredCheck = true;
+    return createSystem(req, DEFAULT_SKIP_CREDENTIAL_CHECK);
+  }
+
+  /**
+   * Create a system
+   * See the helper method buildReqCreateSystem() for an example of how to build a pre-populated
+   *   ReqCreateSystem instance from a TapisSystem instance.
+   *
+   * @param req - Pre-populated ReqCreateSystem instance
+   * @return url pointing to created resource
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public String createSystem(ReqCreateSystem req, Boolean skipCredCheck) throws TapisClientException
+  {
     // Submit the request and return the response
     RespResourceUrl resp = null;
     try { resp = sysApi.createSystem(req, skipCredCheck); }
@@ -246,7 +260,22 @@ public class SystemsClient implements ITapisClient
    */
   public String putSystem(String systemId, ReqPutSystem req) throws TapisClientException
   {
-    Boolean skipCredCheck = true;
+    return putSystem(systemId, req, DEFAULT_SKIP_CREDENTIAL_CHECK);
+  }
+
+  /**
+   * Update all attributes of a system
+   * NOTE: Not all attributes are updatable.
+   * See the helper method buildReqPutSystem() for an example of how to build a pre-populated
+   *   ReqPutSystem instance from a TapisSystem instance.
+   *
+   * @param systemId - Id of resource to be updated
+   * @param req - Pre-populated ReqPutSystem instance
+   * @return url pointing to updated resource
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public String putSystem(String systemId, ReqPutSystem req, Boolean skipCredCheck) throws TapisClientException
+  {
     // Submit the request and return the response
     RespResourceUrl resp = null;
     try { resp = sysApi.putSystem(systemId, req, skipCredCheck); }
@@ -676,7 +705,19 @@ public class SystemsClient implements ITapisClient
    */
   public void updateUserCredential(String systemId, String userName, ReqCreateCredential req) throws TapisClientException
   {
-    Boolean skipCredCheck = true;
+    updateUserCredential(systemId, userName, req, DEFAULT_SKIP_CREDENTIAL_CHECK);
+  }
+
+  /**
+   * Create or update credential for given system and user.
+   *
+   * @param systemId System Id
+   * @param userName Id of user
+   * @param req Request containing credentials (password, keys, etc).
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public void updateUserCredential(String systemId, String userName, ReqCreateCredential req, Boolean skipCredCheck) throws TapisClientException
+  {
     // Submit the request
     try { credsApi.createUserCredential(systemId, userName, req, skipCredCheck); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
