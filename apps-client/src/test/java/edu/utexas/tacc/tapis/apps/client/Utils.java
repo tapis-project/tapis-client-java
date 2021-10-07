@@ -24,9 +24,9 @@ package edu.utexas.tacc.tapis.apps.client;
 
 import com.google.gson.JsonObject;
 import edu.utexas.tacc.tapis.apps.client.gen.model.AppTypeEnum;
-import edu.utexas.tacc.tapis.apps.client.gen.model.ArgMetaSpec;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ArgSpec;
 import edu.utexas.tacc.tapis.apps.client.gen.model.FileInput;
+import edu.utexas.tacc.tapis.apps.client.gen.model.InputModeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.JobAttributes;
 import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.apps.client.gen.model.NotificationMechanism;
@@ -69,10 +69,10 @@ public final class Utils
   public static final String adminTenantName = "admin";
   public static final String filesSvcName = "files";
 
-  // Long term JWT for testuser1 - expires approx 1 July 2026
-  public static final String testUser1JWT ="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiIwZDg0YWRlOC0yMzQwLTQzOGQtOGJiMy1jZTFhYjg0M2I1NjYiLCJpc3MiOiJodHRwczovL2Rldi5kZXZlbG9wLnRhcGlzLmlvL3YzL3Rva2VucyIsInN1YiI6InRlc3R1c2VyMUBkZXYiLCJ0YXBpcy90ZW5hbnRfaWQiOiJkZXYiLCJ0YXBpcy90b2tlbl90eXBlIjoiYWNjZXNzIiwidGFwaXMvZGVsZWdhdGlvbiI6ZmFsc2UsInRhcGlzL2RlbGVnYXRpb25fc3ViIjpudWxsLCJ0YXBpcy91c2VybmFtZSI6InRlc3R1c2VyMSIsInRhcGlzL2FjY291bnRfdHlwZSI6InVzZXIiLCJleHAiOjE3ODI4Mzg0MzZ9.OElQtm2H-BZTsmK1V-Ey36jgQJmzME4wfBu0QQ9CwnQ7IJT8qQMlU_cbFZPiNAfAj9xCpOC9-NskUE0ZzYcbvmFt-rzAwzjwLSS1Akx4B2aENsOEZLmLYnqo8eY_qde0rYbyVt0KtemsAZrx2Y7vrEiwWDKRyvAE-b52Knpc_Xoqmv9NcyinYi7Bi2x9S0IswGev3KZr2D4nwZAmTrgHQ3lp1NbyySJE0HKTXfr4P4gIo2FBFm0Kk_k9xJlJlcT4d2Jf-7YRtIMM9G8Y4sateVepxBA0v8F6b_OxX-LeEHeH-MeD-7MNLFayi2MIQGjXNB3J6Zrl6qWFBMDlxA8PDw";
-  // Long term JWT for testuser3 - expires approx 1 July 2026
-  public static final String testUser3JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJlNmIwMTRiOC05MGY1LTRjY2EtODhmYy1iYmIwYWJkMWZkODciLCJpc3MiOiJodHRwczovL2Rldi5kZXZlbG9wLnRhcGlzLmlvL3YzL3Rva2VucyIsInN1YiI6InRlc3R1c2VyM0BkZXYiLCJ0YXBpcy90ZW5hbnRfaWQiOiJkZXYiLCJ0YXBpcy90b2tlbl90eXBlIjoiYWNjZXNzIiwidGFwaXMvZGVsZWdhdGlvbiI6ZmFsc2UsInRhcGlzL2RlbGVnYXRpb25fc3ViIjpudWxsLCJ0YXBpcy91c2VybmFtZSI6InRlc3R1c2VyMyIsInRhcGlzL2FjY291bnRfdHlwZSI6InVzZXIiLCJleHAiOjE3ODI4Mzg2MjV9.yhAHhvFy5APE0gLw47qEv_aay3RmJZkd5Ik7WGmjh0QHrV9gCCxNIVGLKUSBOeKnocDLN9_dpGD0DL4OFiGcKrE9MaI9bYuL4j8BrxEf3Faa64B3IK38zml2Bx1nzpTAxkP6SJy6NENWFhbGg3MRa05oo8R2XctXoOBq8lb3I__zrwzKxQymF9L25hPzivBKaAkpIfVgsd2EGG8UdiExkK8yBRUDddK_I9BNn0VrzaJ0teLg_aOi-vyZN7JfT2VlQqgdMfvVGvH2O8Lt8BBvBs3dm7ODfSbxz1S5FHCYHvSV0H7h4lHA-yumU1I9vDi4K-_6gamHVfMMCqyYRLdJxA";
+  // Long term JWT for testuser1 for DEV - expires approx 1 Sep 2022
+  public static final String testUser1JWT ="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiI4MGU3YzljZi1kYjFlLTQzNzQtYTg3NC0zZjFiM2ZmYjdhYzQiLCJpc3MiOiJodHRwczovL2Rldi5kZXZlbG9wLnRhcGlzLmlvL3YzL3Rva2VucyIsInN1YiI6InRlc3R1c2VyMUBkZXYiLCJ0YXBpcy90ZW5hbnRfaWQiOiJkZXYiLCJ0YXBpcy90b2tlbl90eXBlIjoiYWNjZXNzIiwidGFwaXMvZGVsZWdhdGlvbiI6ZmFsc2UsInRhcGlzL2RlbGVnYXRpb25fc3ViIjpudWxsLCJ0YXBpcy91c2VybmFtZSI6InRlc3R1c2VyMSIsInRhcGlzL2FjY291bnRfdHlwZSI6InVzZXIiLCJleHAiOjE2NjM5MDMyNjJ9.O9ID46YpTL-cgZvhuisytEkde6vFGMJ9Lu4HcEsvTAS6fJqLVds9w9cBah_FfSLZcUu38ddw7cjYHjSGi5crW2G32fWKPjOA8mrk9EE8Q-BNB_bzSYVXOt7-4dRBAyQnEu7d7OYqGJo4-2F4U7210JXtfNog0CH1S0oH8j0ZaiuAA5ula9bhUxXUmJYZhQcyXvxcgBzD_2fEzS2c0h5NWRb-O9abKmuD51ASvYpgrOB8_kmU1P_A91P5YP2H3Kx9E6ijm10GzQJH9euy2nLqKyH20pmvEysQMoq9u0tirThXN4WXLvkyIOtllOyICgSrfxkz1x6yoTkMf-YTrlryuA";
+  // Long term JWT for testuser3 for DEV - expires approx 1 Sep 2022
+  public static final String testUser3JWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJjZDg4MDBkYy05ZGQ5LTQ2ZmItYWZjMi0wZjM5YzVlNjAxN2EiLCJpc3MiOiJodHRwczovL2Rldi5kZXZlbG9wLnRhcGlzLmlvL3YzL3Rva2VucyIsInN1YiI6InRlc3R1c2VyM0BkZXYiLCJ0YXBpcy90ZW5hbnRfaWQiOiJkZXYiLCJ0YXBpcy90b2tlbl90eXBlIjoiYWNjZXNzIiwidGFwaXMvZGVsZWdhdGlvbiI6ZmFsc2UsInRhcGlzL2RlbGVnYXRpb25fc3ViIjpudWxsLCJ0YXBpcy91c2VybmFtZSI6InRlc3R1c2VyMyIsInRhcGlzL2FjY291bnRfdHlwZSI6InVzZXIiLCJleHAiOjE2NjM5MDMzNzF9.gujOdOU9ZOorB1U-yEjjC3D0mKMJQIatjh-ETdSpj-yw7uPsjqpNxIyaVG0UUEdfpqgtFPoCz04iaWfaw-y83W0It2YJMz-4DB8fPViAi0YA4cSTe_dKUJDCYLJEJpt3UexAmr7aAdEnVD6gNqnx9hoExbI5hNZaXApnQMI1Gmp42htxm9LseL7dnMo9Mh-cOeXJcyriPwyk2G-ejuDaRW8MrBSZ3_AxNdookfPluIV6VCwfOvg_6Vh1qYWgVAnW0cm_4lIZIUC8wFVXlG6AjaVLOZ66svTSDrVoXeUNhuYIiwvhWbKFFInqR3OKcHRTeu5a1d9QEqLFoWdHmvT8OA";
 
 
   // TAPIS_BASE_URL_SUFFIX should be set according to the dev, staging or prod environment
@@ -90,17 +90,18 @@ public final class Utils
   public static final String TAPIS_ENV_SVC_PORT = "TAPIS_SERVICE_PORT";
 
   // Default attributes
+  public static final String description1 = "";
   public static final String defaultDescription = null;
   public static final String defaultNotesStr = "{}";
-  public static final boolean defaultIsEnabled = true;
-  public static final boolean defaultDeleted = false;
+  public static final Boolean defaultIsEnabled = true;
+  public static final Boolean defaultDeleted = false;
   public static final RuntimeEnum defaultRuntime = RuntimeEnum.DOCKER;
   public static final String defaultRuntimeVersion = null;
   public static final String defaultContainerImage = "containerImage";
-  public static final int defaultMaxJobs = 0;
-  public static final int defaultMaxJobsPerUser = 0;
-  public static final boolean defaultStrictFileInputs = false;
-  public static final boolean defaultDynamicExecSystem = false;
+  public static final Integer defaultMaxJobs = 0;
+  public static final Integer defaultMaxJobsPerUser = 0;
+  public static final Boolean defaultStrictFileInputs = false;
+  public static final Boolean defaultDynamicExecSystem = false;
 
   public static final List<String> tags1 = Arrays.asList("value1", "value2", "a",
           "Long tag (1 3 2) special chars [_ $ - & * % @ + = ! ^ ? < > , . ( ) { } / \\ | ]. Backslashes must be escaped.");
@@ -115,94 +116,170 @@ public final class Utils
 
   // App attributes test data
   public static final String appNamePrefix = "CApp";
-  public static final String appVersion = "0.0.1";
+  public static final String appVersion1 = "0.0.1";
+  public static final String appVersion2 = "0.0.2";
   public static final AppTypeEnum appTypeBatch = AppTypeEnum.BATCH;
-  public static final boolean isEnabledTrue = true;
-  public static final RuntimeEnum runtime = RuntimeEnum.DOCKER;
-  public static final String runtimeVersion = "0.0.1";
+  public static final AppTypeEnum appTypeFork = AppTypeEnum.FORK;
+  public static final String appDescription1 =  "app description 1";
+  public static final String appDescription2 =  "app description 2";
+  public static final Boolean isEnabledTrue = true;
+  public static final Boolean isEnabledFalse = false;
+  public static final RuntimeEnum runtime1 = RuntimeEnum.DOCKER;
+  public static final RuntimeEnum runtime2 = RuntimeEnum.SINGULARITY;
+  public static final String runtimeVersion1 = "0.0.1";
+  public static final String runtimeVersion2 = "0.0.2";
   public static final List<RuntimeOptionEnum> runtimeOptions1 = new ArrayList<>(List.of(RuntimeOptionEnum.SINGULARITY_RUN));
   public static final List<RuntimeOptionEnum> runtimeOptions2 = new ArrayList<>(List.of(RuntimeOptionEnum.SINGULARITY_START));
   public static final List<RuntimeOptionEnum> runtimeOptionsNull = null;
-  public static final boolean dynamicExecSystemTrue = true;
-  public static final List<String> execSystemConstraints = Arrays.asList("Constraint1 AND", "Constraint2");
-  public static final String execSystemId = "tapisv3-exec3";
-  public static final String execSystemExecDir = "execSystemExecDir";
-  public static final String execSystemInputDir = "execSystemInputDir";
-  public static final String execSystemOutputDir = "execSystemOutputDir";
-  public static final String execSystemLogicalQueue = "dsnormal";
-  public static final String archiveSystemId = "tapisv3-storage";
+  public static final String containerImage1 = "containerImage1";
+  public static final String containerImage2 = "containerImage2";
+  public static final Boolean dynamicExecSystemTrue = true;
+  public static final Boolean dynamicExecSystemFalse = false;
+  public static final List<String> execSystemConstraints1 = Arrays.asList("Constraint1a AND", "Constraint1b");
+  public static final List<String> execSystemConstraints2 = Arrays.asList("Constraint2a AND", "Constraint2b");
+  public static final String execSystemId1 = "tapisv3-exec3";
+  // TODO Create a new exec system that supports BATCH and has different logicalQueue name.
+  public static final String execSystemId2 = "tapisv3-exec3";
+  public static final String execSystemExecDir1 = "execSystemExecDir1";
+  public static final String execSystemExecDir2 = "execSystemExecDir2";
+  public static final String execSystemInputDir1 = "execSystemInputDir1";
+  public static final String execSystemInputDir2 = "execSystemInputDir2";
+  public static final String execSystemOutputDir1 = "execSystemOutputDir1";
+  public static final String execSystemOutputDir2 = "execSystemOutputDir2";
+  public static final String execSystemLogicalQueue1 = "dsnormal";
+  public static final String execSystemLogicalQueue2 = "dsnormal";
+  public static final String archiveSystemId1 = "tapisv3-storage";
+  public static final String archiveSystemId2 = "tapisv3-exec3";
   public static final String archiveSystemIdNull = null;
-  public static final String archiveSystemDir = "archiveSystemDir";
-  public static final boolean archiveOnAppErrorTrue = true;
-  public static final String jobDescription = "job description";
-  public static final int maxJobs = 1;
-  public static final int maxJobsMAX = Integer.MAX_VALUE;
-  public static final int maxJobsPerUser = 1;
-  public static final int maxJobsPerUserMAX = Integer.MAX_VALUE;
-  public static final boolean strictFileInputsFalse = false;
-  public static final int nodeCount = 10;
-  public static final int coresPerNode = 10;
-  public static final int memoryMb = 32;
-  public static final int maxMinutes = 10;
-  public static final boolean metaRequiredTrue = true;
-  public static final boolean metaRequiredFalse = false;
-  public static final boolean deletedFalse = false;
+  public static final String archiveSystemDir1 = "archiveSystemDir1";
+  public static final String archiveSystemDir2 = "archiveSystemDir2";
+  public static final Boolean archiveOnAppErrorTrue = true;
+  public static final Boolean archiveOnAppErrorFalse = false;
+  public static final String jobDescription1 = "job description 1";
+  public static final String jobDescription2 = "job description 2";
+  public static final Integer maxJobs1 = 1;
+  public static final Integer maxJobs2 = 2;
+  public static final Integer maxJobsMAX = Integer.MAX_VALUE;
+  public static final Integer maxJobsPerUser1 = 1;
+  public static final Integer maxJobsPerUser2 = 2;
+  public static final Integer maxJobsPerUserMAX = Integer.MAX_VALUE;
+  public static final Boolean strictFileInputsTrue = true;
+  public static final Boolean strictFileInputsFalse = false;
+  public static final Integer nodeCount1 = 10;
+  public static final Integer nodeCount2 = 20;
+  public static final Integer coresPerNode1 = 10;
+  public static final Integer coresPerNode2 = 20;
+  public static final Integer memoryMb1 = 32;
+  public static final Integer memoryMb2 = 64;
+  public static final Integer maxMinutes1 = 10;
+  public static final Integer maxMinutes2 = 20;
+  public static final InputModeEnum inputModeRequired = InputModeEnum.REQUIRED;
+  public static final InputModeEnum inputModeOptional = InputModeEnum.OPTIONAL;
+  public static final InputModeEnum inputModeFixed = InputModeEnum.FIXED;
+  public static final Boolean deletedFalse = false;
   public static final Instant createdNull = null;
   public static final Instant updatedNull = null;
-  public static final boolean inPlaceTrue = true;
+  public static final Boolean autoMountLocalTrue = true;
 
-  public static final List<String> metaKVPairs = Arrays.asList("metaKey1=metaVal1", "metaKey2=metaVal2");
-  public static final KeyValuePair kv1 = new KeyValuePair().key("key1").value("value1");
-  public static final KeyValuePair kv2 = new KeyValuePair().key("HOME").value("/home/testuser2");
-  public static final KeyValuePair kv3 = new KeyValuePair().key("TMP").value("/tmp");
-  public static final List<KeyValuePair> envVariables = new ArrayList<>(List.of(kv1,kv2,kv3));
-  public static final List<String> archiveIncludes = Arrays.asList("/archiveInclude1", "/archiveInclude2");
-  public static final List<String> archiveExcludes = Arrays.asList("/archiveExclude1", "/archiveExclude2");
-  public static final List<String> jobTags = Arrays.asList("jobtag1", "jobtag2");
+//  public static final List<KeyValuePair> metaKVPairs1 = Arrays.asList(new KeyValuePair().key("metaKey1A").value("metaVal1A"),
+//                                                                     new KeyValuePair().key("metaKey1B").value("metaVal1B"));
+//  public static final List<KeyValuePair> metaKVPairs2 = Arrays.asList(new KeyValuePair().key("metaKey2A").value("metaVal2A"),
+//          new KeyValuePair().key("metaKey2B").value("metaVal2B"));
 
-  public static final String srcA1 = "https://example.com/srcA1";
-  public static final String srcB1 = "https://example.com/srcB1";
-  public static final List<KeyValuePair> kvPairsFinA1 = new ArrayList<>(List.of(kv1,kv2,kv3));
-  public static final ArgMetaSpec argMetaFinA1 = new ArgMetaSpec().name("finA1").description("File input A1")
-                                                         .required(metaRequiredTrue).keyValuePairs(kvPairsFinA1);
-  public static final FileInput finA1 = new FileInput().sourceUrl(srcA1).targetPath("/targetA1")
-                                                         .inPlace(inPlaceTrue).meta(argMetaFinA1);
-  public static final List<KeyValuePair> kvPairsFinB1 = new ArrayList<>(List.of(kv1,kv2,kv3));
-  public static final ArgMetaSpec argMetaFinB1 = new ArgMetaSpec().name("finB1").description("File input B1")
-          .required(metaRequiredTrue).keyValuePairs(kvPairsFinB1);
-  public static final FileInput finB1 = new FileInput().sourceUrl(srcB1).targetPath("/targetB1")
-          .inPlace(inPlaceTrue).meta(argMetaFinB1);
-  public static final List<FileInput> fileInputs = new ArrayList<>(List.of(finA1, finB1));
+  public static final KeyValuePair kv1a = new KeyValuePair().key("key1").value("value1");
+  public static final KeyValuePair kv1b = new KeyValuePair().key("HOME1").value("/home/testuser1");
+  public static final KeyValuePair kv1c = new KeyValuePair().key("TMP1").value("/tmp1");
+  public static final List<KeyValuePair> envVariables1 = new ArrayList<>(List.of(kv1a, kv1b, kv1c));
+  public static final KeyValuePair kv2a = new KeyValuePair().key("key2").value("value2");
+  public static final KeyValuePair kv2b = new KeyValuePair().key("HOME2").value("/home/testuser2");
+  public static final KeyValuePair kv2c = new KeyValuePair().key("TMP2").value("/tmp2");
+  public static final List<KeyValuePair> envVariables2 = new ArrayList<>(List.of(kv2a, kv2b, kv2c));
+  public static final List<String> archiveIncludes1 = Arrays.asList("/archiveInclude1A", "/archiveInclude1B");
+  public static final List<String> archiveExcludes1 = Arrays.asList("/archiveExclude1A", "/archiveExclude1B");
+  public static final List<String> archiveIncludes2 = Arrays.asList("/archiveInclude2A", "/archiveInclude2B");
+  public static final List<String> archiveExcludes2 = Arrays.asList("/archiveExclude2A", "/archiveExclude2B");
+  public static final Boolean includeLaunchFilesTrue = true;
+  public static final Boolean includeLaunchFilesFalse = false;
+  public static final ParameterSetArchiveFilter archiveFilter1 = new ParameterSetArchiveFilter().includes(archiveIncludes1).excludes(archiveExcludes1).includeLaunchFiles(includeLaunchFilesTrue);
+  public static final ParameterSetArchiveFilter archiveFilter2 = new ParameterSetArchiveFilter().includes(archiveIncludes2).excludes(archiveExcludes2).includeLaunchFiles(includeLaunchFilesFalse);
 
-  public static final NotificationMechanism notifMechA1 =
-          new NotificationMechanism().mechanism(NotificationMechanismEnum.WEBHOOK).webhookURL("webhookUrlA1")
-                  .emailAddress("emailAddressA1");
-  public static final NotificationMechanism notifMechA2 =
-          new NotificationMechanism().mechanism(NotificationMechanismEnum.EMAIL).webhookURL("webhookUrlA2")
-                  .emailAddress("emailAddressA2");
-  public static final List<NotificationMechanism> notifMechsA = new ArrayList<>(List.of(notifMechA1, notifMechA2));
-  public static final NotificationSubscription notifA1 = new NotificationSubscription().filter("filterA1")
-                                .notificationMechanisms(notifMechsA);
-  public static final NotificationMechanism notifMechB1 =
-          new NotificationMechanism().mechanism(NotificationMechanismEnum.WEBHOOK).webhookURL("webhookUrlB1")
-                  .emailAddress("emailAddressB1");
-  public static final NotificationMechanism notifMechB2 =
-          new NotificationMechanism().mechanism(NotificationMechanismEnum.EMAIL).webhookURL("webhookUrlB2")
-                  .emailAddress("emailAddressB2");
-  public static final List<NotificationMechanism> notifMechsB = new ArrayList<>(List.of(notifMechB1, notifMechB2));
-  public static final NotificationSubscription notifB1 = new NotificationSubscription().filter("filterB1")
-          .notificationMechanisms(notifMechsB);
-  public static final List<NotificationSubscription> notifList1 = new ArrayList<>(List.of(notifB1, notifB1));
+  public static final List<String> jobTags1 = Arrays.asList("jobtag1A", "jobtag1B");
+  public static final List<String> jobTags2 = Arrays.asList("jobtag2A", "jobtag2B");
 
-  public static final ArgSpec appArgA1 = AppsClient.buildArg("valueA1", "appArgA1", "App arg A1", metaRequiredTrue, metaKVPairs);
-  public static final ArgSpec appArgB1 = AppsClient.buildArg("valueB1", "appArgB1", "App arg B1", metaRequiredFalse, metaKVPairs);
-  public static final List<ArgSpec> appArgs = new ArrayList<>(List.of(appArgA1, appArgB1));
-  public static final ArgSpec containerArgA1 = AppsClient.buildArg("valueA1", "containerArgA1", "container arg A1", metaRequiredTrue, metaKVPairs);
-  public static final ArgSpec containerArgB1 = AppsClient.buildArg("valueB1", "containerArgB1", "container arg B1", metaRequiredFalse, metaKVPairs);
-  public static final List<ArgSpec> containerArgs = new ArrayList<>(List.of(containerArgA1, containerArgB1));
-  public static final ArgSpec schedulerOptionA1 = AppsClient.buildArg("valueA1", "schedulerOptionA1", "scheduler option A1", metaRequiredTrue, metaKVPairs);
-  public static final ArgSpec schedulerOptionB1 = AppsClient.buildArg("valueB1", "schedulerOptionB1", "scheduler optionApp B1", metaRequiredFalse, metaKVPairs);
-  public static final List<ArgSpec> schedulerOptions = new ArrayList<>(List.of(schedulerOptionA1, schedulerOptionB1));
+  public static final String src1A = "https://example.com/src1A";
+  public static final String src1B = "https://example.com/src1B";
+  public static final List<KeyValuePair> kvPairsFin1A = new ArrayList<>(List.of(kv1a, kv1b, kv1c));
+  public static final List<KeyValuePair> kvPairsFin1B = new ArrayList<>(List.of(kv1a, kv1b, kv1c));
+  public static final FileInput fin1A = new FileInput().name("fin1A").description("File input 1A")
+                                                       .inputMode(inputModeRequired).autoMountLocal(autoMountLocalTrue)//.meta(kvPairsFin1A)
+                                                       .sourceUrl(src1A).targetPath("/target1A");
+  public static final FileInput fin1B = new FileInput().name("finB1").description("File input 1B")
+                                                       .inputMode(inputModeOptional).autoMountLocal(autoMountLocalTrue)//.meta(kvPairsFin1B)
+                                                       .sourceUrl(src1B).targetPath("/target1B");
+  public static final List<FileInput> fileInputs1 = new ArrayList<>(List.of(fin1A, fin1B));
+
+  public static final String src2A = "https://example.com/src2A";
+  public static final String src2B = "https://example.com/src2B";
+  public static final List<KeyValuePair> kvPairsFin2A = new ArrayList<>(List.of(kv2a, kv2b, kv2c));
+  public static final List<KeyValuePair> kvPairsFin2B = new ArrayList<>(List.of(kv2a, kv2b, kv2c));
+  public static final FileInput fin2A = new FileInput().name("fin2A").description("File input 2A")
+          .inputMode(inputModeRequired).autoMountLocal(autoMountLocalTrue)//.meta(kvPairsFin2A)
+          .sourceUrl(src2A).targetPath("/target2A");
+  public static final FileInput fin2B = new FileInput().name("fin2B").description("File input 2B")
+          .inputMode(inputModeFixed).autoMountLocal(autoMountLocalTrue)//.meta(kvPairsFin2B)
+          .sourceUrl(src2B).targetPath("/target2B");
+  public static final List<FileInput> fileInputs2 = new ArrayList<>(List.of(fin2A, fin2B));
+
+  // NotificationSubscriptions
+  public static final NotificationMechanism notifMech1Aa = new NotificationMechanism().mechanism(NotificationMechanismEnum.WEBHOOK).webhookURL("webhookUrl1Aa").emailAddress("emailAddress1Aa");
+  public static final NotificationMechanism notifMech1Ab = new NotificationMechanism().mechanism(NotificationMechanismEnum.WEBHOOK).webhookURL("webhookUrl1Ab").emailAddress("emailAddress1Ab");
+  public static final List<NotificationMechanism> notifMechList1A = new ArrayList<>(List.of(notifMech1Aa, notifMech1Ab));
+  public static final NotificationMechanism notifMech1Ba = new NotificationMechanism().mechanism(NotificationMechanismEnum.WEBHOOK).webhookURL("webhookUrl1Ba").emailAddress("emailAddress1Ba");
+  public static final NotificationMechanism notifMech1Bb = new NotificationMechanism().mechanism(NotificationMechanismEnum.WEBHOOK).webhookURL("webhookUrl1Bb").emailAddress("emailAddress1Bb");
+  public static final List<NotificationMechanism> notifMechList1B = new ArrayList<>(List.of(notifMech1Ba, notifMech1Bb));
+  public static final NotificationSubscription notif1A = new NotificationSubscription().filter("filter1A");
+  public static final NotificationSubscription notif1B = new NotificationSubscription().filter("filter1B");
+  static {
+    notif1A.setNotificationMechanisms(notifMechList1A);
+    notif1B.setNotificationMechanisms(notifMechList1B);
+  }
+  public static final List<NotificationSubscription> notifList1 = new ArrayList<>(List.of(notif1A, notif1B));
+
+  public static final NotificationMechanism notifMech2Aa = new NotificationMechanism().mechanism(NotificationMechanismEnum.WEBHOOK).webhookURL("webhookUrl2Aa").emailAddress("emailAddress2Aa");
+  public static final NotificationMechanism notifMech2Ab = new NotificationMechanism().mechanism(NotificationMechanismEnum.WEBHOOK).webhookURL("webhookUrl2Ab").emailAddress("emailAddress2Ab");
+  public static final List<NotificationMechanism> notifMechList2A = new ArrayList<>(List.of(notifMech2Aa, notifMech2Ab));
+  public static final NotificationMechanism notifMech2Ba = new NotificationMechanism().mechanism(NotificationMechanismEnum.WEBHOOK).webhookURL("webhookUrl2Ba").emailAddress("emailAddress2Ba");
+  public static final NotificationMechanism notifMech2Bb = new NotificationMechanism().mechanism(NotificationMechanismEnum.WEBHOOK).webhookURL("webhookUrl2Bb").emailAddress("emailAddress2Bb");
+  public static final List<NotificationMechanism> notifMechList2B = new ArrayList<>(List.of(notifMech2Ba, notifMech2Bb));
+  public static final NotificationSubscription notif2A = new NotificationSubscription().filter("filter2A");
+  public static final NotificationSubscription notif2B = new NotificationSubscription().filter("filter2B");
+  static {
+    notif2A.setNotificationMechanisms(notifMechList2A);
+    notif2B.setNotificationMechanisms(notifMechList2B);
+  }
+  public static final List<NotificationSubscription> notifList2 = new ArrayList<>(List.of(notif2A, notif2B));
+  public static final List<NotificationSubscription> notifListNull = null;
+
+
+  public static final ArgSpec appArgA1 = (new ArgSpec()).name("appArgA1").arg("valueA1").description("App arg A1").inputMode(inputModeRequired);//.meta(metaKVPairs1);
+  public static final ArgSpec appArgB1 = (new ArgSpec()).name("appArgB1").arg("valueB1").description("App arg B1").inputMode(inputModeOptional);//.meta(metaKVPairs1);
+  public static final List<ArgSpec> appArgs1 = new ArrayList<>(List.of(appArgA1, appArgB1));
+  public static final ArgSpec containerArgA1 = (new ArgSpec()).name("containerArgA1").arg("valueA1").description("container arg A1").inputMode(inputModeRequired);//.meta(metaKVPairs1);
+  public static final ArgSpec containerArgB1 = (new ArgSpec()).name("containerArgB1").arg("valueB1").description("container arg B1").inputMode(inputModeOptional);//.meta(metaKVPairs1);
+  public static final List<ArgSpec> containerArgs1 = new ArrayList<>(List.of(containerArgA1, containerArgB1));
+  public static final ArgSpec schedulerOptionA1 = (new ArgSpec()).name("schedulerOptionA1").arg("valueA1").description("scheduler option A1").inputMode(inputModeRequired);//.meta(metaKVPairs1);
+  public static final ArgSpec schedulerOptionB1 = (new ArgSpec()).name("schedulerOptionB1").arg("valueB1").description("scheduler option B1").inputMode(inputModeOptional);//.meta(metaKVPairs1);
+  public static final List<ArgSpec> schedulerOptions1 = new ArrayList<>(List.of(schedulerOptionA1, schedulerOptionB1));
+
+  public static final ArgSpec appArgA2 = (new ArgSpec()).name("appArgA2").arg("valueA2").description("App arg A2").inputMode(inputModeRequired);//.meta(metaKVPairs2);
+  public static final ArgSpec appArgB2 = (new ArgSpec()).name("appArgB2").arg("valueB2").description("App arg B2").inputMode(inputModeOptional);//.meta(metaKVPairs2);
+  public static final List<ArgSpec> appArgs2 = new ArrayList<>(List.of(appArgA2, appArgB2));
+  public static final ArgSpec containerArgA2 = (new ArgSpec()).name("containerArgA2").arg("valueA2").description("container arg A2").inputMode(inputModeRequired);//.meta(metaKVPairs2);
+  public static final ArgSpec containerArgB2 = (new ArgSpec()).name("containerArgB2").arg("valueB2").description("container arg B2").inputMode(inputModeOptional);//.meta(metaKVPairs2);
+  public static final List<ArgSpec> containerArgs2 = new ArrayList<>(List.of(containerArgA2, containerArgB2));
+  public static final ArgSpec schedulerOptionA2 = (new ArgSpec()).name("schedulerOptionA2").arg("valueA2").description("scheduler option A2").inputMode(inputModeRequired);//.meta(metaKVPairs2);
+  public static final ArgSpec schedulerOptionB2 = (new ArgSpec()).name("schedulerOptionB2").arg("valueB2").description("scheduler option B2").inputMode(inputModeOptional);//.meta(metaKVPairs2);
+  public static final List<ArgSpec> schedulerOptions2 = new ArrayList<>(List.of(schedulerOptionA2, schedulerOptionB2));
 
   // Strings for searches involving special characters
   public static final String specialChar7Str = ",()~*!\\"; // These 7 may need escaping
@@ -233,10 +310,10 @@ public final class Utils
 //              6=runtime, 7=runtimeVersion, 8=containerImage, 9=jobDescription,
 //              10=execSystemId, 11=execSystemExecDir, 12=execSystemInputDir, 13=execSystemOutputDir,
 //              14=execSystemLogicalQueue, 15=archiveSystemId, 16=archiveSystemDir};
-      String[] app0 = {tenantName, appId, appVersion, "description "+suffix, appTypeBatch.name(), ownerUser1,
-                       runtime.name(), runtimeVersion+suffix, defaultContainerImage, jobDescription+suffix,
-                       execSystemId, execSystemExecDir+suffix, execSystemInputDir+suffix, execSystemOutputDir+suffix,
-                       execSystemLogicalQueue, archiveSystemId, archiveSystemDir+suffix};
+      String[] app0 = {tenantName, appId, appVersion1, appDescription1+suffix, appTypeBatch.name(), ownerUser1,
+                       runtime1.name(), runtimeVersion1+suffix, defaultContainerImage, jobDescription1+suffix,
+              execSystemId1, execSystemExecDir1+suffix, execSystemInputDir1+suffix, execSystemOutputDir1+suffix,
+              execSystemLogicalQueue1, archiveSystemId1, archiveSystemDir1+suffix};
       apps.put(i, app0);
     }
     return apps;
@@ -287,15 +364,15 @@ public final class Utils
     rApp.setRuntimeVersion(app[7]);
     rApp.setRuntimeOptions(runtimeOptions1);
     rApp.setContainerImage(app[8]);
-    rApp.setMaxJobs(maxJobs);
-    rApp.setMaxJobsPerUser(maxJobsPerUser);
+    rApp.setMaxJobs(maxJobs1);
+    rApp.setMaxJobsPerUser(maxJobsPerUser1);
     rApp.strictFileInputs(strictFileInputsFalse);
 
     // === Start Job Attributes
     JobAttributes jobAttrs = new JobAttributes();
     jobAttrs.setDescription(app[9]);
     jobAttrs.setDynamicExecSystem(dynamicExecSystemTrue);
-    jobAttrs.setExecSystemConstraints(execSystemConstraints);
+    jobAttrs.setExecSystemConstraints(execSystemConstraints1);
     jobAttrs.setExecSystemId(app[10]);
     jobAttrs.setExecSystemExecDir(app[11]);
     jobAttrs.setExecSystemInputDir(app[12]);
@@ -306,24 +383,25 @@ public final class Utils
     jobAttrs.setArchiveOnAppError(archiveOnAppErrorTrue);
     // ====== Start Parameter Set
     ParameterSet parameterSet = new ParameterSet();
-    parameterSet.setAppArgs(appArgs);
-    parameterSet.setContainerArgs(containerArgs);
-    parameterSet.setSchedulerOptions(schedulerOptions);
-    parameterSet.setEnvVariables(envVariables);
+    parameterSet.setAppArgs(appArgs1);
+    parameterSet.setContainerArgs(containerArgs1);
+    parameterSet.setSchedulerOptions(schedulerOptions1);
+    parameterSet.setEnvVariables(envVariables1);
     ParameterSetArchiveFilter archiveFilter = new ParameterSetArchiveFilter();
-    archiveFilter.setIncludes(archiveIncludes);
-    archiveFilter.setExcludes(archiveExcludes);
+    archiveFilter.setIncludes(archiveIncludes1);
+    archiveFilter.setExcludes(archiveExcludes1);
+    archiveFilter.includeLaunchFiles(includeLaunchFilesTrue);
     parameterSet.setArchiveFilter(archiveFilter);
     // ====== End Parameter Set
     jobAttrs.setParameterSet(parameterSet);
 
-    jobAttrs.setFileInputs(fileInputs);
-    jobAttrs.setNodeCount(nodeCount);
-    jobAttrs.setCoresPerNode(coresPerNode);
-    jobAttrs.setMemoryMB(memoryMb);
-    jobAttrs.setMaxMinutes(maxMinutes);
+    jobAttrs.setFileInputs(fileInputs1);
+    jobAttrs.setNodeCount(nodeCount1);
+    jobAttrs.setCoresPerNode(coresPerNode1);
+    jobAttrs.setMemoryMB(memoryMb1);
+    jobAttrs.setMaxMinutes(maxMinutes1);
     jobAttrs.setSubscriptions(notifList1);
-    jobAttrs.setTags(jobTags);
+    jobAttrs.setTags(jobTags1);
     // === End Job Attributes
     rApp.setJobAttributes(jobAttrs);
 
@@ -384,11 +462,21 @@ public final class Utils
 
   /**
    * Verify most attributes for an App
+   * Some attributes are in String[] app0, others must be passed in.
    *
    * @param tmpApp - app retrieved from the service
    * @param app0 - Data used to create the app
    */
-  public static void verifyAppAttributes(TapisApp tmpApp, String[] app0)
+  public static void verifyAppAttributes(TapisApp tmpApp, String[] app0, Boolean isEnabled,
+                                         List<RuntimeOptionEnum> runtimeOptions, Integer maxJobs, Integer maxJobsPerUser,
+                                         Boolean strictFileInputs, Boolean dynamicExecSystem,
+                                         List<String> execSystemConstraints, Boolean archiveOnAppError,
+                                         List<ArgSpec> appArgs, List<ArgSpec> containerArgs,List<ArgSpec> schedulerOptions,
+                                         List<KeyValuePair> envVariables, ParameterSetArchiveFilter archiveFilter,
+                                         Integer nodeCount, Integer coresPerNode, Integer memoryMb, Integer maxMinutes,
+                                         List<FileInput> fileInputs, List<String> jobTags,
+                                         List<NotificationSubscription> notificationSubscriptions,
+                                         List<String> tags, JsonObject notes)
   {
 //    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=appType, 5=ownerUser1,
 //              6=runtime, 7=runtimeVersion, 8=containerImage, 9=jobDescription,
@@ -401,28 +489,37 @@ public final class Utils
     Assert.assertNotNull(tmpApp.getAppType());
     Assert.assertEquals(tmpApp.getAppType().name(), app0[4]);
     Assert.assertEquals(tmpApp.getOwner(), app0[5]);
-    Assert.assertEquals(tmpApp.getEnabled(), Boolean.valueOf(isEnabledTrue));
+    Assert.assertEquals(tmpApp.getEnabled(), isEnabled);
     Assert.assertNotNull(tmpApp.getRuntime());
     Assert.assertEquals(tmpApp.getRuntime().name(), app0[6]);
     Assert.assertEquals(tmpApp.getRuntimeVersion(), app0[7]);
     // Verify runtimeOptions
     List<RuntimeOptionEnum> rtOps = tmpApp.getRuntimeOptions();
     Assert.assertNotNull(rtOps);
-    for (RuntimeOptionEnum rtOption : runtimeOptions1)
+    for (RuntimeOptionEnum rtOption : runtimeOptions)
     {
       Assert.assertTrue(rtOps.contains(rtOption), "List of runtime options did not contain: " + rtOption.name());
     }
-
     Assert.assertEquals(tmpApp.getContainerImage(), app0[8]);
-    Assert.assertEquals(tmpApp.getMaxJobs(), Integer.valueOf(maxJobs));
-    Assert.assertEquals(tmpApp.getMaxJobsPerUser(), Integer.valueOf(maxJobsPerUser));
-    Assert.assertEquals(tmpApp.getStrictFileInputs(), Boolean.valueOf(strictFileInputsFalse));
+    Assert.assertEquals(tmpApp.getMaxJobs(), maxJobs);
+    Assert.assertEquals(tmpApp.getMaxJobsPerUser(), maxJobsPerUser);
+    Assert.assertEquals(tmpApp.getStrictFileInputs(), strictFileInputs);
 
     // ========== JobAttributes
     JobAttributes jobAttributes = tmpApp.getJobAttributes();
     Assert.assertNotNull(jobAttributes);
     Assert.assertEquals(jobAttributes.getDescription(), app0[9]);
-    Assert.assertEquals(jobAttributes.getDynamicExecSystem(), Boolean.valueOf(dynamicExecSystemTrue));
+    Assert.assertEquals(jobAttributes.getDynamicExecSystem(), dynamicExecSystem);
+    // Verify execSystemConstraints
+    List<String> origExecSystemConstraints = execSystemConstraints;
+    List<String> tmpExecSystemConstraints = jobAttributes.getExecSystemConstraints();
+    Assert.assertNotNull(tmpExecSystemConstraints, "execSystemConstraints value was null");
+    Assert.assertEquals(tmpExecSystemConstraints.size(), origExecSystemConstraints.size(), "Wrong number of constraints");
+    for (String execSystemConstraintStr : origExecSystemConstraints)
+    {
+      Assert.assertTrue(tmpExecSystemConstraints.contains(execSystemConstraintStr));
+      System.out.println("Found execSystemConstraint: " + execSystemConstraintStr);
+    }
     Assert.assertEquals(jobAttributes.getExecSystemId(), app0[10]);
     Assert.assertEquals(jobAttributes.getExecSystemExecDir(), app0[11]);
     Assert.assertEquals(jobAttributes.getExecSystemInputDir(), app0[12]);
@@ -430,47 +527,93 @@ public final class Utils
     Assert.assertEquals(jobAttributes.getExecSystemLogicalQueue(), app0[14]);
     Assert.assertEquals(jobAttributes.getArchiveSystemId(), app0[15]);
     Assert.assertEquals(jobAttributes.getArchiveSystemDir(), app0[16]);
-    Assert.assertEquals(jobAttributes.getArchiveOnAppError(), Boolean.valueOf(archiveOnAppErrorTrue));
-    Assert.assertEquals(jobAttributes.getNodeCount(), Integer.valueOf(nodeCount));
-    Assert.assertEquals(jobAttributes.getCoresPerNode(), Integer.valueOf(coresPerNode));
-    Assert.assertEquals(jobAttributes.getMemoryMB(), Integer.valueOf(memoryMb));
-    Assert.assertEquals(jobAttributes.getMaxMinutes(), Integer.valueOf(maxMinutes));
+    Assert.assertEquals(jobAttributes.getArchiveOnAppError(), archiveOnAppError);
 
-    // TODO Verify fileInputs
-    // TODO only meta.name is checked
-    List<FileInput> tFileInputs = jobAttributes.getFileInputs();
-    Assert.assertNotNull(tFileInputs, "FileInputs list should not be null.");
-    Assert.assertEquals(tFileInputs.size(), fileInputs.size(), "Wrong number of FileInputs");
-    var metaNamesFound = new ArrayList<String>();
-    for (FileInput itemFound : tFileInputs)
+    // Verify parameterSet
+    ParameterSet parmSet = jobAttributes.getParameterSet();
+    Assert.assertNotNull(parmSet, "parameterSet was null");
+    verifyAppArgs("App Arg", appArgs, parmSet.getAppArgs());
+    verifyAppArgs("Container Arg", containerArgs, parmSet.getContainerArgs());
+    verifyAppArgs("Scheduler Option Arg", schedulerOptions, parmSet.getSchedulerOptions());
+
+    // Verify envVariables
+    verifyKeyValuePairs("Env Var", envVariables, parmSet.getEnvVariables());
+
+    // Verify archiveFilter in parameterSet
+    ParameterSetArchiveFilter tmpArchiveFilter = parmSet.getArchiveFilter();
+    Assert.assertNotNull(tmpArchiveFilter, "archiveFilter was null");
+    Assert.assertEquals(tmpArchiveFilter.getIncludeLaunchFiles(), archiveFilter.getIncludeLaunchFiles());
+    // Verify archiveIncludes
+    List<String> archiveIncludesList = tmpArchiveFilter.getIncludes();
+    Assert.assertNotNull(archiveIncludesList, "archiveIncludes value was null");
+    Assert.assertEquals(archiveIncludesList.size(), archiveFilter.getIncludes().size(), "Wrong number of archiveIncludes");
+    for (String archiveIncludeStr : archiveFilter.getIncludes())
     {
-      Assert.assertNotNull(itemFound.getMeta(), "FileInput meta value should not be null.");
-      metaNamesFound.add(itemFound.getMeta().getName());
+      Assert.assertTrue(archiveIncludesList.contains(archiveIncludeStr));
+      System.out.println("Found archiveInclude: " + archiveIncludeStr);
     }
-    for (FileInput itemSeedItem : fileInputs)
+    // Verify archiveExcludes
+    List<String> archiveExcludesList = tmpArchiveFilter.getExcludes();
+    Assert.assertNotNull(archiveExcludesList, "archiveExcludes value was null");
+    Assert.assertEquals(archiveExcludesList.size(), archiveFilter.getExcludes().size(), "Wrong number of archiveExcludes");
+    for (String archiveExcludeStr : archiveFilter.getExcludes())
     {
-      Assert.assertNotNull(itemSeedItem.getMeta());
-      Assert.assertTrue(metaNamesFound.contains(itemSeedItem.getMeta().getName()),
-              "List of fileInputs did not contain an item with metaName: " + itemSeedItem.getMeta().getName());
+      Assert.assertTrue(archiveExcludesList.contains(archiveExcludeStr));
+      System.out.println("Found archiveExclude: " + archiveExcludeStr);
     }
 
+    // Verify file inputs
+    verifyFileInputs(fileInputs, jobAttributes.getFileInputs());
+
+    Assert.assertEquals(jobAttributes.getNodeCount(), nodeCount);
+    Assert.assertEquals(jobAttributes.getCoresPerNode(), coresPerNode);
+    Assert.assertEquals(jobAttributes.getMemoryMB(), memoryMb);
+    Assert.assertEquals(jobAttributes.getMaxMinutes(), maxMinutes);
+
+    verifySubscriptions(notificationSubscriptions, jobAttributes.getSubscriptions());
+    // ???????????????/
     // TODO Verify notificationSubscriptions
     // TODO: Filter is checked but not mechanisms
-    List<NotificationSubscription> tSubscriptions = jobAttributes.getSubscriptions();
-    Assert.assertNotNull(tSubscriptions, "Subscriptions list should not be null.");
-    Assert.assertEquals(tSubscriptions.size(), notifList1.size(), "Wrong number of Subscriptions");
-    var filtersFound = new ArrayList<String>();
-    for (NotificationSubscription itemFound : tSubscriptions)
-    {
-      Assert.assertNotNull(itemFound.getFilter(), "Subscription filter should not be null.");
-      filtersFound.add(itemFound.getFilter());
-    }
-    for (NotificationSubscription itemSeedItem : notifList1)
-    {
-      Assert.assertTrue(filtersFound.contains(itemSeedItem.getFilter()),
-              "List of subscriptions did not contain a filter: " + itemSeedItem.getFilter());
-    }
-
+//    List<NotificationSubscription> tSubscriptions = jobAttributes.getSubscriptions();
+//    Assert.assertNotNull(tSubscriptions, "Subscriptions list should not be null.");
+//    Assert.assertEquals(tSubscriptions.size(), notifList1.size(), "Wrong number of Subscriptions");
+//    var filtersFound = new ArrayList<String>();
+//    for (NotificationSubscription itemFound : tSubscriptions)
+//    {
+//      Assert.assertNotNull(itemFound.getFilter(), "Subscription filter should not be null.");
+//      filtersFound.add(itemFound.getFilter());
+//    }
+//    for (NotificationSubscription itemSeedItem : notifList1)
+//    {
+//      Assert.assertTrue(filtersFound.contains(itemSeedItem.getFilter()),
+//              "List of subscriptions did not contain a filter: " + itemSeedItem.getFilter());
+//    }
+//    // Verify jobTags
+//    List<String> tmpJobTags = jobAttributes.getTags();
+//    Assert.assertNotNull(tmpJobTags, "jobTags value was null");
+//    Assert.assertEquals(tmpJobTags.size(), jobTags1.size(), "Wrong number of jobTags");
+//    for (String tagStr : jobTags1)
+//    {
+//      Assert.assertTrue(tmpJobTags.contains(tagStr));
+//      System.out.println("Found jobTag: " + tagStr);
+//    }
+    // ????????????????//
+    // TODO Verify notificationSubscriptions
+    // TODO: Filter is checked but not mechanisms
+//    List<NotificationSubscription> tSubscriptions = jobAttributes.getSubscriptions();
+//    Assert.assertNotNull(tSubscriptions, "Subscriptions list should not be null.");
+//    Assert.assertEquals(tSubscriptions.size(), notifList1.size(), "Wrong number of Subscriptions");
+//    var filtersFound = new ArrayList<String>();
+//    for (NotificationSubscription itemFound : tSubscriptions)
+//    {
+//      Assert.assertNotNull(itemFound.getFilter(), "Subscription filter should not be null.");
+//      filtersFound.add(itemFound.getFilter());
+//    }
+//    for (NotificationSubscription itemSeedItem : notificationSubscriptions)
+//    {
+//      Assert.assertTrue(filtersFound.contains(itemSeedItem.getFilter()),
+//              "List of subscriptions did not contain a filter: " + itemSeedItem.getFilter());
+//    }
     // Verify jobTags
     List<String> tmpJobTags = jobAttributes.getTags();
     Assert.assertNotNull(tmpJobTags, "jobTags value was null");
@@ -481,90 +624,11 @@ public final class Utils
       System.out.println("Found jobTag: " + tagStr);
     }
 
-    // ========== ParameterSet
-    ParameterSet parameterSet = jobAttributes.getParameterSet();
-    Assert.assertNotNull(parameterSet, "ParameterSet should not be null.");
-    // TODO Verify appArgs
-//    // TODO Arg value is checked but not arg metadata
-    List<ArgSpec> tmpArgs = parameterSet.getAppArgs();
-    Assert.assertNotNull(tmpArgs, "Fetched appArgs was null");
-    Assert.assertEquals(tmpArgs.size(), appArgs.size());
-    var argValuesFound = new ArrayList<String>();
-    for (ArgSpec itemFound : tmpArgs) {argValuesFound.add(itemFound.getArg());}
-    for (ArgSpec itemSeedItem : appArgs)
-    {
-      Assert.assertTrue(argValuesFound.contains(itemSeedItem.getArg()),
-              "List of appArgs did not contain an item with arg value: " + itemSeedItem.getArg());
-    }
-
-    // Verify containerArgs
-    // TODO: Check metadata
-    tmpArgs = parameterSet.getContainerArgs();
-    Assert.assertNotNull(tmpArgs, "Fetched containerArgs was null");
-    Assert.assertEquals(tmpArgs.size(), containerArgs.size());
-    argValuesFound = new ArrayList<>();
-    for (ArgSpec itemFound : tmpArgs) {argValuesFound.add(itemFound.getArg());}
-    for (ArgSpec itemSeedItem : containerArgs)
-    {
-      Assert.assertTrue(argValuesFound.contains(itemSeedItem.getArg()),
-              "List of containerArgs did not contain an item with arg value: " + itemSeedItem.getArg());
-    }
-
-    // Verify schedulerOptions
-    // TODO: Check metadata
-    tmpArgs = parameterSet.getSchedulerOptions();
-    Assert.assertNotNull(tmpArgs, "Fetched schedulerOptions was null");
-    Assert.assertEquals(tmpArgs.size(), schedulerOptions.size());
-    argValuesFound = new ArrayList<>();
-    for (ArgSpec itemFound : tmpArgs) {argValuesFound.add(itemFound.getArg());}
-    for (ArgSpec itemSeedItem : schedulerOptions)
-    {
-      Assert.assertTrue(argValuesFound.contains(itemSeedItem.getArg()),
-              "List of schedulerOptions did not contain an item with arg value: " + itemSeedItem.getArg());
-    }
-
-    // Verify envVariables
-    List<KeyValuePair> tmpEnvVariables = parameterSet.getEnvVariables();
-    Assert.assertNotNull(tmpEnvVariables, "ParameterSet envVariables value was null");
-    Assert.assertEquals(tmpEnvVariables.size(), envVariables.size(), "Wrong number of envVariables");
-    List<String> kvFoundList = new ArrayList<>();
-    for (KeyValuePair kv : tmpEnvVariables)
-    {
-      kvFoundList.add(kv.getKey() + "=" + kv.getValue());
-      System.out.println("Found envVariable: " + kv.getKey() + "=" + kv.getValue());
-    }
-    for (KeyValuePair kv : envVariables)
-    {
-      String kvStr = kv.getKey() + "=" + kv.getValue();
-      Assert.assertTrue(kvFoundList.contains(kvStr),
-              "List of envVariables did not contain an item with key=value of : " + kvStr);
-    }
-
-    // Verify archiveFilter includes and excludes
-    ParameterSetArchiveFilter archiveFilter = parameterSet.getArchiveFilter();
-    Assert.assertNotNull(archiveFilter, "ParameterSetArchiveFilter was null");
-    List<String> tmpFileList = archiveFilter.getIncludes();
-    Assert.assertNotNull(tmpFileList, "includes list from ParameterSetArchiveFilter was null");
-    Assert.assertEquals(tmpFileList.size(), archiveIncludes.size(), "Wrong number of archiveIncludes");
-    for (String tmpStr : archiveIncludes)
-    {
-      Assert.assertTrue(tmpFileList.contains(tmpStr));
-      System.out.println("Found archiveInclude: " + tmpStr);
-    }
-    tmpFileList = archiveFilter.getExcludes();
-    Assert.assertNotNull(tmpFileList, "excludes list from ParameterSetArchiveFilter was null");
-    Assert.assertEquals(tmpFileList.size(), archiveExcludes.size(), "Wrong number of archiveExcludes");
-    for (String tmpStr : archiveExcludes)
-    {
-      Assert.assertTrue(tmpFileList.contains(tmpStr));
-      System.out.println("Found archiveExclude: " + tmpStr);
-    }
-
     // Verify tags
     List<String> tmpTags = tmpApp.getTags();
     Assert.assertNotNull(tmpTags, "Tags value was null");
-    Assert.assertEquals(tmpTags.size(), tags1.size(), "Wrong number of tags");
-    for (String tagStr : tags1)
+    Assert.assertEquals(tmpTags.size(), tags.size(), "Wrong number of tags");
+    for (String tagStr : tags)
     {
       Assert.assertTrue(tmpTags.contains(tagStr));
       System.out.println("Found tag: " + tagStr);
@@ -574,7 +638,7 @@ public final class Utils
     System.out.println("Found notes: " + tmpNotesStr);
     JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(tmpNotesStr, JsonObject.class);
     Assert.assertNotNull(tmpNotes, "Fetched Notes should not be null.");
-    JsonObject origNotes = notes1JO;
+    JsonObject origNotes = notes;
     Assert.assertTrue(tmpNotes.has("project"));
     String projStr = origNotes.get("project").getAsString();
     Assert.assertEquals(tmpNotes.get("project").getAsString(), projStr);
@@ -616,7 +680,7 @@ public final class Utils
     Assert.assertEquals(tmpApp.getTenant(), tenantName);
     // Verify required attributes
     Assert.assertEquals(tmpApp.getId(), appId);
-    Assert.assertEquals(tmpApp.getVersion(), appVersion);
+    Assert.assertEquals(tmpApp.getVersion(), appVersion1);
     Assert.assertNotNull(tmpApp.getAppType());
     Assert.assertEquals(tmpApp.getAppType().name(), appTypeBatch.name());
     Assert.assertNotNull(tmpApp.getJobAttributes());
@@ -631,9 +695,9 @@ public final class Utils
     Assert.assertNull(tmpApp.getRuntimeOptions());
     Assert.assertEquals(tmpApp.getContainerImage(), defaultContainerImage);
     Assert.assertNotNull(tmpApp.getMaxJobs());
-    Assert.assertEquals(tmpApp.getMaxJobs().intValue(), maxJobsMAX);
+    Assert.assertEquals(tmpApp.getMaxJobs(), maxJobsMAX);
     Assert.assertNotNull(tmpApp.getMaxJobsPerUser());
-    Assert.assertEquals(tmpApp.getMaxJobsPerUser().intValue(), maxJobsPerUserMAX);
+    Assert.assertEquals(tmpApp.getMaxJobsPerUser(), maxJobsPerUserMAX);
     Assert.assertEquals(tmpApp.getStrictFileInputs(), Boolean.valueOf(defaultStrictFileInputs));
     Assert.assertNotNull(tmpApp.getTags());
     Assert.assertTrue(tmpApp.getTags().isEmpty());
@@ -704,5 +768,116 @@ public final class Utils
     rApp.setJobAttributes(app.getJobAttributes());
 
     return rApp;
+  }
+
+  // Verify that original list of AppArgs matches the fetched list
+  private static void verifyAppArgs(String argType, List<ArgSpec> origArgs, List<ArgSpec> fetchedArgs)
+  {
+    System.out.println("Verifying fetched AppArgs of type: " + argType);
+    Assert.assertNotNull(origArgs, "Orig AppArgs is null");
+    Assert.assertNotNull(fetchedArgs, "Fetched AppArgs is null");
+    Assert.assertEquals(fetchedArgs.size(), origArgs.size());
+    // Create hash maps of orig and fetched with name as key
+    var origMap = new HashMap<String, ArgSpec>();
+    var fetchedMap = new HashMap<String, ArgSpec>();
+    for (ArgSpec a : origArgs) origMap.put(a.getName(), a);
+    for (ArgSpec a : fetchedArgs) fetchedMap.put(a.getName(), a);
+    // Go through origMap and check properties
+    for (String argName : origMap.keySet())
+    {
+      Assert.assertTrue(fetchedMap.containsKey(argName), "Fetched list does not contain original item: " + argName);
+      ArgSpec fetchedArg = fetchedMap.get(argName);
+      ArgSpec origArg = origMap.get(argName);
+      System.out.println("Found fetched item: " + argName);
+      Assert.assertEquals(fetchedArg.getArg(), origArg.getArg());
+      Assert.assertEquals(fetchedArg .getDescription(), origArg.getDescription());
+      Assert.assertEquals(fetchedArg.getInputMode(), origArg.getInputMode());
+//      verifyKeyValuePairs(argType, fetchedArg.getMeta(), origArg.getMeta());
+    }
+  }
+
+  // Verify that original list of KeyValuePairs matches the fetched list
+  public static void verifyKeyValuePairs(String argType, List<KeyValuePair> origKVs, List<KeyValuePair> fetchedKVs)
+  {
+    System.out.println("Verifying fetched KV pairs of type: " + argType);
+    Assert.assertNotNull(origKVs, "Orig KVs is null");
+    Assert.assertNotNull(fetchedKVs, "Fetched KVs is null");
+    Assert.assertEquals(fetchedKVs.size(), origKVs.size());
+    // Create hash maps of orig and fetched with KV key as key
+    var origMap = new HashMap<String, KeyValuePair>();
+    var fetchedMap = new HashMap<String, KeyValuePair>();
+    for (KeyValuePair kv : origKVs) origMap.put(kv.getKey(), kv);
+    for (KeyValuePair kv : fetchedKVs) fetchedMap.put(kv.getKey(), kv);
+    // Go through origMap and check properties
+    for (String kvKey : origMap.keySet())
+    {
+      Assert.assertTrue(fetchedMap.containsKey(kvKey), "Fetched list does not contain original item: " + kvKey);
+      KeyValuePair fetchedKV = fetchedMap.get(kvKey);
+      System.out.println("Found fetched KeyValuePair: " + fetchedKV);
+      Assert.assertEquals(fetchedMap.get(kvKey).toString(), origMap.get(kvKey).toString());
+    }
+  }
+
+  // Verify that original list of FileInputs matches the fetched list
+  public static void verifyFileInputs(List<FileInput> origFileInputs, List<FileInput> fetchedFileInputs)
+  {
+    System.out.println("Verifying list of FileInputs");
+    Assert.assertNotNull(origFileInputs, "Orig FileInputs is null");
+    Assert.assertNotNull(fetchedFileInputs, "Fetched FileInputs is null");
+    Assert.assertEquals(fetchedFileInputs.size(), origFileInputs.size());
+    // Create hash maps of orig and fetched with name as key
+    var origMap = new HashMap<String, FileInput>();
+    var fetchedMap = new HashMap<String, FileInput>();
+    for (FileInput fi : origFileInputs) origMap.put(fi.getName(), fi);
+    for (FileInput fi : fetchedFileInputs) fetchedMap.put(fi.getName(), fi);
+    // Go through origMap and check properties
+    for (String fiName : origMap.keySet())
+    {
+      Assert.assertTrue(fetchedMap.containsKey(fiName), "Fetched list does not contain original item: " + fiName);
+      FileInput fetchedFileInput = fetchedMap.get(fiName);
+      FileInput origFileInput = origMap.get(fiName);
+      System.out.println("Found fetched FileInput: " + fiName);
+      Assert.assertEquals(fetchedFileInput.getSourceUrl(), origFileInput.getSourceUrl());
+      Assert.assertEquals(fetchedFileInput.getTargetPath(), origFileInput.getTargetPath());
+      Assert.assertEquals(fetchedFileInput.getDescription(), origFileInput.getDescription());
+      Assert.assertEquals(fetchedFileInput.getInputMode(), origFileInput.getInputMode());
+//      verifyKeyValuePairs("FileInput", fetchedFileInput.getMeta(), origFileInput.getMeta());
+    }
+  }
+
+  // Verify that original list of Subscriptions matches the fetched list
+  public static void verifySubscriptions(List<NotificationSubscription> origSubscriptions, List<NotificationSubscription> fetchedSubscriptions)
+  {
+    System.out.println("Verifying list of Subscriptions");
+    Assert.assertNotNull(origSubscriptions, "Orig Subscriptions is null");
+    Assert.assertNotNull(fetchedSubscriptions, "Fetched Subscriptions is null");
+    Assert.assertEquals(fetchedSubscriptions.size(), origSubscriptions.size());
+    var filtersFound = new ArrayList<String>();
+    for (NotificationSubscription itemFound : fetchedSubscriptions) {filtersFound.add(itemFound.getFilter());}
+    for (NotificationSubscription itemSeedItem : origSubscriptions)
+    {
+      System.out.println("Found fetched subscription with filter: " + itemSeedItem.getFilter());
+      Assert.assertTrue(filtersFound.contains(itemSeedItem.getFilter()),
+              "List of notificationSubscriptions did not contain an item with filter: " + itemSeedItem.getFilter());
+      System.out.println("Found fetched subscription with filter: " + itemSeedItem.getFilter());
+    }
+// TODO    // Create hash maps of orig and fetched with name as key
+//    var origMap = new HashMap<String, FileInput>();
+//    var fetchedMap = new HashMap<String, FileInput>();
+//    for (NotificationSubscription s : origSubscriptions) origMap.put(s.getName(), s);
+//    for (NotificationSubscription s : fetchedSubscriptions) fetchedMap.put(s.getName(), s);
+//    // Go through origMap and check properties
+//    for (String fiName : origMap.keySet())
+//    {
+//      Assert.assertTrue(fetchedMap.containsKey(fiName), "Fetched list does not contain original item: " + fiName);
+//      FileInput fetchedFileInput = fetchedMap.get(fiName);
+//      FileInput origFileInput = origMap.get(fiName);
+//      System.out.println("Found fetched FileInput: " + fiName);
+//      Assert.assertEquals(fetchedFileInput.getSourceUrl(), origFileInput.getSourceUrl());
+//      Assert.assertEquals(fetchedFileInput.getTargetPath(), origFileInput.getTargetPath());
+//      Assert.assertEquals(fetchedFileInput.getDescription(), origFileInput.getDescription());
+//      Assert.assertEquals(fetchedFileInput.getInputMode(), origFileInput.getInputMode());
+//      verifyKeyValuePairs("FileInput", fetchedFileInput.getMeta(), origFileInput.getMeta());
+//    }
   }
 }
