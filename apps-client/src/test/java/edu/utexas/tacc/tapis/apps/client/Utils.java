@@ -23,10 +23,11 @@ package edu.utexas.tacc.tapis.apps.client;
  */
 
 import com.google.gson.JsonObject;
+import edu.utexas.tacc.tapis.apps.client.gen.model.AppInputModeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.AppTypeEnum;
-import edu.utexas.tacc.tapis.apps.client.gen.model.ArgSpec;
-import edu.utexas.tacc.tapis.apps.client.gen.model.FileInput;
-import edu.utexas.tacc.tapis.apps.client.gen.model.InputModeEnum;
+import edu.utexas.tacc.tapis.apps.client.gen.model.AppArgSpec;
+import edu.utexas.tacc.tapis.apps.client.gen.model.AppFileInput;
+import edu.utexas.tacc.tapis.apps.client.gen.model.FileInputModeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.JobAttributes;
 import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.apps.client.gen.model.NotificationMechanism;
@@ -173,9 +174,13 @@ public final class Utils
   public static final Integer memoryMb2 = 64;
   public static final Integer maxMinutes1 = 10;
   public static final Integer maxMinutes2 = 20;
-  public static final InputModeEnum inputModeRequired = InputModeEnum.REQUIRED;
-  public static final InputModeEnum inputModeOptional = InputModeEnum.OPTIONAL;
-  public static final InputModeEnum inputModeFixed = InputModeEnum.FIXED;
+  public static final FileInputModeEnum inputModeRequired = FileInputModeEnum.REQUIRED;
+  public static final FileInputModeEnum inputModeOptional = FileInputModeEnum.OPTIONAL;
+  public static final FileInputModeEnum inputModeFixed = FileInputModeEnum.FIXED;
+  public static final AppInputModeEnum appInputModeRequired = AppInputModeEnum.REQUIRED;
+  public static final AppInputModeEnum appInputModeFixed = AppInputModeEnum.FIXED;
+  public static final AppInputModeEnum appInputModeIncludeOnDemand = AppInputModeEnum.INCLUDE_ON_DEMAND;
+  public static final AppInputModeEnum appInputModeIncludeByDefault = AppInputModeEnum.INCLUDE_BY_DEFAULT;
   public static final Boolean deletedFalse = false;
   public static final Instant createdNull = null;
   public static final Instant updatedNull = null;
@@ -210,25 +215,25 @@ public final class Utils
   public static final String src1B = "https://example.com/src1B";
   public static final List<KeyValuePair> kvPairsFin1A = new ArrayList<>(List.of(kv1a, kv1b, kv1c));
   public static final List<KeyValuePair> kvPairsFin1B = new ArrayList<>(List.of(kv1a, kv1b, kv1c));
-  public static final FileInput fin1A = new FileInput().name("fin1A").description("File input 1A")
+  public static final AppFileInput fin1A = new AppFileInput().name("fin1A").description("File input 1A")
                                                        .inputMode(inputModeRequired).autoMountLocal(autoMountLocalTrue)//.meta(kvPairsFin1A)
                                                        .sourceUrl(src1A).targetPath("/target1A");
-  public static final FileInput fin1B = new FileInput().name("finB1").description("File input 1B")
+  public static final AppFileInput fin1B = new AppFileInput().name("finB1").description("File input 1B")
                                                        .inputMode(inputModeOptional).autoMountLocal(autoMountLocalTrue)//.meta(kvPairsFin1B)
                                                        .sourceUrl(src1B).targetPath("/target1B");
-  public static final List<FileInput> fileInputs1 = new ArrayList<>(List.of(fin1A, fin1B));
+  public static final List<AppFileInput> fileInputs1 = new ArrayList<>(List.of(fin1A, fin1B));
 
   public static final String src2A = "https://example.com/src2A";
   public static final String src2B = "https://example.com/src2B";
   public static final List<KeyValuePair> kvPairsFin2A = new ArrayList<>(List.of(kv2a, kv2b, kv2c));
   public static final List<KeyValuePair> kvPairsFin2B = new ArrayList<>(List.of(kv2a, kv2b, kv2c));
-  public static final FileInput fin2A = new FileInput().name("fin2A").description("File input 2A")
+  public static final AppFileInput fin2A = new AppFileInput().name("fin2A").description("File input 2A")
           .inputMode(inputModeRequired).autoMountLocal(autoMountLocalTrue)//.meta(kvPairsFin2A)
           .sourceUrl(src2A).targetPath("/target2A");
-  public static final FileInput fin2B = new FileInput().name("fin2B").description("File input 2B")
+  public static final AppFileInput fin2B = new AppFileInput().name("fin2B").description("File input 2B")
           .inputMode(inputModeFixed).autoMountLocal(autoMountLocalTrue)//.meta(kvPairsFin2B)
           .sourceUrl(src2B).targetPath("/target2B");
-  public static final List<FileInput> fileInputs2 = new ArrayList<>(List.of(fin2A, fin2B));
+  public static final List<AppFileInput> fileInputs2 = new ArrayList<>(List.of(fin2A, fin2B));
 
   // NotificationSubscriptions
   public static final NotificationMechanism notifMech1Aa = new NotificationMechanism().mechanism(NotificationMechanismEnum.WEBHOOK).webhookURL("webhookUrl1Aa").emailAddress("emailAddress1Aa");
@@ -261,25 +266,25 @@ public final class Utils
   public static final List<NotificationSubscription> notifListNull = null;
 
 
-  public static final ArgSpec appArgA1 = (new ArgSpec()).name("appArgA1").arg("valueA1").description("App arg A1").inputMode(inputModeRequired);//.meta(metaKVPairs1);
-  public static final ArgSpec appArgB1 = (new ArgSpec()).name("appArgB1").arg("valueB1").description("App arg B1").inputMode(inputModeOptional);//.meta(metaKVPairs1);
-  public static final List<ArgSpec> appArgs1 = new ArrayList<>(List.of(appArgA1, appArgB1));
-  public static final ArgSpec containerArgA1 = (new ArgSpec()).name("containerArgA1").arg("valueA1").description("container arg A1").inputMode(inputModeRequired);//.meta(metaKVPairs1);
-  public static final ArgSpec containerArgB1 = (new ArgSpec()).name("containerArgB1").arg("valueB1").description("container arg B1").inputMode(inputModeOptional);//.meta(metaKVPairs1);
-  public static final List<ArgSpec> containerArgs1 = new ArrayList<>(List.of(containerArgA1, containerArgB1));
-  public static final ArgSpec schedulerOptionA1 = (new ArgSpec()).name("schedulerOptionA1").arg("valueA1").description("scheduler option A1").inputMode(inputModeRequired);//.meta(metaKVPairs1);
-  public static final ArgSpec schedulerOptionB1 = (new ArgSpec()).name("schedulerOptionB1").arg("valueB1").description("scheduler option B1").inputMode(inputModeOptional);//.meta(metaKVPairs1);
-  public static final List<ArgSpec> schedulerOptions1 = new ArrayList<>(List.of(schedulerOptionA1, schedulerOptionB1));
+  public static final AppArgSpec appArgA1 = (new AppArgSpec()).name("appArgA1").arg("valueA1").description("App arg A1").inputMode(appInputModeRequired);//.meta(metaKVPairs1);
+  public static final AppArgSpec appArgB1 = (new AppArgSpec()).name("appArgB1").arg("valueB1").description("App arg B1").inputMode(appInputModeFixed);//.meta(metaKVPairs1);
+  public static final List<AppArgSpec> appArgs1 = new ArrayList<>(List.of(appArgA1, appArgB1));
+  public static final AppArgSpec containerArgA1 = (new AppArgSpec()).name("containerArgA1").arg("valueA1").description("container arg A1").inputMode(appInputModeRequired);//.meta(metaKVPairs1);
+  public static final AppArgSpec containerArgB1 = (new AppArgSpec()).name("containerArgB1").arg("valueB1").description("container arg B1").inputMode(appInputModeFixed);//.meta(metaKVPairs1);
+  public static final List<AppArgSpec> containerArgs1 = new ArrayList<>(List.of(containerArgA1, containerArgB1));
+  public static final AppArgSpec schedulerOptionA1 = (new AppArgSpec()).name("schedulerOptionA1").arg("valueA1").description("scheduler option A1").inputMode(appInputModeRequired);//.meta(metaKVPairs1);
+  public static final AppArgSpec schedulerOptionB1 = (new AppArgSpec()).name("schedulerOptionB1").arg("valueB1").description("scheduler option B1").inputMode(appInputModeFixed);//.meta(metaKVPairs1);
+  public static final List<AppArgSpec> schedulerOptions1 = new ArrayList<>(List.of(schedulerOptionA1, schedulerOptionB1));
 
-  public static final ArgSpec appArgA2 = (new ArgSpec()).name("appArgA2").arg("valueA2").description("App arg A2").inputMode(inputModeRequired);//.meta(metaKVPairs2);
-  public static final ArgSpec appArgB2 = (new ArgSpec()).name("appArgB2").arg("valueB2").description("App arg B2").inputMode(inputModeOptional);//.meta(metaKVPairs2);
-  public static final List<ArgSpec> appArgs2 = new ArrayList<>(List.of(appArgA2, appArgB2));
-  public static final ArgSpec containerArgA2 = (new ArgSpec()).name("containerArgA2").arg("valueA2").description("container arg A2").inputMode(inputModeRequired);//.meta(metaKVPairs2);
-  public static final ArgSpec containerArgB2 = (new ArgSpec()).name("containerArgB2").arg("valueB2").description("container arg B2").inputMode(inputModeOptional);//.meta(metaKVPairs2);
-  public static final List<ArgSpec> containerArgs2 = new ArrayList<>(List.of(containerArgA2, containerArgB2));
-  public static final ArgSpec schedulerOptionA2 = (new ArgSpec()).name("schedulerOptionA2").arg("valueA2").description("scheduler option A2").inputMode(inputModeRequired);//.meta(metaKVPairs2);
-  public static final ArgSpec schedulerOptionB2 = (new ArgSpec()).name("schedulerOptionB2").arg("valueB2").description("scheduler option B2").inputMode(inputModeOptional);//.meta(metaKVPairs2);
-  public static final List<ArgSpec> schedulerOptions2 = new ArrayList<>(List.of(schedulerOptionA2, schedulerOptionB2));
+  public static final AppArgSpec appArgA2 = (new AppArgSpec()).name("appArgA2").arg("valueA2").description("App arg A2").inputMode(appInputModeRequired);//.meta(metaKVPairs2);
+  public static final AppArgSpec appArgB2 = (new AppArgSpec()).name("appArgB2").arg("valueB2").description("App arg B2").inputMode(appInputModeFixed);//.meta(metaKVPairs2);
+  public static final List<AppArgSpec> appArgs2 = new ArrayList<>(List.of(appArgA2, appArgB2));
+  public static final AppArgSpec containerArgA2 = (new AppArgSpec()).name("containerArgA2").arg("valueA2").description("container arg A2").inputMode(appInputModeRequired);//.meta(metaKVPairs2);
+  public static final AppArgSpec containerArgB2 = (new AppArgSpec()).name("containerArgB2").arg("valueB2").description("container arg B2").inputMode(appInputModeFixed);//.meta(metaKVPairs2);
+  public static final List<AppArgSpec> containerArgs2 = new ArrayList<>(List.of(containerArgA2, containerArgB2));
+  public static final AppArgSpec schedulerOptionA2 = (new AppArgSpec()).name("schedulerOptionA2").arg("valueA2").description("scheduler option A2").inputMode(appInputModeRequired);//.meta(metaKVPairs2);
+  public static final AppArgSpec schedulerOptionB2 = (new AppArgSpec()).name("schedulerOptionB2").arg("valueB2").description("scheduler option B2").inputMode(appInputModeFixed);//.meta(metaKVPairs2);
+  public static final List<AppArgSpec> schedulerOptions2 = new ArrayList<>(List.of(schedulerOptionA2, schedulerOptionB2));
 
   // Strings for searches involving special characters
   public static final String specialChar7Str = ",()~*!\\"; // These 7 may need escaping
@@ -471,10 +476,10 @@ public final class Utils
                                          List<RuntimeOptionEnum> runtimeOptions, Integer maxJobs, Integer maxJobsPerUser,
                                          Boolean strictFileInputs, Boolean dynamicExecSystem,
                                          List<String> execSystemConstraints, Boolean archiveOnAppError,
-                                         List<ArgSpec> appArgs, List<ArgSpec> containerArgs,List<ArgSpec> schedulerOptions,
+                                         List<AppArgSpec> appArgs, List<AppArgSpec> containerArgs,List<AppArgSpec> schedulerOptions,
                                          List<KeyValuePair> envVariables, ParameterSetArchiveFilter archiveFilter,
                                          Integer nodeCount, Integer coresPerNode, Integer memoryMb, Integer maxMinutes,
-                                         List<FileInput> fileInputs, List<String> jobTags,
+                                         List<AppFileInput> fileInputs, List<String> jobTags,
                                          List<NotificationSubscription> notificationSubscriptions,
                                          List<String> tags, JsonObject notes)
   {
@@ -771,23 +776,23 @@ public final class Utils
   }
 
   // Verify that original list of AppArgs matches the fetched list
-  private static void verifyAppArgs(String argType, List<ArgSpec> origArgs, List<ArgSpec> fetchedArgs)
+  private static void verifyAppArgs(String argType, List<AppArgSpec> origArgs, List<AppArgSpec> fetchedArgs)
   {
     System.out.println("Verifying fetched AppArgs of type: " + argType);
     Assert.assertNotNull(origArgs, "Orig AppArgs is null");
     Assert.assertNotNull(fetchedArgs, "Fetched AppArgs is null");
     Assert.assertEquals(fetchedArgs.size(), origArgs.size());
     // Create hash maps of orig and fetched with name as key
-    var origMap = new HashMap<String, ArgSpec>();
-    var fetchedMap = new HashMap<String, ArgSpec>();
-    for (ArgSpec a : origArgs) origMap.put(a.getName(), a);
-    for (ArgSpec a : fetchedArgs) fetchedMap.put(a.getName(), a);
+    var origMap = new HashMap<String, AppArgSpec>();
+    var fetchedMap = new HashMap<String, AppArgSpec>();
+    for (AppArgSpec a : origArgs) origMap.put(a.getName(), a);
+    for (AppArgSpec a : fetchedArgs) fetchedMap.put(a.getName(), a);
     // Go through origMap and check properties
     for (String argName : origMap.keySet())
     {
       Assert.assertTrue(fetchedMap.containsKey(argName), "Fetched list does not contain original item: " + argName);
-      ArgSpec fetchedArg = fetchedMap.get(argName);
-      ArgSpec origArg = origMap.get(argName);
+      AppArgSpec fetchedArg = fetchedMap.get(argName);
+      AppArgSpec origArg = origMap.get(argName);
       System.out.println("Found fetched item: " + argName);
       Assert.assertEquals(fetchedArg.getArg(), origArg.getArg());
       Assert.assertEquals(fetchedArg .getDescription(), origArg.getDescription());
@@ -819,23 +824,23 @@ public final class Utils
   }
 
   // Verify that original list of FileInputs matches the fetched list
-  public static void verifyFileInputs(List<FileInput> origFileInputs, List<FileInput> fetchedFileInputs)
+  public static void verifyFileInputs(List<AppFileInput> origFileInputs, List<AppFileInput> fetchedFileInputs)
   {
     System.out.println("Verifying list of FileInputs");
     Assert.assertNotNull(origFileInputs, "Orig FileInputs is null");
     Assert.assertNotNull(fetchedFileInputs, "Fetched FileInputs is null");
     Assert.assertEquals(fetchedFileInputs.size(), origFileInputs.size());
     // Create hash maps of orig and fetched with name as key
-    var origMap = new HashMap<String, FileInput>();
-    var fetchedMap = new HashMap<String, FileInput>();
-    for (FileInput fi : origFileInputs) origMap.put(fi.getName(), fi);
-    for (FileInput fi : fetchedFileInputs) fetchedMap.put(fi.getName(), fi);
+    var origMap = new HashMap<String, AppFileInput>();
+    var fetchedMap = new HashMap<String, AppFileInput>();
+    for (AppFileInput fi : origFileInputs) origMap.put(fi.getName(), fi);
+    for (AppFileInput fi : fetchedFileInputs) fetchedMap.put(fi.getName(), fi);
     // Go through origMap and check properties
     for (String fiName : origMap.keySet())
     {
       Assert.assertTrue(fetchedMap.containsKey(fiName), "Fetched list does not contain original item: " + fiName);
-      FileInput fetchedFileInput = fetchedMap.get(fiName);
-      FileInput origFileInput = origMap.get(fiName);
+      AppFileInput fetchedFileInput = fetchedMap.get(fiName);
+      AppFileInput origFileInput = origMap.get(fiName);
       System.out.println("Found fetched FileInput: " + fiName);
       Assert.assertEquals(fetchedFileInput.getSourceUrl(), origFileInput.getSourceUrl());
       Assert.assertEquals(fetchedFileInput.getTargetPath(), origFileInput.getTargetPath());
@@ -862,16 +867,16 @@ public final class Utils
       System.out.println("Found fetched subscription with filter: " + itemSeedItem.getFilter());
     }
 // TODO    // Create hash maps of orig and fetched with name as key
-//    var origMap = new HashMap<String, FileInput>();
-//    var fetchedMap = new HashMap<String, FileInput>();
+//    var origMap = new HashMap<String, AppFileInput>();
+//    var fetchedMap = new HashMap<String, AppFileInput>();
 //    for (NotificationSubscription s : origSubscriptions) origMap.put(s.getName(), s);
 //    for (NotificationSubscription s : fetchedSubscriptions) fetchedMap.put(s.getName(), s);
 //    // Go through origMap and check properties
 //    for (String fiName : origMap.keySet())
 //    {
 //      Assert.assertTrue(fetchedMap.containsKey(fiName), "Fetched list does not contain original item: " + fiName);
-//      FileInput fetchedFileInput = fetchedMap.get(fiName);
-//      FileInput origFileInput = origMap.get(fiName);
+//      AppFileInput fetchedFileInput = fetchedMap.get(fiName);
+//      AppFileInput origFileInput = origMap.get(fiName);
 //      System.out.println("Found fetched FileInput: " + fiName);
 //      Assert.assertEquals(fetchedFileInput.getSourceUrl(), origFileInput.getSourceUrl());
 //      Assert.assertEquals(fetchedFileInput.getTargetPath(), origFileInput.getTargetPath());
