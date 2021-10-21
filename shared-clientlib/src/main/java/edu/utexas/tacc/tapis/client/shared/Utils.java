@@ -23,7 +23,7 @@ public class Utils
   public static final boolean DEFAULT_COMPUTETOTAL = false;
   public static final String DEFAULT_SELECT_ALL = "allAttributes";
   public static final String DEFAULT_SELECT_SUMMARY = "summaryAttributes";
-  public static final Boolean DEFAULT_SKIP_CREDENTIAL_CHECK = true;
+  public static final Boolean DEFAULT_SKIP_CREDENTIAL_CHECK = false;
 
   // Default target site for service JWTs
   public static final String DEFAULT_TARGET_SITE = "tacc";
