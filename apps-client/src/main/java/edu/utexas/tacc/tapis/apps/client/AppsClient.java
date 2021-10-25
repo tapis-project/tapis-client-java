@@ -57,7 +57,7 @@ public class AppsClient implements ITapisClient
 
   // Defaults
   public static final boolean DEFAULT_STRICT_FILE_INPUTS = false;
-  public static final boolean DEFAULT_FILE_INPUT_IN_PLACE = false;
+  public static final boolean DEFAULT_FILE_INPUT_AUTO_MOUNT_LOCAL = true;
   public static final int DEFAULT_MAX_JOBS = Integer.MAX_VALUE;
 
   // ************************************************************************
