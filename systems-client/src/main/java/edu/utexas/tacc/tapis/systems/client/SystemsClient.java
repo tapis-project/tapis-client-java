@@ -890,6 +890,7 @@ public class SystemsClient implements ITapisClient
     else if (notes instanceof String) rSys.notes(ClientTapisGsonUtils.getGson().fromJson((String) notes, JsonObject.class));
     else if (notes instanceof JsonObject) rSys.notes(notes);
     else rSys.notes(null);
+    rSys.importRefId(sys.getImportRefId());
     return rSys;
   }
 
@@ -924,6 +925,7 @@ public class SystemsClient implements ITapisClient
     else if (notes instanceof String) rSys.notes(ClientTapisGsonUtils.getGson().fromJson((String) notes, JsonObject.class));
     else if (notes instanceof JsonObject) rSys.notes(notes);
     else rSys.notes(null);
+    rSys.importRefId(sys.getImportRefId());
     return rSys;
   }
 
