@@ -23,6 +23,7 @@ package edu.utexas.tacc.tapis.apps.client;
  */
 
 import com.google.gson.JsonObject;
+import edu.utexas.tacc.tapis.apps.client.gen.model.AppFileInputArray;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ArgInputModeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.AppTypeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.AppArgSpec;
@@ -103,6 +104,12 @@ public final class Utils
   public static final Integer defaultMaxJobsPerUser = 0;
   public static final Boolean defaultStrictFileInputs = false;
   public static final Boolean defaultDynamicExecSystem = false;
+  public static final Boolean defaultArchiveOnAppError = true;
+  public static final Integer defaultNodeCount = 1;
+  public static final Integer defaultCoresPerNode = 1;
+  public static final Integer defaultMemoryMB = 100;
+  public static final Integer defaultMaxMinutes = 10;
+  public static final Boolean defaultIncludeLaunchFiles = true;
 
   public static final List<String> tags1 = Arrays.asList("value1", "value2", "a",
           "Long tag (1 3 2) special chars [_ $ - & * % @ + = ! ^ ? < > , . ( ) { } / \\ | ]. Backslashes must be escaped.");
@@ -177,14 +184,18 @@ public final class Utils
   public static final FileInputModeEnum inputModeRequired = FileInputModeEnum.REQUIRED;
   public static final FileInputModeEnum inputModeOptional = FileInputModeEnum.OPTIONAL;
   public static final FileInputModeEnum inputModeFixed = FileInputModeEnum.FIXED;
-  public static final ArgInputModeEnum appInputModeRequired = ArgInputModeEnum.REQUIRED;
-  public static final ArgInputModeEnum appInputModeFixed = ArgInputModeEnum.FIXED;
+  public static final FileInputModeEnum defaultFileInputMode = FileInputModeEnum.OPTIONAL;
+  public static final ArgInputModeEnum argInputModeRequired = ArgInputModeEnum.REQUIRED;
+  public static final ArgInputModeEnum argInputModeFixed = ArgInputModeEnum.FIXED;
   public static final ArgInputModeEnum appInputModeIncludeOnDemand = ArgInputModeEnum.INCLUDE_ON_DEMAND;
   public static final ArgInputModeEnum appInputModeIncludeByDefault = ArgInputModeEnum.INCLUDE_BY_DEFAULT;
+  public static final ArgInputModeEnum defaultArgInputMode = ArgInputModeEnum.INCLUDE_ON_DEMAND;
   public static final Boolean deletedFalse = false;
   public static final Instant createdNull = null;
   public static final Instant updatedNull = null;
   public static final Boolean autoMountLocalTrue = true;
+  public static final Boolean defaultAutoMountLocal = true;
+  public static final String defaultKeyValuePairValue = "";
 
 //  public static final List<KeyValuePair> metaKVPairs1 = Arrays.asList(new KeyValuePair().key("metaKey1A").value("metaVal1A"),
 //                                                                     new KeyValuePair().key("metaKey1B").value("metaVal1B"));
@@ -199,6 +210,9 @@ public final class Utils
   public static final KeyValuePair kv2b = new KeyValuePair().key("HOME2").value("/home/testuser2");
   public static final KeyValuePair kv2c = new KeyValuePair().key("TMP2").value("/tmp2");
   public static final List<KeyValuePair> envVariables2 = new ArrayList<>(List.of(kv2a, kv2b, kv2c));
+  public static final KeyValuePair kvMin = new KeyValuePair().key("keyMin");
+  public static final List<KeyValuePair> envVariablesMin = new ArrayList<>(List.of(kvMin));
+
   public static final List<String> archiveIncludes1 = Arrays.asList("/archiveInclude1A", "/archiveInclude1B");
   public static final List<String> archiveExcludes1 = Arrays.asList("/archiveExclude1A", "/archiveExclude1B");
   public static final List<String> archiveIncludes2 = Arrays.asList("/archiveInclude2A", "/archiveInclude2B");
@@ -207,6 +221,7 @@ public final class Utils
   public static final Boolean includeLaunchFilesFalse = false;
   public static final ParameterSetArchiveFilter archiveFilter1 = new ParameterSetArchiveFilter().includes(archiveIncludes1).excludes(archiveExcludes1).includeLaunchFiles(includeLaunchFilesTrue);
   public static final ParameterSetArchiveFilter archiveFilter2 = new ParameterSetArchiveFilter().includes(archiveIncludes2).excludes(archiveExcludes2).includeLaunchFiles(includeLaunchFilesFalse);
+  public static final ParameterSetArchiveFilter archiveFilterMin = new ParameterSetArchiveFilter();
 
   public static final List<String> jobTags1 = Arrays.asList("jobtag1A", "jobtag1B");
   public static final List<String> jobTags2 = Arrays.asList("jobtag2A", "jobtag2B");
@@ -223,6 +238,14 @@ public final class Utils
                                                        .sourceUrl(src1B).targetPath("/target1B");
   public static final List<AppFileInput> fileInputs1 = new ArrayList<>(List.of(fin1A, fin1B));
 
+  public static final List<String> srcUrls1A = new ArrayList<>(List.of("https://example.com/src1Aa", "https://example.com/src1Ab"));
+  public static final List<String> srcUrls1B = new ArrayList<>(List.of("https://example.com/src1Ba", "https://example.com/src1Bb"));
+  public static final AppFileInputArray fia1A = new AppFileInputArray().name("fia1A").description("File input array 1A")
+          .inputMode(inputModeRequired).targetDir("/targetDir1A").sourceUrls(srcUrls1A);
+  public static final AppFileInputArray fia1B = new AppFileInputArray().name("fia1B").description("File input array 1B")
+          .inputMode(inputModeFixed).targetDir("/targetDir1B").sourceUrls(srcUrls1B);
+  public static final List<AppFileInputArray> fileInputArrays1 = new ArrayList<>(List.of(fia1A, fia1B));
+
   public static final String src2A = "https://example.com/src2A";
   public static final String src2B = "https://example.com/src2B";
   public static final List<KeyValuePair> kvPairsFin2A = new ArrayList<>(List.of(kv2a, kv2b, kv2c));
@@ -234,6 +257,20 @@ public final class Utils
           .inputMode(inputModeFixed).autoMountLocal(autoMountLocalTrue)//.meta(kvPairsFin2B)
           .sourceUrl(src2B).targetPath("/target2B");
   public static final List<AppFileInput> fileInputs2 = new ArrayList<>(List.of(fin2A, fin2B));
+
+  public static final List<String> srcUrls2A = new ArrayList<>(List.of("https://example.com/src2Aa", "https://example.com/src2Ab"));
+  public static final List<String> srcUrls2B = new ArrayList<>(List.of("https://example.com/src2Ba", "https://example.com/src2Bb"));
+  public static final AppFileInputArray fia2A = new AppFileInputArray().name("fia2A").description("File input array 2A")
+          .inputMode(inputModeRequired).targetDir("/targetDir2A").sourceUrls(srcUrls2A);
+  public static final AppFileInputArray fia2B = new AppFileInputArray().name("fia2B").description("File input array 2B")
+          .inputMode(inputModeFixed).targetDir("/targetDir2B").sourceUrls(srcUrls2B);
+  public static final List<AppFileInputArray> fileInputArrays2 = new ArrayList<>(List.of(fia2A, fia2B));
+
+  public static final AppFileInput finMin = new AppFileInput().name("finMin").targetPath("/targetMin");
+  public static final List<AppFileInput> fileInputsMin = new ArrayList<>(List.of(finMin));
+
+  public static final AppFileInputArray fiaMin = new AppFileInputArray().name("fiaMin").targetDir("/targetDirMin");
+  public static final List<AppFileInputArray> fileInputArraysMin = new ArrayList<>(List.of(fiaMin));
 
   // NotificationSubscriptions
   public static final NotificationMechanism notifMech1Aa = new NotificationMechanism().mechanism(NotificationMechanismEnum.WEBHOOK).webhookURL("webhookUrl1Aa").emailAddress("emailAddress1Aa");
@@ -265,26 +302,32 @@ public final class Utils
   public static final List<NotificationSubscription> notifList2 = new ArrayList<>(List.of(notif2A, notif2B));
   public static final List<NotificationSubscription> notifListNull = null;
 
-
-  public static final AppArgSpec appArgA1 = (new AppArgSpec()).name("appArgA1").arg("valueA1").description("App arg A1").inputMode(appInputModeRequired);//.meta(metaKVPairs1);
-  public static final AppArgSpec appArgB1 = (new AppArgSpec()).name("appArgB1").arg("valueB1").description("App arg B1").inputMode(appInputModeFixed);//.meta(metaKVPairs1);
+  public static final AppArgSpec appArgA1 = (new AppArgSpec()).name("appArgA1").arg("valueA1").description("App arg A1").inputMode(argInputModeRequired);//.meta(metaKVPairs1);
+  public static final AppArgSpec appArgB1 = (new AppArgSpec()).name("appArgB1").arg("valueB1").description("App arg B1").inputMode(argInputModeFixed);//.meta(metaKVPairs1);
   public static final List<AppArgSpec> appArgs1 = new ArrayList<>(List.of(appArgA1, appArgB1));
-  public static final AppArgSpec containerArgA1 = (new AppArgSpec()).name("containerArgA1").arg("valueA1").description("container arg A1").inputMode(appInputModeRequired);//.meta(metaKVPairs1);
-  public static final AppArgSpec containerArgB1 = (new AppArgSpec()).name("containerArgB1").arg("valueB1").description("container arg B1").inputMode(appInputModeFixed);//.meta(metaKVPairs1);
+  public static final AppArgSpec containerArgA1 = (new AppArgSpec()).name("containerArgA1").arg("valueA1").description("container arg A1").inputMode(argInputModeRequired);//.meta(metaKVPairs1);
+  public static final AppArgSpec containerArgB1 = (new AppArgSpec()).name("containerArgB1").arg("valueB1").description("container arg B1").inputMode(argInputModeFixed);//.meta(metaKVPairs1);
   public static final List<AppArgSpec> containerArgs1 = new ArrayList<>(List.of(containerArgA1, containerArgB1));
-  public static final AppArgSpec schedulerOptionA1 = (new AppArgSpec()).name("schedulerOptionA1").arg("valueA1").description("scheduler option A1").inputMode(appInputModeRequired);//.meta(metaKVPairs1);
-  public static final AppArgSpec schedulerOptionB1 = (new AppArgSpec()).name("schedulerOptionB1").arg("valueB1").description("scheduler option B1").inputMode(appInputModeFixed);//.meta(metaKVPairs1);
+  public static final AppArgSpec schedulerOptionA1 = (new AppArgSpec()).name("schedulerOptionA1").arg("valueA1").description("scheduler option A1").inputMode(argInputModeRequired);//.meta(metaKVPairs1);
+  public static final AppArgSpec schedulerOptionB1 = (new AppArgSpec()).name("schedulerOptionB1").arg("valueB1").description("scheduler option B1").inputMode(argInputModeFixed);//.meta(metaKVPairs1);
   public static final List<AppArgSpec> schedulerOptions1 = new ArrayList<>(List.of(schedulerOptionA1, schedulerOptionB1));
 
-  public static final AppArgSpec appArgA2 = (new AppArgSpec()).name("appArgA2").arg("valueA2").description("App arg A2").inputMode(appInputModeRequired);//.meta(metaKVPairs2);
-  public static final AppArgSpec appArgB2 = (new AppArgSpec()).name("appArgB2").arg("valueB2").description("App arg B2").inputMode(appInputModeFixed);//.meta(metaKVPairs2);
+  public static final AppArgSpec appArgA2 = (new AppArgSpec()).name("appArgA2").arg("valueA2").description("App arg A2").inputMode(argInputModeRequired);//.meta(metaKVPairs2);
+  public static final AppArgSpec appArgB2 = (new AppArgSpec()).name("appArgB2").arg("valueB2").description("App arg B2").inputMode(argInputModeFixed);//.meta(metaKVPairs2);
   public static final List<AppArgSpec> appArgs2 = new ArrayList<>(List.of(appArgA2, appArgB2));
-  public static final AppArgSpec containerArgA2 = (new AppArgSpec()).name("containerArgA2").arg("valueA2").description("container arg A2").inputMode(appInputModeRequired);//.meta(metaKVPairs2);
-  public static final AppArgSpec containerArgB2 = (new AppArgSpec()).name("containerArgB2").arg("valueB2").description("container arg B2").inputMode(appInputModeFixed);//.meta(metaKVPairs2);
+  public static final AppArgSpec containerArgA2 = (new AppArgSpec()).name("containerArgA2").arg("valueA2").description("container arg A2").inputMode(argInputModeRequired);//.meta(metaKVPairs2);
+  public static final AppArgSpec containerArgB2 = (new AppArgSpec()).name("containerArgB2").arg("valueB2").description("container arg B2").inputMode(argInputModeFixed);//.meta(metaKVPairs2);
   public static final List<AppArgSpec> containerArgs2 = new ArrayList<>(List.of(containerArgA2, containerArgB2));
-  public static final AppArgSpec schedulerOptionA2 = (new AppArgSpec()).name("schedulerOptionA2").arg("valueA2").description("scheduler option A2").inputMode(appInputModeRequired);//.meta(metaKVPairs2);
-  public static final AppArgSpec schedulerOptionB2 = (new AppArgSpec()).name("schedulerOptionB2").arg("valueB2").description("scheduler option B2").inputMode(appInputModeFixed);//.meta(metaKVPairs2);
+  public static final AppArgSpec schedulerOptionA2 = (new AppArgSpec()).name("schedulerOptionA2").arg("valueA2").description("scheduler option A2").inputMode(argInputModeRequired);//.meta(metaKVPairs2);
+  public static final AppArgSpec schedulerOptionB2 = (new AppArgSpec()).name("schedulerOptionB2").arg("valueB2").description("scheduler option B2").inputMode(argInputModeFixed);//.meta(metaKVPairs2);
   public static final List<AppArgSpec> schedulerOptions2 = new ArrayList<>(List.of(schedulerOptionA2, schedulerOptionB2));
+
+  public static final AppArgSpec appArgMin = (new AppArgSpec()).name("appArgMin");
+  public static final List<AppArgSpec> appArgsMin = new ArrayList<>(List.of(appArgMin));
+  public static final AppArgSpec containerArgMin = (new AppArgSpec()).name("containerArgMin");
+  public static final List<AppArgSpec> containerArgsMin = new ArrayList<>(List.of(containerArgMin));
+  public static final AppArgSpec schedulerOptionMin = (new AppArgSpec()).name("schedulerOptionMin");
+  public static final List<AppArgSpec> schedulerOptionsMin = new ArrayList<>(List.of(schedulerOptionMin));
 
   // Strings for searches involving special characters
   public static final String specialChar7Str = ",()~*!\\"; // These 7 may need escaping
@@ -401,6 +444,7 @@ public final class Utils
     jobAttrs.setParameterSet(parameterSet);
 
     jobAttrs.setFileInputs(fileInputs1);
+    jobAttrs.setFileInputArrays(fileInputArrays1);
     jobAttrs.setNodeCount(nodeCount1);
     jobAttrs.setCoresPerNode(coresPerNode1);
     jobAttrs.setMemoryMB(memoryMb1);
@@ -451,6 +495,53 @@ public final class Utils
   }
 
   /**
+   * Create an application using minimal attributes plus:
+   *   jobAttrs->(fileInput, fileInputArray),
+   *   jobAttrs->parameterSet->(appArg, containerArg, schedulerOption, envVariable->keyValPair, archiveFilter)
+   * In simplest case these are required: id, version, appType, containerImage, execSystemId
+   * Use attributes from a string array.
+   *    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=appType, 5=ownerUser1,
+   *              6=runtime, 7=runtimeVersion, 8=containerImage, 9=jobDescription,
+   *              10=execSystemId, 11=execSystemExecDir, 12=execSystemInputDir, 13=execSystemOutputDir,
+   *              14=execSystemLogicalQueue, 15=archiveSystemId, 16=archiveSystemDir};
+   *
+   * @param clt - Apps client
+   * @param app - Array of attributes that can be represented as strings.
+   * @return Response from the createApp client call
+   * @throws TapisClientException - on error
+   */
+  public static String createAppMinimal2(AppsClient clt, String[] app) throws TapisClientException
+  {
+    ReqCreateApp rApp = new ReqCreateApp();
+    // Id, version and type are always required
+    rApp.setId(app[1]);
+    rApp.setVersion(app[2]);
+    rApp.setAppType(appTypeBatch);
+    // Containerized so container image must be set. NOTE: currently only containerized supported
+    rApp.setContainerImage(defaultContainerImage);
+    // === Start Job Attributes
+    JobAttributes jobAttrs = new JobAttributes();
+    // dynamiceExecSystem defaults to false so execSystemId must be set. This is the simplest minimal App
+    jobAttrs.setExecSystemId(app[10]);
+    // Minimal fileInput, fileInputArray, appArg, etc.
+    jobAttrs.setFileInputs(fileInputsMin);
+    jobAttrs.setFileInputArrays(fileInputArraysMin);
+
+    ParameterSet parameterSet = new ParameterSet();
+    parameterSet.setAppArgs(appArgsMin);
+    parameterSet.setContainerArgs(containerArgsMin);
+    parameterSet.setSchedulerOptions(schedulerOptionsMin);
+    parameterSet.setEnvVariables(envVariablesMin);
+    parameterSet.setArchiveFilter(archiveFilterMin);
+
+    jobAttrs.setParameterSet(parameterSet);
+    rApp.setJobAttributes(jobAttrs);
+
+    // Use client to create the app
+    return clt.createApp(rApp);
+  }
+
+  /**
    * Create an application based on attributes from a TapisApp.
    *
    * @param clt - Apps client
@@ -479,8 +570,8 @@ public final class Utils
                                          List<AppArgSpec> appArgs, List<AppArgSpec> containerArgs,List<AppArgSpec> schedulerOptions,
                                          List<KeyValuePair> envVariables, ParameterSetArchiveFilter archiveFilter,
                                          Integer nodeCount, Integer coresPerNode, Integer memoryMb, Integer maxMinutes,
-                                         List<AppFileInput> fileInputs, List<String> jobTags,
-                                         List<NotificationSubscription> notificationSubscriptions,
+                                         List<AppFileInput> fileInputs, List<AppFileInputArray> fileInputArrays,
+                                         List<String> jobTags, List<NotificationSubscription> notificationSubscriptions,
                                          List<String> tags, JsonObject notes)
   {
 //    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=appType, 5=ownerUser1,
@@ -567,8 +658,9 @@ public final class Utils
       System.out.println("Found archiveExclude: " + archiveExcludeStr);
     }
 
-    // Verify file inputs
+    // Verify file inputs and file input arrays
     verifyFileInputs(fileInputs, jobAttributes.getFileInputs());
+    verifyFileInputArrays(fileInputArrays, jobAttributes.getFileInputArrays());
 
     Assert.assertEquals(jobAttributes.getNodeCount(), nodeCount);
     Assert.assertEquals(jobAttributes.getCoresPerNode(), coresPerNode);
@@ -724,14 +816,12 @@ public final class Utils
     Assert.assertTrue(jobAttrs.getArchiveOnAppError());
     Assert.assertNotNull(jobAttrs.getFileInputs());
     Assert.assertTrue(jobAttrs.getFileInputs().isEmpty());
-    Assert.assertNotNull(jobAttrs.getNodeCount());
-    Assert.assertEquals(jobAttrs.getNodeCount().intValue(), 1);
-    Assert.assertNotNull(jobAttrs.getCoresPerNode());
-    Assert.assertEquals(jobAttrs.getCoresPerNode().intValue(), 1);
-    Assert.assertNotNull(jobAttrs.getMemoryMB());
-    Assert.assertEquals(jobAttrs.getMemoryMB().intValue(), 100);
-    Assert.assertNotNull(jobAttrs.getMaxMinutes());
-    Assert.assertEquals(jobAttrs.getMaxMinutes().intValue(), 10);
+    Assert.assertNotNull(jobAttrs.getFileInputArrays());
+    Assert.assertTrue(jobAttrs.getFileInputArrays().isEmpty());
+    Assert.assertEquals(jobAttrs.getNodeCount(), defaultNodeCount);
+    Assert.assertEquals(jobAttrs.getCoresPerNode(), defaultCoresPerNode);
+    Assert.assertEquals(jobAttrs.getMemoryMB(), defaultMemoryMB);
+    Assert.assertEquals(jobAttrs.getMaxMinutes(), defaultMaxMinutes);
     Assert.assertNotNull(jobAttrs.getSubscriptions());
     Assert.assertTrue(jobAttrs.getSubscriptions().isEmpty());
     Assert.assertNotNull(jobAttrs.getTags());
@@ -752,10 +842,113 @@ public final class Utils
     Assert.assertTrue(archiveFilter.getIncludes().isEmpty());
     Assert.assertNotNull(archiveFilter.getExcludes());
     Assert.assertTrue(archiveFilter.getExcludes().isEmpty());
-    Assert.assertNotNull(archiveFilter.getIncludeLaunchFiles());
-    Assert.assertTrue(archiveFilter.getIncludeLaunchFiles());
+    Assert.assertEquals(archiveFilter.getIncludeLaunchFiles(), defaultIncludeLaunchFiles);
   }
 
+  /**
+   * Verify expected defaults are found for testCreateAndGetAppMinimal2
+   //    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=appType, 5=ownerUser1,
+   //              6=runtime, 7=runtimeVersion, 8=containerImage, 9=jobDescription,
+   //              10=execSystemId, 11=execSystemExecDir, 12=execSystemInputDir, 13=execSystemOutputDir,
+   //              14=execSystemLogicalQueue, 15=archiveSystemId, 16=archiveSystemDir};
+   String[] app0 = {tenantName, appId, appVersion, "description "+suffix, appTypeBatch.name(), ownerUser1,
+   runtime.name(), runtimeVersion+suffix, containerImage+suffix, jobDescription+suffix,
+   execSystemId, execSystemExecDir+suffix, execSystemInputDir+suffix, execSystemOutputDir+suffix,
+   execSystemLogicalQueue, archiveSystemId, archiveSystemDir+suffix};
+   * @param tmpApp - app retrieved from the service
+   */
+  public static void verifyAppDefaults2(TapisApp tmpApp, String appId)
+  {
+    Assert.assertEquals(tmpApp.getTenant(), tenantName);
+    // Verify required attributes
+    Assert.assertEquals(tmpApp.getId(), appId);
+    Assert.assertEquals(tmpApp.getVersion(), appVersion1);
+    Assert.assertNotNull(tmpApp.getAppType());
+    Assert.assertEquals(tmpApp.getAppType().name(), appTypeBatch.name());
+    Assert.assertNotNull(tmpApp.getJobAttributes());
+
+    // Verify optional attributes have been set to defaults
+    // Owner should have defaulted to user who created the system
+    Assert.assertEquals(tmpApp.getOwner(), ownerUser1);
+    Assert.assertEquals(tmpApp.getDescription(), defaultDescription);
+    Assert.assertEquals(tmpApp.getEnabled(), Boolean.valueOf(defaultIsEnabled));
+    Assert.assertEquals(tmpApp.getRuntime(), defaultRuntime);
+    Assert.assertEquals(tmpApp.getRuntimeVersion(), defaultRuntimeVersion);
+    Assert.assertNull(tmpApp.getRuntimeOptions());
+    Assert.assertEquals(tmpApp.getContainerImage(), defaultContainerImage);
+    Assert.assertNotNull(tmpApp.getMaxJobs());
+    Assert.assertEquals(tmpApp.getMaxJobs(), maxJobsMAX);
+    Assert.assertNotNull(tmpApp.getMaxJobsPerUser());
+    Assert.assertEquals(tmpApp.getMaxJobsPerUser(), maxJobsPerUserMAX);
+    Assert.assertEquals(tmpApp.getStrictFileInputs(), Boolean.valueOf(defaultStrictFileInputs));
+    Assert.assertNotNull(tmpApp.getTags());
+    Assert.assertTrue(tmpApp.getTags().isEmpty());
+    Assert.assertNotNull(tmpApp.getNotes());
+    Assert.assertEquals((String) tmpApp.getNotes(), defaultNotesStr);
+    Assert.assertEquals(tmpApp.getDeleted(), Boolean.valueOf(defaultDeleted));
+    // jobAttributes
+    JobAttributes jobAttrs = tmpApp.getJobAttributes();
+    Assert.assertEquals(jobAttrs.getDescription(), defaultDescription);
+    Assert.assertEquals(jobAttrs.getDynamicExecSystem(), defaultDynamicExecSystem);
+    Assert.assertNull(jobAttrs.getExecSystemExecDir());
+    Assert.assertNull(jobAttrs.getExecSystemInputDir());
+    Assert.assertNull(jobAttrs.getExecSystemOutputDir());
+    Assert.assertNull(jobAttrs.getExecSystemLogicalQueue());
+    Assert.assertNull(jobAttrs.getArchiveSystemId());
+    Assert.assertNull(jobAttrs.getArchiveSystemDir());
+    Assert.assertNotNull(jobAttrs.getArchiveOnAppError());
+    Assert.assertEquals(jobAttrs.getArchiveOnAppError(), defaultArchiveOnAppError);
+    // Check file inputs and file input arrays
+    Assert.assertNotNull(jobAttrs.getFileInputs());
+    Assert.assertEquals(jobAttrs.getFileInputs().size(), fileInputsMin.size());
+    Assert.assertEquals(jobAttrs.getFileInputs().get(0).getName(), fileInputsMin.get(0).getName());
+    Assert.assertEquals(jobAttrs.getFileInputs().get(0).getTargetPath(), fileInputsMin.get(0).getTargetPath());
+    Assert.assertEquals(jobAttrs.getFileInputs().get(0).getAutoMountLocal(), defaultAutoMountLocal);
+    Assert.assertEquals(jobAttrs.getFileInputs().get(0).getInputMode(), defaultFileInputMode);
+
+    Assert.assertNotNull(jobAttrs.getFileInputArrays());
+    Assert.assertEquals(jobAttrs.getFileInputArrays().size(), fileInputArraysMin.size());
+    Assert.assertEquals(jobAttrs.getFileInputArrays().get(0).getInputMode(), defaultFileInputMode);
+    Assert.assertEquals(jobAttrs.getFileInputArrays().get(0).getName(), fileInputArraysMin.get(0).getName());
+    Assert.assertEquals(jobAttrs.getFileInputArrays().get(0).getTargetDir(), fileInputArraysMin.get(0).getTargetDir());
+
+    Assert.assertEquals(jobAttrs.getNodeCount(), defaultNodeCount);
+    Assert.assertEquals(jobAttrs.getCoresPerNode(), defaultCoresPerNode);
+    Assert.assertEquals(jobAttrs.getMemoryMB(), defaultMemoryMB);
+    Assert.assertEquals(jobAttrs.getMaxMinutes(), defaultMaxMinutes);
+    Assert.assertNotNull(jobAttrs.getSubscriptions());
+    Assert.assertTrue(jobAttrs.getSubscriptions().isEmpty());
+    Assert.assertNotNull(jobAttrs.getTags());
+    Assert.assertTrue(jobAttrs.getTags().isEmpty());
+    // jobAttributes.parameterSet
+    ParameterSet parmSet = jobAttrs.getParameterSet();
+    Assert.assertNotNull(parmSet);
+    Assert.assertNotNull(parmSet.getAppArgs());
+    Assert.assertEquals(parmSet.getAppArgs().size(), appArgsMin.size());
+    Assert.assertEquals(parmSet.getAppArgs().get(0).getName(), appArgsMin.get(0).getName());
+    Assert.assertEquals(parmSet.getAppArgs().get(0).getInputMode(), defaultArgInputMode);
+    Assert.assertNotNull(parmSet.getContainerArgs());
+    Assert.assertEquals(parmSet.getContainerArgs().size(), containerArgsMin.size());
+    Assert.assertEquals(parmSet.getContainerArgs().get(0).getName(), containerArgsMin.get(0).getName());
+    Assert.assertEquals(parmSet.getContainerArgs().get(0).getInputMode(), defaultArgInputMode);
+    Assert.assertNotNull(parmSet.getSchedulerOptions());
+    Assert.assertEquals(parmSet.getSchedulerOptions().size(), schedulerOptionsMin.size());
+    Assert.assertEquals(parmSet.getSchedulerOptions().get(0).getName(), schedulerOptionsMin.get(0).getName());
+    Assert.assertEquals(parmSet.getSchedulerOptions().get(0).getInputMode(), defaultArgInputMode);
+    Assert.assertNotNull(parmSet.getEnvVariables());
+    Assert.assertEquals(parmSet.getEnvVariables().size(), envVariablesMin.size());
+    Assert.assertEquals(parmSet.getEnvVariables().get(0).getKey(), envVariablesMin.get(0).getKey());
+    Assert.assertEquals(parmSet.getEnvVariables().get(0).getValue(), defaultKeyValuePairValue);
+
+    // parameterSet.archiveFilter
+    ParameterSetArchiveFilter archiveFilter = parmSet.getArchiveFilter();
+    Assert.assertNotNull(archiveFilter);
+    Assert.assertNotNull(archiveFilter.getIncludes());
+    Assert.assertTrue(archiveFilter.getIncludes().isEmpty());
+    Assert.assertNotNull(archiveFilter.getExcludes());
+    Assert.assertTrue(archiveFilter.getExcludes().isEmpty());
+    Assert.assertEquals(archiveFilter.getIncludeLaunchFiles(), defaultIncludeLaunchFiles);
+  }
   /*
    * Generate a full ReqCreateApp using attributes from a TapisApp
    */
@@ -847,6 +1040,40 @@ public final class Utils
       Assert.assertEquals(fetchedFileInput.getDescription(), origFileInput.getDescription());
       Assert.assertEquals(fetchedFileInput.getInputMode(), origFileInput.getInputMode());
 //      verifyKeyValuePairs("FileInput", fetchedFileInput.getMeta(), origFileInput.getMeta());
+    }
+  }
+
+  // Verify that original list of FileInputArrays matches the fetched list
+  public static void verifyFileInputArrays(List<AppFileInputArray> origFileInputArrays, List<AppFileInputArray> fetchedFileInputArrays)
+  {
+    System.out.println("Verifying list of FileInputArrays");
+    Assert.assertNotNull(origFileInputArrays, "Orig FileInputArrays is null");
+    Assert.assertNotNull(fetchedFileInputArrays, "Fetched FileInputArrays is null");
+    Assert.assertEquals(fetchedFileInputArrays.size(), origFileInputArrays.size());
+    // Create hash maps of orig and fetched with name as key
+    var origMap = new HashMap<String, AppFileInputArray>();
+    var fetchedMap = new HashMap<String, AppFileInputArray>();
+    for (AppFileInputArray fia : origFileInputArrays) origMap.put(fia.getName(), fia);
+    for (AppFileInputArray fia : fetchedFileInputArrays) fetchedMap.put(fia.getName(), fia);
+    // Go through origMap and check properties
+    for (String fiaName : origMap.keySet())
+    {
+      Assert.assertTrue(fetchedMap.containsKey(fiaName), "Fetched list does not contain original item: " + fiaName);
+      AppFileInputArray fetchedFileInputArray = fetchedMap.get(fiaName);
+      AppFileInputArray origFileInputArray = origMap.get(fiaName);
+      System.out.println("Found fetched FileInputArray: " + fiaName);
+      if (origFileInputArray.getSourceUrls() == null)
+      {
+        Assert.assertNull(fetchedFileInputArray.getSourceUrls());
+      }
+      else
+      {
+        Assert.assertNotNull(fetchedFileInputArray.getSourceUrls());
+        Assert.assertEquals(fetchedFileInputArray.getSourceUrls().size(), origFileInputArray.getSourceUrls().size());
+      }
+      Assert.assertEquals(fetchedFileInputArray.getTargetDir(), origFileInputArray.getTargetDir());
+      Assert.assertEquals(fetchedFileInputArray.getDescription(), origFileInputArray.getDescription());
+      Assert.assertEquals(fetchedFileInputArray.getInputMode(), origFileInputArray.getInputMode());
     }
   }
 

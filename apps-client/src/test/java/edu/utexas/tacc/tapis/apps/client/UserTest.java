@@ -30,7 +30,7 @@ import static edu.utexas.tacc.tapis.apps.client.Utils.*;
 public class UserTest
 {
   // Test data
-  int numApps = 17;
+  int numApps = 13;
   Map<Integer, String[]> apps = Utils.makeApps(numApps, "CltUsr");
   
   private static final String newOwnerUser = testUser3;
@@ -105,7 +105,7 @@ public class UserTest
       }
     }
     // One app may have had owner changed so use new owner.
-    String appId = apps.get(16)[1];
+    String appId = apps.get(12)[1];
     usrClient = getClientUsr(serviceURL, newOwnerUserJWT);
     try { usrClient.deleteApp(appId); }
     catch (Exception e)
@@ -154,7 +154,7 @@ public class UserTest
   public void testCreateAndGetAppMinimal() throws Exception
   {
     // Create an app using only required attributes
-    String[] app0 = apps.get(14);
+    String[] app0 = apps.get(11);
     String appId = app0[1];
     System.out.println("Creating app with name: " + appId);
     app0[3] = null; app0[4] = null; app0[5] = null;
@@ -168,6 +168,30 @@ public class UserTest
     Assert.assertNotNull(tmpApp, "Failed to create item: " + appId);
     System.out.println("Found item: " + tmpApp.getId());
     Utils.verifyAppDefaults(tmpApp, appId);
+  }
+
+  // Create an app using mostly minimal attributes including at least one of each:
+  //   jobAttrs->(fileInput, fileInputArray),
+  //   jobAttrs->parameterSet->(appArg, containerArg, schedulerOption, envVariable->keyValPair, archiveFilter)
+  // Confirm that defaults are as expected
+  @Test
+  public void testCreateAndGetAppMinimal2() throws Exception
+  {
+    // Create an app using only mostly minimal attributes
+    String[] app0 = apps.get(9);
+    String appId = app0[1];
+    System.out.println("Creating app with name: " + appId);
+    app0[3] = null; app0[4] = null; app0[5] = null;
+
+    String respUrl = createAppMinimal2(usrClient, app0);
+    System.out.println("Created app: " + respUrl);
+    Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+
+    // Get the app and check the defaults
+    TapisApp tmpApp = usrClient.getApp(appId);
+    Assert.assertNotNull(tmpApp, "Failed to create item: " + appId);
+    System.out.println("Found item: " + tmpApp.getId());
+    Utils.verifyAppDefaults2(tmpApp, appId);
   }
 
   // Create an app using minimal attributes, get the app, use modified result to
@@ -260,7 +284,7 @@ public class UserTest
     verifyAppAttributes(tmpApp, app0, isEnabledTrue, runtimeOptions1, maxJobs1, maxJobsPerUser1, strictFileInputsFalse,
             dynamicExecSystemTrue, execSystemConstraints1, archiveOnAppErrorTrue, appArgs1, containerArgs1,
             schedulerOptions1, envVariables1, archiveFilter1, nodeCount1, coresPerNode1, memoryMb1, maxMinutes1,
-            fileInputs1, jobTags1, notifList1, tags1, notes1JO);
+            fileInputs1, fileInputArrays1, jobTags1, notifList1, tags1, notes1JO);
   }
 
   // Test patching most updatable attributes
@@ -280,7 +304,7 @@ public class UserTest
     verifyAppAttributes(tmpApp, app0, isEnabledTrue, runtimeOptions1, maxJobs1, maxJobsPerUser1, strictFileInputsFalse,
             dynamicExecSystemTrue, execSystemConstraints1, archiveOnAppErrorTrue, appArgs1, containerArgs1,
             schedulerOptions1, envVariables1, archiveFilter1, nodeCount1, coresPerNode1, memoryMb1, maxMinutes1,
-            fileInputs1, jobTags1, notifList1, tags1, notes1JO);
+            fileInputs1, fileInputArrays1, jobTags1, notifList1, tags1, notes1JO);
 
     // Create a patch app request that updates: description, containerImage, tags, notes.
     ReqPatchApp rApp = createPatchApp();
@@ -316,14 +340,14 @@ public class UserTest
     verifyAppAttributes(tmpApp, app0, isEnabledTrue, runtimeOptions2, maxJobs2, maxJobsPerUser2, strictFileInputsTrue,
             dynamicExecSystemFalse, execSystemConstraints2, archiveOnAppErrorFalse, appArgs2, containerArgs2,
             schedulerOptions2, envVariables2, archiveFilter2, nodeCount2, coresPerNode2, memoryMb2, maxMinutes2,
-            fileInputs2, jobTags2, notifList2, tags2, notes2JO);
+            fileInputs2, fileInputArrays2, jobTags2, notifList2, tags2, notes2JO);
   }
 
   @Test
   public void testChangeOwner() throws Exception
   {
     // Create the app
-    String[] app0 = apps.get(16);
+    String[] app0 = apps.get(12);
     String appId = app0[1];
     String respUrl = Utils.createApp(usrClient, app0);
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
@@ -364,7 +388,7 @@ public class UserTest
   @Test
   public void testEnableDisable() throws Exception
   {
-    String[] app0 = apps.get(17);
+    String[] app0 = apps.get(13);
     String appId = app0[1];
     String appVer = app0[2];
     String respUrl = Utils.createApp(usrClient, app0);
@@ -623,6 +647,7 @@ public class UserTest
     parameterSet.setArchiveFilter(archiveFilter);
     jobAttributes.parameterSet(parameterSet);
     jobAttributes.fileInputs(fileInputs2);
+    jobAttributes.fileInputArrays(fileInputArrays2);
     jobAttributes.nodeCount(nodeCount2);
     jobAttributes.coresPerNode(coresPerNode2);
     jobAttributes.memoryMB(memoryMb2);
