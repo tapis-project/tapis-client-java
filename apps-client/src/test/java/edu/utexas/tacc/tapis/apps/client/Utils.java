@@ -23,7 +23,7 @@ package edu.utexas.tacc.tapis.apps.client;
  */
 
 import com.google.gson.JsonObject;
-import edu.utexas.tacc.tapis.apps.client.gen.model.AppInputModeEnum;
+import edu.utexas.tacc.tapis.apps.client.gen.model.ArgInputModeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.AppTypeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.AppArgSpec;
 import edu.utexas.tacc.tapis.apps.client.gen.model.AppFileInput;
@@ -177,10 +177,10 @@ public final class Utils
   public static final FileInputModeEnum inputModeRequired = FileInputModeEnum.REQUIRED;
   public static final FileInputModeEnum inputModeOptional = FileInputModeEnum.OPTIONAL;
   public static final FileInputModeEnum inputModeFixed = FileInputModeEnum.FIXED;
-  public static final AppInputModeEnum appInputModeRequired = AppInputModeEnum.REQUIRED;
-  public static final AppInputModeEnum appInputModeFixed = AppInputModeEnum.FIXED;
-  public static final AppInputModeEnum appInputModeIncludeOnDemand = AppInputModeEnum.INCLUDE_ON_DEMAND;
-  public static final AppInputModeEnum appInputModeIncludeByDefault = AppInputModeEnum.INCLUDE_BY_DEFAULT;
+  public static final ArgInputModeEnum appInputModeRequired = ArgInputModeEnum.REQUIRED;
+  public static final ArgInputModeEnum appInputModeFixed = ArgInputModeEnum.FIXED;
+  public static final ArgInputModeEnum appInputModeIncludeOnDemand = ArgInputModeEnum.INCLUDE_ON_DEMAND;
+  public static final ArgInputModeEnum appInputModeIncludeByDefault = ArgInputModeEnum.INCLUDE_BY_DEFAULT;
   public static final Boolean deletedFalse = false;
   public static final Instant createdNull = null;
   public static final Instant updatedNull = null;
