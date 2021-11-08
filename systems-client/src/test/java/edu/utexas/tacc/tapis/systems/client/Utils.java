@@ -65,6 +65,7 @@ public final class Utils
   public static final String adminTenantName = "admin";
   public static final String filesSvcName = "files";
   public static final String sysType = SystemTypeEnum.LINUX.name();
+  public static final String schedulerProfileName = "taccTest";
 
   // Long term JWTs expire approx 1 Sep 2022 (DEV Env only)
   public static final String testUser1JWT ="eyJ0eXATODO";
@@ -97,7 +98,6 @@ public final class Utils
   public static final String defaultDescription = null;
   public static final String defaultRootDir = null;
   public static final String defaultBucketName = null;
-  public static final List<JobRuntime> defaultJobRuntimes = null;
   public static final String defaultJobWorkingDir = null;
   public static final String defaultBatchScheduler = SchedulerTypeEnum.SLURM.toString();
   public static final String defaultBatchDefaultLogicalQueue = null;
@@ -222,7 +222,7 @@ public final class Utils
       //                 13=batchSchedulerProfile
       String[] sys0 = {tenantName, id, "description "+suffix, sysType, testUser1, hostName, "effUser"+suffix,
               "fakePassword"+suffix,"bucket"+suffix, "/root"+suffix, "jobWorkDir"+suffix, SchedulerTypeEnum.SLURM.name(),
-              "batchDefaultLogicalQueue"+suffix, "batchSchedulerProfile"+suffix};
+              "batchDefaultLogicalQueue"+suffix, schedulerProfileName};
       systems.put(i, sys0);
     }
     return systems;
@@ -521,7 +521,7 @@ public final class Utils
     Assert.assertEquals(tmpSys.getEnabled(), Boolean.valueOf(defaultIsEnabled));
     // Effective user should result to requestor which in this case is testuser1
     Assert.assertEquals(tmpSys.getEffectiveUserId(), testUser1);
-    Assert.assertEquals(tmpSys.getJobRuntimes(), defaultJobRuntimes);
+    Assert.assertNull(tmpSys.getJobRuntimes());
     Assert.assertNotNull(tmpSys.getPort());
     Assert.assertEquals(tmpSys.getPort().intValue(), defaultPort);
     Assert.assertNotNull(tmpSys.getUseProxy());

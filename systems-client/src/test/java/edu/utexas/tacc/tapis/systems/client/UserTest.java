@@ -108,6 +108,18 @@ public class UserTest
     // Create user client
     usrClient = getClientUsr(serviceURL, ownerUserJWT);
 
+    // Create a scheduler profile for systems to reference
+    System.out.println("Creating scheduler profile with name: " + schedulerProfileName);
+    try {
+      String moduleLoadCmd = "module load";
+      String[] p0 = {tenantName, schedulerProfileName, "test profile", testUser1, moduleLoadCmd};
+      String respUrl = usrClient.createSchedulerProfile(createReqSchedulerProfile(p0));
+      System.out.println("Created scheduler profile: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
   }
 
   @AfterSuite
@@ -132,6 +144,11 @@ public class UserTest
     }
 
     // Delete scheduler profiles. This is a hard delete
+    try { usrClient.deleteSchedulerProfile(schedulerProfileName); }
+    catch (Exception e)
+    {
+      System.out.println("Caught exception when deleting scheduler profile: "+ schedulerProfileName + " Exception: " + e);
+    }
     for (int i = 1; i <= numSchedulerProfiles; i++)
     {
       String name = schedulerProfiles.get(i)[1];
