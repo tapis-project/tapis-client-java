@@ -95,6 +95,8 @@ public class UserTest
     usrClient = getClientUsr(serviceURL, ownerUserJWT);
     // Remove all objects created by tests, ignore any exceptions
     // This is a soft delete but still should be done to clean up SK artifacts.
+    // NOTE: The delete for app #12 will throw a "not auth" exception if the changeOwner succeeded.
+    //       No clean way to avoid it, live with it for now, just clutters the log output a bit.
     for (int i = 1; i <= numApps; i++)
     {
       String appId = apps.get(i)[1];
@@ -104,8 +106,15 @@ public class UserTest
         System.out.println("Caught exception when soft deleting app: "+ appId + " Exception: " + e);
       }
     }
+    // One app created by a "clone" operation (see testMinimalCreateGetPutAndCreate)
+    String appId = apps.get(5)[1] + "new";
+    try { usrClient.deleteApp(appId); }
+    catch (Exception e)
+    {
+      System.out.println("Caught exception when soft deleting app: "+ appId + " Exception: " + e);
+    }
     // One app may have had owner changed so use new owner.
-    String appId = apps.get(12)[1];
+    appId = apps.get(12)[1];
     usrClient = getClientUsr(serviceURL, newOwnerUserJWT);
     try { usrClient.deleteApp(appId); }
     catch (Exception e)
