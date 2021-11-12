@@ -22,25 +22,6 @@ tags:
   - name: general
     description: informational endpoints
 paths:
-  /jobs/ready:
-    get:
-      tags:
-        - general
-      description: Lightwieght readiness check. No authorization required.
-      operationId: ready
-      responses:
-        '200':
-          description: Service ready.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespProbe'
-        '503':
-          description: Service unavailable.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespProbe'
   /jobs/hello:
     get:
       tags:
@@ -71,6 +52,25 @@ paths:
       responses:
         '200':
           description: Message received.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespProbe'
+        '503':
+          description: Service unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespProbe'
+  /jobs/ready:
+    get:
+      tags:
+        - general
+      description: Lightwieght readiness check. No authorization required.
+      operationId: ready
+      responses:
+        '200':
+          description: Service ready.
           content:
             application/json:
               schema:
@@ -850,6 +850,21 @@ paths:
         - TapisJWT: []
 components:
   schemas:
+    RespBasic:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          type: object
+    ResultMetadata:
+      type: object
     JobsProbe:
       type: object
       properties:
@@ -875,21 +890,6 @@ components:
           $ref: '#/components/schemas/ResultMetadata'
         result:
           $ref: '#/components/schemas/JobsProbe'
-    ResultMetadata:
-      type: object
-    RespBasic:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/ResultMetadata'
-        result:
-          type: object
     JobCancelDisplay:
       type: object
       properties:
@@ -1295,6 +1295,10 @@ components:
           type: string
         targetPath:
           type: string
+        optional:
+          type: boolean
+        tapisLocal:
+          type: boolean
     JobFileInputArray:
       type: object
       properties:
@@ -1308,6 +1312,8 @@ components:
             type: string
         targetDir:
           type: string
+        optional:
+          type: boolean
     JobParameterSet:
       type: object
       properties:
