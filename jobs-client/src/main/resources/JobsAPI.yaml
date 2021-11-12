@@ -1295,10 +1295,6 @@ components:
           type: string
         targetPath:
           type: string
-        optional:
-          type: boolean
-        tapisLocal:
-          type: boolean
     JobFileInputArray:
       type: object
       properties:
@@ -1312,8 +1308,6 @@ components:
             type: string
         targetDir:
           type: string
-        optional:
-          type: boolean
     JobParameterSet:
       type: object
       properties:
