@@ -109,7 +109,7 @@ public final class Utils
   public static final boolean defaultUseProxy = false;
   public static final int defaultProxyPort = -1;
   public static final String defaultProxyHost = null;
-  public static final boolean defaultJobIsBatch = false;
+  public static final boolean defaultCanRunBatch = false;
   public static final int defaultJobMaxJobs = -1;
   public static final int defaultJobMaxJobsPerUser = -1;
   public static final int defaultQMaxJobs = -1;
@@ -128,8 +128,8 @@ public final class Utils
   public static final KeyValuePair kv2 = new KeyValuePair().key("HOME").value("/home/testuser2");
   public static final KeyValuePair kv3 = new KeyValuePair().key("TMP").value("/tmp");
   public static final List<KeyValuePair> jobEnvVariables = new ArrayList<>(List.of(kv1,kv2,kv3));
-  public static final boolean jobIsBatchTrue = true;
-  public static final boolean jobIsBatchFalse = false;
+  public static final boolean canRunBatchTrue = true;
+  public static final boolean canRunBatchFalse = false;
   public static final int jobMaxJobs = -1;
   public static final int jobMaxJobsMAX = Integer.MAX_VALUE;
   public static final int jobMaxJobsPerUser = -1;
@@ -307,7 +307,7 @@ public final class Utils
     rSys.jobWorkingDir(sys[10]);
     rSys.jobEnvVariables(jobEnvVariables);
     rSys.jobMaxJobs(jobMaxJobs).jobMaxJobsPerUser(jobMaxJobsPerUser);
-    rSys.jobIsBatch(jobIsBatchFalse);
+    rSys.canRunBatch(canRunBatchFalse);
     rSys.batchScheduler(SchedulerTypeEnum.fromValue(sys[11])).batchDefaultLogicalQueue(sys[12]);
     rSys.batchSchedulerProfile(sys[13]).batchLogicalQueues(jobQueues1);
     rSys.jobCapabilities(jobCaps1);
@@ -391,7 +391,7 @@ public final class Utils
   /**
    * Verify most attributes for a TapisSystem using default create data for following attributes:
    *     port, useProxy, proxyHost, proxyPort, defaultAuthnMethod,
-   *     canExec, jobWorkingDir, jobMaxJobs, jobMaxJobsPerUser, jobIsBatch, batchScheduler, batchDefaultLogicalQueue,
+   *     canExec, jobWorkingDir, jobMaxJobs, jobMaxJobsPerUser, canRunBatch, batchScheduler, batchDefaultLogicalQueue,
    *     batchSchedulerProfile, jobEnvVariables, jobLogicalQueues, capabilities, tags, notes
    * @param tmpSys - system retrieved from the service
    * @param sys0 - Data used to create the system
@@ -424,7 +424,7 @@ public final class Utils
     Assert.assertEquals(tmpSys.getJobMaxJobs().intValue(), jobMaxJobsMAX);
     Assert.assertNotNull(tmpSys.getJobMaxJobsPerUser());
     Assert.assertEquals(tmpSys.getJobMaxJobsPerUser().intValue(), jobMaxJobsPerUserMAX);
-    Assert.assertEquals(tmpSys.getJobIsBatch(), Boolean.valueOf(jobIsBatchFalse));
+    Assert.assertEquals(tmpSys.getCanRunBatch(), Boolean.valueOf(canRunBatchFalse));
     Assert.assertEquals(tmpSys.getBatchScheduler(), SchedulerTypeEnum.valueOf(sys0[11]));
     Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), sys0[12]);
     Assert.assertEquals(tmpSys.getBatchSchedulerProfile(), sys0[13]);
@@ -536,7 +536,7 @@ public final class Utils
     Assert.assertEquals(tmpSys.getJobMaxJobs().intValue(), jobMaxJobsMAX);
     Assert.assertNotNull(tmpSys.getJobMaxJobsPerUser());
     Assert.assertEquals(tmpSys.getJobMaxJobsPerUser().intValue(), jobMaxJobsPerUserMAX);
-    Assert.assertEquals(tmpSys.getJobIsBatch(), Boolean.valueOf(defaultJobIsBatch));
+    Assert.assertEquals(tmpSys.getCanRunBatch(), Boolean.valueOf(defaultCanRunBatch));
     Assert.assertEquals(tmpSys.getBatchScheduler(), schedulerType);
     Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), defaultBatchDefaultLogicalQueue);
     Assert.assertEquals(tmpSys.getBatchSchedulerProfile(), defaultBatchSchedulerProfile);

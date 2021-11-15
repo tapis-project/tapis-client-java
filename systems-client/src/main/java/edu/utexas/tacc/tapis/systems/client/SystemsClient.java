@@ -878,7 +878,7 @@ public class SystemsClient implements ITapisClient
     rSys.jobWorkingDir(sys.getJobWorkingDir());
     rSys.jobEnvVariables(sys.getJobEnvVariables());
     rSys.jobMaxJobs(sys.getJobMaxJobs()).jobMaxJobsPerUser(sys.getJobMaxJobsPerUser());
-    rSys.jobIsBatch(sys.getJobIsBatch());
+    rSys.canRunBatch(sys.getCanRunBatch());
     rSys.batchScheduler(sys.getBatchScheduler());
     rSys.batchLogicalQueues(sys.getBatchLogicalQueues());
     rSys.batchDefaultLogicalQueue(sys.getBatchDefaultLogicalQueue());
@@ -913,7 +913,7 @@ public class SystemsClient implements ITapisClient
     rSys.jobWorkingDir(sys.getJobWorkingDir());
     rSys.jobEnvVariables(sys.getJobEnvVariables());
     rSys.jobMaxJobs(sys.getJobMaxJobs()).jobMaxJobsPerUser(sys.getJobMaxJobsPerUser());
-    rSys.jobIsBatch(sys.getJobIsBatch());
+    rSys.canRunBatch(sys.getCanRunBatch());
     rSys.batchScheduler(sys.getBatchScheduler());
     rSys.batchLogicalQueues(sys.getBatchLogicalQueues());
     rSys.batchDefaultLogicalQueue(sys.getBatchDefaultLogicalQueue());

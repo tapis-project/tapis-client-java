@@ -24,10 +24,10 @@ package edu.utexas.tacc.tapis.apps.client;
 
 import com.google.gson.JsonObject;
 import edu.utexas.tacc.tapis.apps.client.gen.model.AppFileInputArray;
-import edu.utexas.tacc.tapis.apps.client.gen.model.ArgInputModeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.AppTypeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.AppArgSpec;
 import edu.utexas.tacc.tapis.apps.client.gen.model.AppFileInput;
+import edu.utexas.tacc.tapis.apps.client.gen.model.ArgInputModeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.FileInputModeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.JobAttributes;
 import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
@@ -181,9 +181,9 @@ public final class Utils
   public static final Integer memoryMb2 = 64;
   public static final Integer maxMinutes1 = 10;
   public static final Integer maxMinutes2 = 20;
-  public static final FileInputModeEnum inputModeRequired = FileInputModeEnum.REQUIRED;
-  public static final FileInputModeEnum inputModeOptional = FileInputModeEnum.OPTIONAL;
-  public static final FileInputModeEnum inputModeFixed = FileInputModeEnum.FIXED;
+  public static final FileInputModeEnum fileInputModeRequired = FileInputModeEnum.REQUIRED;
+  public static final FileInputModeEnum fileInputModeOptional = FileInputModeEnum.OPTIONAL;
+  public static final FileInputModeEnum fileInputModeFixed = FileInputModeEnum.FIXED;
   public static final FileInputModeEnum defaultFileInputMode = FileInputModeEnum.OPTIONAL;
   public static final ArgInputModeEnum argInputModeRequired = ArgInputModeEnum.REQUIRED;
   public static final ArgInputModeEnum argInputModeFixed = ArgInputModeEnum.FIXED;
@@ -231,19 +231,19 @@ public final class Utils
   public static final List<KeyValuePair> kvPairsFin1A = new ArrayList<>(List.of(kv1a, kv1b, kv1c));
   public static final List<KeyValuePair> kvPairsFin1B = new ArrayList<>(List.of(kv1a, kv1b, kv1c));
   public static final AppFileInput fin1A = new AppFileInput().name("fin1A").description("File input 1A")
-                                                       .inputMode(inputModeRequired).autoMountLocal(autoMountLocalTrue)//.meta(kvPairsFin1A)
+                                                       .inputMode(fileInputModeRequired).autoMountLocal(autoMountLocalTrue)
                                                        .sourceUrl(src1A).targetPath("/target1A");
   public static final AppFileInput fin1B = new AppFileInput().name("finB1").description("File input 1B")
-                                                       .inputMode(inputModeOptional).autoMountLocal(autoMountLocalTrue)//.meta(kvPairsFin1B)
+                                                       .inputMode(fileInputModeOptional).autoMountLocal(autoMountLocalTrue)
                                                        .sourceUrl(src1B).targetPath("/target1B");
   public static final List<AppFileInput> fileInputs1 = new ArrayList<>(List.of(fin1A, fin1B));
 
   public static final List<String> srcUrls1A = new ArrayList<>(List.of("https://example.com/src1Aa", "https://example.com/src1Ab"));
   public static final List<String> srcUrls1B = new ArrayList<>(List.of("https://example.com/src1Ba", "https://example.com/src1Bb"));
   public static final AppFileInputArray fia1A = new AppFileInputArray().name("fia1A").description("File input array 1A")
-          .inputMode(inputModeRequired).targetDir("/targetDir1A").sourceUrls(srcUrls1A);
+          .inputMode(fileInputModeRequired).targetDir("/targetDir1A").sourceUrls(srcUrls1A);
   public static final AppFileInputArray fia1B = new AppFileInputArray().name("fia1B").description("File input array 1B")
-          .inputMode(inputModeFixed).targetDir("/targetDir1B").sourceUrls(srcUrls1B);
+          .inputMode(fileInputModeFixed).targetDir("/targetDir1B").sourceUrls(srcUrls1B);
   public static final List<AppFileInputArray> fileInputArrays1 = new ArrayList<>(List.of(fia1A, fia1B));
 
   public static final String src2A = "https://example.com/src2A";
@@ -251,19 +251,19 @@ public final class Utils
   public static final List<KeyValuePair> kvPairsFin2A = new ArrayList<>(List.of(kv2a, kv2b, kv2c));
   public static final List<KeyValuePair> kvPairsFin2B = new ArrayList<>(List.of(kv2a, kv2b, kv2c));
   public static final AppFileInput fin2A = new AppFileInput().name("fin2A").description("File input 2A")
-          .inputMode(inputModeRequired).autoMountLocal(autoMountLocalTrue)//.meta(kvPairsFin2A)
+          .inputMode(fileInputModeRequired).autoMountLocal(autoMountLocalTrue)
           .sourceUrl(src2A).targetPath("/target2A");
   public static final AppFileInput fin2B = new AppFileInput().name("fin2B").description("File input 2B")
-          .inputMode(inputModeFixed).autoMountLocal(autoMountLocalTrue)//.meta(kvPairsFin2B)
+          .inputMode(fileInputModeFixed).autoMountLocal(autoMountLocalTrue)
           .sourceUrl(src2B).targetPath("/target2B");
   public static final List<AppFileInput> fileInputs2 = new ArrayList<>(List.of(fin2A, fin2B));
 
   public static final List<String> srcUrls2A = new ArrayList<>(List.of("https://example.com/src2Aa", "https://example.com/src2Ab"));
   public static final List<String> srcUrls2B = new ArrayList<>(List.of("https://example.com/src2Ba", "https://example.com/src2Bb"));
   public static final AppFileInputArray fia2A = new AppFileInputArray().name("fia2A").description("File input array 2A")
-          .inputMode(inputModeRequired).targetDir("/targetDir2A").sourceUrls(srcUrls2A);
+          .inputMode(fileInputModeRequired).targetDir("/targetDir2A").sourceUrls(srcUrls2A);
   public static final AppFileInputArray fia2B = new AppFileInputArray().name("fia2B").description("File input array 2B")
-          .inputMode(inputModeFixed).targetDir("/targetDir2B").sourceUrls(srcUrls2B);
+          .inputMode(fileInputModeFixed).targetDir("/targetDir2B").sourceUrls(srcUrls2B);
   public static final List<AppFileInputArray> fileInputArrays2 = new ArrayList<>(List.of(fia2A, fia2B));
 
   public static final AppFileInput finMin = new AppFileInput().name("finMin").targetPath("/targetMin");
@@ -302,24 +302,24 @@ public final class Utils
   public static final List<NotificationSubscription> notifList2 = new ArrayList<>(List.of(notif2A, notif2B));
   public static final List<NotificationSubscription> notifListNull = null;
 
-  public static final AppArgSpec appArgA1 = (new AppArgSpec()).name("appArgA1").arg("valueA1").description("App arg A1").inputMode(argInputModeRequired);//.meta(metaKVPairs1);
-  public static final AppArgSpec appArgB1 = (new AppArgSpec()).name("appArgB1").arg("valueB1").description("App arg B1").inputMode(argInputModeFixed);//.meta(metaKVPairs1);
+  public static final AppArgSpec appArgA1 = (new AppArgSpec()).name("appArgA1").arg("valueA1").description("App arg A1").inputMode(argInputModeRequired);
+  public static final AppArgSpec appArgB1 = (new AppArgSpec()).name("appArgB1").arg("valueB1").description("App arg B1").inputMode(argInputModeFixed);
   public static final List<AppArgSpec> appArgs1 = new ArrayList<>(List.of(appArgA1, appArgB1));
-  public static final AppArgSpec containerArgA1 = (new AppArgSpec()).name("containerArgA1").arg("valueA1").description("container arg A1").inputMode(argInputModeRequired);//.meta(metaKVPairs1);
-  public static final AppArgSpec containerArgB1 = (new AppArgSpec()).name("containerArgB1").arg("valueB1").description("container arg B1").inputMode(argInputModeFixed);//.meta(metaKVPairs1);
+  public static final AppArgSpec containerArgA1 = (new AppArgSpec()).name("containerArgA1").arg("valueA1").description("container arg A1").inputMode(argInputModeRequired);
+  public static final AppArgSpec containerArgB1 = (new AppArgSpec()).name("containerArgB1").arg("valueB1").description("container arg B1").inputMode(argInputModeFixed);
   public static final List<AppArgSpec> containerArgs1 = new ArrayList<>(List.of(containerArgA1, containerArgB1));
-  public static final AppArgSpec schedulerOptionA1 = (new AppArgSpec()).name("schedulerOptionA1").arg("valueA1").description("scheduler option A1").inputMode(argInputModeRequired);//.meta(metaKVPairs1);
-  public static final AppArgSpec schedulerOptionB1 = (new AppArgSpec()).name("schedulerOptionB1").arg("valueB1").description("scheduler option B1").inputMode(argInputModeFixed);//.meta(metaKVPairs1);
+  public static final AppArgSpec schedulerOptionA1 = (new AppArgSpec()).name("schedulerOptionA1").arg("valueA1").description("scheduler option A1").inputMode(argInputModeRequired);
+  public static final AppArgSpec schedulerOptionB1 = (new AppArgSpec()).name("schedulerOptionB1").arg("valueB1").description("scheduler option B1").inputMode(argInputModeFixed);
   public static final List<AppArgSpec> schedulerOptions1 = new ArrayList<>(List.of(schedulerOptionA1, schedulerOptionB1));
 
-  public static final AppArgSpec appArgA2 = (new AppArgSpec()).name("appArgA2").arg("valueA2").description("App arg A2").inputMode(argInputModeRequired);//.meta(metaKVPairs2);
-  public static final AppArgSpec appArgB2 = (new AppArgSpec()).name("appArgB2").arg("valueB2").description("App arg B2").inputMode(argInputModeFixed);//.meta(metaKVPairs2);
+  public static final AppArgSpec appArgA2 = (new AppArgSpec()).name("appArgA2").arg("valueA2").description("App arg A2").inputMode(argInputModeRequired);
+  public static final AppArgSpec appArgB2 = (new AppArgSpec()).name("appArgB2").arg("valueB2").description("App arg B2").inputMode(argInputModeFixed);
   public static final List<AppArgSpec> appArgs2 = new ArrayList<>(List.of(appArgA2, appArgB2));
-  public static final AppArgSpec containerArgA2 = (new AppArgSpec()).name("containerArgA2").arg("valueA2").description("container arg A2").inputMode(argInputModeRequired);//.meta(metaKVPairs2);
-  public static final AppArgSpec containerArgB2 = (new AppArgSpec()).name("containerArgB2").arg("valueB2").description("container arg B2").inputMode(argInputModeFixed);//.meta(metaKVPairs2);
+  public static final AppArgSpec containerArgA2 = (new AppArgSpec()).name("containerArgA2").arg("valueA2").description("container arg A2").inputMode(argInputModeRequired);
+  public static final AppArgSpec containerArgB2 = (new AppArgSpec()).name("containerArgB2").arg("valueB2").description("container arg B2").inputMode(argInputModeFixed);
   public static final List<AppArgSpec> containerArgs2 = new ArrayList<>(List.of(containerArgA2, containerArgB2));
-  public static final AppArgSpec schedulerOptionA2 = (new AppArgSpec()).name("schedulerOptionA2").arg("valueA2").description("scheduler option A2").inputMode(argInputModeRequired);//.meta(metaKVPairs2);
-  public static final AppArgSpec schedulerOptionB2 = (new AppArgSpec()).name("schedulerOptionB2").arg("valueB2").description("scheduler option B2").inputMode(argInputModeFixed);//.meta(metaKVPairs2);
+  public static final AppArgSpec schedulerOptionA2 = (new AppArgSpec()).name("schedulerOptionA2").arg("valueA2").description("scheduler option A2").inputMode(argInputModeRequired);
+  public static final AppArgSpec schedulerOptionB2 = (new AppArgSpec()).name("schedulerOptionB2").arg("valueB2").description("scheduler option B2").inputMode(argInputModeFixed);
   public static final List<AppArgSpec> schedulerOptions2 = new ArrayList<>(List.of(schedulerOptionA2, schedulerOptionB2));
 
   public static final AppArgSpec appArgMin = (new AppArgSpec()).name("appArgMin");
