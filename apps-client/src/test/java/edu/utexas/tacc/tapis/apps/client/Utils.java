@@ -24,7 +24,7 @@ package edu.utexas.tacc.tapis.apps.client;
 
 import com.google.gson.JsonObject;
 import edu.utexas.tacc.tapis.apps.client.gen.model.AppFileInputArray;
-import edu.utexas.tacc.tapis.apps.client.gen.model.AppTypeEnum;
+import edu.utexas.tacc.tapis.apps.client.gen.model.JobTypeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.AppArgSpec;
 import edu.utexas.tacc.tapis.apps.client.gen.model.AppFileInput;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ArgInputModeEnum;
@@ -126,8 +126,8 @@ public final class Utils
   public static final String appNamePrefix = "CApp";
   public static final String appVersion1 = "0.0.1";
   public static final String appVersion2 = "0.0.2";
-  public static final AppTypeEnum appTypeBatch = AppTypeEnum.BATCH;
-  public static final AppTypeEnum appTypeFork = AppTypeEnum.FORK;
+  public static final JobTypeEnum jobTypeBatch = JobTypeEnum.BATCH;
+  public static final JobTypeEnum jobTypeFork = JobTypeEnum.FORK;
   public static final String appDescription1 =  "app description 1";
   public static final String appDescription2 =  "app description 2";
   public static final Boolean isEnabledTrue = true;
@@ -354,11 +354,11 @@ public final class Utils
       String suffix = key + "_" + String.format("%03d", i);
       String appId = appNamePrefix + "_" + suffix;
       // Constructor initializes all attributes except for TBD
-//    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=appType, 5=ownerUser1,
+//    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=jobType, 5=ownerUser1,
 //              6=runtime, 7=runtimeVersion, 8=containerImage, 9=jobDescription,
 //              10=execSystemId, 11=execSystemExecDir, 12=execSystemInputDir, 13=execSystemOutputDir,
 //              14=execSystemLogicalQueue, 15=archiveSystemId, 16=archiveSystemDir};
-      String[] app0 = {tenantName, appId, appVersion1, appDescription1+suffix, appTypeBatch.name(), ownerUser1,
+      String[] app0 = {tenantName, appId, appVersion1, appDescription1+suffix, jobTypeBatch.name(), ownerUser1,
                        runtime1.name(), runtimeVersion1+suffix, defaultContainerImage, jobDescription1+suffix,
               execSystemId1, execSystemExecDir1+suffix, execSystemInputDir1+suffix, execSystemOutputDir1+suffix,
               execSystemLogicalQueue1, archiveSystemId1, archiveSystemDir1+suffix};
@@ -405,13 +405,13 @@ public final class Utils
     rApp.setId(app[1]);
     rApp.setVersion(app[2]);
     rApp.description(app[3]);
-    rApp.setAppType(AppTypeEnum.valueOf(app[4]));
     rApp.owner(app[5]);
     rApp.enabled(isEnabledTrue);
     rApp.setRuntime(RuntimeEnum.valueOf(app[6]));
     rApp.setRuntimeVersion(app[7]);
     rApp.setRuntimeOptions(runtimeOptions1);
     rApp.setContainerImage(app[8]);
+    rApp.setJobType(JobTypeEnum.valueOf(app[4]));
     rApp.setMaxJobs(maxJobs1);
     rApp.setMaxJobsPerUser(maxJobsPerUser1);
     rApp.strictFileInputs(strictFileInputsFalse);
@@ -463,9 +463,9 @@ public final class Utils
 
   /**
    * Create an application using only required attributes.
-   * In simplest case these are required: id, version, appType, containerImage, execSystemId
+   * In simplest case these are required: id, version, containerImage, execSystemId
    * Use attributes from a string array.
-   *    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=appType, 5=ownerUser1,
+   *    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=jobType, 5=ownerUser1,
    *              6=runtime, 7=runtimeVersion, 8=containerImage, 9=jobDescription,
    *              10=execSystemId, 11=execSystemExecDir, 12=execSystemInputDir, 13=execSystemOutputDir,
    *              14=execSystemLogicalQueue, 15=archiveSystemId, 16=archiveSystemDir};
@@ -478,17 +478,11 @@ public final class Utils
   public static String createAppMinimal(AppsClient clt, String[] app) throws TapisClientException
   {
     ReqCreateApp rApp = new ReqCreateApp();
-    // Id, version and type are always required
+    // Id, version are always required
     rApp.setId(app[1]);
     rApp.setVersion(app[2]);
-    rApp.setAppType(appTypeBatch);
     // Containerized so container image must be set. NOTE: currently only containerized supported
     rApp.setContainerImage(defaultContainerImage);
-    // === Start Job Attributes
-    JobAttributes jobAttrs = new JobAttributes();
-    // dynamiceExecSystem defaults to false so execSystemId must be set. This is the simplest minimal App
-    jobAttrs.setExecSystemId(app[10]);
-    rApp.setJobAttributes(jobAttrs);
 
     // Use client to create the app
     return clt.createApp(rApp);
@@ -498,9 +492,9 @@ public final class Utils
    * Create an application using minimal attributes plus:
    *   jobAttrs->(fileInput, fileInputArray),
    *   jobAttrs->parameterSet->(appArg, containerArg, schedulerOption, envVariable->keyValPair, archiveFilter)
-   * In simplest case these are required: id, version, appType, containerImage, execSystemId
+   * In simplest case these are required: id, version, containerImage, execSystemId
    * Use attributes from a string array.
-   *    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=appType, 5=ownerUser1,
+   *    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=jobType, 5=ownerUser1,
    *              6=runtime, 7=runtimeVersion, 8=containerImage, 9=jobDescription,
    *              10=execSystemId, 11=execSystemExecDir, 12=execSystemInputDir, 13=execSystemOutputDir,
    *              14=execSystemLogicalQueue, 15=archiveSystemId, 16=archiveSystemDir};
@@ -516,7 +510,6 @@ public final class Utils
     // Id, version and type are always required
     rApp.setId(app[1]);
     rApp.setVersion(app[2]);
-    rApp.setAppType(appTypeBatch);
     // Containerized so container image must be set. NOTE: currently only containerized supported
     rApp.setContainerImage(defaultContainerImage);
     // === Start Job Attributes
@@ -574,7 +567,7 @@ public final class Utils
                                          List<String> jobTags, List<NotificationSubscription> notificationSubscriptions,
                                          List<String> tags, JsonObject notes)
   {
-//    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=appType, 5=ownerUser1,
+//    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=jobType, 5=ownerUser1,
 //              6=runtime, 7=runtimeVersion, 8=containerImage, 9=jobDescription,
 //              10=execSystemId, 11=execSystemExecDir, 12=execSystemInputDir, 13=execSystemOutputDir,
 //              14=execSystemLogicalQueue, 15=archiveSystemId, 16=archiveSystemDir};
@@ -582,8 +575,8 @@ public final class Utils
     Assert.assertEquals(tmpApp.getId(), app0[1]);
     Assert.assertEquals(tmpApp.getVersion(), app0[2]);
     Assert.assertEquals(tmpApp.getDescription(), app0[3]);
-    Assert.assertNotNull(tmpApp.getAppType());
-    Assert.assertEquals(tmpApp.getAppType().name(), app0[4]);
+    Assert.assertNotNull(tmpApp.getJobType());
+    Assert.assertEquals(tmpApp.getJobType().name(), app0[4]);
     Assert.assertEquals(tmpApp.getOwner(), app0[5]);
     Assert.assertEquals(tmpApp.getEnabled(), isEnabled);
     Assert.assertNotNull(tmpApp.getRuntime());
@@ -762,11 +755,11 @@ public final class Utils
   /**
    * Verify the required attributes for a TapisApp
    *   and verify that other attributes are set to expected defaults.
-   //    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=appType, 5=ownerUser1,
+   //    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=jobType, 5=ownerUser1,
    //              6=runtime, 7=runtimeVersion, 8=containerImage, 9=jobDescription,
    //              10=execSystemId, 11=execSystemExecDir, 12=execSystemInputDir, 13=execSystemOutputDir,
    //              14=execSystemLogicalQueue, 15=archiveSystemId, 16=archiveSystemDir};
-   String[] app0 = {tenantName, appId, appVersion, "description "+suffix, appTypeBatch.name(), ownerUser1,
+   String[] app0 = {tenantName, appId, appVersion, "description "+suffix, jobTypeBatch.name(), ownerUser1,
    runtime.name(), runtimeVersion+suffix, containerImage+suffix, jobDescription+suffix,
    execSystemId, execSystemExecDir+suffix, execSystemInputDir+suffix, execSystemOutputDir+suffix,
    execSystemLogicalQueue, archiveSystemId, archiveSystemDir+suffix};
@@ -778,8 +771,8 @@ public final class Utils
     // Verify required attributes
     Assert.assertEquals(tmpApp.getId(), appId);
     Assert.assertEquals(tmpApp.getVersion(), appVersion1);
-    Assert.assertNotNull(tmpApp.getAppType());
-    Assert.assertEquals(tmpApp.getAppType().name(), appTypeBatch.name());
+    Assert.assertNotNull(tmpApp.getJobType());
+    Assert.assertEquals(tmpApp.getJobType().name(), jobTypeBatch.name());
     Assert.assertNotNull(tmpApp.getJobAttributes());
 
     // Verify optional attributes have been set to defaults
@@ -847,11 +840,11 @@ public final class Utils
 
   /**
    * Verify expected defaults are found for testCreateAndGetAppMinimal2
-   //    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=appType, 5=ownerUser1,
+   //    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=jobType, 5=ownerUser1,
    //              6=runtime, 7=runtimeVersion, 8=containerImage, 9=jobDescription,
    //              10=execSystemId, 11=execSystemExecDir, 12=execSystemInputDir, 13=execSystemOutputDir,
    //              14=execSystemLogicalQueue, 15=archiveSystemId, 16=archiveSystemDir};
-   String[] app0 = {tenantName, appId, appVersion, "description "+suffix, appTypeBatch.name(), ownerUser1,
+   String[] app0 = {tenantName, appId, appVersion, "description "+suffix, jobTypeBatch.name(), ownerUser1,
    runtime.name(), runtimeVersion+suffix, containerImage+suffix, jobDescription+suffix,
    execSystemId, execSystemExecDir+suffix, execSystemInputDir+suffix, execSystemOutputDir+suffix,
    execSystemLogicalQueue, archiveSystemId, archiveSystemDir+suffix};
@@ -863,8 +856,8 @@ public final class Utils
     // Verify required attributes
     Assert.assertEquals(tmpApp.getId(), appId);
     Assert.assertEquals(tmpApp.getVersion(), appVersion1);
-    Assert.assertNotNull(tmpApp.getAppType());
-    Assert.assertEquals(tmpApp.getAppType().name(), appTypeBatch.name());
+    Assert.assertNotNull(tmpApp.getJobType());
+    Assert.assertEquals(tmpApp.getJobType().name(), jobTypeBatch.name());
     Assert.assertNotNull(tmpApp.getJobAttributes());
 
     // Verify optional attributes have been set to defaults
@@ -955,16 +948,15 @@ public final class Utils
   private static ReqCreateApp makeReqCreateAppFromTapisApp(TapisApp app) throws TapisClientException
   {
     ReqCreateApp rApp = new ReqCreateApp();
-    // Id, version and type
+    // Id, version
     rApp.setId(app.getId());
     rApp.setVersion(app.getVersion());
-    rApp.setAppType(app.getAppType());
     rApp.setDescription(app.getDescription());
     rApp.setOwner(app.getOwner());
     rApp.setContainerImage(app.getContainerImage());
 // TODO ???
     rApp.setJobAttributes(app.getJobAttributes());
-
+    rApp.setJobType(app.getJobType());
     return rApp;
   }
 

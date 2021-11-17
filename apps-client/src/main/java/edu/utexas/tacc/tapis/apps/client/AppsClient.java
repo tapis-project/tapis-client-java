@@ -612,13 +612,13 @@ public class AppsClient implements ITapisClient
     rApp.id(app.getId());
     rApp.version(app.getVersion());
     rApp.description(app.getDescription());
-    rApp.appType(app.getAppType());
     rApp.owner(app.getOwner());
     rApp.enabled(app.getEnabled());
     rApp.runtime(app.getRuntime());
     rApp.runtimeVersion(app.getRuntimeVersion());
     rApp.runtimeOptions(app.getRuntimeOptions());
     rApp.containerImage(app.getContainerImage());
+    rApp.jobType(app.getJobType());
     rApp.maxJobs(app.getMaxJobs()).maxJobsPerUser(app.getMaxJobsPerUser());
     rApp.strictFileInputs(app.getStrictFileInputs());
     rApp.jobAttributes(app.getJobAttributes());

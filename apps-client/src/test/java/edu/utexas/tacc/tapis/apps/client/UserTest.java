@@ -279,7 +279,7 @@ public class UserTest
   }
 
   // Test retrieving a app by name.
-  //  String[] app0 = {tenantName, appId, appVersion, "description " + suffix, appType, ownerUser1};
+  //  String[] app0 = {tenantName, appId, appVersion, "description " + suffix, jobType, ownerUser1};
   @Test
   public void testGetApp() throws Exception
   {
@@ -327,7 +327,7 @@ public class UserTest
     tmpApp = usrClient.getApp(appId);
     Assert.assertNotNull(tmpApp, "Failed to create item: " + appId);
     System.out.println("Found item: " + tmpApp.getId());
-//    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=appType, 5=ownerUser1,
+//    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=jobType, 5=ownerUser1,
 //              6=runtime, 7=runtimeVersion, 8=containerImage, 9=jobDescription,
 //              10=execSystemId, 11=execSystemExecDir, 12=execSystemInputDir, 13=execSystemOutputDir,
 //              14=execSystemLogicalQueue, 15=archiveSystemId, 16=archiveSystemDir};

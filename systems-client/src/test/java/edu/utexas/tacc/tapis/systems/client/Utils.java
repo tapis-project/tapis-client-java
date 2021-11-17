@@ -303,11 +303,11 @@ public final class Utils
     rSys.rootDir(sys[9]);
     rSys.port(port).useProxy(prot1UseProxy).proxyHost(prot1ProxyHost).proxyPort(prot1ProxyPort);
     rSys.canExec(canExecTrue);
+    rSys.canRunBatch(canRunBatchFalse);
     rSys.setJobRuntimes(jobRuntimes1);
     rSys.jobWorkingDir(sys[10]);
     rSys.jobEnvVariables(jobEnvVariables);
     rSys.jobMaxJobs(jobMaxJobs).jobMaxJobsPerUser(jobMaxJobsPerUser);
-    rSys.canRunBatch(canRunBatchFalse);
     rSys.batchScheduler(SchedulerTypeEnum.fromValue(sys[11])).batchDefaultLogicalQueue(sys[12]);
     rSys.batchSchedulerProfile(sys[13]).batchLogicalQueues(jobQueues1);
     rSys.jobCapabilities(jobCaps1);
@@ -391,7 +391,7 @@ public final class Utils
   /**
    * Verify most attributes for a TapisSystem using default create data for following attributes:
    *     port, useProxy, proxyHost, proxyPort, defaultAuthnMethod,
-   *     canExec, jobWorkingDir, jobMaxJobs, jobMaxJobsPerUser, canRunBatch, batchScheduler, batchDefaultLogicalQueue,
+   *     canExec, canRunBatch, jobWorkingDir, jobMaxJobs, jobMaxJobsPerUser, batchScheduler, batchDefaultLogicalQueue,
    *     batchSchedulerProfile, jobEnvVariables, jobLogicalQueues, capabilities, tags, notes
    * @param tmpSys - system retrieved from the service
    * @param sys0 - Data used to create the system
@@ -418,13 +418,13 @@ public final class Utils
     Assert.assertNotNull(tmpSys.getProxyPort());
     Assert.assertEquals(tmpSys.getProxyPort().intValue(), prot1ProxyPort);
     Assert.assertEquals(tmpSys.getCanExec(), Boolean.valueOf(canExecTrue));
+    Assert.assertEquals(tmpSys.getCanRunBatch(), Boolean.valueOf(canRunBatchFalse));
     Assert.assertEquals(tmpSys.getJobWorkingDir(), sys0[10]);
     // TODO check jobRuntimes
     Assert.assertNotNull(tmpSys.getJobMaxJobs());
     Assert.assertEquals(tmpSys.getJobMaxJobs().intValue(), jobMaxJobsMAX);
     Assert.assertNotNull(tmpSys.getJobMaxJobsPerUser());
     Assert.assertEquals(tmpSys.getJobMaxJobsPerUser().intValue(), jobMaxJobsPerUserMAX);
-    Assert.assertEquals(tmpSys.getCanRunBatch(), Boolean.valueOf(canRunBatchFalse));
     Assert.assertEquals(tmpSys.getBatchScheduler(), SchedulerTypeEnum.valueOf(sys0[11]));
     Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), sys0[12]);
     Assert.assertEquals(tmpSys.getBatchSchedulerProfile(), sys0[13]);
@@ -521,6 +521,7 @@ public final class Utils
     Assert.assertEquals(tmpSys.getEnabled(), Boolean.valueOf(defaultIsEnabled));
     // Effective user should result to requestor which in this case is testuser1
     Assert.assertEquals(tmpSys.getEffectiveUserId(), testUser1);
+    Assert.assertEquals(tmpSys.getCanRunBatch(), Boolean.valueOf(defaultCanRunBatch));
     Assert.assertNull(tmpSys.getJobRuntimes());
     Assert.assertNotNull(tmpSys.getPort());
     Assert.assertEquals(tmpSys.getPort().intValue(), defaultPort);
@@ -536,7 +537,6 @@ public final class Utils
     Assert.assertEquals(tmpSys.getJobMaxJobs().intValue(), jobMaxJobsMAX);
     Assert.assertNotNull(tmpSys.getJobMaxJobsPerUser());
     Assert.assertEquals(tmpSys.getJobMaxJobsPerUser().intValue(), jobMaxJobsPerUserMAX);
-    Assert.assertEquals(tmpSys.getCanRunBatch(), Boolean.valueOf(defaultCanRunBatch));
     Assert.assertEquals(tmpSys.getBatchScheduler(), schedulerType);
     Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), defaultBatchDefaultLogicalQueue);
     Assert.assertEquals(tmpSys.getBatchSchedulerProfile(), defaultBatchSchedulerProfile);
