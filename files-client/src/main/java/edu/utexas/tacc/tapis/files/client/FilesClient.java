@@ -212,15 +212,15 @@ public class FilesClient implements ITapisClient
    * @param path path relative to system rootDir
    * @param limit pagination limit
    * @param offset pagination offset
-   * @param meta Flag indicating if metadata should be include. Will slow down request.
+   * @param recurse Flag indicating if a recursive listing is to be provided.
    * @return list of FileInfo objects
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<FileInfo> listFiles(String systemId, String path, int limit, long offset, boolean meta)
+  public List<FileInfo> listFiles(String systemId, String path, int limit, long offset, boolean recurse)
           throws TapisClientException
   {
     FileListingResponse resp = null;
-    try { resp = fileOperations.listFiles(systemId, path, limit, offset); }
+    try { resp = fileOperations.listFiles(systemId, path, limit, offset, recurse); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
