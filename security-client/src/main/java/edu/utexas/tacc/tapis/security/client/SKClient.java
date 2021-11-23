@@ -730,6 +730,26 @@ public class SKClient
     }
     
     /* ---------------------------------------------------------------------------- */
+    /* getAdmins:                                                                   */
+    /* ---------------------------------------------------------------------------- */
+    public List<String> getAdmins(String tenant)
+     throws TapisClientException
+    {
+      // Make the REST call.
+      RespNameArray resp = null;
+      try {
+        // Get the API object using default networking.
+        var userApi = new UserApi(_apiClient);
+        resp = userApi.getAdmins(tenant, false);
+      }
+      catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+      catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+
+      // Return result value.
+      return resp.getResult().getNames();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
     /* grantAdminRole:                                                              */
     /* ---------------------------------------------------------------------------- */
     public int grantAdminRole(String tenant, String user)
