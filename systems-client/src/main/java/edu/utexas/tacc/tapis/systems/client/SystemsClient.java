@@ -7,6 +7,7 @@ import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SEARCH;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_ALL;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_SUMMARY;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP_CREDENTIAL_CHECK;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
 
 import java.util.Collections;
@@ -16,6 +17,7 @@ import edu.utexas.tacc.tapis.systems.client.gen.api.SchedulerProfilesApi;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfile;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfiles;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerProfile;
 import org.apache.commons.lang3.StringUtils;
 
@@ -205,9 +207,23 @@ public class SystemsClient implements ITapisClient
    */
   public String createSystem(ReqCreateSystem req) throws TapisClientException
   {
+    return createSystem(req, DEFAULT_SKIP_CREDENTIAL_CHECK);
+  }
+
+  /**
+   * Create a system
+   * See the helper method buildReqCreateSystem() for an example of how to build a pre-populated
+   *   ReqCreateSystem instance from a TapisSystem instance.
+   *
+   * @param req - Pre-populated ReqCreateSystem instance
+   * @return url pointing to created resource
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public String createSystem(ReqCreateSystem req, Boolean skipCredCheck) throws TapisClientException
+  {
     // Submit the request and return the response
     RespResourceUrl resp = null;
-    try { resp = sysApi.createSystem(req); }
+    try { resp = sysApi.createSystem(req, skipCredCheck); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
@@ -244,9 +260,25 @@ public class SystemsClient implements ITapisClient
    */
   public String putSystem(String systemId, ReqPutSystem req) throws TapisClientException
   {
+    return putSystem(systemId, req, DEFAULT_SKIP_CREDENTIAL_CHECK);
+  }
+
+  /**
+   * Update all attributes of a system
+   * NOTE: Not all attributes are updatable.
+   * See the helper method buildReqPutSystem() for an example of how to build a pre-populated
+   *   ReqPutSystem instance from a TapisSystem instance.
+   *
+   * @param systemId - Id of resource to be updated
+   * @param req - Pre-populated ReqPutSystem instance
+   * @return url pointing to updated resource
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public String putSystem(String systemId, ReqPutSystem req, Boolean skipCredCheck) throws TapisClientException
+  {
     // Submit the request and return the response
     RespResourceUrl resp = null;
-    try { resp = sysApi.putSystem(systemId, req); }
+    try { resp = sysApi.putSystem(systemId, req, skipCredCheck); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
@@ -673,8 +705,21 @@ public class SystemsClient implements ITapisClient
    */
   public void updateUserCredential(String systemId, String userName, ReqCreateCredential req) throws TapisClientException
   {
+    updateUserCredential(systemId, userName, req, DEFAULT_SKIP_CREDENTIAL_CHECK);
+  }
+
+  /**
+   * Create or update credential for given system and user.
+   *
+   * @param systemId System Id
+   * @param userName Id of user
+   * @param req Request containing credentials (password, keys, etc).
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public void updateUserCredential(String systemId, String userName, ReqCreateCredential req, Boolean skipCredCheck) throws TapisClientException
+  {
     // Submit the request
-    try { credsApi.createUserCredential(systemId, userName, req); }
+    try { credsApi.createUserCredential(systemId, userName, req, skipCredCheck); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
   }
@@ -833,7 +878,7 @@ public class SystemsClient implements ITapisClient
     rSys.jobWorkingDir(sys.getJobWorkingDir());
     rSys.jobEnvVariables(sys.getJobEnvVariables());
     rSys.jobMaxJobs(sys.getJobMaxJobs()).jobMaxJobsPerUser(sys.getJobMaxJobsPerUser());
-    rSys.jobIsBatch(sys.getJobIsBatch());
+    rSys.canRunBatch(sys.getCanRunBatch());
     rSys.batchScheduler(sys.getBatchScheduler());
     rSys.batchLogicalQueues(sys.getBatchLogicalQueues());
     rSys.batchDefaultLogicalQueue(sys.getBatchDefaultLogicalQueue());
@@ -845,6 +890,7 @@ public class SystemsClient implements ITapisClient
     else if (notes instanceof String) rSys.notes(ClientTapisGsonUtils.getGson().fromJson((String) notes, JsonObject.class));
     else if (notes instanceof JsonObject) rSys.notes(notes);
     else rSys.notes(null);
+    rSys.importRefId(sys.getImportRefId());
     return rSys;
   }
 
@@ -867,7 +913,7 @@ public class SystemsClient implements ITapisClient
     rSys.jobWorkingDir(sys.getJobWorkingDir());
     rSys.jobEnvVariables(sys.getJobEnvVariables());
     rSys.jobMaxJobs(sys.getJobMaxJobs()).jobMaxJobsPerUser(sys.getJobMaxJobsPerUser());
-    rSys.jobIsBatch(sys.getJobIsBatch());
+    rSys.canRunBatch(sys.getCanRunBatch());
     rSys.batchScheduler(sys.getBatchScheduler());
     rSys.batchLogicalQueues(sys.getBatchLogicalQueues());
     rSys.batchDefaultLogicalQueue(sys.getBatchDefaultLogicalQueue());
@@ -879,6 +925,7 @@ public class SystemsClient implements ITapisClient
     else if (notes instanceof String) rSys.notes(ClientTapisGsonUtils.getGson().fromJson((String) notes, JsonObject.class));
     else if (notes instanceof JsonObject) rSys.notes(notes);
     else rSys.notes(null);
+    rSys.importRefId(sys.getImportRefId());
     return rSys;
   }
 
@@ -965,6 +1012,20 @@ public class SystemsClient implements ITapisClient
     cap.setPrecedence(precedence);
     cap.setValue(value);
     return cap;
+  }
+
+  /**
+   * Utility method to map a SchedulerHiddenOptionEnum to the string used by the scheduler.
+   * @param hiddenOptionEnum - Scheduler hidden option enum
+   * @return String containing the option as expected by the batch scheduler. Empty string if no mapping found.
+   */
+  public static String getSchedulerHiddenOptionValue(SchedulerHiddenOptionEnum hiddenOptionEnum)
+  {
+    return switch (hiddenOptionEnum)
+    {
+      case MEM -> "--mem";
+      default -> "";
+    };
   }
 
   // ************************************************************************

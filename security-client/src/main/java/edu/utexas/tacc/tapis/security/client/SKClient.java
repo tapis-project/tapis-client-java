@@ -3,7 +3,6 @@ package edu.utexas.tacc.tapis.security.client;
 import java.util.Arrays;
 import java.util.List;
 
-import edu.utexas.tacc.tapis.security.client.gen.model.ReqRemovePermissionFromAllRoles;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.utexas.tacc.tapis.client.shared.ITapisClient;
@@ -19,13 +18,16 @@ import edu.utexas.tacc.tapis.security.client.gen.model.Options;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqAddChildRole;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqAddRolePermission;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqCreateRole;
+import edu.utexas.tacc.tapis.security.client.gen.model.ReqGrantAdminRole;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqGrantUserPermission;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqGrantUserRole;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqGrantUserRoleWithPermission;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqPreviewPathPrefix;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqRemoveChildRole;
+import edu.utexas.tacc.tapis.security.client.gen.model.ReqRemovePermissionFromAllRoles;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqRemoveRolePermission;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqReplacePathPrefix;
+import edu.utexas.tacc.tapis.security.client.gen.model.ReqRevokeAdminRole;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqRevokeUserPermission;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqRevokeUserRole;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqUpdateRoleDescription;
@@ -725,6 +727,78 @@ public class SKClient
         // Return result value.
         Integer x = resp.getResult().getChanges();
         return x == null ? 0 : x;
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* getAdmins:                                                                   */
+    /* ---------------------------------------------------------------------------- */
+    public List<String> getAdmins(String tenant)
+     throws TapisClientException
+    {
+      // Make the REST call.
+      RespNameArray resp = null;
+      try {
+        // Get the API object using default networking.
+        var userApi = new UserApi(_apiClient);
+        resp = userApi.getAdmins(tenant, false);
+      }
+      catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+      catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+
+      // Return result value.
+      return resp.getResult().getNames();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* grantAdminRole:                                                              */
+    /* ---------------------------------------------------------------------------- */
+    public int grantAdminRole(String tenant, String user)
+     throws TapisClientException
+    {
+      // Assign input body.
+      var body = new ReqGrantAdminRole();
+      body.setTenant(tenant);
+      body.setUser(user);
+
+      // Make the REST call.
+      RespChangeCount resp = null;
+      try {
+        // Get the API object using default networking.
+        var userApi = new UserApi(_apiClient);
+        resp = userApi.grantAdminRole(body, false);
+      }
+      catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+      catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+
+      // Return result value.
+      Integer x = resp.getResult().getChanges();
+      return x == null ? 0 : x;
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* revokeAdminRole:                                                             */
+    /* ---------------------------------------------------------------------------- */
+    public int revokeAdminRole(String tenant, String user)
+     throws TapisClientException
+    {
+      // Assign input body.
+      var body = new ReqRevokeAdminRole();
+      body.setTenant(tenant);
+      body.setUser(user);
+
+      // Make the REST call.
+      RespChangeCount resp = null;
+      try {
+        // Get the API object using default networking.
+        var userApi = new UserApi(_apiClient);
+        resp = userApi.revokeAdminRole(body, false);
+      }
+      catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+      catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+
+      // Return result value.
+      Integer x = resp.getResult().getChanges();
+      return x == null ? 0 : x;
     }
     
     /* ---------------------------------------------------------------------------- */

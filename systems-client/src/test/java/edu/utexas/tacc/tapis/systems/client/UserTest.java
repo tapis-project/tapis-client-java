@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gson.JsonObject;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerProfile;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
@@ -107,6 +108,18 @@ public class UserTest
     // Create user client
     usrClient = getClientUsr(serviceURL, ownerUserJWT);
 
+    // Create a scheduler profile for systems to reference
+    System.out.println("Creating scheduler profile with name: " + schedulerProfileName);
+    try {
+      String moduleLoadCmd = "module load";
+      String[] p0 = {tenantName, schedulerProfileName, "test profile", testUser1, moduleLoadCmd};
+      String respUrl = usrClient.createSchedulerProfile(createReqSchedulerProfile(p0));
+      System.out.println("Created scheduler profile: " + respUrl);
+      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
+    } catch (Exception e) {
+      System.out.println("Caught exception: " + e);
+      Assert.fail();
+    }
   }
 
   @AfterSuite
@@ -131,6 +144,11 @@ public class UserTest
     }
 
     // Delete scheduler profiles. This is a hard delete
+    try { usrClient.deleteSchedulerProfile(schedulerProfileName); }
+    catch (Exception e)
+    {
+      System.out.println("Caught exception when deleting scheduler profile: "+ schedulerProfileName + " Exception: " + e);
+    }
     for (int i = 1; i <= numSchedulerProfiles; i++)
     {
       String name = schedulerProfiles.get(i)[1];
@@ -866,6 +884,7 @@ public class UserTest
     Assert.assertNotNull(tmpProfile.getHiddenOptions());
     Assert.assertFalse(tmpProfile.getHiddenOptions().isEmpty());
     Assert.assertEquals(tmpProfile.getHiddenOptions().size(), hiddenOptions.size());
+    Assert.assertTrue(tmpProfile.getHiddenOptions().contains(SchedulerHiddenOptionEnum.MEM));
   }
 
   @Test
@@ -922,6 +941,7 @@ public class UserTest
     {
       profileNamesFound.add(profile.getName());
       System.out.println("Found item with name: " + profile.getName());
+      Assert.assertTrue(profile.getHiddenOptions().contains(SchedulerHiddenOptionEnum.MEM));
     }
     Assert.assertTrue(profileNamesFound.contains(p1[1]),
             "getSchedulerProfiles did not return item with name: " + p1[1]);
