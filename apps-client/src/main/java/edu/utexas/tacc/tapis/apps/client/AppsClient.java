@@ -1,14 +1,10 @@
 package edu.utexas.tacc.tapis.apps.client;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.google.gson.JsonObject;
 import com.google.gson.internal.LinkedTreeMap;
 import edu.utexas.tacc.tapis.apps.client.gen.api.GeneralApi;
-import edu.utexas.tacc.tapis.apps.client.gen.model.ArgMetaSpec;
-import edu.utexas.tacc.tapis.apps.client.gen.model.ArgSpec;
 import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqPutApp;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespApps;
@@ -61,8 +57,7 @@ public class AppsClient implements ITapisClient
 
   // Defaults
   public static final boolean DEFAULT_STRICT_FILE_INPUTS = false;
-  public static final boolean DEFAULT_FILE_INPUT_IN_PLACE = false;
-  public static final boolean DEFAULT_FILE_INPUT_META_REQUIRED = false;
+  public static final boolean DEFAULT_FILE_INPUT_AUTO_MOUNT_LOCAL = true;
   public static final int DEFAULT_MAX_JOBS = Integer.MAX_VALUE;
 
   // ************************************************************************
@@ -516,7 +511,7 @@ public class AppsClient implements ITapisClient
     try { resp = appApi.isEnabled(appId); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null)
+    if (resp != null && resp.getResult() != null && resp.getResult().getaBool() != null)
     {
       return resp.getResult().getaBool();
     }
@@ -617,13 +612,13 @@ public class AppsClient implements ITapisClient
     rApp.id(app.getId());
     rApp.version(app.getVersion());
     rApp.description(app.getDescription());
-    rApp.appType(app.getAppType());
     rApp.owner(app.getOwner());
     rApp.enabled(app.getEnabled());
     rApp.runtime(app.getRuntime());
     rApp.runtimeVersion(app.getRuntimeVersion());
     rApp.runtimeOptions(app.getRuntimeOptions());
     rApp.containerImage(app.getContainerImage());
+    rApp.jobType(app.getJobType());
     rApp.maxJobs(app.getMaxJobs()).maxJobsPerUser(app.getMaxJobsPerUser());
     rApp.strictFileInputs(app.getStrictFileInputs());
     rApp.jobAttributes(app.getJobAttributes());
@@ -660,38 +655,6 @@ public class AppsClient implements ITapisClient
     else if (notes instanceof JsonObject) rApp.notes(notes);
     else rApp.notes(null);
     return rApp;
-  }
-
-  /**
-   * Utility method to build an ArgSpec given value, metaName, metaRequired and metaKeyValuePairs
-   *
-   * @param value
-   * @param metaName
-   * @param metaDescription
-   * @param metaRequired
-   * @param metaKVPairs - List of Strings in the form key=value.
-   * @return a new ArgSpec object
-   */
-  public static ArgSpec buildArg(String value, String metaName, String metaDescription,
-                                 boolean metaRequired, List<String> metaKVPairs)
-  {
-    var arg = new ArgSpec();
-    var argMeta = new ArgMetaSpec();
-    var argMetaKVPairs = new ArrayList<KeyValuePair>();
-    List<String> argKVPairs = Collections.emptyList();
-    if (metaKVPairs != null) argKVPairs = metaKVPairs;
-    // Convert strings in the form key=value into KeyValuePair objects
-    for (String kvPairStr : argKVPairs)
-    {
-      argMetaKVPairs.add(kvPairFromString(kvPairStr));
-    }
-    argMeta.setName(metaName);
-    argMeta.setDescription(metaDescription);
-    argMeta.setRequired(metaRequired);
-    argMeta.setKeyValuePairs(argMetaKVPairs);
-    arg.setArg(value);
-    arg.setMeta(argMeta);
-    return arg;
   }
 
   // ************************************************************************

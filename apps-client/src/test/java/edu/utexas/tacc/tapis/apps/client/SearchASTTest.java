@@ -77,7 +77,7 @@ public class SearchASTTest
 //    // Cleanup anything leftover from previous failed run
 //    tearDown();
 //
-////    String[] tenantName = 0, name = 1, "description " + suffix = 2, appType = 3, ownerUser = 4, "host"+suffix = 5,
+////    String[] tenantName = 0, name = 1, "description " + suffix = 2, jobType = 3, ownerUser = 4, "host"+suffix = 5,
 ////             "effUser"+suffix = 6, "fakePassword"+suffix = 7,"bucket"+suffix = 8, "/root"+suffix = 9,
 ////             "jobLocalWorkDir"+suffix = 10, "jobLocalArchDir"+suffix = 11,
 ////            "jobRemoteArchApptem"+suffix = 12, "jobRemoteArchDir"+suffix = 13};
