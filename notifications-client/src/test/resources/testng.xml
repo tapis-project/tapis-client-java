@@ -1,0 +1,17 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="Tapis Notifications client" verbose="1" parallel="none">
+    <groups>
+        <run>
+            <include name="unit"/>
+            <exclude name="integration"/>
+            <exclude name="broken"/>
+            <exclude name="notReady"/>
+        </run>
+    </groups>
+	<test name="notifications-client">
+		<packages>
+		   <package name="edu.utexas.tacc.tapis.notifications.client.*" /> 
+		</packages>
+	</test>
+</suite>
