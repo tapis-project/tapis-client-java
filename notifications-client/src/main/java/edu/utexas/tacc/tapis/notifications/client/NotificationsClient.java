@@ -4,8 +4,8 @@ import java.util.List;
 
 import com.google.gson.JsonObject;
 import com.google.gson.internal.LinkedTreeMap;
-import org.apache.commons.lang3.StringUtils;
 import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
 
 import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
@@ -30,7 +30,6 @@ import edu.utexas.tacc.tapis.notifications.client.gen.model.ReqPatchSubscription
 import edu.utexas.tacc.tapis.notifications.client.gen.model.ReqPostSubscription;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.ReqPutSubscription;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.ReqSearchSubscriptions;
-import edu.utexas.tacc.tapis.notifications.client.gen.model.ReqPatchSubscription;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.TapisSubscription;
 
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_COMPUTETOTAL;
@@ -183,7 +182,7 @@ public class NotificationsClient implements ITapisClient
   // -----------------------------------------------------------------------
   /**
    * Create a subscription
-   * TODO See the helper method buildReqPostSubscription() for an example of how to build a pre-populated
+   * See the helper method buildReqPostSubscription() for an example of how to build a pre-populated
    *   ReqPostSubscription instance from a TapisSubscription instance.
    *
    * @param req Request body specifying attributes
@@ -221,7 +220,7 @@ public class NotificationsClient implements ITapisClient
   /**
    * Update all attributes of a subscription
    * NOTE: Not all attributes are updatable.
-   * TODO See the helper method buildReqPutSubscription() for an example of how to build a pre-populated
+   * See the helper method buildReqPutSubscription() for an example of how to build a pre-populated
    *   ReqPutSubscription instance from a TapisSubscription instance.
    *
    * @param id - Id of resource to be updated
@@ -453,6 +452,25 @@ public class NotificationsClient implements ITapisClient
   }
 
   // -----------------------------------------------------------------------
+  // ------------------------- Events -------------------------------
+  // -----------------------------------------------------------------------
+  /**
+   * Publish an event
+   * See the helper method buildReqPostEvent() for an example of how to build a pre-populated
+   *   ReqPostEvent instance.
+   *
+   * @param req Request body specifying attributes
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public void publishEvent(ReqPostEvent req) throws TapisClientException
+  {
+    // Submit the request
+    try { eventsApi.publishEvent(req); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+  }
+
+  // -----------------------------------------------------------------------
   // --------------------------- Permissions -------------------------------
   // -----------------------------------------------------------------------
 
@@ -534,9 +552,9 @@ public class NotificationsClient implements ITapisClient
   // -----------------------------------------------------------------------
 
   /**
-   * Utility method to build a ReqCreateSubscription object using attributes from a TapisSubscription.
+   * Utility method to build a ReqPostSubscription object using attributes from a TapisSubscription.
    */
-  public static ReqPostSubscription buildReqCreateSubscription(TapisSubscription subscription)
+  public static ReqPostSubscription buildReqPostSubscription(TapisSubscription subscription)
   {
     if (subscription == null) return null;
     ReqPostSubscription rSubscription = new ReqPostSubscription();
@@ -571,6 +589,21 @@ public class NotificationsClient implements ITapisClient
     else if (notes instanceof JsonObject) rSubscription.notes(notes);
     else rSubscription.notes(null);
     return rSubscription;
+  }
+
+  /**
+   * Utility method to build a ReqPostEvent object.
+   */
+  public static ReqPostEvent buildReqPostEvent(String source, String topic, String subject, String timestamp)
+  {
+    // If any required attributes null then return null.
+    if (StringUtils.isBlank(source) || StringUtils.isBlank(topic) || StringUtils.isBlank(timestamp)) return null;
+    ReqPostEvent rEvent = new ReqPostEvent();
+    rEvent.source(source);
+    rEvent.topic(topic);
+    rEvent.subject(subject);
+    rEvent.time(timestamp);
+    return rEvent;
   }
 
   // ************************************************************************
