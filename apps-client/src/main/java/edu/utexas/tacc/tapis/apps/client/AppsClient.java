@@ -21,7 +21,7 @@ import edu.utexas.tacc.tapis.apps.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.apps.client.gen.ApiException;
 import edu.utexas.tacc.tapis.apps.client.gen.api.PermissionsApi;
 import edu.utexas.tacc.tapis.apps.client.gen.api.ApplicationsApi;
-import edu.utexas.tacc.tapis.apps.client.gen.model.ReqCreateApp;
+import edu.utexas.tacc.tapis.apps.client.gen.model.ReqPostApp;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqPerms;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqSearchApps;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqPatchApp;
@@ -176,14 +176,14 @@ public class AppsClient implements ITapisClient
 
   /**
    * Create an app
-   * See the helper method buildReqCreateApp() for an example of how to build a pre-populated
-   *   ReqCreateApp instance from a TapisApp instance.
+   * See the helper method buildReqPostApp() for an example of how to build a pre-populated
+   *   ReqPostApp instance from a TapisApp instance.
    *
    * @param req Request body specifying attributes
    * @return url pointing to created resource
    * @throws TapisClientException - If api call throws an exception
    */
-  public String createApp(ReqCreateApp req) throws TapisClientException
+  public String createApp(ReqPostApp req) throws TapisClientException
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
@@ -603,12 +603,12 @@ public class AppsClient implements ITapisClient
   // -----------------------------------------------------------------------
 
   /**
-   * Utility method to build a ReqCreateApp object using attributes from a TapisApp.
+   * Utility method to build a ReqPostApp object using attributes from a TapisApp.
    */
-  public static ReqCreateApp buildReqCreateApp(TapisApp app)
+  public static ReqPostApp buildReqPostApp(TapisApp app)
   {
     if (app == null) return null;
-    ReqCreateApp rApp = new ReqCreateApp();
+    ReqPostApp rApp = new ReqPostApp();
     rApp.id(app.getId());
     rApp.version(app.getVersion());
     rApp.description(app.getDescription());

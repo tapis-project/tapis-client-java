@@ -18,7 +18,7 @@ import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
 
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPutSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPatchSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
@@ -240,7 +240,7 @@ public class UserTest
   // Test various restrictions on system attributes at system creation time
   public void testSystemCreateRestrictions() {
     String[] sys0 = systems.get(4);
-    ReqCreateSystem rSys = createReqSystem(sys0, prot1Port, prot1AuthnMethod, null);
+    ReqPostSystem rSys = createReqSystem(sys0, prot1Port, prot1AuthnMethod, null);
 
     // Attempt to create an S3 system with no bucketName
     boolean pass = false;
