@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.utexas.tacc.tapis</groupId>
   <artifactId>notifications-client</artifactId>
-  <version>2.0.21</version>
+  <version>2.0.22</version>
   <name>Tapis Notifications Client</name>
   <description>Java client for Notifications Service</description>
   <url>https://github.com/tapis-project/tapis-client-java/notifications-client</url>
@@ -164,6 +164,7 @@
     <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
     <openapi-generator-maven-plugin.version>4.3.1</openapi-generator-maven-plugin.version>
     <jakarta.servlet-api.version>4.0.2</jakarta.servlet-api.version>
+    <specPath>https://raw.githubusercontent.com/tapis-project/openapi-notifications/local/NotificationsAPI.yaml</specPath>
     <javax.ws.rs-api.version>2.1</javax.ws.rs-api.version>
     <jooq-codegen-maven-plugin.version>3.14.9</jooq-codegen-maven-plugin.version>
     <gson.version>2.8.6</gson.version>
@@ -173,7 +174,7 @@
     <javax.validation.version>2.0.1.Final</javax.validation.version>
     <amqp-client.version>5.10.0</amqp-client.version>
     <eddsa.version>0.3.0</eddsa.version>
-    <timestamp>1639071311274</timestamp>
+    <timestamp>1639666709298</timestamp>
     <metrics-core.version>3.2.3</metrics-core.version>
     <threetenbp.version>1.3.5</threetenbp.version>
     <snakeyaml.version>1.26</snakeyaml.version>
@@ -183,7 +184,7 @@
     <swagger-jaxrs2.version>2.0.10</swagger-jaxrs2.version>
     <undertow.version>2.2.2.Final</undertow.version>
     <commons-math3.version>3.6.1</commons-math3.version>
-    <buildNumber>7c0a7033</buildNumber>
+    <buildNumber>2a46cac2</buildNumber>
     <reactor-core.version>3.4.6</reactor-core.version>
     <software.amazon.awssdk.version>2.13.11</software.amazon.awssdk.version>
     <testng.version>6.14.3</testng.version>
@@ -213,7 +214,7 @@
     <apache-sshd.version>2.7.0</apache-sshd.version>
     <mockito-core.version>3.0.0</mockito-core.version>
     <javax.websocket-api.version>1.1</javax.websocket-api.version>
-    <build.timestamp>2021-12-09T17:34:12Z</build.timestamp>
+    <build.timestamp>2021-12-16T14:57:14Z</build.timestamp>
     <statefulj.version>3.0</statefulj.version>
     <java-source.version>1.15</java-source.version>
     <reactor-rabbitmq.version>1.5.2</reactor-rabbitmq.version>
@@ -228,6 +229,7 @@
     <maven-javadoc-plugin.version>3.0.0</maven-javadoc-plugin.version>
     <jersey-container-servlet.version>2.34</jersey-container-servlet.version>
     <javax.activation.activation.version>1.1.1</javax.activation.activation.version>
+    <skipIntegrationTests>true</skipIntegrationTests>
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
     <org.everit.json.schema.version>1.12.1</org.everit.json.schema.version>
     <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
@@ -251,6 +253,24 @@
       <artifactId>jcommander</artifactId>
       <version>1.72</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>2.12.1</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.12.1</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.12.1</version>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
@@ -284,15 +304,45 @@
     </dependency>
     <dependency>
       <groupId>edu.utexas.tacc.tapis</groupId>
+      <artifactId>auth-client</artifactId>
+      <version>2.0.22</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>edu.utexas.tacc.tapis</groupId>
       <artifactId>shared-clientlib</artifactId>
-      <version>2.0.21</version>
+      <version>2.0.22</version>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>edu.utexas.tacc.tapis</groupId>
+      <artifactId>tokens-client</artifactId>
+      <version>2.0.22</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>io.gsonfire</groupId>
       <artifactId>gson-fire</artifactId>
       <version>1.8.3</version>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-api</artifactId>
+      <version>0.11.2</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-impl</artifactId>
+      <version>0.11.2</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-jackson</artifactId>
+      <version>0.11.2</version>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>io.swagger</groupId>
@@ -453,6 +503,16 @@
         <extensions>false</extensions>
       </plugin>
       <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.22.2</version>
+        <extensions>false</extensions>
+        <configuration>
+          <suiteXmlFiles>
+            <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+          </suiteXmlFiles>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.openapitools</groupId>
         <artifactId>openapi-generator-maven-plugin</artifactId>
         <version>4.3.1</version>
@@ -463,7 +523,7 @@
               <goal>generate</goal>
             </goals>
             <configuration>
-              <inputSpec>https://raw.githubusercontent.com/tapis-project/notifications/dev/api/src/main/resources/openapi.yaml</inputSpec>
+              <inputSpec>${specPath}</inputSpec>
               <enablePostProcessFile>true</enablePostProcessFile>
               <output>${project.build.directory}/generated-sources/openapi</output>
               <generatorName>java</generatorName>
@@ -498,6 +558,17 @@
         </executions>
         <configuration>
           <createDependencyReducedPom>false</createDependencyReducedPom>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.22.2</version>
+        <extensions>false</extensions>
+        <configuration>
+          <skip>${skipIntegrationTests}</skip>
+          <environmentVariables>
+            <APP_ENV>test</APP_ENV>
+          </environmentVariables>
         </configuration>
       </plugin>
     </plugins>
