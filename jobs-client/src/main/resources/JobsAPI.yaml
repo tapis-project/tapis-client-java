@@ -22,25 +22,6 @@ tags:
   - name: general
     description: informational endpoints
 paths:
-  /jobs/ready:
-    get:
-      tags:
-        - general
-      description: Lightwieght readiness check. No authorization required.
-      operationId: ready
-      responses:
-        '200':
-          description: Service ready.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespProbe'
-        '503':
-          description: Service unavailable.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespProbe'
   /jobs/hello:
     get:
       tags:
@@ -81,73 +62,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespProbe'
-  /jobs/{jobUuid}/unhide:
-    post:
+  /jobs/ready:
+    get:
       tags:
-        - jobs
-      description: |-
-        Un-hide a job by its UUID.
-
-        The caller must be the job owner, creator or a tenant administrator.
-      operationId: unhideJob
-      parameters:
-        - name: jobUuid
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pretty
-          in: query
-          schema:
-            type: boolean
-            default: false
+        - general
+      description: Lightwieght readiness check. No authorization required.
+      operationId: ready
       responses:
         '200':
-          description: Unhide the job successfuly.
+          description: Service ready.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RespHideJob'
-        '400':
-          description: Input error.
+                $ref: '#/components/schemas/RespProbe'
+        '503':
+          description: Service unavailable.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '403':
-          description: Forbidden.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '404':
-          description: Job not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespName'
-        '409':
-          description: >-
-            Job is already in Terminal State (CANCELLED, FINISHED or FAILED).
-            Job state conflicts with the cancel request. No action taken
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespName'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-      security:
-        - TapisJWT: []
+                $ref: '#/components/schemas/RespProbe'
   /jobs/{jobUuid}/hide:
     post:
       tags:
@@ -200,9 +133,72 @@ paths:
               schema:
                 $ref: '#/components/schemas/RespName'
         '409':
-          description: >-
-            Job is already in Terminal State (CANCELLED, FINISHED or FAILED).
-            Job state conflicts with the cancel request. No action taken
+          description: Job is already in Terminal State (CANCELLED, FINISHED or FAILED). Job state conflicts with the cancel request. No action taken
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  /jobs/{jobUuid}/unhide:
+    post:
+      tags:
+        - jobs
+      description: |-
+        Un-hide a job by its UUID.
+
+        The caller must be the job owner, creator or a tenant administrator.
+      operationId: unhideJob
+      parameters:
+        - name: jobUuid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Unhide the job successfuly.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespHideJob'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Job not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '409':
+          description: Job is already in Terminal State (CANCELLED, FINISHED or FAILED). Job state conflicts with the cancel request. No action taken
           content:
             application/json:
               schema:
@@ -267,9 +263,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/RespName'
         '409':
-          description: >-
-            Job is already in Terminal State (CANCELLED, FINISHED or FAILED).
-            Job state conflicts with the cancel request. No action taken
+          description: Job is already in Terminal State (CANCELLED, FINISHED or FAILED). Job state conflicts with the cancel request. No action taken
           content:
             application/json:
               schema:
@@ -491,13 +485,10 @@ paths:
     get:
       tags:
         - jobs
-      description: >-
-        Download job's output files for previously submitted job by its UUID.
-        The job must be in a terminal state - FINISHED or FAILED.  
-
+      description: |-
+        Download job's output files for previously submitted job by its UUID. The job must be in a terminal state - FINISHED or FAILED.  
 
         The caller must be the job owner, creator or a tenant administrator.
-
         The URL must ends with '/' even if there is no outputPath is specified. 
       operationId: getJobOutputDownload
       parameters:
@@ -571,14 +562,10 @@ paths:
     get:
       tags:
         - jobs
-      description: >-
-        Retrieve job's output files list for previously submitted job by its
-        UUID. The job must be in a terminal state (FINISHED or FAILED or
-        CANCELLED)  
-
+      description: |-
+        Retrieve job's output files list for previously submitted job by its UUID. The job must be in a terminal state (FINISHED or FAILED or CANCELLED)  
 
         The caller must be the job owner, creator or a tenant administrator.
-
         The URL must ends with '/' even if there is no outputPath is specified. 
       operationId: getJobOutputList
       parameters:
@@ -651,10 +638,8 @@ paths:
     get:
       tags:
         - jobs
-      description: >-
-        Retrieve list of jobs for the user based on search conditions in the
-        query paramter on the dedicated search end-point.
-
+      description: |-
+        Retrieve list of jobs for the user based on search conditions in the query paramter on the dedicated search end-point.
 
         The caller must be the job owner, creator or a tenant administrator.
       operationId: getJobSearchList
@@ -733,11 +718,8 @@ paths:
     post:
       tags:
         - jobs
-      description: >-
-        Retrieve list of jobs for the user based on search conditions in the
-        request body and pagination information from the query paramter on the
-        dedicated search end-point.
-
+      description: |-
+        Retrieve list of jobs for the user based on search conditions in the request body and pagination information from the query paramter on the dedicated search end-point.
 
         The caller must be the job owner, creator or a tenant administrator.
       operationId: getJobSearchListByPostSqlStr
@@ -941,9 +923,8 @@ paths:
     post:
       tags:
         - jobs
-      description: >
-        Resubmit a job for execution using the original parameters.  The main
-        phases of job execution are:
+      description: |
+        Resubmit a job for execution using the original parameters.  The main phases of job execution are:
 
           - validate input
           - check resource availability
@@ -999,6 +980,21 @@ paths:
         - TapisJWT: []
 components:
   schemas:
+    RespBasic:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          type: object
+    ResultMetadata:
+      type: object
     JobsProbe:
       type: object
       properties:
@@ -1024,21 +1020,6 @@ components:
           $ref: '#/components/schemas/ResultMetadata'
         result:
           $ref: '#/components/schemas/JobsProbe'
-    ResultMetadata:
-      type: object
-    RespBasic:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/ResultMetadata'
-        result:
-          type: object
     JobHideDisplay:
       type: object
       properties:
@@ -1240,6 +1221,12 @@ components:
           enum:
             - FORK
             - BATCH
+        mpiCmd:
+          type: string
+        cmdPrefix:
+          type: string
+        mpi:
+          type: boolean
     RespGetJob:
       type: object
       properties:
@@ -1604,6 +1591,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/NotificationSubscription'
+        isMpi:
+          type: boolean
+        mpiCmd:
+          type: string
+        cmdPrefix:
+          type: string
   securitySchemes:
     TapisJWT:
       type: apiKey
