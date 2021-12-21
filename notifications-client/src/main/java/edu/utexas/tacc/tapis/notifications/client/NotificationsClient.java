@@ -17,7 +17,6 @@ import edu.utexas.tacc.tapis.notifications.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.notifications.client.gen.ApiException;
 import edu.utexas.tacc.tapis.notifications.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.notifications.client.gen.api.EventsApi;
-//import edu.utexas.tacc.tapis.notifications.client.gen.api.PermissionsApi;
 import edu.utexas.tacc.tapis.notifications.client.gen.api.SubscriptionsApi;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.RespBasic;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.RespBoolean;
@@ -70,7 +69,6 @@ public class NotificationsClient implements ITapisClient
   private final ApiClient apiClient;
   private final SubscriptionsApi subscriptionsApi;
   private final EventsApi eventsApi;
-//  private final PermissionsApi permsApi;
   private final GeneralApi generalApi;
 
   // ************************************************************************
@@ -86,7 +84,6 @@ public class NotificationsClient implements ITapisClient
     apiClient = new ApiClient();
     subscriptionsApi = new SubscriptionsApi(apiClient);
     eventsApi = new EventsApi(apiClient);
-//    permsApi = new PermissionsApi(apiClient);
     generalApi = new GeneralApi(apiClient);
   }
 
@@ -106,7 +103,6 @@ public class NotificationsClient implements ITapisClient
     if (!StringUtils.isBlank(jwt)) apiClient.addDefaultHeader(TAPIS_JWT_HEADER, jwt);
     subscriptionsApi = new SubscriptionsApi(apiClient);
     eventsApi = new EventsApi(apiClient);
-//    permsApi = new PermissionsApi(apiClient);
     generalApi = new GeneralApi(apiClient);
   }
 
@@ -462,10 +458,10 @@ public class NotificationsClient implements ITapisClient
    * @param req Request body specifying attributes
    * @throws TapisClientException - If api call throws an exception
    */
-  public void publishEvent(ReqPostEvent req) throws TapisClientException
+  public void postEvent(ReqPostEvent req) throws TapisClientException
   {
     // Submit the request
-    try { eventsApi.publishEvent(req); }
+    try { eventsApi.postEvent(req); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
   }
@@ -473,79 +469,6 @@ public class NotificationsClient implements ITapisClient
   // -----------------------------------------------------------------------
   // --------------------------- Permissions -------------------------------
   // -----------------------------------------------------------------------
-
-//  /**
-//   * Grant permissions for given app and user.
-//   *
-//   * @param appId id of app
-//   * @param userName Id of user
-//   * @param permissions list of permissions to grant.
-//   * @throws TapisClientException - If api call throws an exception
-//   */
-//  public void grantUserPermissions(String appId, String userName, List<String> permissions)
-//          throws TapisClientException
-//  {
-//    // Build the request
-//    var req = new ReqPerms();
-//    req.setPermissions(permissions);
-//    // Submit the request
-//    try { permsApi.grantUserPerms(appId, userName, req); }
-//    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-//    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-//  }
-//
-//  /**
-//   * Get list of permissions for given app and user.
-//   *
-//   * @param appId id of app
-//   * @param userName Name of user
-//   * @throws TapisClientException - If api call throws an exception
-//   */
-//  public List<String> getSubscriptionPermissions(String appId, String userName) throws TapisClientException
-//  {
-//    RespNameArray resp = null;
-//    try { resp = permsApi.getUserPerms(appId, userName); }
-//    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-//    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-//    if (resp != null && resp.getResult() != null) return resp.getResult().getNames(); else return null;
-//  }
-//
-//  /**
-//   * Revoke permissions for given app and user.
-//   *
-//   * @param appId id of app
-//   * @param userName name of user
-//   * @param permissions list of permissions to revoke.
-//   * @throws TapisClientException - If api call throws an exception
-//   */
-//  public void revokeUserPermissions(String appId, String userName, List<String> permissions)
-//          throws TapisClientException
-//  {
-//    // Build the request
-//    var req = new ReqPerms();
-//    req.setPermissions(permissions);
-//    // Submit the request
-//    try { permsApi.revokeUserPerms(appId, userName, req); }
-//    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-//    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-//  }
-//
-//  /**
-//   * Revoke single permission for given app and user.
-//   *
-//   * @param appId id of app
-//   * @param userName name of user
-//   * @param permission permission to revoke
-//   * @throws TapisClientException - if api call throws an exception
-//   */
-//  public void revokeUserPermission(String appId, String userName, String permission)
-//          throws TapisClientException
-//  {
-//    // Submit the request
-//    try { permsApi.revokeUserPerm(appId, userName, permission); }
-//    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-//    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-//  }
 
   // -----------------------------------------------------------------------
   // --------------------------- Utility Methods ---------------------------
@@ -562,6 +485,9 @@ public class NotificationsClient implements ITapisClient
     rSubscription.description(subscription.getDescription());
     rSubscription.owner(subscription.getOwner());
     rSubscription.enabled(subscription.getEnabled());
+    rSubscription.typeFilter(subscription.getTypeFilter());
+    rSubscription.subjectFilter(subscription.getSubjectFilter());
+    rSubscription.deliveryMethods(subscription.getDeliveryMethods());
     // Notes requires special handling. It must be null or a JsonObject
     Object notes = subscription.getNotes();
     if (notes == null) rSubscription.notes(null);
@@ -579,7 +505,7 @@ public class NotificationsClient implements ITapisClient
     if (subscription == null) return null;
     ReqPutSubscription rSubscription = new ReqPutSubscription();
     rSubscription.description(subscription.getDescription());
-    rSubscription.topicFilter(subscription.getTopicFilter());
+    rSubscription.typeFilter(subscription.getTypeFilter());
     rSubscription.subjectFilter(subscription.getSubjectFilter());
     rSubscription.deliveryMethods(subscription.getDeliveryMethods());
     // Notes requires special handling. It must be null or a JsonObject
@@ -594,13 +520,13 @@ public class NotificationsClient implements ITapisClient
   /**
    * Utility method to build a ReqPostEvent object.
    */
-  public static ReqPostEvent buildReqPostEvent(String source, String topic, String subject, String timestamp)
+  public static ReqPostEvent buildReqPostEvent(String source, String type, String subject, String timestamp)
   {
     // If any required attributes null then return null.
-    if (StringUtils.isBlank(source) || StringUtils.isBlank(topic) || StringUtils.isBlank(timestamp)) return null;
+    if (StringUtils.isBlank(source) || StringUtils.isBlank(type) || StringUtils.isBlank(timestamp)) return null;
     ReqPostEvent rEvent = new ReqPostEvent();
     rEvent.source(source);
-    rEvent.topic(topic);
+    rEvent.type(type);
     rEvent.subject(subject);
     rEvent.time(timestamp);
     return rEvent;
