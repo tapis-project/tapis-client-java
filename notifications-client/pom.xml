@@ -22,7 +22,7 @@
           or if yaml committed to local branch then do:
      mvn install -DspecPath="https://raw.githubusercontent.com/tapis-project/openapi-notifications/local/NotificationsAPI.yaml"
      -->
-    <specPath>https://raw.githubusercontent.com/tapis-project/openapi-notifications/local/NotificationsAPI.yaml</specPath>
+    <specPath>https://raw.githubusercontent.com/tapis-project/openapi-notifications/dev/NotificationsAPI.yaml</specPath>
 
     <!-- Skip integration tests by default -->
     <!-- To run tests TAPIS_FILES_SVC_PASSWORD must be set in the env -->
