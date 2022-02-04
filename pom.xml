@@ -126,6 +126,7 @@
         <module>apps-client</module>
         <module>jobs-client</module>
         <module>notifications-client</module>
+        <module>globusproxy-client</module>
     </modules>
     <build>
         <plugins>
