@@ -109,10 +109,10 @@ public class GlobusProxyClient implements ITapisClient
   public String getBasePath() { return apiClient.getBasePath(); }
 
   // Update base path for default client.
-  public GlobusProxyClient setBasePath(String basePath) { apiClient.setBasePath(basePath); return this;}
+  public GlobusProxyClient setBasePath(String basePath) { apiClient.setBasePath(basePath); return this; }
 
   // Add http header to default client
-  public GlobusProxyClient addDefaultHeader(String key, String val) { apiClient.addDefaultHeader(key, val); return this;}
+  public GlobusProxyClient addDefaultHeader(String key, String val) {apiClient.addDefaultHeader(key,val);return this;}
 
   /**
    *  Close connections and stop threads that can sometimes prevent JVM shutdown.
@@ -141,19 +141,21 @@ public class GlobusProxyClient implements ITapisClient
    */
   public String checkHealth() throws TapisClientException
   {
-    // Submit the request and return the response
+    // Submit the request
     RespBasic resp = null;
     try { resp = generalApi.healthCheck(); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null) return resp.getStatus(); else return null;
+    // Return the response
+    if (resp == null || resp.getResult() == null) return null;
+    return resp.getStatus();
   }
 
   // -----------------------------------------------------------------------
   // ------------------------- Auth -------------------------------
   // -----------------------------------------------------------------------
   /**
-   * Return auth URL
+   * Return auth URL that can be used to obtain a Globus Native App Authorization Code
    *
    * @param clientId Id of the client
    * @return The authorization URL
@@ -195,7 +197,8 @@ public class GlobusProxyClient implements ITapisClient
    * @return tokens
    * @throws TapisClientException - If api call throws an exception
    */
-  public AuthTokens checkTokens(String endpointId, String accessToken, String refreshToken) throws TapisClientException
+  public AuthTokens checkTokens(String endpointId, String accessToken, String refreshToken)
+          throws TapisClientException
   {
     RespAuthTokens resp = null;
     try {resp = authApi.checkTokens(endpointId, accessToken, refreshToken); }
@@ -216,7 +219,8 @@ public class GlobusProxyClient implements ITapisClient
    * @return list of files
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<FileInfo> listFiles(String endpointId, String accessToken, String path, boolean recurse) throws TapisClientException
+  public List<FileInfo> listFiles(String endpointId, String accessToken, String path, boolean recurse)
+          throws TapisClientException
   {
     RespFileList resp = null;
     try { resp = operationsApi.listFiles(endpointId, path, accessToken, recurse); }
@@ -234,10 +238,11 @@ public class GlobusProxyClient implements ITapisClient
    * @return status
    * @throws TapisClientException - If api call throws an exception
    */
-  public String deletePath(String endpointId, String accessToken, String path, boolean recurse) throws TapisClientException
+  public String deletePath(String endpointId, String accessToken, String path, boolean recurse)
+          throws TapisClientException
   {
     RespBasic resp = null;
-    try { resp = operationsApi.delete(endpointId, path, accessToken, recurse); }
+    try { resp = operationsApi.deletePath(endpointId, path, accessToken, recurse); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
