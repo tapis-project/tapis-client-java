@@ -10,15 +10,10 @@ import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP_CREDENTIAL_CHECK;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import edu.utexas.tacc.tapis.systems.client.gen.api.SchedulerProfilesApi;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostCredential;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfile;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfiles;
-import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerProfile;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.JsonObject;
@@ -33,27 +28,33 @@ import edu.utexas.tacc.tapis.systems.client.gen.ApiException;
 import edu.utexas.tacc.tapis.systems.client.gen.api.CredentialsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.PermissionsApi;
+import edu.utexas.tacc.tapis.systems.client.gen.api.SchedulerProfilesApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.SystemsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
 import edu.utexas.tacc.tapis.systems.client.gen.model.CategoryEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.DatatypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPatchSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSchedulerProfile;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPutSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqSearchSystems;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPatchSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespBasic;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespBoolean;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespChangeCount;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespNameArray;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespResourceUrl;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfile;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfiles;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystems;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerProfile;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
 
 /**
@@ -874,7 +875,7 @@ public class SystemsClient implements ITapisClient
     rSys.dtnMountPoint(sys.getDtnMountPoint()).dtnMountSourcePath(sys.getDtnMountSourcePath());
     rSys.isDtn(sys.getIsDtn());
     rSys.canExec(sys.getCanExec());
-    rSys.jobRuntimes(sys.getJobRuntimes());
+    if (sys.getJobRuntimes() != null) rSys.jobRuntimes(new ArrayList<>(sys.getJobRuntimes()));
     rSys.jobWorkingDir(sys.getJobWorkingDir());
     rSys.jobEnvVariables(sys.getJobEnvVariables());
     rSys.jobMaxJobs(sys.getJobMaxJobs()).jobMaxJobsPerUser(sys.getJobMaxJobsPerUser());
@@ -910,7 +911,7 @@ public class SystemsClient implements ITapisClient
     rSys.port(sys.getPort()).useProxy(sys.getUseProxy()).proxyHost(sys.getProxyHost()).proxyPort(sys.getProxyPort());
     rSys.dtnSystemId(sys.getDtnSystemId());
     rSys.dtnMountPoint(sys.getDtnMountPoint()).dtnMountSourcePath(sys.getDtnMountSourcePath());
-    rSys.jobRuntimes(sys.getJobRuntimes());
+    if (sys.getJobRuntimes() != null) rSys.jobRuntimes(new ArrayList<>(sys.getJobRuntimes()));
     rSys.jobWorkingDir(sys.getJobWorkingDir());
     rSys.jobEnvVariables(sys.getJobEnvVariables());
     rSys.jobMaxJobs(sys.getJobMaxJobs()).jobMaxJobsPerUser(sys.getJobMaxJobsPerUser());
