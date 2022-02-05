@@ -1,5 +1,6 @@
 package edu.utexas.tacc.tapis.notifications.client;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import com.google.gson.JsonObject;
@@ -520,10 +521,10 @@ public class NotificationsClient implements ITapisClient
   /**
    * Utility method to build a ReqPostEvent object.
    */
-  public static ReqPostEvent buildReqPostEvent(String source, String type, String subject, String timestamp)
+  public static ReqPostEvent buildReqPostEvent(String source, String type, String subject, OffsetDateTime timestamp)
   {
     // If any required attributes null then return null.
-    if (StringUtils.isBlank(source) || StringUtils.isBlank(type) || StringUtils.isBlank(timestamp)) return null;
+    if (StringUtils.isBlank(source) || StringUtils.isBlank(type) || timestamp == null) return null;
     ReqPostEvent rEvent = new ReqPostEvent();
     rEvent.source(source);
     rEvent.type(type);
