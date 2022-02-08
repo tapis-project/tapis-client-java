@@ -10,7 +10,6 @@ import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP_CREDENTIAL_CHECK;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -875,7 +874,7 @@ public class SystemsClient implements ITapisClient
     rSys.dtnMountPoint(sys.getDtnMountPoint()).dtnMountSourcePath(sys.getDtnMountSourcePath());
     rSys.isDtn(sys.getIsDtn());
     rSys.canExec(sys.getCanExec());
-    if (sys.getJobRuntimes() != null) rSys.jobRuntimes(new ArrayList<>(sys.getJobRuntimes()));
+    rSys.jobRuntimes(sys.getJobRuntimes());
     rSys.jobWorkingDir(sys.getJobWorkingDir());
     rSys.jobEnvVariables(sys.getJobEnvVariables());
     rSys.jobMaxJobs(sys.getJobMaxJobs()).jobMaxJobsPerUser(sys.getJobMaxJobsPerUser());
@@ -911,7 +910,7 @@ public class SystemsClient implements ITapisClient
     rSys.port(sys.getPort()).useProxy(sys.getUseProxy()).proxyHost(sys.getProxyHost()).proxyPort(sys.getProxyPort());
     rSys.dtnSystemId(sys.getDtnSystemId());
     rSys.dtnMountPoint(sys.getDtnMountPoint()).dtnMountSourcePath(sys.getDtnMountSourcePath());
-    if (sys.getJobRuntimes() != null) rSys.jobRuntimes(new ArrayList<>(sys.getJobRuntimes()));
+    rSys.jobRuntimes(sys.getJobRuntimes());
     rSys.jobWorkingDir(sys.getJobWorkingDir());
     rSys.jobEnvVariables(sys.getJobEnvVariables());
     rSys.jobMaxJobs(sys.getJobMaxJobs()).jobMaxJobsPerUser(sys.getJobMaxJobsPerUser());
