@@ -16,7 +16,7 @@
     </parent>
 
     <artifactId>tapis-client-java</artifactId>
-    <version>2.0.28-SNAPSHOT</version>
+    <version>2.0.28</version>
 
     <name>Tapis Client</name>
     <description>Top level java client</description>
@@ -25,7 +25,7 @@
     <scm>
         <connection>scm:git:git@github.com:tapis-project/tapis-client-java.git</connection>
         <url>https://github.com/tapis-project/tapis-client-java</url>
-        <tag>HEAD</tag>
+        <tag>tapis-client-java-2.0.28</tag>
     </scm>
 
     <!-- AVOID CIRCULAR DEPENDENCY WITH TAPIS-SHARED-JAVA -->
