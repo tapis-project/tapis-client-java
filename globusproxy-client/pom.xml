@@ -3,7 +3,7 @@
   <parent>
     <groupId>edu.utexas.tacc.tapis</groupId>
     <artifactId>tapis-client-java</artifactId>
-    <version>2.0.28-SNAPSHOT</version>
+    <version>2.0.29-SNAPSHOT</version>
   </parent>
 
   <artifactId>globusproxy-client</artifactId>
@@ -23,8 +23,7 @@
           or if yaml committed to local branch then do:
      mvn install -DspecPath="https://raw.githubusercontent.com/tapis-project/openapi-globusproxy/local/GlobusProxyAPI.yaml"
      -->
-    <specPath>https://raw.githubusercontent.com/tapis-project/openapi-globusproxy/local/GlobusProxyAPI.yaml</specPath>
-
+    <specPath>${project.basedir}/target/globus-proxy.json</specPath>
   </properties>
 
   <dependencies>
@@ -49,7 +48,9 @@
 
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
-
+    
+    <!-- NOTE: THE CALLED SCRIPT INTRODUCES HIDDEN DEPENDENCIES -->
+    <!--       These dependencies include Docker and curl.      -->
     <plugins>
       <!-- Capture the git commit hash and branch identifiers. -->
       <!-- See parent pom for configuration details. -->
@@ -68,7 +69,24 @@
           </suiteXmlFiles>
         </configuration>
       </plugin>
-
+      <!-- Run script to download latest globuxproxy openapi_v3.yml and generate bundled json file  -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>${exec-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>Generate bundled openapi json file</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>${basedir}/gen_spec.sh</executable>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <!-- Build generated client code using openapi-generator -->
       <plugin>
         <groupId>org.openapitools</groupId>
@@ -83,6 +101,7 @@
               <!-- Location of openapi spec -->
               <inputSpec>${specPath}</inputSpec>
               <enablePostProcessFile>true</enablePostProcessFile>
+              <generateAliasAsModel>true</generateAliasAsModel>
               <output>${project.build.directory}/generated-sources/openapi</output>
               <generatorName>java</generatorName>
               <groupId>edu.utexas.tacc.tapis</groupId>
