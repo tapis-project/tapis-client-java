@@ -172,24 +172,22 @@ public class GlobusProxyClient implements ITapisClient
    */
   public String getAuthUrl(String clientId) throws TapisClientException
   {
-    String result = null;
+    String url = null;
     // Submit the request
-    Map resp = null;
-    try { resp = (Map) authApi.getAuthUrl(clientId); }
+    try
+    {
+      var resp = authApi.getAuthUrl(clientId);
+      // If response came back null return null
+      if (resp == null) return null;
+      // Marshal only the result from the response.
+      Object v = resp.getResult();
+      if (v == null) return null;
+      url = resp.getResult().getUrl();
+    }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    // If response came back null return null
-    if (resp == null) return result;
 
-    // Marshal only the result from the map.
-    String json = gson.toJson(resp.get("result"));
-    // If no result return null
-    if (StringUtils.isBlank(json)) return result;
-
-    // Get the result as a string.
-    JsonObject jsonObj = JsonParser.parseString(json).getAsJsonObject();
-    result = jsonObj.get("url").getAsString();
-    return result;
+    return url;
   }
 
   /**
