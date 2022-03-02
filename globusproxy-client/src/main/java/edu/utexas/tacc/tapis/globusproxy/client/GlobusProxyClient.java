@@ -1,11 +1,11 @@
 package edu.utexas.tacc.tapis.globusproxy.client;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import edu.utexas.tacc.tapis.globusproxy.client.gen.model.InlineObject1;
+import edu.utexas.tacc.tapis.globusproxy.client.gen.model.InlineObject2;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.utexas.tacc.tapis.client.shared.Utils;
@@ -13,6 +13,8 @@ import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.client.shared.ITapisClient;
 
+import edu.utexas.tacc.tapis.globusproxy.client.gen.model.InlineObject;
+import edu.utexas.tacc.tapis.globusproxy.client.gen.model.ResultGlobusAuthUrl;
 import edu.utexas.tacc.tapis.globusproxy.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.globusproxy.client.gen.ApiException;
 import edu.utexas.tacc.tapis.globusproxy.client.gen.api.GeneralApi;
@@ -145,19 +147,18 @@ public class GlobusProxyClient implements ITapisClient
    */
   public String checkHealth() throws TapisClientException
   {
-    String result = null;
+    String retVal = null;
     // Submit the request
-    Map resp = null;
-    try { resp = (Map) generalApi.healthCheck(); }
+    try
+    {
+      var resp = generalApi.healthCheck();
+      // If response came back null return null
+      if (resp == null) return null;
+      retVal = (String) resp.getResult();
+    }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-
-    // If response came back null return null
-    if (resp == null) return result;
-
-    // Marshal only the result from the map.
-    result = gson.toJson(resp.get("result"));
-    return result;
+    return retVal;
   }
 
   // -----------------------------------------------------------------------
@@ -170,28 +171,33 @@ public class GlobusProxyClient implements ITapisClient
    * @return The authorization URL
    * @throws TapisClientException - If api call throws an exception
    */
-  public String getAuthUrl(String clientId) throws TapisClientException
+  public ResultGlobusAuthUrl getAuthUrl(String clientId) throws TapisClientException
   {
-    String url = null;
+    if (StringUtils.isBlank(clientId)) return null;
+
+    ResultGlobusAuthUrl authUrl = new ResultGlobusAuthUrl();
     // Submit the request
     try
     {
       var resp = authApi.getAuthUrl(clientId);
       // If response came back null return null
-      if (resp == null) return null;
+      if (resp == null || resp.getResult() == null) return null;
       // Marshal only the result from the response.
-      Object v = resp.getResult();
-      if (v == null) return null;
-      url = resp.getResult().getUrl();
+      var result = resp.getResult();
+      if (result == null) return null;
+      authUrl.setUrl(result.getUrl());
+      authUrl.setSesssionId(result.getSesssionId());
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
 
-    return url;
+    return authUrl;
   }
 
   /**
    * Exchange auth code for access and refresh token pair
+   * TODO: Add sessionId
+   * TODO/TBD: Also need clientId? probably not, just need sessionId
    *
    * @param authCode - Globus Native App Authorization Code
    * @return tokens
@@ -199,192 +205,263 @@ public class GlobusProxyClient implements ITapisClient
    */
   public AuthTokens getTokens(String authCode) throws TapisClientException
   {
-    AuthTokens result = null;
+    if (StringUtils.isBlank(authCode)) return null;
+
+    AuthTokens authTokens = new AuthTokens();
     // Submit the request
-    Map resp = null;
-    try { resp = (Map) authApi.getTokens(authCode); }
+    try
+    {
+      var resp = authApi.getTokens(authCode);
+      // If response came back null return null
+      if (resp == null || resp.getResult() == null) return null;
+      var result = resp.getResult();
+      authTokens.setAccessToken(result.getAccessToken());
+      authTokens.setRefreshToken(result.getRefreshToken());
+    }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    // If response came back null return null
-    if (resp == null) return result;
 
-    // Marshal only the result from the map.
-    String json = gson.toJson(resp.get("result"));
-    // If no result return null
-    if (StringUtils.isBlank(json)) return result;
-
-    // Get the access and refresh tokens from the result
-    JsonObject jsonObj = JsonParser.parseString(json).getAsJsonObject();
-    String accessToken = jsonObj.get("access_token").getAsString();
-    String refreshToken = jsonObj.get("refresh_token").getAsString();
-    result = new AuthTokens();
-    result.setAccessToken(accessToken);
-    result.setRefreshToken(refreshToken);
-    return result;
+    return authTokens;
   }
 
-//  /**
-//   * Check token pair and refresh as needed.
-//   *
-//   * @param endpointId - Id of endpoint
-//   * @param accessToken - globus access token
-//   * @param refreshToken - globus refresh token
-//   * @return tokens
-//   * @throws TapisClientException - If api call throws an exception
-//   */
-//  public AuthTokens checkTokens(String endpointId, String accessToken, String refreshToken)
-//          throws TapisClientException
-//  {
-//    return null;
-////    RespAuthTokens resp = null;
-////    try {resp = authApi.checkTokens(endpointId, accessToken, refreshToken); }
-////    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-////    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-////    if (resp == null || resp.getResult() == null) return null;
-////    return resp.getResult();
-//  }
-//
-//  // -----------------------------------------------------------------------
-//  // ------------------------- File Operations -----------------------------
-//  // -----------------------------------------------------------------------
-//  /**
-//   * Get list files for an endpoint
-//   *
-//   * @param endpointId - Id of endpoint
-//   * @param accessToken - globus access token
-//   * @return list of files
-//   * @throws TapisClientException - If api call throws an exception
-//   */
-//  public List<FileInfo> listFiles(String endpointId, String accessToken, String path, boolean recurse)
-//          throws TapisClientException
-//  {
-//    return null;
-////    RespFileList resp = null;
-////    try { resp = operationsApi.listFiles(endpointId, path, accessToken, recurse); }
-////    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-////    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-////    if (resp == null || resp.getResult() == null) return null;
-////    return resp.getResult();
-//  }
-//
-//  /**
-//   * Delete a path
-//   *
-//   * @param endpointId - Id of endpoint
-//   * @param accessToken - globus access token
-//   * @return status
-//   * @throws TapisClientException - If api call throws an exception
-//   */
-//  public String deletePath(String endpointId, String accessToken, String path, boolean recurse)
-//          throws TapisClientException
-//  {
-//    return null;
-////    RespBasic resp = null;
-////    try { resp = operationsApi.deletePath(endpointId, path, accessToken, recurse); }
-////    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-////    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-////    if (resp == null || resp.getResult() == null) return null;
-////    return resp.getStatus();
-//  }
-//
-//  /**
-//   * Create a directory
-//   *
-//   * @param endpointId - Id of endpoint
-//   * @param accessToken - globus access token
-//   * @return status
-//   * @throws TapisClientException - If api call throws an exception
-//   */
-//  public String makeDir(String endpointId, String accessToken, ReqMakeDir reqMakeDir) throws TapisClientException
-//  {
-//    return null;
-////    RespBasic resp = null;
-////    try { resp = operationsApi.makeDir(endpointId, accessToken, reqMakeDir); }
-////    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-////    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-////    if (resp == null || resp.getResult() == null) return null;
-////    return resp.getStatus();
-//  }
-//
-//  /**
-//   * Rename a path
-//   *
-//   * @param endpointId - Id of endpoint
-//   * @param accessToken - globus access token
-//   * @return status
-//   * @throws TapisClientException - If api call throws an exception
-//   */
-//  public String renamePath(String endpointId, String accessToken, ReqRename reqRename) throws TapisClientException
-//  {
-//    return null;
-////    RespBasic resp = null;
-////    try { resp = operationsApi.renamePath(endpointId, accessToken, reqRename); }
-////    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-////    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-////    if (resp == null || resp.getResult() == null) return null;
-////    return resp.getStatus();
-//  }
-//
-//  // -----------------------------------------------------------------------
-//  // --------------------------- Transfers -------------------------------
-//  // -----------------------------------------------------------------------
-//  /**
-//   * Create a transfer task
-//   *
-//   * @param accessToken - globus access token
-//   * @return transfer task
-//   * @throws TapisClientException - If api call throws an exception
-//   */
-//  public TransferTask createTransferTask(String accessToken, ReqCreateTransfer reqCreateTransfer)
-//          throws TapisClientException
-//  {
-//    return null;
-////    RespTransferTask resp = null;
-////    try { resp = transfersApi.createTransferTask(accessToken, reqCreateTransfer); }
-////    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-////    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-////    if (resp == null || resp.getResult() == null) return null;
-////    return resp.getResult();
-//  }
-//
-//  /**
-//   * Get a transfer task
-//   *
-//   * @param accessToken - globus access token
-//   * @param taskId task id
-//   * @return transfer task
-//   * @throws TapisClientException - If api call throws an exception
-//   */
-//  public TransferTask getTransferTask(String accessToken, String taskId) throws TapisClientException
-//  {
-//    return null;
-////    RespTransferTask resp = null;
-////    try { resp = transfersApi.getTransferTask(taskId, accessToken); }
-////    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-////    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-////    if (resp == null || resp.getResult() == null) return null;
-////    return resp.getResult();
-//  }
-//
-//  /**
-//   * Request to cancel a transfer task
-//   *
-//   * @param accessToken - globus access token
-//   * @param taskId task id
-//   * @return transfer task
-//   * @throws TapisClientException - If api call throws an exception
-//   */
-//  public ResultCancelTask cancelTransferTask(String accessToken, String taskId) throws TapisClientException
-//  {
-//    return null;
-////    RespCancelTask resp = null;
-////    try { resp = transfersApi.cancelTransferTask(taskId, accessToken); }
-////    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-////    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-////    if (resp == null || resp.getResult() == null) return null;
-////    return resp.getResult();
-//  }
-//
+  /**
+   * Check token pair and refresh as needed.
+   * TODO/TBD: Also need clientId? probably
+   *
+   * @param endpointId - Id of endpoint
+   * @param accessToken - globus access token
+   * @param refreshToken - globus refresh token
+   * @return tokens
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public AuthTokens checkTokens(String endpointId, String accessToken, String refreshToken)
+          throws TapisClientException
+  {
+    if (StringUtils.isBlank(endpointId) || StringUtils.isBlank(accessToken) || StringUtils.isBlank(refreshToken))
+      return null;
+
+    AuthTokens authTokens = new AuthTokens();
+    try
+    {
+      var resp = authApi.checkTokens(endpointId, accessToken, refreshToken);
+      if (resp == null || resp.getResult() == null) return null;
+      var result = resp.getResult();
+      authTokens.setAccessToken(result.getAccessToken());
+      authTokens.setRefreshToken(result.getRefreshToken());
+    }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+
+    return authTokens;
+  }
+
+  // -----------------------------------------------------------------------
+  // ------------------------- File Operations -----------------------------
+  // -----------------------------------------------------------------------
+  /**
+   * Get list of files for an endpoint
+   * TODO/TBD: Also need clientId? probably
+   *
+   * @param endpointId - Id of endpoint
+   * @param accessToken - globus access token
+   * @return list of files
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public List<FileInfo> listFiles(String endpointId, String accessToken, String path, boolean recurse)
+          throws TapisClientException
+  {
+    if (StringUtils.isBlank(endpointId) || StringUtils.isBlank(accessToken)) return null;
+
+    ArrayList<FileInfo> fileInfoList =  new ArrayList<>();
+    try
+    {
+      var resp = operationsApi.listFiles(endpointId, path, accessToken, recurse);
+      if (resp == null) return null;
+      var resultList = resp.getResult();
+      if (resultList == null) return null;
+      for (int i = 0; i < resultList.size(); i++)
+      {
+        var fiRaw = resultList.get(i);
+        FileInfo fi = new FileInfo();
+        fi.setType(fiRaw.getType());
+        fi.setUser(fiRaw.getUser());
+        fi.setGroup(fiRaw.getGroup());
+        fi.setName(fiRaw.getName());
+        fi.setPath(fiRaw.getPath());
+        fi.setSize(fiRaw.getSize());
+        fi.setLastModified(fiRaw.getLastModified());
+        fi.setPermissions(fiRaw.getPermissions());
+        fileInfoList.add(fi);
+      }
+    }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+
+    return fileInfoList;
+  }
+
+  /**
+   * Delete a path
+   * TODO/TBD: Also need clientId? probably
+   *
+   * @param endpointId - Id of endpoint
+   * @param accessToken - globus access token
+   * @return status
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public String deletePath(String endpointId, String accessToken, String path, boolean recurse)
+          throws TapisClientException
+  {
+    if (StringUtils.isBlank(endpointId) || StringUtils.isBlank(accessToken)) return null;
+
+    String retVal = null;
+    try
+    {
+      var resp = operationsApi.deletePath(endpointId, path, accessToken, recurse);
+      if (resp == null) return null;
+      retVal = resp.getStatus();
+    }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+
+    return retVal;
+  }
+
+  /**
+   * Create a directory
+   * TODO/TBD: Also need clientId? probably
+   *
+   * @param endpointId - Id of endpoint
+   * @param accessToken - globus access token
+   * @return status
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public String makeDir(String endpointId, String accessToken, ReqMakeDir reqMakeDir) throws TapisClientException
+  {
+    if (StringUtils.isBlank(endpointId) || StringUtils.isBlank(accessToken) || reqMakeDir == null) return null;
+
+    String retVal = null;
+    // NOTE: IF openapi spec changes this class name may change. Not clear how to make code more robust and
+    //       not depend on the generated class names.
+    InlineObject makeDirPath = new InlineObject();
+    makeDirPath.setPath(reqMakeDir.getPath());
+    try
+    {
+      var resp = operationsApi.makeDir(endpointId, accessToken, makeDirPath);
+      if (resp == null || resp.getResult() == null) return null;
+      retVal = resp.getStatus();
+    }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+
+    return retVal;
+  }
+
+  /**
+   * Rename a path
+   * TODO/TBD: Also need clientId? probably
+   *
+   * @param endpointId - Id of endpoint
+   * @param accessToken - globus access token
+   * @return status
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public String renamePath(String endpointId, String accessToken, ReqRename reqRename) throws TapisClientException
+  {
+    if (StringUtils.isBlank(endpointId) || StringUtils.isBlank(accessToken) || reqRename == null) return null;
+
+    String retVal = null;
+    // NOTE: IF openapi spec changes this class name may change. Not clear how to make code more robust and
+    //       not depend on the generated class names.
+    InlineObject1 reqRenameObj = new InlineObject1();
+    reqRenameObj.setSourcePath(reqRename.getSourcePath());
+    reqRenameObj.setDestinationPath(reqRename.getDestinationPath());
+    try
+    {
+      var resp = operationsApi.renamePath(endpointId, accessToken, reqRenameObj);
+      if (resp == null || resp.getResult() == null) return null;
+      retVal = resp.getStatus();
+    }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+
+    return retVal;
+  }
+
+  // -----------------------------------------------------------------------
+  // --------------------------- Transfers -------------------------------
+  // -----------------------------------------------------------------------
+  /**
+   * Create a transfer task
+   * TODO/TBD: Also need clientId? probably
+   *
+   * @param accessToken - globus access token
+   * @return transfer task
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public TransferTask createTransferTask(String clientId, String accessToken, ReqCreateTransfer reqCreateTransfer)
+          throws TapisClientException
+  {
+    if (StringUtils.isBlank(accessToken) || reqCreateTransfer == null) return null;
+
+    TransferTask transferTask = new TransferTask();
+    // NOTE: IF openapi spec changes this class name may change. Not clear how to make code more robust and
+    //       not depend on the generated class names.
+    InlineObject2 reqCreateTransferObj = new InlineObject2();
+    var v = reqCreateTransfer.getTransferItems();
+    for (Object o : reqCreateTransfer.getTransferItems())
+    reqCreateTransferObj.addTransferItemsItem();
+    reqCreateTransferObj.setDestinationPath(reqRename.getDestinationPath());
+    try
+    {
+      var resp = transfersApi.createTransferTask(accessToken, reqCreateTransferObj).renamePath(endpointId, accessToken, reqRenameObj);
+      if (resp == null || resp.getResult() == null) return null;
+      retVal = resp.getStatus();
+    }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+
+    return transferTask;
+  }
+
+  /**
+   * Get a transfer task
+   *
+   * @param accessToken - globus access token
+   * @param taskId task id
+   * @return transfer task
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public TransferTask getTransferTask(String accessToken, String taskId) throws TapisClientException
+  {
+    return null;
+//    RespTransferTask resp = null;
+//    try { resp = transfersApi.getTransferTask(taskId, accessToken); }
+//    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+//    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+//    if (resp == null || resp.getResult() == null) return null;
+//    return resp.getResult();
+  }
+
+  /**
+   * Request to cancel a transfer task
+   *
+   * @param accessToken - globus access token
+   * @param taskId task id
+   * @return transfer task
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public ResultCancelTask cancelTransferTask(String accessToken, String taskId) throws TapisClientException
+  {
+    return null;
+//    RespCancelTask resp = null;
+//    try { resp = transfersApi.cancelTransferTask(taskId, accessToken); }
+//    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+//    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+//    if (resp == null || resp.getResult() == null) return null;
+//    return resp.getResult();
+  }
+
   // -----------------------------------------------------------------------
   // --------------------------- Utility Methods ---------------------------
   // -----------------------------------------------------------------------
