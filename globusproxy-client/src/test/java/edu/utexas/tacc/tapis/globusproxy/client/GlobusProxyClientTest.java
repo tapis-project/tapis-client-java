@@ -47,9 +47,9 @@ public class GlobusProxyClientTest
   {
     ResultGlobusAuthUrl authUrl = globusProxyClient.getAuthUrl(clientId);
     System.out.printf("Got authUrl for clientId: %s%n", userName);
-    System.out.printf("authUrl. url: %s sessionId: %s%n", authUrl.getUrl(), authUrl.getSesssionId());
+    System.out.printf("authUrl. url: %s sessionId: %s%n", authUrl.getUrl(), authUrl.getSessionId());
     Assert.assertFalse(StringUtils.isBlank(authUrl.getUrl()), "authUrl.url should not be blank");
-    Assert.assertFalse(StringUtils.isBlank(authUrl.getSesssionId()), "authUrl.sessionId should not be blank");
+    Assert.assertFalse(StringUtils.isBlank(authUrl.getSessionId()), "authUrl.sessionId should not be blank");
   }
 
   @AfterSuite
