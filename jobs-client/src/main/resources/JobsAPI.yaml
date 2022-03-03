@@ -22,6 +22,25 @@ tags:
   - name: general
     description: informational endpoints
 paths:
+  /jobs/ready:
+    get:
+      tags:
+        - general
+      description: Lightwieght readiness check. No authorization required.
+      operationId: ready
+      responses:
+        '200':
+          description: Service ready.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespProbe'
+        '503':
+          description: Service unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespProbe'
   /jobs/hello:
     get:
       tags:
@@ -52,25 +71,6 @@ paths:
       responses:
         '200':
           description: Message received.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespProbe'
-        '503':
-          description: Service unavailable.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespProbe'
-  /jobs/ready:
-    get:
-      tags:
-        - general
-      description: Lightwieght readiness check. No authorization required.
-      operationId: ready
-      responses:
-        '200':
-          description: Service ready.
           content:
             application/json:
               schema:
@@ -980,21 +980,6 @@ paths:
         - TapisJWT: []
 components:
   schemas:
-    RespBasic:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/ResultMetadata'
-        result:
-          type: object
-    ResultMetadata:
-      type: object
     JobsProbe:
       type: object
       properties:
@@ -1020,6 +1005,21 @@ components:
           $ref: '#/components/schemas/ResultMetadata'
         result:
           $ref: '#/components/schemas/JobsProbe'
+    ResultMetadata:
+      type: object
+    RespBasic:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          type: object
     JobHideDisplay:
       type: object
       properties:
@@ -1248,7 +1248,7 @@ components:
         created:
           type: integer
           format: int64
-        jobStatus:
+        eventDetail:
           type: string
         description:
           type: string
