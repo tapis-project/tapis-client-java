@@ -1,14 +1,12 @@
 package edu.utexas.tacc.tapis.globusproxy.client;
 
-import edu.utexas.tacc.tapis.globusproxy.client.gen.model.ResultGlobusAuthUrl;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+import edu.utexas.tacc.tapis.globusproxy.client.gen.model.ResultGlobusAuthInfo;
 
 /**
  *  Test the globusproxy client
@@ -43,13 +41,13 @@ public class GlobusProxyClientTest
   }
 
   @Test
-  public void testGetAuthUrl() throws Exception
+  public void testGetAuthInfo() throws Exception
   {
-    ResultGlobusAuthUrl authUrl = globusProxyClient.getAuthUrl(clientId);
-    System.out.printf("Got authUrl for clientId: %s%n", userName);
-    System.out.printf("authUrl. url: %s sessionId: %s%n", authUrl.getUrl(), authUrl.getSessionId());
-    Assert.assertFalse(StringUtils.isBlank(authUrl.getUrl()), "authUrl.url should not be blank");
-    Assert.assertFalse(StringUtils.isBlank(authUrl.getSessionId()), "authUrl.sessionId should not be blank");
+    ResultGlobusAuthInfo authInfo = globusProxyClient.getAuthInfo(clientId);
+    System.out.printf("Got authInfo for clientId: %s%n", userName);
+    System.out.printf("authInfo. url: %s sessionId: %s%n", authInfo.getUrl(), authInfo.getSessionId());
+    Assert.assertFalse(StringUtils.isBlank(authInfo.getUrl()), "authInfo.url should not be blank");
+    Assert.assertFalse(StringUtils.isBlank(authInfo.getSessionId()), "authInfo.sessionId should not be blank");
   }
 
   @AfterSuite

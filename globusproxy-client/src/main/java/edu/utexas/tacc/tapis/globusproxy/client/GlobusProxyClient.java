@@ -2,17 +2,16 @@ package edu.utexas.tacc.tapis.globusproxy.client;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
-import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.client.shared.ITapisClient;
 
+import edu.utexas.tacc.tapis.globusproxy.client.gen.model.TransferItem;
+import edu.utexas.tacc.tapis.globusproxy.client.gen.model.V3GlobusProxyTransfersClientIdTransferItems;
 import edu.utexas.tacc.tapis.globusproxy.client.gen.model.InlineObject;
-import edu.utexas.tacc.tapis.globusproxy.client.gen.model.ResultGlobusAuthUrl;
+import edu.utexas.tacc.tapis.globusproxy.client.gen.model.ResultGlobusAuthInfo;
 import edu.utexas.tacc.tapis.globusproxy.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.globusproxy.client.gen.ApiException;
 import edu.utexas.tacc.tapis.globusproxy.client.gen.api.GeneralApi;
@@ -164,27 +163,27 @@ public class GlobusProxyClient implements ITapisClient
    * @return The authorization URL
    * @throws TapisClientException - If api call throws an exception
    */
-  public ResultGlobusAuthUrl getAuthUrl(String clientId) throws TapisClientException
+  public ResultGlobusAuthInfo getAuthInfo(String clientId) throws TapisClientException
   {
     if (StringUtils.isBlank(clientId)) return null;
 
-    ResultGlobusAuthUrl authUrl = new ResultGlobusAuthUrl();
+    ResultGlobusAuthInfo authInfo = new ResultGlobusAuthInfo();
     // Submit the request
     try
     {
-      var resp = authApi.getAuthUrl(clientId);
+      var resp = authApi.getAuthInfo(clientId);
       // If response came back null return null
       if (resp == null || resp.getResult() == null) return null;
       // Marshal only the result from the response.
       var result = resp.getResult();
       if (result == null) return null;
-      authUrl.setUrl(result.getUrl());
-      authUrl.setSessionId(result.getSessionId());
+      authInfo.setUrl(result.getUrl());
+      authInfo.setSessionId(result.getSessionId());
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
 
-    return authUrl;
+    return authInfo;
   }
 
   /**
@@ -406,7 +405,6 @@ public class GlobusProxyClient implements ITapisClient
 
     // Add all transfer items to the request
     var txfrItems = reqCreateTransferApiObj.getTransferItems();
-    var v = reqCreateTransfer.getTransferItems();
     txfrItems.addAll(reqCreateTransfer.getTransferItems());
     reqCreateTransferApiObj.setTransferItems(txfrItems);
     // Set source and destination endpoints
@@ -490,42 +488,47 @@ public class GlobusProxyClient implements ITapisClient
   // -----------------------------------------------------------------------
   // --------------------------- Utility Methods ---------------------------
   // -----------------------------------------------------------------------
-//  /**
-//   * Utility method to build a ReqCreateTransfer object.
-//   */
-//  public static ReqCreateTransfer buildReqCreateTransfer()
-//  {
-//    if (subscription == null) return null;
-//    ReqPostSubscription rSubscription = new ReqPostSubscription();
-//    rSubscription.id(subscription.getId());
-//    rSubscription.description(subscription.getDescription());
-//    rSubscription.owner(subscription.getOwner());
-//    rSubscription.enabled(subscription.getEnabled());
-//    rSubscription.typeFilter(subscription.getTypeFilter());
-//    rSubscription.subjectFilter(subscription.getSubjectFilter());
-//    rSubscription.deliveryMethods(subscription.getDeliveryMethods());
-//    // Notes requires special handling. It must be null or a JsonObject
-//    Object notes = subscription.getNotes();
-//    if (notes == null) rSubscription.notes(null);
-//    else if (notes instanceof String) rSubscription.notes(ClientTapisGsonUtils.getGson().fromJson((String) notes, JsonObject.class));
-//    else if (notes instanceof JsonObject) rSubscription.notes(notes);
-//    else rSubscription.notes(null);
-//    return rSubscription;
-//  }
-//  /**
-//   * Utility method to build a ReqPostEvent object.
-//   */
-//  public static ReqPostEvent buildReqPostEvent(String source, String type, String subject, OffsetDateTime timestamp)
-//  {
-//    // If any required attributes null then return null.
-//    if (StringUtils.isBlank(source) || StringUtils.isBlank(type) || timestamp == null) return null;
-//    ReqPostEvent rEvent = new ReqPostEvent();
-//    rEvent.source(source);
-//    rEvent.type(type);
-//    rEvent.subject(subject);
-//    rEvent.time(timestamp);
-//    return rEvent;
-//  }
+
+  /**
+   * Utility method to build a ReqCreateTransfer object.
+   * Note that null is returned if any incoming parameters are null or the strings are empty.
+   */
+  public static ReqCreateTransfer buildReqCreateTransfer(String srcEndpoint, String dstEndpoint,
+                                                         List<TransferItem> txfrItems)
+  {
+    if (StringUtils.isBlank(srcEndpoint) || StringUtils.isBlank(dstEndpoint) || txfrItems == null) return null;
+    var rTransfer = new ReqCreateTransfer();
+    rTransfer.setSourceEndpoint(srcEndpoint);
+    rTransfer.setDestinationEndpoint(dstEndpoint);
+    // Build up list of transfer items
+    var rTxfrItems = rTransfer.getTransferItems();
+    for (TransferItem txfrItem : txfrItems)
+    {
+      var item = new V3GlobusProxyTransfersClientIdTransferItems();
+      item.setSourcePath(txfrItem.getSourcePath());
+      item.setDestinationPath(txfrItem.getDestinationPath());
+      item.setRecursive(txfrItem.getRecursive());
+      rTxfrItems.add(item);
+    }
+
+    return rTransfer;
+  }
+
+  /**
+   * Utility method to build a transfer item that can be part of a ReqCreateTransfer.
+   * If item is a directory then recursive must be set to true.
+   *
+   * Note that null is returned if any incoming parameters are null or the strings are empty.
+   */
+  public static TransferItem buildTransferItem(String srcPath, String dstPath, boolean recursive)
+  {
+    if (StringUtils.isBlank(srcPath) || StringUtils.isBlank(dstPath)) return null;
+    var txfrItem = new TransferItem();
+    txfrItem.setSourcePath(srcPath);
+    txfrItem.setDestinationPath(dstPath);
+    txfrItem.setRecursive(recursive);
+    return txfrItem;
+  }
 
   // ************************************************************************
   // *********************** Private Methods ********************************
