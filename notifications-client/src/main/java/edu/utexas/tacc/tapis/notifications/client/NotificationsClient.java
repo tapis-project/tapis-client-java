@@ -529,7 +529,7 @@ public class NotificationsClient implements ITapisClient
     rEvent.source(source);
     rEvent.type(type);
     rEvent.subject(subject);
-    rEvent.time(timestamp);
+//    rEvent.time(timestamp);
     return rEvent;
   }
 
