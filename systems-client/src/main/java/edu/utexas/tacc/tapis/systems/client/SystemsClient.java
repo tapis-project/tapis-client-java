@@ -1,22 +1,17 @@
 package edu.utexas.tacc.tapis.systems.client;
 
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_COMPUTETOTAL;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_ORDERBY;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SEARCH;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_ALL;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_SUMMARY;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP_CREDENTIAL_CHECK;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
-
 import java.util.Collections;
 import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.gson.JsonObject;
 import com.google.gson.internal.LinkedTreeMap;
+import org.apache.commons.lang3.StringUtils;
+
+import edu.utexas.tacc.tapis.systems.client.gen.api.SchedulerProfilesApi;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostCredential;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfile;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfiles;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerProfile;
 
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.client.shared.ITapisClient;
@@ -55,6 +50,16 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystems;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerProfile;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_COMPUTETOTAL;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_ORDERBY;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SEARCH;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_ALL;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_SUMMARY;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP_CREDENTIAL_CHECK;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
+
 
 /**
  * Class providing a convenient front-end to the automatically generated client code

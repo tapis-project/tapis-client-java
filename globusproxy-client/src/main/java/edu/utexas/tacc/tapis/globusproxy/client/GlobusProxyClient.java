@@ -19,7 +19,7 @@ import edu.utexas.tacc.tapis.globusproxy.client.gen.api.AuthApi;
 import edu.utexas.tacc.tapis.globusproxy.client.gen.api.FileOperationsApi;
 import edu.utexas.tacc.tapis.globusproxy.client.gen.api.TransfersApi;
 import edu.utexas.tacc.tapis.globusproxy.client.gen.model.AuthTokens;
-import edu.utexas.tacc.tapis.globusproxy.client.gen.model.FileInfo;
+import edu.utexas.tacc.tapis.globusproxy.client.gen.model.GlobusFileInfo;
 import edu.utexas.tacc.tapis.globusproxy.client.gen.model.ReqCreateTransfer;
 import edu.utexas.tacc.tapis.globusproxy.client.gen.model.ReqMakeDir;
 import edu.utexas.tacc.tapis.globusproxy.client.gen.model.ReqRename;
@@ -257,12 +257,12 @@ public class GlobusProxyClient implements ITapisClient
    * @return list of files
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<FileInfo> listFiles(String clientId, String endpointId, String accessToken, String path, boolean recurse)
+  public List<GlobusFileInfo> listFiles(String clientId, String endpointId, String accessToken, String path, boolean recurse)
           throws TapisClientException
   {
     if (StringUtils.isBlank(endpointId) || StringUtils.isBlank(accessToken)) return null;
 
-    ArrayList<FileInfo> fileInfoList =  new ArrayList<>();
+    ArrayList<GlobusFileInfo> fileInfoList =  new ArrayList<>();
     try
     {
       var resp = operationsApi.listFiles(clientId, endpointId, path, accessToken, recurse);
@@ -272,7 +272,7 @@ public class GlobusProxyClient implements ITapisClient
       for (int i = 0; i < resultList.size(); i++)
       {
         var fiRaw = resultList.get(i);
-        FileInfo fi = new FileInfo();
+        GlobusFileInfo fi = new GlobusFileInfo();
         fi.setType(fiRaw.getType());
         fi.setUser(fiRaw.getUser());
         fi.setGroup(fiRaw.getGroup());

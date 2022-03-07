@@ -8,7 +8,7 @@ export PRG_PATH=`pwd`
 cd $RUN_DIR
 
 # Path to the openapi yaml file
-SPEC_PATH=https://raw.githubusercontent.com/tapis-project/globus-proxy/main/service/resources/openapi_v3.yml
+SPEC_PATH=https://raw.githubusercontent.com/tapis-project/globus-proxy/dev/service/resources/openapi_v3.yml
 
 # Create target dir in case not yet created by maven
 mkdir -p $PRG_PATH/target
@@ -17,10 +17,9 @@ mkdir -p $PRG_PATH/target
 TMP_DIR=$(mktemp -d)
 
 # Download latest openapi spec from repo
-# TODO for now, copy from local file for testing
-# TODO switch back to curl
-# curl -o target/openapi_v3.yml $SPEC_PATH
-cp ../../globus-proxy/service/resources/openapi_v3.yml target/openapi_v3.yml
+curl -o target/openapi_v3.yml $SPEC_PATH
+# Could also copy from local file for testing
+# cp ../../globus-proxy/service/resources/openapi_v3.yml target/openapi_v3.yml
 
 # Run swagger-cli from docker image to generate bundled json file from openapi yaml file
 set -xv
