@@ -13,7 +13,7 @@ public class TapisClientException
     private String status;
     private String tapisMessage;
     private String version;
-    private String metadata;
+    private Object metadata;
     private Object result;
 
     // Constructors.
@@ -45,10 +45,10 @@ public class TapisClientException
     public void setVersion(String version) {
         this.version = version;
     }
-    public String getMetadata() {
+    public Object getMetadata() {
     return metadata;
   }
-    public void setMetadata(String metadata) {
+    public void setMetadata(Object metadata) {
     this.metadata = metadata;
   }
     public Object getResult() {
