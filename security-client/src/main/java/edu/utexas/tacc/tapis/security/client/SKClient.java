@@ -1228,10 +1228,6 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     public SkShareList getShares(SKShareGetSharesParms p) throws TapisClientException
     {
-        // String grantor, String grantee, String resourceType, String resourceId1, 
-        // String resourceId2, String privilege, String createdBy, 
-        // String createdByTenant, Boolean includePublicGrantees, Boolean requireNullId2, 
-        // Integer id, Boolean pretty
         RespShareList resp = null;
         var shareApi = new ShareApi(_apiClient);
         try {resp = shareApi.getShares(p.getGrantor(), p.getGrantee(), p.getResourceType(),

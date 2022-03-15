@@ -1074,13 +1074,13 @@ paths:
       tags:
         - share
       description: |-
-        Get a filtered list of shared resources. Query parameters are used to restrict the returned shares. The *grantor*, *grantee*, *resourceType*, *resourceId1*, *resourceId2*, *privilege*, *createdBy* and *createdByTenant* parameters are used to match values in shared resource objects. The other parameters are used to control how matching is performed.
+        Get a filtered list of shared resources. Query parameters are used to restrict the returned shares. The *grantor*, *grantee*, *resourceType*, *resourceId1*, *resourceId2*, *privilege*, *createdBy* and *createdByTenant* parameters are used to match values in shared resource objects. Other query parameters are used to control how matching is performed.
 
         Specifying the *id* parameter causes the other filtering parameters to be ignored. The result list will contain at most one entry.
 
-        The *includePublicGrantees* flag, true by default, controls whether resources granted to **~public** and **~public_no_authn** that meet all other constraints are included in the results.
+        The *includePublicGrantees* flag, true by default, controls whether resources granted to **~public** and **~public_no_authn** are also considered for inclusion in the result list.
 
-        The *requireNullId2* flag, true by default, applies only when no *resourceId2* value is provided. By default, only resources granted with no *resourceId2* value and meet all other constraints are included in the results. By setting this flag to false the caller indicates "don't care" designation on the *resourceId2* values, allowing shares with any *resourceId2* value that meet all other constraints to be included in the results.
+        The *requireNullId2* flag, true by default, applies only when no *resourceId2* value is provided. When set, only shared resources that do not specify a *resourceId2* value are considered for inclusion in the result list. By setting this flag to false the caller indicates a "don't care" designation on the *resourceId2* value, allowing shares with any *resourceId2* value to be considered for inclusion in the result list.
 
         For the request to be authorized, the requestor must be a Tapis service.
       operationId: getShares
@@ -1177,7 +1177,9 @@ paths:
       tags:
         - share
       description: |-
-        Share a Tapis resource using a request body.  Shared resources allow services to tell other services to relax their Tapis authorization checking in certain contexts where a grantee has been given shared access. The distinguished ~public and ~public_no_authn grantees are used to grant different types of public access to a resource.
+        Share a Tapis resource using a request body.  Shared resources allow services to indicate that other services should relax their Tapis authorization checking in certain, well-defined contexts.
+
+        Grantees can be given shared access to a resource on an individual basis or by using the public granting mechanism. Grants to the distinguished **~public** and **~public_no_authn** pseudo-grantees allow access to a resource to authenticated users or to any user, respectively.
 
         The payload for this includes these values, with all except resourceId2 required:
 
@@ -1240,11 +1242,11 @@ paths:
       description: |-
         Delete a single shared resource by unique attribute selection. The *grantee*, *resourceType*, *resourceId1* and *privilege* parameters are mandatory; *resourceId2* is optional and assumed to be NULL if not provided.
 
-        The shared resource is deleted only if it's in the tenant on whose behalf the service is making the call. The calling service/tenant must also be the same as the orginal creator service/tenant.
+        The shared resource is deleted only if it's in the tenant on whose behalf the service is making the call. The calling service must also be the same as the orginal service that granted the share.
 
         This call is idempotent.  If no share satisfies the above constraints, a success response code is returned and the indicated number of changes is set to zero.  When a share is deleted, the indicated number of changes is one.
 
-        For the request to be authorized, the requestor must be a Tapis service.
+        For the request to be authorized, the requestor must be the Tapis service that originally granted the share.
       operationId: deleteShare
       parameters:
         - name: grantee
@@ -1362,11 +1364,11 @@ paths:
       tags:
         - share
       description: |-
-        Delete a shared resource by ID. The shared resource is deleted only if it's in the tenant on whose behalf the service is making the call. The calling service/tenant must also be the same as the orginal creator service/tenant.
+        Delete a shared resource by ID. The shared resource is deleted only if it's in the tenant on whose behalf the service is making the call. The calling service must also be the same as the orginal service that created the share.
 
         This call is idempotent.  If no share satisfies the above constraints, a success response code is returned and the indicated number of changes is set to zero.  When a share is deleted, the indicated number of changes is one.
 
-        For the request to be authorized, the requestor must be a Tapis service.
+        For the request to be authorized, the requestor must be the Tapis service that originally granted the share.
       operationId: deleteShareById
       parameters:
         - name: id
@@ -1412,13 +1414,13 @@ paths:
       tags:
         - share
       description: |-
-        Determine if a user has been granted a specific privilege on a resource. The *grantee*, *resourceType*, *resourceId1* and *privilege* parameters are mandatory; *resourceId2* is optional and assumed to be NULL if not provided. Privilege matching is performed for the user and tenant on behalf of whom the call is being made.
+        Determine if a user has been granted a specific privilege on a specific resource. The *grantee*, *resourceType*, *resourceId1* and *privilege* parameters are mandatory; *resourceId2* is optional and assumed to be NULL if not provided. Privilege matching is performed for the user and tenant on behalf of whom the call is being made.
 
         True is returned if the user has been granted the privilege, false otherwise.
 
-        By default, both authenticated and unauthenticated public privileges are included in the calculation. For example, if a privilege on a resource has been granted to all authenticated users in a tenant, then true will be returned for all users in the tenant.
+        By default, both authenticated and unauthenticated public privileges are included in the calculation. For example, if a privilege on a resource has been granted to all authenticated users in a tenant (~public), then true will be returned for all users in the tenant.
 
-        The *excludePublic* and *excludePublicNoAuthn* parameters can be used to change the default handling of public grants. The on-behalf-of user is always included in thecalculation, but either or both of the public grants can be excluded.
+        The *excludePublic* and *excludePublicNoAuthn* parameters can be used to change the default handling of public grants. Either or both types of public grants can be excluded.
 
         For the request to be authorized, the requestor must be a Tapis service.
       operationId: hasPrivilege

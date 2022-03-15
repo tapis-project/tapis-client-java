@@ -2,7 +2,6 @@ package edu.utexas.tacc.tapis.security.client.model;
 
 public class SKShareGetSharesParms 
 {
-    private String  tenant;
     private String  grantor;         
     private String  grantee;         
     private String  resourceType;    
@@ -16,12 +15,6 @@ public class SKShareGetSharesParms
     private boolean requireNullId2 = true;
     
     // Accessors.
-    public String getTenant() {
-        return tenant;
-    }
-    public void setTenant(String tenant) {
-        this.tenant = tenant;
-    }
     public String getGrantor() {
         return grantor;
     }
