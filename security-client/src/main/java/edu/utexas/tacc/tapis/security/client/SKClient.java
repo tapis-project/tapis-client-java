@@ -94,6 +94,10 @@ public class SKClient
     public static final String TAPIS_JWT_USER    = "X-Tapis-User";
     public static final String TAPIS_HASH_HEADER = "X-Tapis-User-Token-Hash";
     
+    // Public pseudo-grantees.
+    public static final String PUBLIC_GRANTEE = "~public";
+    public static final String PUBLIC_NO_AUTHN_GRANTEE = "~public_no_authn";
+    
     // Configuration defaults.
     private static final String SKCLIENT_USER_AGENT = "SKClient";
     
