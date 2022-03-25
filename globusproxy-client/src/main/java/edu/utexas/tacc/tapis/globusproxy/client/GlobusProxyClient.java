@@ -257,7 +257,8 @@ public class GlobusProxyClient implements ITapisClient
    * @return list of files
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<GlobusFileInfo> listFiles(String clientId, String endpointId, String accessToken, String path, boolean recurse)
+  public List<GlobusFileInfo> listFiles(String clientId, String endpointId, String accessToken, String path,
+                                        int limit, int offset, String filter)
           throws TapisClientException
   {
     if (StringUtils.isBlank(endpointId) || StringUtils.isBlank(accessToken)) return null;
@@ -265,7 +266,7 @@ public class GlobusProxyClient implements ITapisClient
     ArrayList<GlobusFileInfo> fileInfoList =  new ArrayList<>();
     try
     {
-      var resp = operationsApi.listFiles(clientId, endpointId, path, accessToken, recurse);
+      var resp = operationsApi.listFiles(clientId, endpointId, path, accessToken, limit, offset, filter);
       if (resp == null) return null;
       var resultList = resp.getResult();
       if (resultList == null) return null;
