@@ -291,8 +291,8 @@ public class MetaClient
   }
   
   //---------------------------- submitLargeQuery ----------------------------
-  public List<Object> submitLargeQuery(String db, String collection, String page,
-                                       String pagesize, Object filter, Object sort,
+  public List<Object> submitLargeQuery(String db, String collection, Integer page,
+                                       Integer pagesize, Object filter, Object sort,
                                        List<String> keys, Object body) throws TapisClientException {
     List<Object> resp = null;
     try { resp = collectionApi.submitLargeQuery(db,collection,page,pagesize,sort,keys,body); }

@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
 
-<suite name="Tapis Apps client" verbose="1" parallel="none">
+<suite name="Tapis Notifications client" verbose="1" parallel="none">
     <groups>
         <run>
             <include name="unit"/>
@@ -9,9 +9,9 @@
             <exclude name="notReady"/>
         </run>
     </groups>
-	<test name="apps-client">
+	<test name="notifications-client">
 		<packages>
-		   <package name="edu.utexas.tacc.tapis.apps.client.*" /> 
+		   <package name="edu.utexas.tacc.tapis.notifications.client.*" /> 
 		</packages>
 	</test>
 </suite>

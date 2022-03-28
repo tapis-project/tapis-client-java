@@ -2,7 +2,7 @@ package edu.utexas.tacc.tapis.systems.client;
 
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSystem;
 //import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
 import org.apache.commons.lang3.StringUtils;
@@ -112,7 +112,7 @@ public class MatchConstraintsTest
 //        String[] sys0 = systems.get(i);
 //        // Vary port # for checking numeric relational searches
 //        int port = i;
-//        ReqCreateSystem rSys;
+//        ReqPostSystem rSys;
 //        // Create half the systems owned by ownerUser1 and half by ownerUser2
 //        if (i <= numSystems / 2)
 //        {
