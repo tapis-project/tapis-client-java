@@ -33,8 +33,8 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.JobRuntime;
 import edu.utexas.tacc.tapis.systems.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSchedulerProfile;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSchedulerProfile;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RuntimeTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerTypeEnum;
@@ -283,13 +283,13 @@ public final class Utils
   }
 
   /*
-   * Build a ReqCreateSystem object to be used for client call to create a system given most attributes for the system.
+   * Build a ReqPostSystem object to be used for client call to create a system given most attributes for the system.
    */
-  public static ReqCreateSystem createReqSystem(String[] sys, int port, SystemsClient.AuthnMethod authnMethod,
+  public static ReqPostSystem createReqSystem(String[] sys, int port, SystemsClient.AuthnMethod authnMethod,
                                                 Credential credential)
   {
     var accMethod = authnMethod != null ? authnMethod : prot1AuthnMethod;
-    ReqCreateSystem rSys = new ReqCreateSystem();
+    ReqPostSystem rSys = new ReqPostSystem();
     rSys.setId(sys[1]);
     rSys.description(sys[2]);
     rSys.setSystemType(SystemTypeEnum.valueOf(sys[3]));
@@ -298,7 +298,7 @@ public final class Utils
     rSys.enabled(true);
     rSys.effectiveUserId(sys[6]);
     rSys.defaultAuthnMethod(AuthnEnum.valueOf(accMethod.name()));
-    rSys.authnCredential(SystemsClient.buildReqCreateCredential(credential));
+    rSys.authnCredential(SystemsClient.buildReqPostCredential(credential));
     rSys.bucketName(sys[8]);
     rSys.rootDir(sys[9]);
     rSys.port(port).useProxy(prot1UseProxy).proxyHost(prot1ProxyHost).proxyPort(prot1ProxyPort);
@@ -325,7 +325,7 @@ public final class Utils
   public static String createSystemMinimal(SystemsClient clt, String[] sys)
           throws TapisClientException
   {
-    ReqCreateSystem rSys = new ReqCreateSystem();
+    ReqPostSystem rSys = new ReqPostSystem();
     rSys.setId(sys[1]);
     rSys.setSystemType(SystemTypeEnum.valueOf(sys[3]));
     rSys.setHost(sys[5]);
@@ -345,16 +345,16 @@ public final class Utils
   public static String createSystemFromTapisSystem(SystemsClient clt, TapisSystem sys)
           throws TapisClientException
   {
-    ReqCreateSystem rSys = SystemsClient.buildReqCreateSystem(sys);
+    ReqPostSystem rSys = SystemsClient.buildReqPostSystem(sys);
     return clt.createSystem(rSys);
   }
 
   /*
-   * Build a ReqCreateSchedulerProfile object to be used for client call to create a profile give most attributes.
+   * Build a ReqPostSchedulerProfile object to be used for client call to create a profile give most attributes.
    */
-  public static ReqCreateSchedulerProfile createReqSchedulerProfile(String[] profile)
+  public static ReqPostSchedulerProfile createReqSchedulerProfile(String[] profile)
   {
-    ReqCreateSchedulerProfile rProfile = new ReqCreateSchedulerProfile();
+    ReqPostSchedulerProfile rProfile = new ReqPostSchedulerProfile();
     rProfile.setName(profile[1]);
     rProfile.description(profile[2]);
     rProfile.owner(profile[3]);

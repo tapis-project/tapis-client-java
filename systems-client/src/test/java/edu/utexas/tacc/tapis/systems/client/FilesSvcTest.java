@@ -4,7 +4,7 @@ import edu.utexas.tacc.tapis.auth.client.AuthClient;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.systems.client.SystemsClient.AuthnMethod;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
 import edu.utexas.tacc.tapis.tokens.client.TokensClient;
 import org.apache.commons.lang3.StringUtils;
@@ -99,7 +99,7 @@ public class FilesSvcTest
       String[] sys0 = systems.get(i);
       System.out.println("Creating system with name: " + sys0[1]);
       try {
-        ReqCreateSystem rSys = Utils.createReqSystem(sys0, prot1Port, prot1AuthnMethod, cred0);
+        ReqPostSystem rSys = Utils.createReqSystem(sys0, prot1Port, prot1AuthnMethod, cred0);
         String respUrl = sysClient.createSystem(rSys);
         System.out.println("Created system: " + respUrl);
         Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
@@ -224,7 +224,7 @@ public class FilesSvcTest
 //      System.out.println("Created system: " + respUrl);
 //      System.out.println("Testing credentials for user: " + newPermsUser);
 //      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
-//      ReqCreateCredential reqCred = new ReqCreateCredential();
+//      ReqPostCredential reqCred = new ReqPostCredential();
 //      reqCred.password(sys0[7]).privateKey("fakePrivateKey").publicKey("fakePublicKey")
 //           .authnKey("fakeAccessKey").accessSecret("fakeAccessSecret").certificate("fakeCert");
 //      // Store and retrieve multiple secret types: password, ssh keys, access key and secret
@@ -257,7 +257,7 @@ public class FilesSvcTest
 //      getClientUsr(serviceURL, ownerUserJWT).deleteUserCredential(sys0[1], newPermsUser);
 //
 //      // Set just ACCESS_KEY only and test
-//      reqCred = new ReqCreateCredential().accessKey("fakeAccessKey2").accessSecret("fakeAccessSecret2");
+//      reqCred = new ReqPostCredential().accessKey("fakeAccessKey2").accessSecret("fakeAccessSecret2");
 //      getClientUsr(serviceURL, ownerUserJWT).updateUserCredential(sys0[1], newPermsUser, reqCred);
 //      cred1 = getClientFilesSvc().getUserCredential(sys0[1], newPermsUser, AuthnMethod.ACCESS_KEY);
 //      Assert.assertEquals(cred1.getAccessKey(), reqCred.getAccessKey());
