@@ -1,8 +1,11 @@
 package edu.utexas.tacc.tapis.client.shared.exceptions;
 
-public class TapisClientException 
+import java.io.Serial;
+
+public class TapisClientException
  extends TException
 {
+    @Serial
     private static final long serialVersionUID = 2070468207317431854L;
     
     // Fields.
@@ -10,6 +13,7 @@ public class TapisClientException
     private String status;
     private String tapisMessage;
     private String version;
+    private Object metadata;
     private Object result;
 
     // Constructors.
@@ -41,6 +45,12 @@ public class TapisClientException
     public void setVersion(String version) {
         this.version = version;
     }
+    public Object getMetadata() {
+    return metadata;
+  }
+    public void setMetadata(Object metadata) {
+    this.metadata = metadata;
+  }
     public Object getResult() {
         return result;
     }

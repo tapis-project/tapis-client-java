@@ -12,6 +12,7 @@ import edu.utexas.tacc.tapis.security.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.security.client.gen.ApiException;
 import edu.utexas.tacc.tapis.security.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.security.client.gen.api.RoleApi;
+import edu.utexas.tacc.tapis.security.client.gen.api.ShareApi;
 import edu.utexas.tacc.tapis.security.client.gen.api.UserApi;
 import edu.utexas.tacc.tapis.security.client.gen.api.VaultApi;
 import edu.utexas.tacc.tapis.security.client.gen.model.Options;
@@ -30,6 +31,7 @@ import edu.utexas.tacc.tapis.security.client.gen.model.ReqReplacePathPrefix;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqRevokeAdminRole;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqRevokeUserPermission;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqRevokeUserRole;
+import edu.utexas.tacc.tapis.security.client.gen.model.ReqShareResource;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqUpdateRoleDescription;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqUpdateRoleName;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqUpdateRoleOwner;
@@ -43,6 +45,7 @@ import edu.utexas.tacc.tapis.security.client.gen.model.ReqVersions;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqWriteSecret;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespAuthorized;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespBasic;
+import edu.utexas.tacc.tapis.security.client.gen.model.RespBoolean;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespChangeCount;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespName;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespNameArray;
@@ -54,17 +57,27 @@ import edu.utexas.tacc.tapis.security.client.gen.model.RespSecret;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespSecretList;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespSecretMeta;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespSecretVersionMetadata;
+import edu.utexas.tacc.tapis.security.client.gen.model.RespShare;
+import edu.utexas.tacc.tapis.security.client.gen.model.RespShareList;
 import edu.utexas.tacc.tapis.security.client.gen.model.RespVersions;
+import edu.utexas.tacc.tapis.security.client.gen.model.ResultBoolean;
+import edu.utexas.tacc.tapis.security.client.gen.model.ResultChangeCount;
+import edu.utexas.tacc.tapis.security.client.gen.model.ResultResourceUrl;
 import edu.utexas.tacc.tapis.security.client.gen.model.SkRole;
 import edu.utexas.tacc.tapis.security.client.gen.model.SkSecret;
 import edu.utexas.tacc.tapis.security.client.gen.model.SkSecretList;
 import edu.utexas.tacc.tapis.security.client.gen.model.SkSecretMetadata;
 import edu.utexas.tacc.tapis.security.client.gen.model.SkSecretVersionMetadata;
+import edu.utexas.tacc.tapis.security.client.gen.model.SkShare;
+import edu.utexas.tacc.tapis.security.client.gen.model.SkShareList;
 import edu.utexas.tacc.tapis.security.client.gen.model.Transformation;
 import edu.utexas.tacc.tapis.security.client.model.SKSecretDeleteParms;
 import edu.utexas.tacc.tapis.security.client.model.SKSecretMetaParms;
 import edu.utexas.tacc.tapis.security.client.model.SKSecretReadParms;
 import edu.utexas.tacc.tapis.security.client.model.SKSecretWriteParms;
+import edu.utexas.tacc.tapis.security.client.model.SKShareDeleteShareParms;
+import edu.utexas.tacc.tapis.security.client.model.SKShareGetSharesParms;
+import edu.utexas.tacc.tapis.security.client.model.SKShareHasPrivilegeParms;
 
 public class SKClient
  implements ITapisClient
@@ -80,6 +93,10 @@ public class SKClient
     public static final String TAPIS_JWT_TENANT  = "X-Tapis-Tenant";
     public static final String TAPIS_JWT_USER    = "X-Tapis-User";
     public static final String TAPIS_HASH_HEADER = "X-Tapis-User-Token-Hash";
+    
+    // Public pseudo-grantees.
+    public static final String PUBLIC_GRANTEE = "~public";
+    public static final String PUBLIC_NO_AUTHN_GRANTEE = "~public_no_authn";
     
     // Configuration defaults.
     private static final String SKCLIENT_USER_AGENT = "SKClient";
@@ -263,7 +280,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             RoleApi roleApi = new RoleApi(_apiClient);
-            resp = roleApi.getRoleNames(tenant, false);
+            resp = roleApi.getRoleNames(tenant, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -283,7 +300,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             RoleApi roleApi = new RoleApi(_apiClient);
-            resp = roleApi.getRoleByName(roleName, tenant, false);
+            resp = roleApi.getRoleByName(roleName, tenant, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -309,7 +326,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             RoleApi roleApi = new RoleApi(_apiClient);
-            resp = roleApi.createRole(body, false);
+            resp = roleApi.createRole(body, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -329,7 +346,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             RoleApi roleApi = new RoleApi(_apiClient);
-            resp = roleApi.deleteRoleByName(roleName, tenant, false);
+            resp = roleApi.deleteRoleByName(roleName, tenant, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -356,7 +373,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             RoleApi roleApi = new RoleApi(_apiClient);
-            resp = roleApi.updateRoleName(roleName, body, false);
+            resp = roleApi.updateRoleName(roleName, body, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -379,7 +396,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             RoleApi roleApi = new RoleApi(_apiClient);
-            resp = roleApi.updateRoleOwner(roleName, body, false);
+            resp = roleApi.updateRoleOwner(roleName, body, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -402,7 +419,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             RoleApi roleApi = new RoleApi(_apiClient);
-            resp = roleApi.updateRoleDescription(roleName, body, false);
+            resp = roleApi.updateRoleDescription(roleName, body, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -419,7 +436,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             RoleApi roleApi = new RoleApi(_apiClient);
-            resp = roleApi.getRolePermissions(roleName, roleTenant, immediate, false);
+            resp = roleApi.getRolePermissions(roleName, roleTenant, immediate, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -446,7 +463,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             RoleApi roleApi = new RoleApi(_apiClient);
-            resp = roleApi.addRolePermission(body, false);
+            resp = roleApi.addRolePermission(body, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -473,7 +490,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             RoleApi roleApi = new RoleApi(_apiClient);
-            resp = roleApi.removeRolePermission(body, false);
+            resp = roleApi.removeRolePermission(body, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -500,7 +517,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             RoleApi roleApi = new RoleApi(_apiClient);
-            resp = roleApi.addChildRole(body, false);
+            resp = roleApi.addChildRole(body, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -527,7 +544,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             RoleApi roleApi = new RoleApi(_apiClient);
-            resp = roleApi.removeChildRole(body, false);
+            resp = roleApi.removeChildRole(body, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -560,7 +577,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             RoleApi roleApi = new RoleApi(_apiClient);
-            resp = roleApi.previewPathPrefix(body, false);
+            resp = roleApi.previewPathPrefix(body, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -592,7 +609,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             RoleApi roleApi = new RoleApi(_apiClient);
-            resp = roleApi.replacePathPrefix(body, false);
+            resp = roleApi.replacePathPrefix(body, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -616,7 +633,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi(_apiClient);
-            resp = userApi.getUserNames(tenant, false);
+            resp = userApi.getUserNames(tenant, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -636,7 +653,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi(_apiClient);
-            resp = userApi.getUserRoles(user, tenant, false);
+            resp = userApi.getUserRoles(user, tenant, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -666,7 +683,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi(_apiClient);
-            resp = userApi.getUserPerms(user, tenant, implies, impliedBy, false);
+            resp = userApi.getUserPerms(user, tenant, implies, impliedBy, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -692,7 +709,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi(_apiClient);
-            resp = userApi.grantRole(body, false);
+            resp = userApi.grantRole(body, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -719,7 +736,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi(_apiClient);
-            resp = userApi.revokeUserRole(body, false);
+            resp = userApi.revokeUserRole(body, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -740,7 +757,7 @@ public class SKClient
       try {
         // Get the API object using default networking.
         var userApi = new UserApi(_apiClient);
-        resp = userApi.getAdmins(tenant, false);
+        resp = userApi.getAdmins(tenant, Boolean.FALSE);
       }
       catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
       catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -765,7 +782,7 @@ public class SKClient
       try {
         // Get the API object using default networking.
         var userApi = new UserApi(_apiClient);
-        resp = userApi.grantAdminRole(body, false);
+        resp = userApi.grantAdminRole(body, Boolean.FALSE);
       }
       catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
       catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -791,7 +808,7 @@ public class SKClient
       try {
         // Get the API object using default networking.
         var userApi = new UserApi(_apiClient);
-        resp = userApi.revokeAdminRole(body, false);
+        resp = userApi.revokeAdminRole(body, Boolean.FALSE);
       }
       catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
       catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -820,7 +837,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi(_apiClient);
-            resp = userApi.grantRoleWithPermission(body, false);
+            resp = userApi.grantRoleWithPermission(body, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -847,7 +864,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi(_apiClient);
-            resp = userApi.grantUserPermission(body, false);
+            resp = userApi.grantUserPermission(body, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -874,7 +891,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi(_apiClient);
-            resp = userApi.revokeUserPermission(body, false);
+            resp = userApi.revokeUserPermission(body, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -901,7 +918,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi(_apiClient);
-            resp = userApi.hasRole(body, false);
+            resp = userApi.hasRole(body, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -928,7 +945,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi(_apiClient);
-            resp = userApi.hasRoleAny(body, false);
+            resp = userApi.hasRoleAny(body, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -955,7 +972,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi(_apiClient);
-            resp = userApi.hasRoleAll(body, false);
+            resp = userApi.hasRoleAll(body, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -981,7 +998,7 @@ public class SKClient
     try {
       // Get the API object using default networking.
       var userApi = new UserApi(_apiClient);
-      resp = userApi.isAdmin(body, false);
+      resp = userApi.isAdmin(body, Boolean.FALSE);
     }
     catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
     catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -1008,7 +1025,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi(_apiClient);
-            resp = userApi.isPermitted(body, false);
+            resp = userApi.isPermitted(body, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -1035,7 +1052,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi(_apiClient);
-            resp = userApi.isPermittedAny(body, false);
+            resp = userApi.isPermittedAny(body, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -1062,7 +1079,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi(_apiClient);
-            resp = userApi.isPermittedAll(body, false);
+            resp = userApi.isPermittedAll(body, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -1083,7 +1100,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi(_apiClient);
-            resp = userApi.getUsersWithRole(roleName, tenant, false);
+            resp = userApi.getUsersWithRole(roleName, tenant, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -1103,7 +1120,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi(_apiClient);
-            resp = userApi.getUsersWithPermission(permSpec, tenant, false);
+            resp = userApi.getUsersWithPermission(permSpec, tenant, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -1123,7 +1140,7 @@ public class SKClient
         try {
             // Get the API object using default networking.
             var userApi = new UserApi(_apiClient);
-            resp = userApi.getDefaultUserRole1(user, false);
+            resp = userApi.getDefaultUserRole1(user, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -1146,7 +1163,7 @@ public class SKClient
             var req = new ReqRemovePermissionFromAllRoles();
             req.setTenant(tenant);
             req.setPermSpec(permSpec);
-            resp = roleApi.removePathPermissionFromAllRoles(req, false);
+            resp = roleApi.removePathPermissionFromAllRoles(req, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -1169,13 +1186,108 @@ public class SKClient
             var req = new ReqRemovePermissionFromAllRoles();
             req.setTenant(tenant);
             req.setPermSpec(permSpec);
-            resp = roleApi.removePermissionFromAllRoles(req, false);
+            resp = roleApi.removePermissionFromAllRoles(req, Boolean.FALSE);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
 
         // Return result value.
         return resp.getResult().getChanges();
+    }
+    
+    /* **************************************************************************** */
+    /*                             Public Share Methods                             */
+    /* **************************************************************************** */
+    /* ---------------------------------------------------------------------------- */
+    /* shareResource:                                                               */
+    /* ---------------------------------------------------------------------------- */
+    public ResultResourceUrl shareResource(ReqShareResource reqShareResource)
+       throws TapisClientException
+    {
+        RespResourceUrl resp = null;
+        var shareApi = new ShareApi(_apiClient);
+        try {resp = shareApi.shareResource(reqShareResource, Boolean.FALSE);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+        
+        return resp.getResult();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* getShare:                                                                    */
+    /* ---------------------------------------------------------------------------- */
+    public SkShare getShare(int id) throws TapisClientException
+    {
+        RespShare resp = null;
+        var shareApi = new ShareApi(_apiClient);
+        try {resp = shareApi.getShare(id, Boolean.FALSE);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+        
+        return resp.getResult();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* getShares:                                                                   */
+    /* ---------------------------------------------------------------------------- */
+    public SkShareList getShares(SKShareGetSharesParms p) throws TapisClientException
+    {
+        RespShareList resp = null;
+        var shareApi = new ShareApi(_apiClient);
+        try {resp = shareApi.getShares(p.getGrantor(), p.getGrantee(), p.getResourceType(),
+                p.getResourceId1(), p.getResourceId2(), p.getPrivilege(), p.getCreatedBy(),
+                p.getCreatedByTenant(), p.isIncludePublicGrantees(), p.isRequireNullId2(), 
+                p.getId(), Boolean.FALSE);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+        
+        return resp.getResult();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* deleteShareById:                                                             */
+    /* ---------------------------------------------------------------------------- */
+    public ResultChangeCount deleteShareById(int id) throws TapisClientException
+    {
+        RespChangeCount resp = null;
+        var shareApi = new ShareApi(_apiClient);
+        try {resp = shareApi.deleteShareById(id, Boolean.FALSE);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+        
+        return resp.getResult();
+    }
+
+    /* ---------------------------------------------------------------------------- */
+    /* deleteShare:                                                                 */
+    /* ---------------------------------------------------------------------------- */
+    public ResultChangeCount deleteShare(SKShareDeleteShareParms p) throws TapisClientException
+    {
+        RespChangeCount resp = null;
+        var shareApi = new ShareApi(_apiClient);
+        try {resp = shareApi.deleteShare(p.getGrantee(), p.getResourceType(),
+                p.getResourceId1(), p.getResourceId2(), p.getPrivilege(), Boolean.FALSE);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+        
+        return resp.getResult();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* hasPrivilege:                                                                */
+    /* ---------------------------------------------------------------------------- */
+    public ResultBoolean hasPrivilege(SKShareHasPrivilegeParms p)
+        throws TapisClientException
+    {
+        RespBoolean resp = null;
+        var shareApi = new ShareApi(_apiClient);
+        try {resp = shareApi.hasPrivilege(p.getGrantee(), p.getResourceType(),
+                p.getResourceId1(), p.getResourceId2(), p.getPrivilege(), 
+                p.isExcludePublic(), p.isExcludePublicNoAuthn(), Boolean.FALSE);}
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+        
+        return resp.getResult();
     }
     
     /* **************************************************************************** */
@@ -1461,7 +1573,7 @@ public class SKClient
             // Get the API object using default networking.
             var vaultApi = new VaultApi(_apiClient);
             resp = vaultApi.validateServicePassword(serviceName, 
-                                                    reqValidateServicePwd, false);
+                                                    reqValidateServicePwd, Boolean.FALSE);
             
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}

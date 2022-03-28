@@ -1,88 +1,142 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>edu.utexas.tacc.tapis</groupId>
-        <artifactId>tapis-client-java</artifactId>
-        <version>2.0.20-SNAPSHOT</version>
-    </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>edu.utexas.tacc.tapis</groupId>
+    <artifactId>tapis-client-java</artifactId>
+    <version>2.0.34-SNAPSHOT</version>
+  </parent>
 
-    <artifactId>notifications-client</artifactId>
+  <artifactId>notifications-client</artifactId>
 
-    <name>Tapis Notifications Client</name>
-    <description>Java client for Notifications Service</description>
+  <name>Tapis Notifications Client</name>
+  <description>Java client for Notifications Service</description>
 
-    <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>shared-clientlib</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
-    
-    <build>
-        <sourceDirectory>src/main/java</sourceDirectory>
+  <properties>
+    <!-- Location of openapi spec. Default is dev branch -->
+    <!-- NOTE: In order to try out openapi updates using a local file do something similar to the following:
+     mvn clean install
+     cd notificationss-client
+     cp ../../openapi-notifications/NotificationsAPI.yaml target/
+     mvn install -DspecPath="/home/scblack/src_git/github/dev/tapis-client-java/notifications-client/target/NotificationssAPI.yaml"
 
-        <plugins>
-            <!-- Capture the git commit hash and branch identifiers. -->
-            <!-- See parent pom for configuration details. -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>buildnumber-maven-plugin</artifactId>
-            </plugin>
-            <!-- Build generated client code using openapi-generator -->
-            <plugin>
-                <groupId>org.openapitools</groupId>
-                <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>${openapi-generator-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <!-- Use the openapi spec here. Tapis live-docs website should also get spec from here -->
-                            <inputSpec>https://raw.githubusercontent.com/tapis-project/notifications/dev/api/src/main/resources/openapi.yaml</inputSpec>
-                            <enablePostProcessFile>true</enablePostProcessFile>
-                            <output>${project.build.directory}/generated-sources/openapi</output>
-                            <generatorName>java</generatorName>
-                            <groupId>edu.utexas.tacc.tapis</groupId>
-                            <invokerPackage>edu.utexas.tacc.tapis.notifications.client.gen</invokerPackage>
-                            <apiPackage>edu.utexas.tacc.tapis.notifications.client.gen.api</apiPackage>
-                            <modelPackage>edu.utexas.tacc.tapis.notifications.client.gen.model</modelPackage>
+          or if yaml committed to local branch then do:
+     mvn install -DspecPath="https://raw.githubusercontent.com/tapis-project/openapi-notifications/local/NotificationsAPI.yaml"
+     -->
+    <specPath>https://raw.githubusercontent.com/tapis-project/openapi-notifications/dev/NotificationsAPI.yaml</specPath>
 
-                            <!-- Turn off generation of stuff we do not need -->
-                            <generateApiTests>false</generateApiTests>
-                            <generateApiDocumentation>false</generateApiDocumentation>
-                            <generateModelTests>false</generateModelTests>
-                            <generateModelDocumentation>false</generateModelDocumentation>
-                            <configOptions>
-                                <sourceFolder>src/gen/java/main</sourceFolder>
-                                <!-- Use java 8 libraries instead of 3rd party libraries -->
-                                <java8>true</java8>
-                                <dateLibrary>java8</dateLibrary>
-                            </configOptions>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <configuration>
-                    <createDependencyReducedPom>false</createDependencyReducedPom>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
+    <!-- Skip integration tests by default -->
+    <!-- To run tests TAPIS_FILES_SVC_PASSWORD must be set in the env -->
+    <!-- Use following command to run integration tests -->
+    <!--   TAPIS_FILES_SVC_PASSWORD=<files_service_password> mvn verify -DskipIntegrationTests=false  -->
+    <skipIntegrationTests>true</skipIntegrationTests>
+  </properties>
 
-        <finalName>notifications-client</finalName>
-    </build>
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>shared-clientlib</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>auth-client</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>tokens-client</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <sourceDirectory>src/main/java</sourceDirectory>
+
+    <plugins>
+      <!-- Capture the git commit hash and branch identifiers. -->
+      <!-- See parent pom for configuration details. -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <!-- The version is set in the parent pom -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <suiteXmlFiles>
+            <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+          </suiteXmlFiles>
+        </configuration>
+      </plugin>
+
+      <!-- Build generated client code using openapi-generator -->
+      <plugin>
+        <groupId>org.openapitools</groupId>
+        <artifactId>openapi-generator-maven-plugin</artifactId>
+        <version>${openapi-generator-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <!-- Location of openapi spec -->
+              <inputSpec>${specPath}</inputSpec>
+              <enablePostProcessFile>true</enablePostProcessFile>
+              <output>${project.build.directory}/generated-sources/openapi</output>
+              <generatorName>java</generatorName>
+              <groupId>edu.utexas.tacc.tapis</groupId>
+              <invokerPackage>edu.utexas.tacc.tapis.notifications.client.gen</invokerPackage>
+              <apiPackage>edu.utexas.tacc.tapis.notifications.client.gen.api</apiPackage>
+              <modelPackage>edu.utexas.tacc.tapis.notifications.client.gen.model</modelPackage>
+              <!-- Turn off generation of stuff we do not need -->
+              <generateApiTests>false</generateApiTests>
+              <generateApiDocumentation>false</generateApiDocumentation>
+              <generateModelTests>false</generateModelTests>
+              <generateModelDocumentation>false</generateModelDocumentation>
+              <configOptions>
+                <sourceFolder>src/gen/java/main</sourceFolder>
+                <!-- Use java 8 libraries instead of 3rd party libraries -->
+                <java8>true</java8>
+                <dateLibrary>java8</dateLibrary>
+              </configOptions>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <configuration>
+          <createDependencyReducedPom>false</createDependencyReducedPom>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- failsafe plugin is for running integration tests -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <skip>${skipIntegrationTests}</skip>
+          <environmentVariables>
+            <APP_ENV>test</APP_ENV>
+          </environmentVariables>
+        </configuration>
+      </plugin>
+    </plugins>
+
+    <finalName>notifications-client</finalName>
+  </build>
 
 </project>

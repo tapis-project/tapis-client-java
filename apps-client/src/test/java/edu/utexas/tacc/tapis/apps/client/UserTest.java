@@ -291,7 +291,7 @@ public class UserTest
     Assert.assertNotNull(tmpApp, "Failed to create item: " + app0[1]);
     System.out.println("Found item: " + tmpApp.getId());
     verifyAppAttributes(tmpApp, app0, isEnabledTrue, runtimeOptions1, maxJobs1, maxJobsPerUser1, strictFileInputsFalse,
-            dynamicExecSystemTrue, execSystemConstraints1, archiveOnAppErrorTrue, appArgs1, containerArgs1,
+            dynamicExecSystemTrue, execSystemConstraints1, archiveOnAppErrorTrue, mpiCmd1, appArgs1, containerArgs1,
             schedulerOptions1, envVariables1, archiveFilter1, nodeCount1, coresPerNode1, memoryMb1, maxMinutes1,
             fileInputs1, fileInputArrays1, jobTags1, notifList1, tags1, notes1JO);
   }
@@ -311,7 +311,7 @@ public class UserTest
     Assert.assertNotNull(tmpApp, "Failed to create item: " + appId);
     System.out.println("Found item: " + tmpApp.getId());
     verifyAppAttributes(tmpApp, app0, isEnabledTrue, runtimeOptions1, maxJobs1, maxJobsPerUser1, strictFileInputsFalse,
-            dynamicExecSystemTrue, execSystemConstraints1, archiveOnAppErrorTrue, appArgs1, containerArgs1,
+            dynamicExecSystemTrue, execSystemConstraints1, archiveOnAppErrorTrue, mpiCmd1, appArgs1, containerArgs1,
             schedulerOptions1, envVariables1, archiveFilter1, nodeCount1, coresPerNode1, memoryMb1, maxMinutes1,
             fileInputs1, fileInputArrays1, jobTags1, notifList1, tags1, notes1JO);
 
@@ -347,7 +347,7 @@ public class UserTest
 
     // Verify patched attributes
     verifyAppAttributes(tmpApp, app0, isEnabledTrue, runtimeOptions2, maxJobs2, maxJobsPerUser2, strictFileInputsTrue,
-            dynamicExecSystemFalse, execSystemConstraints2, archiveOnAppErrorFalse, appArgs2, containerArgs2,
+            dynamicExecSystemFalse, execSystemConstraints2, archiveOnAppErrorFalse, mpiCmd2, appArgs2, containerArgs2,
             schedulerOptions2, envVariables2, archiveFilter2, nodeCount2, coresPerNode2, memoryMb2, maxMinutes2,
             fileInputs2, fileInputArrays2, jobTags2, notifList2, tags2, notes2JO);
   }
@@ -645,6 +645,7 @@ public class UserTest
     jobAttributes.archiveSystemId(archiveSystemId2);
     jobAttributes.archiveSystemDir(archiveSystemDir2);
     jobAttributes.archiveOnAppError(archiveOnAppErrorFalse);
+    jobAttributes.setMpiCmd(mpiCmd2);
     parameterSet.appArgs(appArgs2);
     parameterSet.containerArgs(containerArgs2);
     parameterSet.schedulerOptions(schedulerOptions2);

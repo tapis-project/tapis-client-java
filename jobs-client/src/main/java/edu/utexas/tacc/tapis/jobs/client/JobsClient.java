@@ -17,6 +17,7 @@ import edu.utexas.tacc.tapis.jobs.client.gen.api.JobsApi;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.FileInfo;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.Job;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobCancelDisplay;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.JobHideDisplay;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobHistoryDisplayDTO;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobListDTO;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobStatusDisplay;
@@ -27,6 +28,7 @@ import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJobList;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJobOutputList;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJobStatus;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.RespHideJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespJobHistory;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespJobSearchAllAttributes;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespProbe;
@@ -405,6 +407,55 @@ public class JobsClient
 			}
            return stream;
        
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* getJobSearchListByPostSqlStr:                                                */
+    /* ---------------------------------------------------------------------------- */
+    public List<Job> getJobSearchListByPostSqlStr(String [] req, int limit, int skip, 
+    		int startAfter, String orderBy, boolean computeTotal, String select)
+     throws TapisClientException
+    {
+
+    	RespJobSearchAllAttributes resp = null;
+        try {  var jobsApi = new JobsApi(_apiClient);
+        	resp = jobsApi.getJobSearchListByPostSqlStr(limit, skip, startAfter, orderBy, computeTotal,
+        			select, false, req);
+        }
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+
+        return resp == null ? null : resp.getResult();
+    }
+
+    /* ---------------------------------------------------------------------------- */
+    /* hideJob:                                                                     */
+    /* ---------------------------------------------------------------------------- */
+    public JobHideDisplay hideJob(String jobUuid)
+    	     throws TapisClientException
+    {	
+    	RespHideJob resp = new RespHideJob();
+    	try {
+    		var jobsApi = new JobsApi(_apiClient);
+    		resp=jobsApi.hideJob(jobUuid, false);
+    	}catch (ApiException e) {Utils.throwTapisClientException(e.getCode(),e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+    	return resp == null ? null : resp.getResult();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* hideJob:                                                                     */
+    /* ---------------------------------------------------------------------------- */
+    public JobHideDisplay unhideJob(String jobUuid)
+    	     throws TapisClientException
+    {	
+    	RespHideJob resp = new RespHideJob();
+    	try {
+    		var jobsApi = new JobsApi(_apiClient);
+    		resp = jobsApi.unhideJob(jobUuid, false);
+    	}catch (ApiException e) {Utils.throwTapisClientException(e.getCode(),e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+    	return resp == null ? null : resp.getResult();
     }
     
     /* **************************************************************************** */

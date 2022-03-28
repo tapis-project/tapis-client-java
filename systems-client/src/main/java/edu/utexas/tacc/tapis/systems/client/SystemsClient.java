@@ -13,12 +13,6 @@ import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
 import java.util.Collections;
 import java.util.List;
 
-import edu.utexas.tacc.tapis.systems.client.gen.api.SchedulerProfilesApi;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateCredential;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfile;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfiles;
-import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerProfile;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.JsonObject;
@@ -33,27 +27,33 @@ import edu.utexas.tacc.tapis.systems.client.gen.ApiException;
 import edu.utexas.tacc.tapis.systems.client.gen.api.CredentialsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.PermissionsApi;
+import edu.utexas.tacc.tapis.systems.client.gen.api.SchedulerProfilesApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.SystemsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
 import edu.utexas.tacc.tapis.systems.client.gen.model.CategoryEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.DatatypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSchedulerProfile;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPatchSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostCredential;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSchedulerProfile;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPutSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqSearchSystems;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPatchSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespBasic;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespBoolean;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespChangeCount;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespNameArray;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespResourceUrl;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfile;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfiles;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystems;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerProfile;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
 
 /**
@@ -198,28 +198,28 @@ public class SystemsClient implements ITapisClient
 
   /**
    * Create a system
-   * See the helper method buildReqCreateSystem() for an example of how to build a pre-populated
-   *   ReqCreateSystem instance from a TapisSystem instance.
+   * See the helper method buildReqPostSystem() for an example of how to build a pre-populated
+   *   ReqPostSystem instance from a TapisSystem instance.
    *
-   * @param req - Pre-populated ReqCreateSystem instance
+   * @param req - Pre-populated ReqPostSystem instance
    * @return url pointing to created resource
    * @throws TapisClientException - If api call throws an exception
    */
-  public String createSystem(ReqCreateSystem req) throws TapisClientException
+  public String createSystem(ReqPostSystem req) throws TapisClientException
   {
     return createSystem(req, DEFAULT_SKIP_CREDENTIAL_CHECK);
   }
 
   /**
    * Create a system
-   * See the helper method buildReqCreateSystem() for an example of how to build a pre-populated
-   *   ReqCreateSystem instance from a TapisSystem instance.
+   * See the helper method buildReqPostSystem() for an example of how to build a pre-populated
+   *   ReqPostSystem instance from a TapisSystem instance.
    *
-   * @param req - Pre-populated ReqCreateSystem instance
+   * @param req - Pre-populated ReqPostSystem instance
    * @return url pointing to created resource
    * @throws TapisClientException - If api call throws an exception
    */
-  public String createSystem(ReqCreateSystem req, Boolean skipCredCheck) throws TapisClientException
+  public String createSystem(ReqPostSystem req, Boolean skipCredCheck) throws TapisClientException
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
@@ -703,7 +703,7 @@ public class SystemsClient implements ITapisClient
    * @param req Request containing credentials (password, keys, etc).
    * @throws TapisClientException - If api call throws an exception
    */
-  public void updateUserCredential(String systemId, String userName, ReqCreateCredential req) throws TapisClientException
+  public void updateUserCredential(String systemId, String userName, ReqPostCredential req) throws TapisClientException
   {
     updateUserCredential(systemId, userName, req, DEFAULT_SKIP_CREDENTIAL_CHECK);
   }
@@ -716,7 +716,7 @@ public class SystemsClient implements ITapisClient
    * @param req Request containing credentials (password, keys, etc).
    * @throws TapisClientException - If api call throws an exception
    */
-  public void updateUserCredential(String systemId, String userName, ReqCreateCredential req, Boolean skipCredCheck) throws TapisClientException
+  public void updateUserCredential(String systemId, String userName, ReqPostCredential req, Boolean skipCredCheck) throws TapisClientException
   {
     // Submit the request
     try { credsApi.createUserCredential(systemId, userName, req, skipCredCheck); }
@@ -778,14 +778,14 @@ public class SystemsClient implements ITapisClient
 
   /**
    * Create a scheduler profile
-   * See the helper method buildReqCreateSchedulerProfile() for an example of how to build a pre-populated
-   *   ReqCreateSchedulerProfile instance from a SchedulerProfile instance.
+   * See the helper method buildReqPostSchedulerProfile() for an example of how to build a pre-populated
+   *   ReqPostSchedulerProfile instance from a SchedulerProfile instance.
    *
-   * @param req - Pre-populated ReqCreateSchedulerProfile instance
+   * @param req - Pre-populated ReqPostSchedulerProfile instance
    * @return url pointing to created resource
    * @throws TapisClientException - If api call throws an exception
    */
-  public String createSchedulerProfile(ReqCreateSchedulerProfile req) throws TapisClientException
+  public String createSchedulerProfile(ReqPostSchedulerProfile req) throws TapisClientException
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
@@ -852,12 +852,12 @@ public class SystemsClient implements ITapisClient
   // ************************************************************************
 
   /**
-   * Utility method to build a ReqCreateSystem object using attributes from a TapisSystem.
+   * Utility method to build a ReqPostSystem object using attributes from a TapisSystem.
    */
-  public static ReqCreateSystem buildReqCreateSystem(TapisSystem sys)
+  public static ReqPostSystem buildReqPostSystem(TapisSystem sys)
   {
     if (sys == null) return null;
-    var rSys = new ReqCreateSystem();
+    var rSys = new ReqPostSystem();
     rSys.id(sys.getId());
     rSys.description(sys.getDescription());
     rSys.systemType(sys.getSystemType());
@@ -866,7 +866,7 @@ public class SystemsClient implements ITapisClient
     rSys.enabled(sys.getEnabled());
     rSys.effectiveUserId(sys.getEffectiveUserId());
     rSys.defaultAuthnMethod(sys.getDefaultAuthnMethod());
-    rSys.authnCredential(buildReqCreateCredential(sys.getAuthnCredential()));
+    rSys.authnCredential(buildReqPostCredential(sys.getAuthnCredential()));
     rSys.bucketName(sys.getBucketName());
     rSys.rootDir(sys.getRootDir());
     rSys.port(sys.getPort()).useProxy(sys.getUseProxy()).proxyHost(sys.getProxyHost()).proxyPort(sys.getProxyPort());
@@ -879,6 +879,7 @@ public class SystemsClient implements ITapisClient
     rSys.jobEnvVariables(sys.getJobEnvVariables());
     rSys.jobMaxJobs(sys.getJobMaxJobs()).jobMaxJobsPerUser(sys.getJobMaxJobsPerUser());
     rSys.canRunBatch(sys.getCanRunBatch());
+    rSys.mpiCmd(sys.getMpiCmd());
     rSys.batchScheduler(sys.getBatchScheduler());
     rSys.batchLogicalQueues(sys.getBatchLogicalQueues());
     rSys.batchDefaultLogicalQueue(sys.getBatchDefaultLogicalQueue());
@@ -905,7 +906,7 @@ public class SystemsClient implements ITapisClient
     rSys.host(sys.getHost());
     rSys.effectiveUserId(sys.getEffectiveUserId());
     rSys.defaultAuthnMethod(sys.getDefaultAuthnMethod());
-    rSys.authnCredential(buildReqCreateCredential(sys.getAuthnCredential()));
+    rSys.authnCredential(buildReqPostCredential(sys.getAuthnCredential()));
     rSys.port(sys.getPort()).useProxy(sys.getUseProxy()).proxyHost(sys.getProxyHost()).proxyPort(sys.getProxyPort());
     rSys.dtnSystemId(sys.getDtnSystemId());
     rSys.dtnMountPoint(sys.getDtnMountPoint()).dtnMountSourcePath(sys.getDtnMountSourcePath());
@@ -914,6 +915,7 @@ public class SystemsClient implements ITapisClient
     rSys.jobEnvVariables(sys.getJobEnvVariables());
     rSys.jobMaxJobs(sys.getJobMaxJobs()).jobMaxJobsPerUser(sys.getJobMaxJobsPerUser());
     rSys.canRunBatch(sys.getCanRunBatch());
+    rSys.mpiCmd(sys.getMpiCmd());
     rSys.batchScheduler(sys.getBatchScheduler());
     rSys.batchLogicalQueues(sys.getBatchLogicalQueues());
     rSys.batchDefaultLogicalQueue(sys.getBatchDefaultLogicalQueue());
@@ -946,12 +948,12 @@ public class SystemsClient implements ITapisClient
   }
 
   /**
-   * Utility method to build a ReqCreateCredential using attributes from a Credential.
+   * Utility method to build a ReqPostCredential using attributes from a Credential.
    */
-  public static ReqCreateCredential buildReqCreateCredential(Credential credential)
+  public static ReqPostCredential buildReqPostCredential(Credential credential)
   {
     if (credential == null) return null;
-    var rCred = new ReqCreateCredential();
+    var rCred = new ReqPostCredential();
     rCred.password(credential.getPassword());
     rCred.publicKey(credential.getPublicKey());
     rCred.privateKey(credential.getPrivateKey());
@@ -962,12 +964,12 @@ public class SystemsClient implements ITapisClient
   }
 
   /**
-   * Utility method to build a ReqCreateSchedulerProfile using attributes from a SchedulerProfile.
+   * Utility method to build a ReqPostSchedulerProfile using attributes from a SchedulerProfile.
    */
-  public static ReqCreateSchedulerProfile buildReqCreateSchedulerProfile(SchedulerProfile profile)
+  public static ReqPostSchedulerProfile buildReqPostSchedulerProfile(SchedulerProfile profile)
   {
     if (profile == null) return null;
-    var rProfile = new ReqCreateSchedulerProfile();
+    var rProfile = new ReqPostSchedulerProfile();
     rProfile.name(profile.getName());
     rProfile.description(profile.getDescription());
     rProfile.owner(profile.getOwner());

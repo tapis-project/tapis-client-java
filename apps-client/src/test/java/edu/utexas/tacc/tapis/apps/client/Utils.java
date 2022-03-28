@@ -41,7 +41,7 @@ import edu.utexas.tacc.tapis.apps.client.gen.model.RuntimeOptionEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.TapisApp;
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
-import edu.utexas.tacc.tapis.apps.client.gen.model.ReqCreateApp;
+import edu.utexas.tacc.tapis.apps.client.gen.model.ReqPostApp;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 
@@ -163,6 +163,8 @@ public final class Utils
   public static final String archiveSystemDir2 = "archiveSystemDir2";
   public static final Boolean archiveOnAppErrorTrue = true;
   public static final Boolean archiveOnAppErrorFalse = false;
+  public static final String mpiCmd1 = "mpirun1";
+  public static final String mpiCmd2 = "mpirun2";
   public static final String jobDescription1 = "job description 1";
   public static final String jobDescription2 = "job description 2";
   public static final Integer maxJobs1 = 1;
@@ -401,7 +403,7 @@ public final class Utils
   public static String createApp(AppsClient clt, String[] app)
           throws TapisClientException
   {
-    ReqCreateApp rApp = new ReqCreateApp();
+    ReqPostApp rApp = new ReqPostApp();
     rApp.setId(app[1]);
     rApp.setVersion(app[2]);
     rApp.description(app[3]);
@@ -429,6 +431,7 @@ public final class Utils
     jobAttrs.setArchiveSystemId(app[15]);
     jobAttrs.setArchiveSystemDir(app[16]);
     jobAttrs.setArchiveOnAppError(archiveOnAppErrorTrue);
+    jobAttrs.setMpiCmd(mpiCmd1);
     // ====== Start Parameter Set
     ParameterSet parameterSet = new ParameterSet();
     parameterSet.setAppArgs(appArgs1);
@@ -477,7 +480,7 @@ public final class Utils
    */
   public static String createAppMinimal(AppsClient clt, String[] app) throws TapisClientException
   {
-    ReqCreateApp rApp = new ReqCreateApp();
+    ReqPostApp rApp = new ReqPostApp();
     // Id, version are always required
     rApp.setId(app[1]);
     rApp.setVersion(app[2]);
@@ -506,7 +509,7 @@ public final class Utils
    */
   public static String createAppMinimal2(AppsClient clt, String[] app) throws TapisClientException
   {
-    ReqCreateApp rApp = new ReqCreateApp();
+    ReqPostApp rApp = new ReqPostApp();
     // Id, version and type are always required
     rApp.setId(app[1]);
     rApp.setVersion(app[2]);
@@ -544,7 +547,7 @@ public final class Utils
    */
   public static String createAppFromTapisApp(AppsClient clt, TapisApp app) throws TapisClientException
   {
-    ReqCreateApp rApp = makeReqCreateAppFromTapisApp(app);
+    ReqPostApp rApp = makeReqPostAppFromTapisApp(app);
     // Use client to create the app
     return clt.createApp(rApp);
   }
@@ -559,7 +562,7 @@ public final class Utils
   public static void verifyAppAttributes(TapisApp tmpApp, String[] app0, Boolean isEnabled,
                                          List<RuntimeOptionEnum> runtimeOptions, Integer maxJobs, Integer maxJobsPerUser,
                                          Boolean strictFileInputs, Boolean dynamicExecSystem,
-                                         List<String> execSystemConstraints, Boolean archiveOnAppError,
+                                         List<String> execSystemConstraints, Boolean archiveOnAppError, String mpiCmd,
                                          List<AppArgSpec> appArgs, List<AppArgSpec> containerArgs,List<AppArgSpec> schedulerOptions,
                                          List<KeyValuePair> envVariables, ParameterSetArchiveFilter archiveFilter,
                                          Integer nodeCount, Integer coresPerNode, Integer memoryMb, Integer maxMinutes,
@@ -617,6 +620,7 @@ public final class Utils
     Assert.assertEquals(jobAttributes.getArchiveSystemId(), app0[15]);
     Assert.assertEquals(jobAttributes.getArchiveSystemDir(), app0[16]);
     Assert.assertEquals(jobAttributes.getArchiveOnAppError(), archiveOnAppError);
+    Assert.assertEquals(jobAttributes.getMpiCmd(), mpiCmd);
 
     // Verify parameterSet
     ParameterSet parmSet = jobAttributes.getParameterSet();
@@ -807,6 +811,7 @@ public final class Utils
     Assert.assertNull(jobAttrs.getArchiveSystemDir());
     Assert.assertNotNull(jobAttrs.getArchiveOnAppError());
     Assert.assertTrue(jobAttrs.getArchiveOnAppError());
+    Assert.assertNull(jobAttrs.getMpiCmd());
     Assert.assertNotNull(jobAttrs.getFileInputs());
     Assert.assertTrue(jobAttrs.getFileInputs().isEmpty());
     Assert.assertNotNull(jobAttrs.getFileInputArrays());
@@ -891,6 +896,7 @@ public final class Utils
     Assert.assertNull(jobAttrs.getArchiveSystemDir());
     Assert.assertNotNull(jobAttrs.getArchiveOnAppError());
     Assert.assertEquals(jobAttrs.getArchiveOnAppError(), defaultArchiveOnAppError);
+    Assert.assertNull(jobAttrs.getMpiCmd());
     // Check file inputs and file input arrays
     Assert.assertNotNull(jobAttrs.getFileInputs());
     Assert.assertEquals(jobAttrs.getFileInputs().size(), fileInputsMin.size());
@@ -943,11 +949,11 @@ public final class Utils
     Assert.assertEquals(archiveFilter.getIncludeLaunchFiles(), defaultIncludeLaunchFiles);
   }
   /*
-   * Generate a full ReqCreateApp using attributes from a TapisApp
+   * Generate a full ReqPostApp using attributes from a TapisApp
    */
-  private static ReqCreateApp makeReqCreateAppFromTapisApp(TapisApp app) throws TapisClientException
+  private static ReqPostApp makeReqPostAppFromTapisApp(TapisApp app) throws TapisClientException
   {
-    ReqCreateApp rApp = new ReqCreateApp();
+    ReqPostApp rApp = new ReqPostApp();
     // Id, version
     rApp.setId(app.getId());
     rApp.setVersion(app.getVersion());
