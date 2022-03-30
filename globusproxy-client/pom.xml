@@ -16,9 +16,7 @@
     <!-- Location of openapi spec. Default is dev branch -->
     <!-- NOTE: In order to try out openapi updates using a local file do something similar to the following:
      mvn clean install
-     cd globusproxy-client
-     cp ../../openapi-globusproxy/GlobusProxyAPI.yaml target/
-     mvn install -DspecPath="/home/scblack/src_git/github/dev/tapis-client-java/globusproxy-client/target/GlobusProxyAPI.yaml"
+     mvn install -DspecPath="/home/scblack/src_git/github/globus/globus-proxy/service/resources/openapi_v3.yml"
 
           or if yaml committed to local branch then do:
      mvn install -DspecPath="https://raw.githubusercontent.com/tapis-project/openapi-globusproxy/local/GlobusProxyAPI.yaml"

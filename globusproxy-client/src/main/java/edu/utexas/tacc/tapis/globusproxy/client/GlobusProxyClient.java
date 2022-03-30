@@ -193,7 +193,7 @@ public class GlobusProxyClient implements ITapisClient
    * @return tokens
    * @throws TapisClientException - If api call throws an exception
    */
-  public AuthTokens getTokens(String sessionId, String authCode) throws TapisClientException
+  public AuthTokens getTokens(String clientId, String sessionId, String authCode) throws TapisClientException
   {
     if (StringUtils.isBlank(authCode)) return null;
 
@@ -201,7 +201,7 @@ public class GlobusProxyClient implements ITapisClient
     // Submit the request
     try
     {
-      var resp = authApi.getTokens(sessionId, authCode);
+      var resp = authApi.getTokens(clientId, sessionId, authCode);
       // If response came back null return null
       if (resp == null || resp.getResult() == null) return null;
       var result = resp.getResult();
@@ -257,8 +257,8 @@ public class GlobusProxyClient implements ITapisClient
    * @return list of files
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<GlobusFileInfo> listFiles(String clientId, String endpointId, String accessToken, String path,
-                                        int limit, int offset, String filter)
+  public List<GlobusFileInfo> listFiles(String clientId, String endpointId, String accessToken, String refreshToken,
+                                        String path, int limit, int offset, String filter)
           throws TapisClientException
   {
     if (StringUtils.isBlank(endpointId) || StringUtils.isBlank(accessToken)) return null;
@@ -266,10 +266,11 @@ public class GlobusProxyClient implements ITapisClient
     ArrayList<GlobusFileInfo> fileInfoList =  new ArrayList<>();
     try
     {
-      var resp = operationsApi.listFiles(clientId, endpointId, path, accessToken, limit, offset, filter);
-      if (resp == null) return null;
-      var resultList = resp.getResult();
-      if (resultList == null) return null;
+      var resp = operationsApi.listFiles(clientId, endpointId, path, accessToken, refreshToken,
+                                                     limit, offset, filter);
+      // Make sure we are non-null down to the data
+      if (resp == null || resp.getResult() == null || resp.getResult().getDATA() == null) return fileInfoList;
+      var resultList = resp.getResult().getDATA();
       for (int i = 0; i < resultList.size(); i++)
       {
         var fiRaw = resultList.get(i);
@@ -300,7 +301,7 @@ public class GlobusProxyClient implements ITapisClient
    * @return status
    * @throws TapisClientException - If api call throws an exception
    */
-  public String deletePath(String clientId, String endpointId, String accessToken, String path, boolean recurse)
+  public String deletePath(String clientId, String endpointId, String accessToken, String refreshToken, String path, boolean recurse)
           throws TapisClientException
   {
     if (StringUtils.isBlank(endpointId) || StringUtils.isBlank(accessToken)) return null;
@@ -308,7 +309,7 @@ public class GlobusProxyClient implements ITapisClient
     String retVal = null;
     try
     {
-      var resp = operationsApi.deletePath(clientId, endpointId, path, accessToken, recurse);
+      var resp = operationsApi.deletePath(clientId, endpointId, path, accessToken, refreshToken, recurse);
       if (resp == null) return null;
       retVal = resp.getStatus();
     }
@@ -327,19 +328,19 @@ public class GlobusProxyClient implements ITapisClient
    * @return status
    * @throws TapisClientException - If api call throws an exception
    */
-  public String makeDir(String clientId, String endpointId, String accessToken, ReqMakeDir reqMakeDir)
+  public String makeDir(String clientId, String endpointId, String accessToken, String refreshToken, String path)
           throws TapisClientException
   {
-    if (StringUtils.isBlank(endpointId) || StringUtils.isBlank(accessToken) || reqMakeDir == null) return null;
+    if (StringUtils.isBlank(endpointId) || StringUtils.isBlank(accessToken) || StringUtils.isBlank(path)) return null;
 
     String retVal = null;
     // NOTE: IF openapi spec changes this class name may change. Not clear how to make code more robust and
     //       not depend on the generated class names.
-    InlineObject makeDirPath = new InlineObject();
-    makeDirPath.setPath(reqMakeDir.getPath());
+    var makeDirPath = new ReqMakeDir();
+    makeDirPath.setPath(path);
     try
     {
-      var resp = operationsApi.makeDir(clientId, endpointId, accessToken, makeDirPath);
+      var resp = operationsApi.makeDir(clientId, endpointId, accessToken, refreshToken, makeDirPath);
       if (resp == null || resp.getResult() == null) return null;
       retVal = resp.getStatus();
     }
@@ -358,20 +359,22 @@ public class GlobusProxyClient implements ITapisClient
    * @return status
    * @throws TapisClientException - If api call throws an exception
    */
-  public String renamePath(String clientId, String endpointId, String accessToken, ReqRename reqRename)
+  public String renamePath(String clientId, String endpointId, String srcPath, String destPath,
+                           String accessToken, String refreshToken)
           throws TapisClientException
   {
-    if (StringUtils.isBlank(endpointId) || StringUtils.isBlank(accessToken) || reqRename == null) return null;
+    if (StringUtils.isBlank(endpointId) || StringUtils.isBlank(accessToken) || StringUtils.isBlank(srcPath)
+            || StringUtils.isBlank(destPath)) return null;
 
     String retVal = null;
     // NOTE: IF openapi spec changes this class name may change. Not clear how to make code more robust and
     //       not depend on the generated class names.
-    InlineObject1 reqRenameObj = new InlineObject1();
-    reqRenameObj.setSourcePath(reqRename.getSourcePath());
-    reqRenameObj.setDestinationPath(reqRename.getDestinationPath());
+    var reqRenameObj = new ReqRename();
+    reqRenameObj.setSourcePath(srcPath);
+    reqRenameObj.setDestinationPath(destPath);
     try
     {
-      var resp = operationsApi.renamePath(clientId, endpointId, accessToken, reqRenameObj);
+      var resp = operationsApi.renamePath(clientId, endpointId, accessToken, refreshToken, reqRenameObj);
       if (resp == null || resp.getResult() == null) return null;
       retVal = resp.getStatus();
     }
@@ -384,79 +387,79 @@ public class GlobusProxyClient implements ITapisClient
   // -----------------------------------------------------------------------
   // --------------------------- Transfers -------------------------------
   // -----------------------------------------------------------------------
-  /**
-   * Create a transfer task
-   *
-   * @param clientId Id of client
-   * @param accessToken - globus access token
-   * @return transfer task
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public TransferTask createTransferTask(String clientId, String accessToken, ReqCreateTransfer reqCreateTransfer)
-          throws TapisClientException
-  {
-    if (StringUtils.isBlank(clientId) || StringUtils.isBlank(accessToken) || reqCreateTransfer == null) return null;
-
-    TransferTask transferTask = new TransferTask();
-    // NOTE: IF openapi spec changes this class name may change. Not clear how to make code more robust and
-    //       not depend on the generated class names.
-
-    // Create the request object required by the API call.
-    var reqCreateTransferApiObj = new InlineObject2();
-
-    // Add all transfer items to the request
-    var txfrItems = reqCreateTransferApiObj.getTransferItems();
-    txfrItems.addAll(reqCreateTransfer.getTransferItems());
-    reqCreateTransferApiObj.setTransferItems(txfrItems);
-    // Set source and destination endpoints
-    reqCreateTransferApiObj.setDestinationEndpoint(reqCreateTransfer.getDestinationEndpoint());
-    reqCreateTransferApiObj.setSourceEndpoint(reqCreateTransfer.getSourceEndpoint());
-    try
-    {
-      var resp = transfersApi.createTransferTask(clientId, accessToken, reqCreateTransferApiObj);
-      if (resp == null || resp.getResult() == null) return null;
-      var r = resp.getResult();
-      // Create transfer task from result.
-      transferTask = buildTransferTask(r);
-    }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-
-    return transferTask;
-  }
-
-  /**
-   * Get a transfer task
-   *
-   * @param clientId Id of client
-   * @param accessToken - globus access token
-   * @param taskId task id
-   * @return transfer task
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public TransferTask getTransferTask(String clientId, String accessToken, String taskId) throws TapisClientException
-  {
-    if (StringUtils.isBlank(clientId) || StringUtils.isBlank(accessToken) || StringUtils.isBlank(taskId)) return null;
-
-    TransferTask transferTask = null;
-
-    try
-    {
-      // NOTE: IF openapi spec changes this class name may change. Not clear how to make code more robust and
-      //       not depend on the generated class names.
-      var resp = transfersApi.getTransferTask(clientId, taskId, accessToken);
-      if (resp == null || resp.getResult() == null) return null;
-      var r = resp.getResult();
-
-      // Create transfer task from result.
-      transferTask = buildTransferTask(r);
-    }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-
-    return transferTask;
-  }
-
+//  /**
+//   * Create a transfer task
+//   *
+//   * @param clientId Id of client
+//   * @param accessToken - globus access token
+//   * @return transfer task
+//   * @throws TapisClientException - If api call throws an exception
+//   */
+//  public TransferTask createTransferTask(String clientId, String accessToken, ReqCreateTransfer reqCreateTransfer)
+//          throws TapisClientException
+//  {
+//    if (StringUtils.isBlank(clientId) || StringUtils.isBlank(accessToken) || reqCreateTransfer == null) return null;
+//
+//    TransferTask transferTask = new TransferTask();
+//    // NOTE: IF openapi spec changes this class name may change. Not clear how to make code more robust and
+//    //       not depend on the generated class names.
+//
+//    // Create the request object required by the API call.
+//    var reqCreateTransferApiObj = new InlineObject2();
+//
+//    // Add all transfer items to the request
+//    var txfrItems = reqCreateTransferApiObj.getTransferItems();
+//    txfrItems.addAll(reqCreateTransfer.getTransferItems());
+//    reqCreateTransferApiObj.setTransferItems(txfrItems);
+//    // Set source and destination endpoints
+//    reqCreateTransferApiObj.setDestinationEndpoint(reqCreateTransfer.getDestinationEndpoint());
+//    reqCreateTransferApiObj.setSourceEndpoint(reqCreateTransfer.getSourceEndpoint());
+//    try
+//    {
+//      var resp = transfersApi.createTransferTask(clientId, accessToken, reqCreateTransferApiObj);
+//      if (resp == null || resp.getResult() == null) return null;
+//      var r = resp.getResult();
+//      // Create transfer task from result.
+//      transferTask = buildTransferTask(r);
+//    }
+//    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+//    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+//
+//    return transferTask;
+//  }
+//
+//  /**
+//   * Get a transfer task
+//   *
+//   * @param clientId Id of client
+//   * @param accessToken - globus access token
+//   * @param taskId task id
+//   * @return transfer task
+//   * @throws TapisClientException - If api call throws an exception
+//   */
+//  public TransferTask getTransferTask(String clientId, String accessToken, String taskId) throws TapisClientException
+//  {
+//    if (StringUtils.isBlank(clientId) || StringUtils.isBlank(accessToken) || StringUtils.isBlank(taskId)) return null;
+//
+//    TransferTask transferTask = null;
+//
+//    try
+//    {
+//      // NOTE: IF openapi spec changes this class name may change. Not clear how to make code more robust and
+//      //       not depend on the generated class names.
+//      var resp = transfersApi.getTransferTask(clientId, taskId, accessToken);
+//      if (resp == null || resp.getResult() == null) return null;
+//      var r = resp.getResult();
+//
+//      // Create transfer task from result.
+//      transferTask = buildTransferTask(r);
+//    }
+//    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+//    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+//
+//    return transferTask;
+//  }
+//
   /**
    * Request to cancel a transfer task
    *
@@ -490,92 +493,92 @@ public class GlobusProxyClient implements ITapisClient
   // --------------------------- Utility Methods ---------------------------
   // -----------------------------------------------------------------------
 
-  /**
-   * Utility method to build a ReqCreateTransfer object.
-   * Note that null is returned if any incoming parameters are null or the strings are empty.
-   */
-  public static ReqCreateTransfer buildReqCreateTransfer(String srcEndpoint, String dstEndpoint,
-                                                         List<TransferItem> txfrItems)
-  {
-    if (StringUtils.isBlank(srcEndpoint) || StringUtils.isBlank(dstEndpoint) || txfrItems == null) return null;
-    var rTransfer = new ReqCreateTransfer();
-    rTransfer.setSourceEndpoint(srcEndpoint);
-    rTransfer.setDestinationEndpoint(dstEndpoint);
-    // Build up list of transfer items
-    var rTxfrItems = rTransfer.getTransferItems();
-    for (TransferItem txfrItem : txfrItems)
-    {
-      var item = new V3GlobusProxyTransfersClientIdTransferItems();
-      item.setSourcePath(txfrItem.getSourcePath());
-      item.setDestinationPath(txfrItem.getDestinationPath());
-      item.setRecursive(txfrItem.getRecursive());
-      rTxfrItems.add(item);
-    }
-
-    return rTransfer;
-  }
-
-  /**
-   * Utility method to build a transfer item that can be part of a ReqCreateTransfer.
-   * If item is a directory then recursive must be set to true.
-   *
-   * Note that null is returned if any incoming parameters are null or the strings are empty.
-   */
-  public static TransferItem buildTransferItem(String srcPath, String dstPath, boolean recursive)
-  {
-    if (StringUtils.isBlank(srcPath) || StringUtils.isBlank(dstPath)) return null;
-    var txfrItem = new TransferItem();
-    txfrItem.setSourcePath(srcPath);
-    txfrItem.setDestinationPath(dstPath);
-    txfrItem.setRecursive(recursive);
-    return txfrItem;
-  }
+//  /**
+//   * Utility method to build a ReqCreateTransfer object.
+//   * Note that null is returned if any incoming parameters are null or the strings are empty.
+//   */
+//  public static ReqCreateTransfer buildReqCreateTransfer(String srcEndpoint, String dstEndpoint,
+//                                                         List<TransferItem> txfrItems)
+//  {
+//    if (StringUtils.isBlank(srcEndpoint) || StringUtils.isBlank(dstEndpoint) || txfrItems == null) return null;
+//    var rTransfer = new ReqCreateTransfer();
+//    rTransfer.setSourceEndpoint(srcEndpoint);
+//    rTransfer.setDestinationEndpoint(dstEndpoint);
+//    // Build up list of transfer items
+//    var rTxfrItems = rTransfer.getTransferItems();
+//    for (TransferItem txfrItem : txfrItems)
+//    {
+//      var item = new V3GlobusProxyTransfersClientIdTransferItems();
+//      item.setSourcePath(txfrItem.getSourcePath());
+//      item.setDestinationPath(txfrItem.getDestinationPath());
+//      item.setRecursive(txfrItem.getRecursive());
+//      rTxfrItems.add(item);
+//    }
+//
+//    return rTransfer;
+//  }
+//
+//  /**
+//   * Utility method to build a transfer item that can be part of a ReqCreateTransfer.
+//   * If item is a directory then recursive must be set to true.
+//   *
+//   * Note that null is returned if any incoming parameters are null or the strings are empty.
+//   */
+//  public static TransferItem buildTransferItem(String srcPath, String dstPath, boolean recursive)
+//  {
+//    if (StringUtils.isBlank(srcPath) || StringUtils.isBlank(dstPath)) return null;
+//    var txfrItem = new TransferItem();
+//    txfrItem.setSourcePath(srcPath);
+//    txfrItem.setDestinationPath(dstPath);
+//    txfrItem.setRecursive(recursive);
+//    return txfrItem;
+//  }
 
   // ************************************************************************
   // *********************** Private Methods ********************************
   // ************************************************************************
 
-  /*
-   * Create and populate a TransferTask given the result from a call to transfersApi.getTransferTask()
-   *  or transfersApi.createTransferTask()
-   * Note that the type for the input parameter is from autogenerated code so could change when the
-   *   openapi spec is changed.
-   */
-  TransferTask buildTransferTask(InlineResponse2004Result r)
-  {
-    TransferTask transferTask = new TransferTask();
-    transferTask.setBytesTransferred(r.getBytesTransferred());
-    transferTask.setCompletionTime(r.getCompletionTime());
-    transferTask.setDeadline(r.getDeadline());
-    transferTask.setDestinationEndpointDisplayName(r.getDestinationEndpointDisplayName());
-    transferTask.setDestinationEndpointId(r.getDestinationEndpointId());
-    transferTask.setDirectories(r.getDirectories());
-    transferTask.setEffectiveBytesPerSecond(r.getEffectiveBytesPerSecond());
-    transferTask.setEncryptData(r.getEncryptData());
-    transferTask.setFailOnQuotaErrors(r.getFailOnQuotaErrors());
-    transferTask.setFatalError(r.getFatalError());
-    transferTask.setFaults(r.getFaults());
-    transferTask.setFiles(r.getFiles());
-    transferTask.setFilesSkipped(r.getFilesSkipped());
-    transferTask.setFilesTransferred(r.getFilesTransferred());
-    transferTask.setHistoryDeleted(r.getHistoryDeleted());
-    transferTask.setIsOk(r.getIsOk());
-    transferTask.setIsPaused(r.getIsPaused());
-    transferTask.setLabel(r.getLabel());
-    transferTask.setOwnerId(r.getOwnerId());
-    transferTask.setRequestTime(r.getRequestTime());
-    transferTask.setSkipSourceErrors(r.getSkipSourceErrors());
-    transferTask.setSourceEndpointDisplayName(r.getSourceEndpointDisplayName());
-    transferTask.setSourceEndpointId(r.getSourceEndpointId());
-    transferTask.setSymlinks(r.getSymlinks());
-    transferTask.setSyncLevel(r.getSyncLevel());
-    transferTask.setTaskId(r.getTaskId());
-    transferTask.setVerifyChecksum(r.getVerifyChecksum());
-    // NOTE that although the generated code has two enum types for both Status and Type,
-    //   they come from the same sources defined in the openapi spec. Namely, GlobusTransferTaskStatusEnum
-    //   and GlobusTaskTypeEnum defined in the openapi spec. So it should be OK to set one from the other
-    transferTask.setStatus(TransferTask.StatusEnum.valueOf(r.getStatus().name()));
-    transferTask.setType(TransferTask.TypeEnum.valueOf(r.getType().name()));
-    return transferTask;
-  }
+//  /*
+//   * Create and populate a TransferTask given the result from a call to transfersApi.getTransferTask()
+//   *  or transfersApi.createTransferTask()
+//   * Note that the type for the input parameter is from autogenerated code so could change when the
+//   *   openapi spec is changed.
+//   */
+//  TransferTask buildTransferTask(InlineResponse2004Result r)
+//  {
+//    TransferTask transferTask = new TransferTask();
+//    transferTask.setBytesTransferred(r.getBytesTransferred());
+//    transferTask.setCompletionTime(r.getCompletionTime());
+//    transferTask.setDeadline(r.getDeadline());
+//    transferTask.setDestinationEndpointDisplayName(r.getDestinationEndpointDisplayName());
+//    transferTask.setDestinationEndpointId(r.getDestinationEndpointId());
+//    transferTask.setDirectories(r.getDirectories());
+//    transferTask.setEffectiveBytesPerSecond(r.getEffectiveBytesPerSecond());
+//    transferTask.setEncryptData(r.getEncryptData());
+//    transferTask.setFailOnQuotaErrors(r.getFailOnQuotaErrors());
+//    transferTask.setFatalError(r.getFatalError());
+//    transferTask.setFaults(r.getFaults());
+//    transferTask.setFiles(r.getFiles());
+//    transferTask.setFilesSkipped(r.getFilesSkipped());
+//    transferTask.setFilesTransferred(r.getFilesTransferred());
+//    transferTask.setHistoryDeleted(r.getHistoryDeleted());
+//    transferTask.setIsOk(r.getIsOk());
+//    transferTask.setIsPaused(r.getIsPaused());
+//    transferTask.setLabel(r.getLabel());
+//    transferTask.setOwnerId(r.getOwnerId());
+//    transferTask.setRequestTime(r.getRequestTime());
+//    transferTask.setSkipSourceErrors(r.getSkipSourceErrors());
+//    transferTask.setSourceEndpointDisplayName(r.getSourceEndpointDisplayName());
+//    transferTask.setSourceEndpointId(r.getSourceEndpointId());
+//    transferTask.setSymlinks(r.getSymlinks());
+//    transferTask.setSyncLevel(r.getSyncLevel());
+//    transferTask.setTaskId(r.getTaskId());
+//    transferTask.setVerifyChecksum(r.getVerifyChecksum());
+//    // NOTE that although the generated code has two enum types for both Status and Type,
+//    //   they come from the same sources defined in the openapi spec. Namely, GlobusTransferTaskStatusEnum
+//    //   and GlobusTaskTypeEnum defined in the openapi spec. So it should be OK to set one from the other
+//    transferTask.setStatus(TransferTask.StatusEnum.valueOf(r.getStatus().name()));
+//    transferTask.setType(TransferTask.TypeEnum.valueOf(r.getType().name()));
+//    return transferTask;
+//  }
 }
