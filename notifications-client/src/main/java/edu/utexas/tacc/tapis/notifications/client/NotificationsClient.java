@@ -25,7 +25,7 @@ import edu.utexas.tacc.tapis.notifications.client.gen.model.RespChangeCount;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.RespResourceUrl;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.RespSubscription;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.RespSubscriptions;
-import edu.utexas.tacc.tapis.notifications.client.gen.model.ReqPostEvent;
+import edu.utexas.tacc.tapis.notifications.client.gen.model.Event;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.ReqPatchSubscription;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.ReqPostSubscription;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.ReqPutSubscription;
@@ -454,12 +454,12 @@ public class NotificationsClient implements ITapisClient
   /**
    * Publish an event
    * See the helper method buildReqPostEvent() for an example of how to build a pre-populated
-   *   ReqPostEvent instance.
+   *   Event instance.
    *
    * @param req Request body specifying attributes
    * @throws TapisClientException - If api call throws an exception
    */
-  public void postEvent(ReqPostEvent req) throws TapisClientException
+  public void postEvent(Event req) throws TapisClientException
   {
     // Submit the request
     try { eventsApi.postEvent(req); }
@@ -519,13 +519,13 @@ public class NotificationsClient implements ITapisClient
   }
 
   /**
-   * Utility method to build a ReqPostEvent object.
+   * Utility method to build a Event object.
    */
-  public static ReqPostEvent buildReqPostEvent(String source, String type, String subject, OffsetDateTime timestamp)
+  public static Event buildEvent(String source, String type, String subject, OffsetDateTime timestamp)
   {
     // If any required attributes null then return null.
     if (StringUtils.isBlank(source) || StringUtils.isBlank(type) || timestamp == null) return null;
-    ReqPostEvent rEvent = new ReqPostEvent();
+    Event rEvent = new Event();
     rEvent.source(source);
     rEvent.type(type);
     rEvent.subject(subject);
