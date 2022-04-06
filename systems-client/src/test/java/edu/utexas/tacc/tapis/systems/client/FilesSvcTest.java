@@ -195,7 +195,7 @@ public class FilesSvcTest
     sys0 = systems.get(2);
     // This should succeed
     sysClient = getClientFilesSvc(tenantName, testUser2, filesServiceJWT);
-    tmpSys = sysClient.getSystem(sys0[1], false, null, true, DEFAULT_SELECT_ALL);
+    tmpSys = sysClient.getSystem(sys0[1], null, true, DEFAULT_SELECT_ALL, false, false);
     Assert.assertNotNull(tmpSys, "Failed to find item: " + sys0[1]);
     System.out.println("Found item: " + sys0[1]);
     // Verify most attributes
@@ -205,7 +205,7 @@ public class FilesSvcTest
     // this should fail
     sysClient = getClientFilesSvc(tenantName, testUser3, filesServiceJWT);
     try {
-      sysClient.getSystem(sys0[1], false, null, true, DEFAULT_SELECT_ALL);
+      sysClient.getSystem(sys0[1], null, true, DEFAULT_SELECT_ALL, false, false);
       Assert.fail("Fetch of system did not require EXECUTE permission as expected");
     } catch (TapisClientException tce) {
       Assert.assertTrue(tce.getTapisMessage().contains("SYSLIB_UNAUTH"), "Wrong exception message: " + tce.getTapisMessage());

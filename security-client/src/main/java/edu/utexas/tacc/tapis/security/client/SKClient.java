@@ -1276,7 +1276,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* hasPrivilege:                                                                */
     /* ---------------------------------------------------------------------------- */
-    public ResultBoolean hasPrivilege(SKShareHasPrivilegeParms p)
+    public boolean hasPrivilege(SKShareHasPrivilegeParms p)
         throws TapisClientException
     {
         RespBoolean resp = null;
@@ -1287,7 +1287,10 @@ public class SKClient
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
-        return resp.getResult();
+//        return resp.getResult();
+      // Return result value.
+      Boolean b = resp.getResult().getaBool();
+      return b == null ? false : b;
     }
     
     /* **************************************************************************** */

@@ -379,7 +379,7 @@ public class SystemsClient implements ITapisClient
    */
   public TapisSystem getSystem(String systemId) throws TapisClientException
   {
-    return getSystem(systemId, false, null, false, DEFAULT_SELECT_ALL);
+    return getSystem(systemId, null, false, DEFAULT_SELECT_ALL, false, false);
   }
 
   /**
@@ -399,7 +399,7 @@ public class SystemsClient implements ITapisClient
                                Boolean requireExecPerm)
           throws TapisClientException
   {
-    return getSystem(systemId, returnCredentials, authnMethod, requireExecPerm, DEFAULT_SELECT_ALL);
+    return getSystem(systemId, authnMethod, requireExecPerm, DEFAULT_SELECT_ALL, returnCredentials, false);
   }
 
   /**
@@ -440,22 +440,23 @@ public class SystemsClient implements ITapisClient
    * Use of this method is highly restricted.
    *
    * @param systemId System Id
-   * @param returnCredentials - Include credentials in returned system object
    * @param authnMethod - Desired authn method used when fetching credentials, for default pass in null.
    * @param requireExecPerm Check for EXECUTE permission as well as READ permission
    * @param selectStr - Attributes to be included in result. For example select=id,owner,host
+   * @param returnCredentials - Include credentials in returned system object
+   * @param skipTapisAuthorization - Skip tapis auth
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public TapisSystem getSystem(String systemId, Boolean returnCredentials, AuthnMethod authnMethod,
-                               Boolean requireExecPerm, String selectStr)
+  public TapisSystem getSystem(String systemId, AuthnMethod authnMethod, Boolean requireExecPerm, String selectStr,
+                               Boolean returnCredentials, Boolean skipTapisAuthorization)
           throws TapisClientException
   {
     String selectStr1 = DEFAULT_SELECT_ALL;
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
     RespSystem resp = null;
     String authnMethodStr = (authnMethod==null ? null : authnMethod.name());
-    try {resp = sysApi.getSystem(systemId, returnCredentials, authnMethodStr, requireExecPerm, selectStr1); }
+    try {resp = sysApi.getSystem(systemId, authnMethodStr, requireExecPerm, selectStr1, returnCredentials, skipTapisAuthorization); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;

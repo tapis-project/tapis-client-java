@@ -206,6 +206,7 @@ public class FilesClient implements ITapisClient
   // -----------------------------------------------------------------------
   // --------------------------- File operations ---------------------------
   // -----------------------------------------------------------------------
+
   /**
    * List files/objects in a storage system.
    *
@@ -214,17 +215,25 @@ public class FilesClient implements ITapisClient
    * @param limit pagination limit
    * @param offset pagination offset
    * @param recurse Flag indicating if a recursive listing is to be provided.
+   * @param skipTapisAuthorization - Skip tapis auth
    * @return list of FileInfo objects
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<FileInfo> listFiles(String systemId, String path, int limit, long offset, boolean recurse)
+  public List<FileInfo> listFiles(String systemId, String path, int limit, long offset, boolean recurse,
+                                  boolean skipTapisAuthorization)
           throws TapisClientException
   {
     FileListingResponse resp = null;
-    try { resp = fileOperations.listFiles(systemId, path, limit, offset, recurse); }
+    try { resp = fileOperations.listFiles(systemId, path, limit, offset, recurse, skipTapisAuthorization); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
+  }
+
+  public List<FileInfo> listFiles(String systemId, String path, int limit, long offset, boolean recurse)
+          throws TapisClientException
+  {
+    return listFiles(systemId, path, limit, offset, recurse, false);
   }
 
   /**
@@ -233,10 +242,11 @@ public class FilesClient implements ITapisClient
    * @param systemId system
    * @param path path relative to system rootDir
    * @param zip Flag indicating if contents of a folder should be zipped
-   * @return transfer task
+   * @param skipTapisAuthorization - Skip tapis auth
+   * @return data stream
    * @throws TapisClientException - If api call throws an exception
    */
-  public StreamedFile getFileContents(String systemId, String path, boolean zip)
+  public StreamedFile getFileContents(String systemId, String path, boolean zip, boolean skipTapisAuthorization)
           throws TapisClientException
   {
 
@@ -245,7 +255,7 @@ public class FilesClient implements ITapisClient
       String filename = FilenameUtils.getName(path);
 
       try {
-          Call call = fileContents.getContentsCall(systemId, path, null, zip, null, null);
+          Call call = fileContents.getContentsCall(systemId, path, null, zip, null, skipTapisAuthorization, null);
           Response response =  call.execute();
           stream = response.body().byteStream();
 
@@ -256,6 +266,11 @@ public class FilesClient implements ITapisClient
       catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
       catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
       return new StreamedFile(stream, filename);
+  }
+
+  public StreamedFile getFileContents(String systemId, String path, boolean zip) throws TapisClientException
+  {
+    return getFileContents(systemId, path, zip, false);
   }
 
   /**
@@ -273,7 +288,7 @@ public class FilesClient implements ITapisClient
     String filename = FilenameUtils.getName(StringUtils.stripEnd(path, "/"));
 
     try {
-      Call call = fileContents.getContentsCall(systemId, path, null, true, null, null);
+      Call call = fileContents.getContentsCall(systemId, path, null, true, null, false, null);
       Response response =  call.execute();
       filename = FilenameUtils.removeExtension(filename) + ".zip";
       zipStream = response.body().byteStream();
