@@ -55,6 +55,9 @@ public class AppsClient implements ITapisClient
   // Header key for JWT
   public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
 
+  // Named null values to make it clear what is being passed in to a method
+  private static final String nullImpersonationId = null;
+
   // Defaults
   public static final boolean DEFAULT_STRICT_FILE_INPUTS = false;
   public static final boolean DEFAULT_FILE_INPUT_AUTO_MOUNT_LOCAL = true;
@@ -365,7 +368,7 @@ public class AppsClient implements ITapisClient
    */
   public TapisApp getApp(String appId, String appVersion) throws TapisClientException
   {
-    return getApp(appId, appVersion, Boolean.FALSE, Boolean.FALSE, DEFAULT_SELECT_ALL);
+    return getApp(appId, appVersion, Boolean.FALSE, nullImpersonationId, DEFAULT_SELECT_ALL);
   }
 
   /**
@@ -374,18 +377,18 @@ public class AppsClient implements ITapisClient
    * @param appId Id of the application
    * @param appVersion Version of the application
    * @param requireExecPerm Check for EXECUTE permission as well as READ permission
-   * @param skipTapisAuthorization - Skip tapis auth
+   * @param impersonationId - use provided Tapis username instead of oboUser
    * @return The app or null if app not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm, Boolean skipTapisAuthorization)
+  public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm, String impersonationId)
           throws TapisClientException
   {
-    return getApp(appId, appVersion, requireExecPerm, skipTapisAuthorization, DEFAULT_SELECT_ALL);
+    return getApp(appId, appVersion, requireExecPerm, impersonationId, DEFAULT_SELECT_ALL);
   }
   public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm) throws TapisClientException
   {
-    return getApp(appId, appVersion, requireExecPerm, Boolean.FALSE, DEFAULT_SELECT_ALL);
+    return getApp(appId, appVersion, requireExecPerm, nullImpersonationId, DEFAULT_SELECT_ALL);
   }
 
   /**
@@ -394,19 +397,19 @@ public class AppsClient implements ITapisClient
    * @param appId Id of the application
    * @param appVersion Version of the application
    * @param requireExecPerm Check for EXECUTE permission as well as READ permission
-   * @param skipTapisAuthorization - Skip tapis auth
+   * @param impersonationId - use provided Tapis username instead of oboUser
    * @param selectStr - Attributes to be included in result. For example select=id,version,owner
    * @return The app or null if app not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm, Boolean skipTapisAuthorization,
+  public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm, String impersonationId,
                          String selectStr)
           throws TapisClientException
   {
     String selectStr1 = DEFAULT_SELECT_ALL;
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
     RespApp resp = null;
-    try {resp = appApi.getApp(appId, appVersion, requireExecPerm, skipTapisAuthorization, selectStr1); }
+    try {resp = appApi.getApp(appId, appVersion, requireExecPerm, impersonationId, selectStr1); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;

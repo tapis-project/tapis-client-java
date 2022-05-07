@@ -42,6 +42,9 @@ import static edu.utexas.tacc.tapis.systems.client.Utils.*;
 @Test(groups={"integration"})
 public class FilesSvcTest
 {
+  // Named null values to make it clear what is being passed in to a method
+  private static final String nullImpersonationId = null;
+
   // Test data
   int numSystems = 2;
   Map<Integer, String[]> systems = Utils.makeSystems(numSystems, "CltFiles");
@@ -195,7 +198,7 @@ public class FilesSvcTest
     sys0 = systems.get(2);
     // This should succeed
     sysClient = getClientFilesSvc(tenantName, testUser2, filesServiceJWT);
-    tmpSys = sysClient.getSystem(sys0[1], null, true, DEFAULT_SELECT_ALL, false, false);
+    tmpSys = sysClient.getSystem(sys0[1], null, true, DEFAULT_SELECT_ALL, false, nullImpersonationId);
     Assert.assertNotNull(tmpSys, "Failed to find item: " + sys0[1]);
     System.out.println("Found item: " + sys0[1]);
     // Verify most attributes
@@ -205,7 +208,7 @@ public class FilesSvcTest
     // this should fail
     sysClient = getClientFilesSvc(tenantName, testUser3, filesServiceJWT);
     try {
-      sysClient.getSystem(sys0[1], null, true, DEFAULT_SELECT_ALL, false, false);
+      sysClient.getSystem(sys0[1], null, true, DEFAULT_SELECT_ALL, false, nullImpersonationId);
       Assert.fail("Fetch of system did not require EXECUTE permission as expected");
     } catch (TapisClientException tce) {
       Assert.assertTrue(tce.getTapisMessage().contains("SYSLIB_UNAUTH"), "Wrong exception message: " + tce.getTapisMessage());

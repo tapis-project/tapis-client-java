@@ -71,6 +71,9 @@ public class SystemsClient implements ITapisClient
   // Header key for JWT
   public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
 
+  // Named null values to make it clear what is being passed in to a method
+  private static final String nullImpersonationId = null;
+
   // ************************************************************************
   // *********************** Enums ******************************************
   // ************************************************************************
@@ -379,7 +382,7 @@ public class SystemsClient implements ITapisClient
    */
   public TapisSystem getSystem(String systemId) throws TapisClientException
   {
-    return getSystem(systemId, null, false, DEFAULT_SELECT_ALL, false, false);
+    return getSystem(systemId, null, false, DEFAULT_SELECT_ALL, false, nullImpersonationId);
   }
 
   /**
@@ -399,7 +402,7 @@ public class SystemsClient implements ITapisClient
                                Boolean requireExecPerm)
           throws TapisClientException
   {
-    return getSystem(systemId, authnMethod, requireExecPerm, DEFAULT_SELECT_ALL, returnCredentials, false);
+    return getSystem(systemId, authnMethod, requireExecPerm, DEFAULT_SELECT_ALL, returnCredentials, nullImpersonationId);
   }
 
   /**
@@ -444,19 +447,23 @@ public class SystemsClient implements ITapisClient
    * @param requireExecPerm Check for EXECUTE permission as well as READ permission
    * @param selectStr - Attributes to be included in result. For example select=id,owner,host
    * @param returnCredentials - Include credentials in returned system object
-   * @param skipTapisAuthorization - Skip tapis auth
+   * @param impersonationId - use provided Tapis username instead of oboUser when checking auth and
+   *                          resolving effectiveUserId
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
   public TapisSystem getSystem(String systemId, AuthnMethod authnMethod, Boolean requireExecPerm, String selectStr,
-                               Boolean returnCredentials, Boolean skipTapisAuthorization)
+                               Boolean returnCredentials, String impersonationId)
           throws TapisClientException
   {
     String selectStr1 = DEFAULT_SELECT_ALL;
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
     RespSystem resp = null;
     String authnMethodStr = (authnMethod==null ? null : authnMethod.name());
-    try {resp = sysApi.getSystem(systemId, authnMethodStr, requireExecPerm, selectStr1, returnCredentials, skipTapisAuthorization); }
+    try
+    {
+      resp = sysApi.getSystem(systemId, authnMethodStr, requireExecPerm, selectStr1, returnCredentials, impersonationId);
+    }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
