@@ -1076,6 +1076,8 @@ paths:
       description: |-
         Get a filtered list of shared resources. Query parameters are used to restrict the returned shares. The *grantor*, *grantee*, *resourceType*, *resourceId1*, *resourceId2*, *privilege*, *createdBy* and *createdByTenant* parameters are used to match values in shared resource objects. Other query parameters are used to control how matching is performed.
 
+        If resourceId1 or resourceId2 end with a percent sign (%) wildcard then the search results will include all shares with IDs that begin with the same prefix string.  Percent signs embedded elsewhere in the string are *not* recognized as wildcards.
+
         Specifying the *id* parameter causes the other filtering parameters to be ignored. The result list will contain at most one entry.
 
         The *includePublicGrantees* flag, true by default, controls whether resources granted to **~public** and **~public_no_authn** are also considered for inclusion in the result list.
