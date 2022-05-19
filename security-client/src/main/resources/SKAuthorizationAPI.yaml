@@ -1076,6 +1076,8 @@ paths:
       description: |-
         Get a filtered list of shared resources. Query parameters are used to restrict the returned shares. The *grantor*, *grantee*, *resourceType*, *resourceId1*, *resourceId2*, *privilege*, *createdBy* and *createdByTenant* parameters are used to match values in shared resource objects. Other query parameters are used to control how matching is performed.
 
+        If resourceId1 or resourceId2 end with a percent sign (%) wildcard then the search results will include all shares with IDs that begin with the same prefix string.  Percent signs embedded elsewhere in the string are *not* recognized as wildcards.
+
         Specifying the *id* parameter causes the other filtering parameters to be ignored. The result list will contain at most one entry.
 
         The *includePublicGrantees* flag, true by default, controls whether resources granted to **~public** and **~public_no_authn** are also considered for inclusion in the result list.
@@ -1181,13 +1183,16 @@ paths:
 
         Grantees can be given shared access to a resource on an individual basis or by using the public granting mechanism. Grants to the distinguished **~public** and **~public_no_authn** pseudo-grantees allow access to a resource to authenticated users or to any user, respectively.
 
-        The payload for this includes these values, with all except resourceId2 required:
+        The payload for this request includes these values, with all except resourceId2 required:
 
+           - grantor
            - grantee
            - resourceType
            - resourceId1
            - resourceId2
            - privilege
+
+        The grantor and grantee are always in the OBO tenant.
 
         If the share already exists, then this call has no effect. For the request to be authorized, the requestor must be a Tapis service.
       operationId: shareResource
@@ -4049,6 +4054,8 @@ components:
     ReqShareResource:
       type: object
       properties:
+        grantor:
+          type: string
         grantee:
           type: string
         resourceType:

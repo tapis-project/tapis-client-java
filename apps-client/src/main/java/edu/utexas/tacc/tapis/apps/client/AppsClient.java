@@ -55,6 +55,9 @@ public class AppsClient implements ITapisClient
   // Header key for JWT
   public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
 
+  // Named null values to make it clear what is being passed in to a method
+  private static final String nullImpersonationId = null;
+
   // Defaults
   public static final boolean DEFAULT_STRICT_FILE_INPUTS = false;
   public static final boolean DEFAULT_FILE_INPUT_AUTO_MOUNT_LOCAL = true;
@@ -333,57 +336,6 @@ public class AppsClient implements ITapisClient
   }
 
   /**
-   * Get a specific version of an app using minimal attributes
-   *
-   * @param appId Id of the application
-   * @param appVersion Version of the application
-   * @return The app or null if app not found
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public TapisApp getApp(String appId, String appVersion) throws TapisClientException
-  {
-    return getApp(appId, appVersion, Boolean.FALSE, DEFAULT_SELECT_ALL);
-  }
-
-  /**
-   * Get a specific version of an app
-   *
-   * @param appId Id of the application
-   * @param appVersion Version of the application
-   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
-   * @return The app or null if app not found
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm) throws TapisClientException
-  {
-    return getApp(appId, appVersion, requireExecPerm, DEFAULT_SELECT_ALL);
-  }
-
-  /**
-   * Get a specific version of an app using all supported parameters.
-   *
-   * @param appId Id of the application
-   * @param appVersion Version of the application
-   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
-   * @param selectStr - Attributes to be included in result. For example select=id,version,owner
-   * @return The app or null if app not found
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm, String selectStr) throws TapisClientException
-  {
-    String selectStr1 = DEFAULT_SELECT_ALL;
-    if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
-    RespApp resp = null;
-    try {resp = appApi.getApp(appId, appVersion, requireExecPerm, selectStr1); }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null) return null;
-    // Postprocess the app
-    TapisApp app = postProcessApp(resp.getResult());
-    return app;
-  }
-
-  /**
    * Get latest version of an app using all supported parameters
    *
    * @param appId Id of the application
@@ -398,6 +350,66 @@ public class AppsClient implements ITapisClient
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
     RespApp resp = null;
     try {resp = appApi.getAppLatestVersion(appId, requireExecPerm, selectStr1); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp == null || resp.getResult() == null) return null;
+    // Postprocess the app
+    TapisApp app = postProcessApp(resp.getResult());
+    return app;
+  }
+
+  /**
+   * Get a specific version of an app using minimal attributes
+   *
+   * @param appId Id of the application
+   * @param appVersion Version of the application
+   * @return The app or null if app not found
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public TapisApp getApp(String appId, String appVersion) throws TapisClientException
+  {
+    return getApp(appId, appVersion, Boolean.FALSE, nullImpersonationId, DEFAULT_SELECT_ALL);
+  }
+
+  /**
+   * Get a specific version of an app including the two auth related flags
+   *
+   * @param appId Id of the application
+   * @param appVersion Version of the application
+   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
+   * @param impersonationId - use provided Tapis username instead of oboUser
+   * @return The app or null if app not found
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm, String impersonationId)
+          throws TapisClientException
+  {
+    return getApp(appId, appVersion, requireExecPerm, impersonationId, DEFAULT_SELECT_ALL);
+  }
+  public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm) throws TapisClientException
+  {
+    return getApp(appId, appVersion, requireExecPerm, nullImpersonationId, DEFAULT_SELECT_ALL);
+  }
+
+  /**
+   * Get a specific version of an app using all supported parameters.
+   *
+   * @param appId Id of the application
+   * @param appVersion Version of the application
+   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
+   * @param impersonationId - use provided Tapis username instead of oboUser
+   * @param selectStr - Attributes to be included in result. For example select=id,version,owner
+   * @return The app or null if app not found
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm, String impersonationId,
+                         String selectStr)
+          throws TapisClientException
+  {
+    String selectStr1 = DEFAULT_SELECT_ALL;
+    if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
+    RespApp resp = null;
+    try {resp = appApi.getApp(appId, appVersion, requireExecPerm, impersonationId, selectStr1); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;

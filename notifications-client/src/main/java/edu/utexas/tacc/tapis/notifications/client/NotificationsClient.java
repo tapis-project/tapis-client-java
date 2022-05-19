@@ -6,6 +6,7 @@ import java.util.List;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.Gson;
+import edu.utexas.tacc.tapis.notifications.client.gen.api.TestApi;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.utexas.tacc.tapis.client.shared.Utils;
@@ -25,7 +26,7 @@ import edu.utexas.tacc.tapis.notifications.client.gen.model.RespChangeCount;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.RespResourceUrl;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.RespSubscription;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.RespSubscriptions;
-import edu.utexas.tacc.tapis.notifications.client.gen.model.ReqPostEvent;
+import edu.utexas.tacc.tapis.notifications.client.gen.model.Event;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.ReqPatchSubscription;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.ReqPostSubscription;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.ReqPutSubscription;
@@ -40,6 +41,8 @@ import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_SUMMARY;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_ORDERBY;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SUBSCRIPTION_TTL;
+import static edu.utexas.tacc.tapis.client.shared.Utils.EMPTY_JSON;
 
 /**
  * Class providing a convenient front-end to the automatically generated client code
@@ -71,6 +74,7 @@ public class NotificationsClient implements ITapisClient
   private final SubscriptionsApi subscriptionsApi;
   private final EventsApi eventsApi;
   private final GeneralApi generalApi;
+  private final TestApi testApi;
 
   // ************************************************************************
   // *********************** Constructors ***********************************
@@ -86,6 +90,7 @@ public class NotificationsClient implements ITapisClient
     subscriptionsApi = new SubscriptionsApi(apiClient);
     eventsApi = new EventsApi(apiClient);
     generalApi = new GeneralApi(apiClient);
+    testApi = new TestApi(apiClient);
   }
 
   /**
@@ -105,6 +110,7 @@ public class NotificationsClient implements ITapisClient
     subscriptionsApi = new SubscriptionsApi(apiClient);
     eventsApi = new EventsApi(apiClient);
     generalApi = new GeneralApi(apiClient);
+    testApi = new TestApi(apiClient);
   }
 
   // ************************************************************************
@@ -454,17 +460,48 @@ public class NotificationsClient implements ITapisClient
   /**
    * Publish an event
    * See the helper method buildReqPostEvent() for an example of how to build a pre-populated
-   *   ReqPostEvent instance.
+   *   Event instance.
    *
    * @param req Request body specifying attributes
    * @throws TapisClientException - If api call throws an exception
    */
-  public void postEvent(ReqPostEvent req) throws TapisClientException
+  public void postEvent(Event req) throws TapisClientException
   {
     // Submit the request
     try { eventsApi.postEvent(req); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+  }
+
+  // -----------------------------------------------------------------------
+  // ------------------------- TestSequence -------------------------------
+  // -----------------------------------------------------------------------
+  /**
+   * Start a test sequence
+   *
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public TapisSubscription beginTestSequence(Integer subscriptionTTL) throws TapisClientException
+  {
+    RespSubscription resp = null;
+    Integer subscrTTL = subscriptionTTL;
+    if (subscriptionTTL == null) subscrTTL = DEFAULT_SUBSCRIPTION_TTL;
+    // Submit the request
+    // Json body is not used but appears to be required when generating the client from the openapi spec.
+    try { resp = testApi.beginTestSequence(subscrTTL, EMPTY_JSON); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+
+    if (resp != null && resp.getResult() != null)
+    {
+      // Postprocess the subscription
+      TapisSubscription subscription = postProcessSubscription(resp.getResult());
+      return subscription;
+    }
+    else
+    {
+      throw new TapisClientException("beginTestSequence did not return a result");
+    }
   }
 
   // -----------------------------------------------------------------------
@@ -519,13 +556,13 @@ public class NotificationsClient implements ITapisClient
   }
 
   /**
-   * Utility method to build a ReqPostEvent object.
+   * Utility method to build a Event object.
    */
-  public static ReqPostEvent buildReqPostEvent(String source, String type, String subject, OffsetDateTime timestamp)
+  public static Event buildEvent(String source, String type, String subject, OffsetDateTime timestamp)
   {
     // If any required attributes null then return null.
     if (StringUtils.isBlank(source) || StringUtils.isBlank(type) || timestamp == null) return null;
-    ReqPostEvent rEvent = new ReqPostEvent();
+    Event rEvent = new Event();
     rEvent.source(source);
     rEvent.type(type);
     rEvent.subject(subject);
