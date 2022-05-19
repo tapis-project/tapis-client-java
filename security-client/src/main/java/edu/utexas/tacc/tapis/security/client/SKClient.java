@@ -1201,7 +1201,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* shareResource:                                                               */
     /* ---------------------------------------------------------------------------- */
-    public ResultResourceUrl shareResource(ReqShareResource reqShareResource)
+    public String shareResource(ReqShareResource reqShareResource)
        throws TapisClientException
     {
         RespResourceUrl resp = null;
@@ -1210,7 +1210,7 @@ public class SKClient
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
-        return resp.getResult();
+        return resp.getResult().getUrl();
     }
     
     /* ---------------------------------------------------------------------------- */
@@ -1247,7 +1247,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* deleteShareById:                                                             */
     /* ---------------------------------------------------------------------------- */
-    public ResultChangeCount deleteShareById(int id) throws TapisClientException
+    public int deleteShareById(int id) throws TapisClientException
     {
         RespChangeCount resp = null;
         var shareApi = new ShareApi(_apiClient);
@@ -1255,13 +1255,14 @@ public class SKClient
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
-        return resp.getResult();
+        var changes = resp.getResult().getChanges();
+        return changes == null ? 0 : changes;
     }
 
     /* ---------------------------------------------------------------------------- */
     /* deleteShare:                                                                 */
     /* ---------------------------------------------------------------------------- */
-    public ResultChangeCount deleteShare(SKShareDeleteShareParms p) throws TapisClientException
+    public int deleteShare(SKShareDeleteShareParms p) throws TapisClientException
     {
         RespChangeCount resp = null;
         var shareApi = new ShareApi(_apiClient);
@@ -1270,13 +1271,14 @@ public class SKClient
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
-        return resp.getResult();
+        var changes = resp.getResult().getChanges();
+        return changes == null ? 0 : changes;
     }
     
     /* ---------------------------------------------------------------------------- */
     /* hasPrivilege:                                                                */
     /* ---------------------------------------------------------------------------- */
-    public ResultBoolean hasPrivilege(SKShareHasPrivilegeParms p)
+    public boolean hasPrivilege(SKShareHasPrivilegeParms p)
         throws TapisClientException
     {
         RespBoolean resp = null;
@@ -1287,7 +1289,8 @@ public class SKClient
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
-        return resp.getResult();
+        var bool = resp.getResult().getaBool();
+        return bool == null ? false : bool;
     }
     
     /* **************************************************************************** */

@@ -28,6 +28,12 @@ public class Utils
   // Default target site for service JWTs
   public static final String DEFAULT_TARGET_SITE = "tacc";
 
+  // Default Notification Subscription TTL
+  public static final int DEFAULT_SUBSCRIPTION_TTL = 60;
+
+  // Empty json body
+  public static final String EMPTY_JSON = "{}";
+
   // Error msg to use in unlikely event we are unable to extract one from underlying exception
   private static final String ERR_MSG = "Exception encountered but unable to extract message from response or underlying exception";
 
