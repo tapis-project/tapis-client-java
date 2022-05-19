@@ -1183,13 +1183,16 @@ paths:
 
         Grantees can be given shared access to a resource on an individual basis or by using the public granting mechanism. Grants to the distinguished **~public** and **~public_no_authn** pseudo-grantees allow access to a resource to authenticated users or to any user, respectively.
 
-        The payload for this includes these values, with all except resourceId2 required:
+        The payload for this request includes these values, with all except resourceId2 required:
 
+           - grantor
            - grantee
            - resourceType
            - resourceId1
            - resourceId2
            - privilege
+
+        The grantor and grantee are always in the OBO tenant.
 
         If the share already exists, then this call has no effect. For the request to be authorized, the requestor must be a Tapis service.
       operationId: shareResource
@@ -4051,6 +4054,8 @@ components:
     ReqShareResource:
       type: object
       properties:
+        grantor:
+          type: string
         grantee:
           type: string
         resourceType:
