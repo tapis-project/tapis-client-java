@@ -338,10 +338,8 @@ public class NotificationsClient implements ITapisClient
     try {resp = subscriptionsApi.getSubscription(subscriptionId, selectStr1); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null) return null;
-    // Postprocess the subscription
-    TapisSubscription subscription = postProcessSubscription(resp.getResult());
-    return subscription;
+    if (resp == null) return null;
+    return resp.getResult();
   }
 
   /**
@@ -406,9 +404,7 @@ public class NotificationsClient implements ITapisClient
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null) return null;
-    // Postprocess Subscriptions in the result
-    for (TapisSubscription subscription : resp.getResult()) postProcessSubscription(subscription);
+    if (resp == null) return null;
     return resp.getResult();
   }
 
@@ -494,9 +490,7 @@ public class NotificationsClient implements ITapisClient
 
     if (resp != null && resp.getResult() != null)
     {
-      // Postprocess the subscription
-      TapisSubscription subscription = postProcessSubscription(resp.getResult());
-      return subscription;
+      return resp.getResult();
     }
     else
     {
@@ -519,19 +513,13 @@ public class NotificationsClient implements ITapisClient
   {
     if (subscription == null) return null;
     ReqPostSubscription rSubscription = new ReqPostSubscription();
-    rSubscription.id(subscription.getId());
+    rSubscription.name(subscription.getName());
     rSubscription.description(subscription.getDescription());
     rSubscription.owner(subscription.getOwner());
     rSubscription.enabled(subscription.getEnabled());
     rSubscription.typeFilter(subscription.getTypeFilter());
     rSubscription.subjectFilter(subscription.getSubjectFilter());
-    rSubscription.deliveryMethods(subscription.getDeliveryMethods());
-    // Notes requires special handling. It must be null or a JsonObject
-    Object notes = subscription.getNotes();
-    if (notes == null) rSubscription.notes(null);
-    else if (notes instanceof String) rSubscription.notes(ClientTapisGsonUtils.getGson().fromJson((String) notes, JsonObject.class));
-    else if (notes instanceof JsonObject) rSubscription.notes(notes);
-    else rSubscription.notes(null);
+    rSubscription.deliveryTargets(subscription.getDeliveryTargets());
     return rSubscription;
   }
 
@@ -545,13 +533,7 @@ public class NotificationsClient implements ITapisClient
     rSubscription.description(subscription.getDescription());
     rSubscription.typeFilter(subscription.getTypeFilter());
     rSubscription.subjectFilter(subscription.getSubjectFilter());
-    rSubscription.deliveryMethods(subscription.getDeliveryMethods());
-    // Notes requires special handling. It must be null or a JsonObject
-    Object notes = subscription.getNotes();
-    if (notes == null) rSubscription.notes(null);
-    else if (notes instanceof String) rSubscription.notes(ClientTapisGsonUtils.getGson().fromJson((String) notes, JsonObject.class));
-    else if (notes instanceof JsonObject) rSubscription.notes(notes);
-    else rSubscription.notes(null);
+    rSubscription.deliveryTargets(subscription.getDeliveryTargets());
     return rSubscription;
   }
 
@@ -573,21 +555,4 @@ public class NotificationsClient implements ITapisClient
   // ************************************************************************
   // *********************** Private Methods ********************************
   // ************************************************************************
-  /**
-   * Do any client side postprocessing of a returned resource.
-   * Currently, this just involves transforming the notes attribute into a json string
-   * @param subscription Subscription to process
-   * @return - Resulting Subscription
-   */
-  TapisSubscription postProcessSubscription(TapisSubscription subscription)
-  {
-    // If we have a notes attribute convert it from a LinkedTreeMap to a string with json.
-    if (subscription != null && subscription.getNotes() != null)
-    {
-      LinkedTreeMap lmap = (LinkedTreeMap) subscription.getNotes();
-      JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(lmap.toString(), JsonObject.class);
-      subscription.setNotes(tmpNotes.toString());
-    }
-    return subscription;
-  }
-}
+ }
