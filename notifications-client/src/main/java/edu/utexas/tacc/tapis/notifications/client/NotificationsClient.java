@@ -1,10 +1,7 @@
 package edu.utexas.tacc.tapis.notifications.client;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
-import com.google.gson.JsonObject;
-import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.Gson;
 import edu.utexas.tacc.tapis.notifications.client.gen.api.TestApi;
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +26,6 @@ import edu.utexas.tacc.tapis.notifications.client.gen.model.RespSubscriptions;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.Event;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.ReqPatchSubscription;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.ReqPostSubscription;
-import edu.utexas.tacc.tapis.notifications.client.gen.model.ReqPutSubscription;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.ReqSearchSubscriptions;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.TapisSubscription;
 
@@ -220,27 +216,27 @@ public class NotificationsClient implements ITapisClient
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
   }
 
-  /**
-   * Update all attributes of a subscription
-   * NOTE: Not all attributes are updatable.
-   * See the helper method buildReqPutSubscription() for an example of how to build a pre-populated
-   *   ReqPutSubscription instance from a TapisSubscription instance.
-   *
-   * @param id - Id of resource to be updated
-   * @param req - Pre-populated ReqPutSubscription instance
-   * @return url pointing to updated resource
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public String putSubscription(String id, ReqPutSubscription req) throws TapisClientException
-  {
-    // Submit the request and return the response
-    RespResourceUrl resp = null;
-    try { resp = subscriptionsApi.putSubscription(id, req); }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
-  }
-
+//  /**
+//   * Update all attributes of a subscription
+//   * NOTE: Not all attributes are updatable.
+//   * See the helper method buildReqPutSubscription() for an example of how to build a pre-populated
+//   *   ReqPutSubscription instance from a TapisSubscription instance.
+//   *
+//   * @param id - Id of resource to be updated
+//   * @param req - Pre-populated ReqPutSubscription instance
+//   * @return url pointing to updated resource
+//   * @throws TapisClientException - If api call throws an exception
+//   */
+//  public String putSubscription(String id, ReqPutSubscription req) throws TapisClientException
+//  {
+//    // Submit the request and return the response
+//    RespResourceUrl resp = null;
+//    try { resp = subscriptionsApi.putSubscription(id, req); }
+//    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+//    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+//    if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
+//  }
+//
   /**
    * Update enabled attribute to true.
    *
@@ -520,35 +516,37 @@ public class NotificationsClient implements ITapisClient
     rSubscription.typeFilter(subscription.getTypeFilter());
     rSubscription.subjectFilter(subscription.getSubjectFilter());
     rSubscription.deliveryTargets(subscription.getDeliveryTargets());
+    rSubscription.ttlMinutes(subscription.getTtlMinutes());
     return rSubscription;
   }
 
-  /**
-   * Utility method to build a ReqPutSubscription object using attributes from a TapisSubscription.
-   */
-  public static ReqPutSubscription buildReqPutSubscription(TapisSubscription subscription)
-  {
-    if (subscription == null) return null;
-    ReqPutSubscription rSubscription = new ReqPutSubscription();
-    rSubscription.description(subscription.getDescription());
-    rSubscription.typeFilter(subscription.getTypeFilter());
-    rSubscription.subjectFilter(subscription.getSubjectFilter());
-    rSubscription.deliveryTargets(subscription.getDeliveryTargets());
-    return rSubscription;
-  }
+//  /**
+//   * Utility method to build a ReqPutSubscription object using attributes from a TapisSubscription.
+//   */
+//  public static ReqPutSubscription buildReqPutSubscription(TapisSubscription subscription)
+//  {
+//    if (subscription == null) return null;
+//    ReqPutSubscription rSubscription = new ReqPutSubscription();
+//    rSubscription.description(subscription.getDescription());
+//    rSubscription.typeFilter(subscription.getTypeFilter());
+//    rSubscription.subjectFilter(subscription.getSubjectFilter());
+//    rSubscription.deliveryTargets(subscription.getDeliveryTargets());
+//    return rSubscription;
+//  }
 
   /**
-   * Utility method to build a Event object.
+   * Utility method to build an Event object.
    */
-  public static Event buildEvent(String source, String type, String subject, OffsetDateTime timestamp)
+  public static Event buildEvent(String source, String type, String subject, String seriesId, String time)
   {
     // If any required attributes null then return null.
-    if (StringUtils.isBlank(source) || StringUtils.isBlank(type) || timestamp == null) return null;
+    if (StringUtils.isBlank(source) || StringUtils.isBlank(type) || time == null) return null;
     Event rEvent = new Event();
     rEvent.source(source);
     rEvent.type(type);
     rEvent.subject(subject);
-//    rEvent.time(timestamp);
+    rEvent.seriesId(seriesId);
+    rEvent.time(time);
     return rEvent;
   }
 

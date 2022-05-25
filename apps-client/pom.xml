@@ -22,7 +22,7 @@
           or if yaml committed to local branch then do:
      mvn install -DspecPath="https://raw.githubusercontent.com/tapis-project/openapi-apps/local/AppsAPI.yaml"
      -->
-    <specPath>https://raw.githubusercontent.com/tapis-project/openapi-apps/dev/AppsAPI.yaml</specPath>
+    <specPath>https://raw.githubusercontent.com/tapis-project/openapi-apps/job-subscribe/AppsAPI.yaml</specPath>
 
     <!-- Skip integration tests by default -->
     <!-- To run tests TAPIS_FILES_SVC_PASSWORD must be set in the env -->

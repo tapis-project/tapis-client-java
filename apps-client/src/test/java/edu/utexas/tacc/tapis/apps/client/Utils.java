@@ -31,9 +31,9 @@ import edu.utexas.tacc.tapis.apps.client.gen.model.ArgInputModeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.FileInputModeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.JobAttributes;
 import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
-import edu.utexas.tacc.tapis.apps.client.gen.model.NotifDeliveryTarget;
-import edu.utexas.tacc.tapis.apps.client.gen.model.NotifDeliveryMethod;
-import edu.utexas.tacc.tapis.apps.client.gen.model.NotifSubscription;
+import edu.utexas.tacc.tapis.apps.client.gen.model.DeliveryTarget;
+import edu.utexas.tacc.tapis.apps.client.gen.model.DeliveryMethod;
+import edu.utexas.tacc.tapis.apps.client.gen.model.AppSubscription;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ParameterSet;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ParameterSetArchiveFilter;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RuntimeEnum;
@@ -274,35 +274,35 @@ public final class Utils
   public static final AppFileInputArray fiaMin = new AppFileInputArray().name("fiaMin").targetDir("/targetDirMin");
   public static final List<AppFileInputArray> fileInputArraysMin = new ArrayList<>(List.of(fiaMin));
 
-  // NotifSubscriptions
-  public static final NotifDeliveryTarget notifMech1Aa = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl1Aa");
-  public static final NotifDeliveryTarget notifMech1Ab = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl1Ab");
-  public static final List<NotifDeliveryTarget> notifMechList1A = new ArrayList<>(List.of(notifMech1Aa, notifMech1Ab));
-  public static final NotifDeliveryTarget notifMech1Ba = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl1Ba");
-  public static final NotifDeliveryTarget notifMech1Bb = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl1Bb");
-  public static final List<NotifDeliveryTarget> notifMechList1B = new ArrayList<>(List.of(notifMech1Ba, notifMech1Bb));
-  public static final NotifSubscription notif1A = new NotifSubscription().typeFilter("filter1A");
-  public static final NotifSubscription notif1B = new NotifSubscription().typeFilter("filter1B");
+  // AppSubscriptions
+  public static final DeliveryTarget notifMech1Aa = new DeliveryTarget().deliveryMethod(DeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl1Aa");
+  public static final DeliveryTarget notifMech1Ab = new DeliveryTarget().deliveryMethod(DeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl1Ab");
+  public static final List<DeliveryTarget> notifMechList1A = new ArrayList<>(List.of(notifMech1Aa, notifMech1Ab));
+  public static final DeliveryTarget notifMech1Ba = new DeliveryTarget().deliveryMethod(DeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl1Ba");
+  public static final DeliveryTarget notifMech1Bb = new DeliveryTarget().deliveryMethod(DeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl1Bb");
+  public static final List<DeliveryTarget> notifMechList1B = new ArrayList<>(List.of(notifMech1Ba, notifMech1Bb));
+  public static final AppSubscription notif1A = new AppSubscription().typeFilter("filter1A");
+  public static final AppSubscription notif1B = new AppSubscription().typeFilter("filter1B");
   static {
     notif1A.setDeliveryTargets(notifMechList1A);
     notif1B.setDeliveryTargets(notifMechList1B);
   }
-  public static final List<NotifSubscription> notifList1 = new ArrayList<>(List.of(notif1A, notif1B));
+  public static final List<AppSubscription> notifList1 = new ArrayList<>(List.of(notif1A, notif1B));
 
-  public static final NotifDeliveryTarget notifMech2Aa = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl2Aa");
-  public static final NotifDeliveryTarget notifMech2Ab = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl2Ab");
-  public static final List<NotifDeliveryTarget> notifMechList2A = new ArrayList<>(List.of(notifMech2Aa, notifMech2Ab));
-  public static final NotifDeliveryTarget notifMech2Ba = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl2Ba");
-  public static final NotifDeliveryTarget notifMech2Bb = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl2Bb");
-  public static final List<NotifDeliveryTarget> notifMechList2B = new ArrayList<>(List.of(notifMech2Ba, notifMech2Bb));
-  public static final NotifSubscription notif2A = new NotifSubscription().typeFilter("filter2A");
-  public static final NotifSubscription notif2B = new NotifSubscription().typeFilter("filter2B");
+  public static final DeliveryTarget notifMech2Aa = new DeliveryTarget().deliveryMethod(DeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl2Aa");
+  public static final DeliveryTarget notifMech2Ab = new DeliveryTarget().deliveryMethod(DeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl2Ab");
+  public static final List<DeliveryTarget> notifMechList2A = new ArrayList<>(List.of(notifMech2Aa, notifMech2Ab));
+  public static final DeliveryTarget notifMech2Ba = new DeliveryTarget().deliveryMethod(DeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl2Ba");
+  public static final DeliveryTarget notifMech2Bb = new DeliveryTarget().deliveryMethod(DeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl2Bb");
+  public static final List<DeliveryTarget> notifMechList2B = new ArrayList<>(List.of(notifMech2Ba, notifMech2Bb));
+  public static final AppSubscription notif2A = new AppSubscription().typeFilter("filter2A");
+  public static final AppSubscription notif2B = new AppSubscription().typeFilter("filter2B");
   static {
     notif2A.setDeliveryTargets(notifMechList2A);
     notif2B.setDeliveryTargets(notifMechList2B);
   }
-  public static final List<NotifSubscription> notifList2 = new ArrayList<>(List.of(notif2A, notif2B));
-  public static final List<NotifSubscription> notifListNull = null;
+  public static final List<AppSubscription> notifList2 = new ArrayList<>(List.of(notif2A, notif2B));
+  public static final List<AppSubscription> notifListNull = null;
 
   public static final AppArgSpec appArgA1 = (new AppArgSpec()).name("appArgA1").arg("valueA1").description("App arg A1").inputMode(argInputModeRequired);
   public static final AppArgSpec appArgB1 = (new AppArgSpec()).name("appArgB1").arg("valueB1").description("App arg B1").inputMode(argInputModeFixed);
@@ -567,7 +567,7 @@ public final class Utils
                                          List<KeyValuePair> envVariables, ParameterSetArchiveFilter archiveFilter,
                                          Integer nodeCount, Integer coresPerNode, Integer memoryMb, Integer maxMinutes,
                                          List<AppFileInput> fileInputs, List<AppFileInputArray> fileInputArrays,
-                                         List<String> jobTags, List<NotifSubscription> notifSubscriptions,
+                                         List<String> jobTags, List<AppSubscription> AppSubscriptions,
                                          List<String> tags, JsonObject notes)
   {
 //    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=jobType, 5=ownerUser1,
@@ -664,20 +664,20 @@ public final class Utils
     Assert.assertEquals(jobAttributes.getMemoryMB(), memoryMb);
     Assert.assertEquals(jobAttributes.getMaxMinutes(), maxMinutes);
 
-    verifySubscriptions(notifSubscriptions, jobAttributes.getSubscriptions());
+    verifySubscriptions(AppSubscriptions, jobAttributes.getSubscriptions());
     // ???????????????/
-    // TODO Verify notifSubscriptions
+    // TODO Verify AppSubscriptions
     // TODO: Filter is checked but not mechanisms
-//    List<NotifSubscription> tSubscriptions = jobAttributes.getSubscriptions();
+//    List<AppSubscription> tSubscriptions = jobAttributes.getSubscriptions();
 //    Assert.assertNotNull(tSubscriptions, "Subscriptions list should not be null.");
 //    Assert.assertEquals(tSubscriptions.size(), notifList1.size(), "Wrong number of Subscriptions");
 //    var filtersFound = new ArrayList<String>();
-//    for (NotifSubscription itemFound : tSubscriptions)
+//    for (AppSubscription itemFound : tSubscriptions)
 //    {
 //      Assert.assertNotNull(itemFound.getTypeFilter(), "Subscription filter should not be null.");
 //      filtersFound.add(itemFound.getTypeFilter());
 //    }
-//    for (NotifSubscription itemSeedItem : notifList1)
+//    for (AppSubscription itemSeedItem : notifList1)
 //    {
 //      Assert.assertTrue(filtersFound.contains(itemSeedItem.getTypeFilter()),
 //              "List of subscriptions did not contain a filter: " + itemSeedItem.getTypeFilter());
@@ -692,18 +692,18 @@ public final class Utils
 //      System.out.println("Found jobTag: " + tagStr);
 //    }
     // ????????????????//
-    // TODO Verify notifSubscriptions
+    // TODO Verify AppSubscriptions
     // TODO: Filter is checked but not mechanisms
-//    List<NotifSubscription> tSubscriptions = jobAttributes.getSubscriptions();
+//    List<AppSubscription> tSubscriptions = jobAttributes.getSubscriptions();
 //    Assert.assertNotNull(tSubscriptions, "Subscriptions list should not be null.");
 //    Assert.assertEquals(tSubscriptions.size(), notifList1.size(), "Wrong number of Subscriptions");
 //    var filtersFound = new ArrayList<String>();
-//    for (NotifSubscription itemFound : tSubscriptions)
+//    for (AppSubscription itemFound : tSubscriptions)
 //    {
 //      Assert.assertNotNull(itemFound.getTypeFilter(), "Subscription filter should not be null.");
 //      filtersFound.add(itemFound.getTypeFilter());
 //    }
-//    for (NotifSubscription itemSeedItem : notifSubscriptions)
+//    for (AppSubscription itemSeedItem : AppSubscriptions)
 //    {
 //      Assert.assertTrue(filtersFound.contains(itemSeedItem.getTypeFilter()),
 //              "List of subscriptions did not contain a filter: " + itemSeedItem.getTypeFilter());
@@ -1076,26 +1076,26 @@ public final class Utils
   }
 
   // Verify that original list of Subscriptions matches the fetched list
-  public static void verifySubscriptions(List<NotifSubscription> origSubscriptions, List<NotifSubscription> fetchedSubscriptions)
+  public static void verifySubscriptions(List<AppSubscription> origSubscriptions, List<AppSubscription> fetchedSubscriptions)
   {
     System.out.println("Verifying list of Subscriptions");
     Assert.assertNotNull(origSubscriptions, "Orig Subscriptions is null");
     Assert.assertNotNull(fetchedSubscriptions, "Fetched Subscriptions is null");
     Assert.assertEquals(fetchedSubscriptions.size(), origSubscriptions.size());
     var filtersFound = new ArrayList<String>();
-    for (NotifSubscription itemFound : fetchedSubscriptions) {filtersFound.add(itemFound.getTypeFilter());}
-    for (NotifSubscription itemSeedItem : origSubscriptions)
+    for (AppSubscription itemFound : fetchedSubscriptions) {filtersFound.add(itemFound.getTypeFilter());}
+    for (AppSubscription itemSeedItem : origSubscriptions)
     {
       System.out.println("Found fetched subscription with filter: " + itemSeedItem.getTypeFilter());
       Assert.assertTrue(filtersFound.contains(itemSeedItem.getTypeFilter()),
-              "List of notifSubscriptions did not contain an item with filter: " + itemSeedItem.getTypeFilter());
+              "List of AppSubscriptions did not contain an item with filter: " + itemSeedItem.getTypeFilter());
       System.out.println("Found fetched subscription with filter: " + itemSeedItem.getTypeFilter());
     }
 // TODO    // Create hash maps of orig and fetched with name as key
 //    var origMap = new HashMap<String, AppFileInput>();
 //    var fetchedMap = new HashMap<String, AppFileInput>();
-//    for (NotifSubscription s : origSubscriptions) origMap.put(s.getName(), s);
-//    for (NotifSubscription s : fetchedSubscriptions) fetchedMap.put(s.getName(), s);
+//    for (AppSubscription s : origSubscriptions) origMap.put(s.getName(), s);
+//    for (AppSubscription s : fetchedSubscriptions) fetchedMap.put(s.getName(), s);
 //    // Go through origMap and check properties
 //    for (String fiName : origMap.keySet())
 //    {
