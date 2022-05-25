@@ -31,8 +31,8 @@ import edu.utexas.tacc.tapis.apps.client.gen.model.ArgInputModeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.FileInputModeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.JobAttributes;
 import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
-import edu.utexas.tacc.tapis.apps.client.gen.model.DeliveryTarget;
-import edu.utexas.tacc.tapis.apps.client.gen.model.DeliveryMethod;
+import edu.utexas.tacc.tapis.apps.client.gen.model.NotifDeliveryTarget;
+import edu.utexas.tacc.tapis.apps.client.gen.model.NotifDeliveryMethod;
 import edu.utexas.tacc.tapis.apps.client.gen.model.AppSubscription;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ParameterSet;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ParameterSetArchiveFilter;
@@ -275,12 +275,12 @@ public final class Utils
   public static final List<AppFileInputArray> fileInputArraysMin = new ArrayList<>(List.of(fiaMin));
 
   // AppSubscriptions
-  public static final DeliveryTarget notifMech1Aa = new DeliveryTarget().deliveryMethod(DeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl1Aa");
-  public static final DeliveryTarget notifMech1Ab = new DeliveryTarget().deliveryMethod(DeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl1Ab");
-  public static final List<DeliveryTarget> notifMechList1A = new ArrayList<>(List.of(notifMech1Aa, notifMech1Ab));
-  public static final DeliveryTarget notifMech1Ba = new DeliveryTarget().deliveryMethod(DeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl1Ba");
-  public static final DeliveryTarget notifMech1Bb = new DeliveryTarget().deliveryMethod(DeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl1Bb");
-  public static final List<DeliveryTarget> notifMechList1B = new ArrayList<>(List.of(notifMech1Ba, notifMech1Bb));
+  public static final NotifDeliveryTarget notifMech1Aa = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl1Aa");
+  public static final NotifDeliveryTarget notifMech1Ab = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl1Ab");
+  public static final List<NotifDeliveryTarget> notifMechList1A = new ArrayList<>(List.of(notifMech1Aa, notifMech1Ab));
+  public static final NotifDeliveryTarget notifMech1Ba = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl1Ba");
+  public static final NotifDeliveryTarget notifMech1Bb = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl1Bb");
+  public static final List<NotifDeliveryTarget> notifMechList1B = new ArrayList<>(List.of(notifMech1Ba, notifMech1Bb));
   public static final AppSubscription notif1A = new AppSubscription().typeFilter("filter1A");
   public static final AppSubscription notif1B = new AppSubscription().typeFilter("filter1B");
   static {
@@ -289,12 +289,12 @@ public final class Utils
   }
   public static final List<AppSubscription> notifList1 = new ArrayList<>(List.of(notif1A, notif1B));
 
-  public static final DeliveryTarget notifMech2Aa = new DeliveryTarget().deliveryMethod(DeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl2Aa");
-  public static final DeliveryTarget notifMech2Ab = new DeliveryTarget().deliveryMethod(DeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl2Ab");
-  public static final List<DeliveryTarget> notifMechList2A = new ArrayList<>(List.of(notifMech2Aa, notifMech2Ab));
-  public static final DeliveryTarget notifMech2Ba = new DeliveryTarget().deliveryMethod(DeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl2Ba");
-  public static final DeliveryTarget notifMech2Bb = new DeliveryTarget().deliveryMethod(DeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl2Bb");
-  public static final List<DeliveryTarget> notifMechList2B = new ArrayList<>(List.of(notifMech2Ba, notifMech2Bb));
+  public static final NotifDeliveryTarget notifMech2Aa = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl2Aa");
+  public static final NotifDeliveryTarget notifMech2Ab = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl2Ab");
+  public static final List<NotifDeliveryTarget> notifMechList2A = new ArrayList<>(List.of(notifMech2Aa, notifMech2Ab));
+  public static final NotifDeliveryTarget notifMech2Ba = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl2Ba");
+  public static final NotifDeliveryTarget notifMech2Bb = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl2Bb");
+  public static final List<NotifDeliveryTarget> notifMechList2B = new ArrayList<>(List.of(notifMech2Ba, notifMech2Bb));
   public static final AppSubscription notif2A = new AppSubscription().typeFilter("filter2A");
   public static final AppSubscription notif2B = new AppSubscription().typeFilter("filter2B");
   static {
