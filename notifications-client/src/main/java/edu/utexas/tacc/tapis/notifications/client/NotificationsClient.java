@@ -201,53 +201,32 @@ public class NotificationsClient implements ITapisClient
   /**
    * Update selected attributes of a subscription
    *
-   * @param id Id of resource
+   * @param name Id of resource
    * @param req Request body specifying attributes
    * @return url pointing to updated resource
    * @throws TapisClientException - If api call throws an exception
    */
-  public String patchSubscription(String id, String version, ReqPatchSubscription req) throws TapisClientException
+  public String patchSubscription(String name, String owner, ReqPatchSubscription req) throws TapisClientException
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
-    try { resp = subscriptionsApi.patchSubscription(id, req); }
+    try { resp = subscriptionsApi.patchSubscription(name, req, owner); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
   }
 
-//  /**
-//   * Update all attributes of a subscription
-//   * NOTE: Not all attributes are updatable.
-//   * See the helper method buildReqPutSubscription() for an example of how to build a pre-populated
-//   *   ReqPutSubscription instance from a TapisSubscription instance.
-//   *
-//   * @param id - Id of resource to be updated
-//   * @param req - Pre-populated ReqPutSubscription instance
-//   * @return url pointing to updated resource
-//   * @throws TapisClientException - If api call throws an exception
-//   */
-//  public String putSubscription(String id, ReqPutSubscription req) throws TapisClientException
-//  {
-//    // Submit the request and return the response
-//    RespResourceUrl resp = null;
-//    try { resp = subscriptionsApi.putSubscription(id, req); }
-//    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-//    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-//    if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
-//  }
-//
   /**
    * Update enabled attribute to true.
    *
-   * @param id Subscription id
+   * @param name Subscription id
    * @return number of records modified as a result of the action
    * @throws TapisClientException - If api call throws an exception
    */
-  public int enableSubscription(String id) throws TapisClientException
+  public int enableSubscription(String name, String owner) throws TapisClientException
   {
     RespChangeCount resp = null;
-    try { resp = subscriptionsApi.enableSubscription(id); }
+    try { resp = subscriptionsApi.enableSubscription(name, owner); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
@@ -257,14 +236,14 @@ public class NotificationsClient implements ITapisClient
   /**
    * Update enabled attribute to false.
    *
-   * @param id Subscription id
+   * @param name Subscription id
    * @return number of records modified as a result of the action
    * @throws TapisClientException - If api call throws an exception
    */
-  public int disableSubscription(String id) throws TapisClientException
+  public int disableSubscription(String name, String owner) throws TapisClientException
   {
     RespChangeCount resp = null;
-    try { resp = subscriptionsApi.disableSubscription(id); }
+    try { resp = subscriptionsApi.disableSubscription(name, owner); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
@@ -274,32 +253,14 @@ public class NotificationsClient implements ITapisClient
   /**
    * Delete a subscription
    *
-   * @param id Subscription id
+   * @param name Subscription id
    * @return number of records modified as a result of the action
    * @throws TapisClientException - If api call throws an exception
    */
-  public int deleteSubscription(String id) throws TapisClientException
+  public int deleteSubscription(String name, String owner) throws TapisClientException
   {
     RespChangeCount resp = null;
-    try { resp = subscriptionsApi.deleteSubscription(id); }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
-    else return -1;
-  }
-
-  /**
-   * Change subscription owner given the resource id and new owner id.
-   *
-   * @param id Subscription id
-   * @param newOwnerName New owner id
-   * @return number of records modified as a result of the action
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public int changeSubscriptionOwner(String id, String newOwnerName) throws TapisClientException
-  {
-    RespChangeCount resp = null;
-    try { resp = subscriptionsApi.changeSubscriptionOwner(id, newOwnerName); }
+    try { resp = subscriptionsApi.deleteSubscription(name, owner); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
@@ -309,29 +270,29 @@ public class NotificationsClient implements ITapisClient
   /**
    * Get a subscription, return all attributes
    *
-   * @param subscriptionId Id of the subscription
+   * @param name Id of the subscription
    * @return The subscription or null if resource not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public TapisSubscription getSubscription(String subscriptionId) throws TapisClientException
+  public TapisSubscription getSubscription(String name, String owner) throws TapisClientException
   {
-    return getSubscription(subscriptionId, DEFAULT_SELECT_ALL);
+    return getSubscription(name, owner, DEFAULT_SELECT_ALL);
   }
 
   /**
    * Get a subscription using all supported parameters.
    *
-   * @param subscriptionId Id of the subscription
+   * @param name Id of the subscription
    * @param selectStr - Attributes to be included in result. For example select=id,version,owner
    * @return The subscription or null if resource not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public TapisSubscription getSubscription(String subscriptionId, String selectStr) throws TapisClientException
+  public TapisSubscription getSubscription(String name, String owner, String selectStr) throws TapisClientException
   {
     String selectStr1 = DEFAULT_SELECT_ALL;
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
     RespSubscription resp = null;
-    try {resp = subscriptionsApi.getSubscription(subscriptionId, selectStr1); }
+    try {resp = subscriptionsApi.getSubscription(name, owner, selectStr1); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null) return null;
@@ -344,9 +305,9 @@ public class NotificationsClient implements ITapisClient
    * @return Subscriptions accessible to the caller
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<TapisSubscription> getSubscriptions() throws TapisClientException
+  public List<TapisSubscription> getSubscriptions(String owner) throws TapisClientException
   {
-    return getSubscriptions(DEFAULT_SEARCH);
+    return getSubscriptions(owner, DEFAULT_SEARCH);
   }
 
   /**
@@ -357,9 +318,9 @@ public class NotificationsClient implements ITapisClient
    * @return Subscriptions accessible to the caller
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<TapisSubscription> getSubscriptions(String searchStr) throws TapisClientException
+  public List<TapisSubscription> getSubscriptions(String owner, String searchStr) throws TapisClientException
   {
-    return getSubscriptions(searchStr, DEFAULT_SELECT_SUMMARY);
+    return getSubscriptions(owner, searchStr, DEFAULT_SELECT_SUMMARY);
   }
 
   /**
@@ -371,9 +332,9 @@ public class NotificationsClient implements ITapisClient
    * @return Subscriptions accessible to the caller
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<TapisSubscription> getSubscriptions(String searchStr, String selectStr) throws TapisClientException
+  public List<TapisSubscription> getSubscriptions(String owner, String searchStr, String selectStr) throws TapisClientException
   {
-    return getSubscriptions(searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
+    return getSubscriptions(owner, searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
                             selectStr, false);
   }
 
@@ -387,7 +348,7 @@ public class NotificationsClient implements ITapisClient
    * @return Subscriptions accessible to the caller
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<TapisSubscription> getSubscriptions(String searchStr, int limit, String orderBy, int skip, String startAfter,
+  public List<TapisSubscription> getSubscriptions(String owner, String searchStr, int limit, String orderBy, int skip, String startAfter,
                                 String selectStr, boolean showDeleted) throws TapisClientException
   {
     RespSubscriptions resp = null;
@@ -396,7 +357,7 @@ public class NotificationsClient implements ITapisClient
 
     try
     {
-      resp = subscriptionsApi.getSubscriptions(searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr1);
+      resp = subscriptionsApi.getSubscriptions(owner, searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr1);
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -411,12 +372,12 @@ public class NotificationsClient implements ITapisClient
    * @return Subscriptions accessible to the caller
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<TapisSubscription> searchSubscriptions(ReqSearchSubscriptions req, String selectStr) throws TapisClientException
+  public List<TapisSubscription> searchSubscriptions(String owner, ReqSearchSubscriptions req, String selectStr) throws TapisClientException
   {
     RespSubscriptions resp = null;
     String selectStr1 = DEFAULT_SELECT_SUMMARY;
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
-    try { resp = subscriptionsApi.searchSubscriptionsRequestBody(req, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
+    try { resp = subscriptionsApi.searchSubscriptionsRequestBody(req, owner, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
                                               DEFAULT_COMPUTETOTAL, selectStr1); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -429,11 +390,11 @@ public class NotificationsClient implements ITapisClient
    * @return boolean indicating if enabled
    * @throws TapisClientException - If api call throws an exception
    */
-  public boolean isEnabled(String subscriptionId) throws TapisClientException
+  public boolean isEnabled(String name, String owner) throws TapisClientException
   {
     // Submit the request and return the response
     RespBoolean resp = null;
-    try { resp = subscriptionsApi.isEnabled(subscriptionId); }
+    try { resp = subscriptionsApi.isEnabled(name, owner); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getaBool() != null)
