@@ -334,12 +334,11 @@ public class NotificationsClient implements ITapisClient
    */
   public List<TapisSubscription> getSubscriptions(String owner, String searchStr, String selectStr) throws TapisClientException
   {
-    return getSubscriptions(owner, searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
-                            selectStr, false);
+    return getSubscriptions(owner, searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, selectStr);
   }
 
   /**
-   * Get list using all supported parameters: searchStr, limit, orderBy, skip, startAfter, select, showDeleted
+   * Get list using all supported parameters: searchStr, limit, orderBy, skip, startAfter, select
    * Retrieve subscriptions. Use search and select query parameters to limit results.
    * For example search=(id.like.MySub*)~(enabled.eq.true)
    *
@@ -349,7 +348,7 @@ public class NotificationsClient implements ITapisClient
    * @throws TapisClientException - If api call throws an exception
    */
   public List<TapisSubscription> getSubscriptions(String owner, String searchStr, int limit, String orderBy, int skip, String startAfter,
-                                String selectStr, boolean showDeleted) throws TapisClientException
+                                String selectStr) throws TapisClientException
   {
     RespSubscriptions resp = null;
     String selectStr1 = DEFAULT_SELECT_SUMMARY;
