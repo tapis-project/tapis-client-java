@@ -480,33 +480,20 @@ public class NotificationsClient implements ITapisClient
     return rSubscription;
   }
 
-//  /**
-//   * Utility method to build a ReqPutSubscription object using attributes from a TapisSubscription.
-//   */
-//  public static ReqPutSubscription buildReqPutSubscription(TapisSubscription subscription)
-//  {
-//    if (subscription == null) return null;
-//    ReqPutSubscription rSubscription = new ReqPutSubscription();
-//    rSubscription.description(subscription.getDescription());
-//    rSubscription.typeFilter(subscription.getTypeFilter());
-//    rSubscription.subjectFilter(subscription.getSubjectFilter());
-//    rSubscription.deliveryTargets(subscription.getDeliveryTargets());
-//    return rSubscription;
-//  }
-
   /**
    * Utility method to build an Event object.
    */
-  public static Event buildEvent(String source, String type, String subject, String seriesId, String time)
+  public static Event buildEvent(String source, String type, String subject, String data, String seriesId,
+                                 String timestamp)
   {
     // If any required attributes null then return null.
-    if (StringUtils.isBlank(source) || StringUtils.isBlank(type) || time == null) return null;
+    if (StringUtils.isBlank(source) || StringUtils.isBlank(type) || timestamp == null) return null;
     Event rEvent = new Event();
     rEvent.source(source);
     rEvent.type(type);
     rEvent.subject(subject);
     rEvent.seriesId(seriesId);
-    rEvent.time(time);
+    rEvent.timestamp(timestamp);
     return rEvent;
   }
 
