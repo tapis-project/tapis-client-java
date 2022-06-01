@@ -24,6 +24,7 @@ package edu.utexas.tacc.tapis.apps.client;
 
 import com.google.gson.JsonObject;
 import edu.utexas.tacc.tapis.apps.client.gen.model.AppFileInputArray;
+import edu.utexas.tacc.tapis.apps.client.gen.model.JobEventCategoryFilter;
 import edu.utexas.tacc.tapis.apps.client.gen.model.JobTypeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.AppArgSpec;
 import edu.utexas.tacc.tapis.apps.client.gen.model.AppFileInput;
@@ -33,7 +34,7 @@ import edu.utexas.tacc.tapis.apps.client.gen.model.JobAttributes;
 import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.apps.client.gen.model.NotifDeliveryTarget;
 import edu.utexas.tacc.tapis.apps.client.gen.model.NotifDeliveryMethod;
-import edu.utexas.tacc.tapis.apps.client.gen.model.AppSubscription;
+import edu.utexas.tacc.tapis.apps.client.gen.model.ReqSubscribe;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ParameterSet;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ParameterSetArchiveFilter;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RuntimeEnum;
@@ -274,20 +275,20 @@ public final class Utils
   public static final AppFileInputArray fiaMin = new AppFileInputArray().name("fiaMin").targetDir("/targetDirMin");
   public static final List<AppFileInputArray> fileInputArraysMin = new ArrayList<>(List.of(fiaMin));
 
-  // AppSubscriptions
+  // ReqSubscribes
   public static final NotifDeliveryTarget notifMech1Aa = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl1Aa");
   public static final NotifDeliveryTarget notifMech1Ab = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl1Ab");
   public static final List<NotifDeliveryTarget> notifMechList1A = new ArrayList<>(List.of(notifMech1Aa, notifMech1Ab));
   public static final NotifDeliveryTarget notifMech1Ba = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl1Ba");
   public static final NotifDeliveryTarget notifMech1Bb = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl1Bb");
   public static final List<NotifDeliveryTarget> notifMechList1B = new ArrayList<>(List.of(notifMech1Ba, notifMech1Bb));
-  public static final AppSubscription notif1A = new AppSubscription().typeFilter("filter1A");
-  public static final AppSubscription notif1B = new AppSubscription().typeFilter("filter1B");
+  public static final ReqSubscribe notif1A = new ReqSubscribe().jobEventCategoryFilter(JobEventCategoryFilter.JOB_ARCHIVE_TRANSACTION_ID);
+  public static final ReqSubscribe notif1B = new ReqSubscribe().jobEventCategoryFilter(JobEventCategoryFilter.JOB_SUBSCRIPTION);
   static {
     notif1A.setDeliveryTargets(notifMechList1A);
     notif1B.setDeliveryTargets(notifMechList1B);
   }
-  public static final List<AppSubscription> notifList1 = new ArrayList<>(List.of(notif1A, notif1B));
+  public static final List<ReqSubscribe> notifList1 = new ArrayList<>(List.of(notif1A, notif1B));
 
   public static final NotifDeliveryTarget notifMech2Aa = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl2Aa");
   public static final NotifDeliveryTarget notifMech2Ab = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl2Ab");
@@ -295,14 +296,14 @@ public final class Utils
   public static final NotifDeliveryTarget notifMech2Ba = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl2Ba");
   public static final NotifDeliveryTarget notifMech2Bb = new NotifDeliveryTarget().deliveryMethod(NotifDeliveryMethod.WEBHOOK).deliveryAddress("webhookUrl2Bb");
   public static final List<NotifDeliveryTarget> notifMechList2B = new ArrayList<>(List.of(notifMech2Ba, notifMech2Bb));
-  public static final AppSubscription notif2A = new AppSubscription().typeFilter("filter2A");
-  public static final AppSubscription notif2B = new AppSubscription().typeFilter("filter2B");
+  public static final ReqSubscribe notif2A = new ReqSubscribe().jobEventCategoryFilter(JobEventCategoryFilter.JOB_NEW_STATUS);
+  public static final ReqSubscribe notif2B = new ReqSubscribe().jobEventCategoryFilter(JobEventCategoryFilter.ALL);
   static {
     notif2A.setDeliveryTargets(notifMechList2A);
     notif2B.setDeliveryTargets(notifMechList2B);
   }
-  public static final List<AppSubscription> notifList2 = new ArrayList<>(List.of(notif2A, notif2B));
-  public static final List<AppSubscription> notifListNull = null;
+  public static final List<ReqSubscribe> notifList2 = new ArrayList<>(List.of(notif2A, notif2B));
+  public static final List<ReqSubscribe> notifListNull = null;
 
   public static final AppArgSpec appArgA1 = (new AppArgSpec()).name("appArgA1").arg("valueA1").description("App arg A1").inputMode(argInputModeRequired);
   public static final AppArgSpec appArgB1 = (new AppArgSpec()).name("appArgB1").arg("valueB1").description("App arg B1").inputMode(argInputModeFixed);
@@ -567,7 +568,7 @@ public final class Utils
                                          List<KeyValuePair> envVariables, ParameterSetArchiveFilter archiveFilter,
                                          Integer nodeCount, Integer coresPerNode, Integer memoryMb, Integer maxMinutes,
                                          List<AppFileInput> fileInputs, List<AppFileInputArray> fileInputArrays,
-                                         List<String> jobTags, List<AppSubscription> AppSubscriptions,
+                                         List<String> jobTags, List<ReqSubscribe> ReqSubscribes,
                                          List<String> tags, JsonObject notes)
   {
 //    app0 = {0=tenantName, 1=appId, 2=appVersion, 3=description, 4=jobType, 5=ownerUser1,
@@ -664,20 +665,20 @@ public final class Utils
     Assert.assertEquals(jobAttributes.getMemoryMB(), memoryMb);
     Assert.assertEquals(jobAttributes.getMaxMinutes(), maxMinutes);
 
-    verifySubscriptions(AppSubscriptions, jobAttributes.getSubscriptions());
+    verifySubscriptions(ReqSubscribes, jobAttributes.getSubscriptions());
     // ???????????????/
-    // TODO Verify AppSubscriptions
+    // TODO Verify ReqSubscribes
     // TODO: Filter is checked but not mechanisms
-//    List<AppSubscription> tSubscriptions = jobAttributes.getSubscriptions();
+//    List<ReqSubscribe> tSubscriptions = jobAttributes.getSubscriptions();
 //    Assert.assertNotNull(tSubscriptions, "Subscriptions list should not be null.");
 //    Assert.assertEquals(tSubscriptions.size(), notifList1.size(), "Wrong number of Subscriptions");
 //    var filtersFound = new ArrayList<String>();
-//    for (AppSubscription itemFound : tSubscriptions)
+//    for (ReqSubscribe itemFound : tSubscriptions)
 //    {
 //      Assert.assertNotNull(itemFound.getTypeFilter(), "Subscription filter should not be null.");
 //      filtersFound.add(itemFound.getTypeFilter());
 //    }
-//    for (AppSubscription itemSeedItem : notifList1)
+//    for (ReqSubscribe itemSeedItem : notifList1)
 //    {
 //      Assert.assertTrue(filtersFound.contains(itemSeedItem.getTypeFilter()),
 //              "List of subscriptions did not contain a filter: " + itemSeedItem.getTypeFilter());
@@ -692,18 +693,18 @@ public final class Utils
 //      System.out.println("Found jobTag: " + tagStr);
 //    }
     // ????????????????//
-    // TODO Verify AppSubscriptions
+    // TODO Verify ReqSubscribes
     // TODO: Filter is checked but not mechanisms
-//    List<AppSubscription> tSubscriptions = jobAttributes.getSubscriptions();
+//    List<ReqSubscribe> tSubscriptions = jobAttributes.getSubscriptions();
 //    Assert.assertNotNull(tSubscriptions, "Subscriptions list should not be null.");
 //    Assert.assertEquals(tSubscriptions.size(), notifList1.size(), "Wrong number of Subscriptions");
 //    var filtersFound = new ArrayList<String>();
-//    for (AppSubscription itemFound : tSubscriptions)
+//    for (ReqSubscribe itemFound : tSubscriptions)
 //    {
 //      Assert.assertNotNull(itemFound.getTypeFilter(), "Subscription filter should not be null.");
 //      filtersFound.add(itemFound.getTypeFilter());
 //    }
-//    for (AppSubscription itemSeedItem : AppSubscriptions)
+//    for (ReqSubscribe itemSeedItem : ReqSubscribes)
 //    {
 //      Assert.assertTrue(filtersFound.contains(itemSeedItem.getTypeFilter()),
 //              "List of subscriptions did not contain a filter: " + itemSeedItem.getTypeFilter());
@@ -1076,26 +1077,26 @@ public final class Utils
   }
 
   // Verify that original list of Subscriptions matches the fetched list
-  public static void verifySubscriptions(List<AppSubscription> origSubscriptions, List<AppSubscription> fetchedSubscriptions)
+  public static void verifySubscriptions(List<ReqSubscribe> origSubscriptions, List<ReqSubscribe> fetchedSubscriptions)
   {
     System.out.println("Verifying list of Subscriptions");
     Assert.assertNotNull(origSubscriptions, "Orig Subscriptions is null");
     Assert.assertNotNull(fetchedSubscriptions, "Fetched Subscriptions is null");
     Assert.assertEquals(fetchedSubscriptions.size(), origSubscriptions.size());
     var filtersFound = new ArrayList<String>();
-    for (AppSubscription itemFound : fetchedSubscriptions) {filtersFound.add(itemFound.getTypeFilter());}
-    for (AppSubscription itemSeedItem : origSubscriptions)
+    for (ReqSubscribe itemFound : fetchedSubscriptions) {filtersFound.add(itemFound.getJobEventCategoryFilter().name());}
+    for (ReqSubscribe itemSeedItem : origSubscriptions)
     {
-      System.out.println("Found fetched subscription with filter: " + itemSeedItem.getTypeFilter());
-      Assert.assertTrue(filtersFound.contains(itemSeedItem.getTypeFilter()),
-              "List of AppSubscriptions did not contain an item with filter: " + itemSeedItem.getTypeFilter());
-      System.out.println("Found fetched subscription with filter: " + itemSeedItem.getTypeFilter());
+      System.out.println("Found fetched subscription with filter: " + itemSeedItem.getJobEventCategoryFilter().name());
+      Assert.assertTrue(filtersFound.contains(itemSeedItem.getJobEventCategoryFilter().name()),
+              "List of ReqSubscribes did not contain an item with filter: " + itemSeedItem.getJobEventCategoryFilter().name());
+      System.out.println("Found fetched subscription with filter: " + itemSeedItem.getJobEventCategoryFilter().name());
     }
 // TODO    // Create hash maps of orig and fetched with name as key
 //    var origMap = new HashMap<String, AppFileInput>();
 //    var fetchedMap = new HashMap<String, AppFileInput>();
-//    for (AppSubscription s : origSubscriptions) origMap.put(s.getName(), s);
-//    for (AppSubscription s : fetchedSubscriptions) fetchedMap.put(s.getName(), s);
+//    for (ReqSubscribe s : origSubscriptions) origMap.put(s.getName(), s);
+//    for (ReqSubscribe s : fetchedSubscriptions) fetchedMap.put(s.getName(), s);
 //    // Go through origMap and check properties
 //    for (String fiName : origMap.keySet())
 //    {
