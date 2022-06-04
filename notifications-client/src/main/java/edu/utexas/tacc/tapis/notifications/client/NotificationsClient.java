@@ -53,6 +53,9 @@ public class NotificationsClient implements ITapisClient
   // *********************** Constants **************************************
   // ************************************************************************
 
+  // Filter wildcard
+  public static final String FILTER_WILDCARD = "*";
+
   // Header key for JWT
   public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
 
@@ -282,7 +285,7 @@ public class NotificationsClient implements ITapisClient
    */
   public TapisSubscription getSubscription(String name, String ownedBy) throws TapisClientException
   {
-    return getSubscription(name, ownedBy, DEFAULT_SELECT_ALL);
+    return getSubscription(name, DEFAULT_SELECT_ALL, ownedBy);
   }
 
   /**
@@ -299,7 +302,7 @@ public class NotificationsClient implements ITapisClient
     String selectStr1 = DEFAULT_SELECT_ALL;
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
     RespSubscription resp = null;
-    try {resp = subscriptionsApi.getSubscription(name, ownedBy, selectStr1); }
+    try {resp = subscriptionsApi.getSubscription(name, selectStr1, ownedBy); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null) return null;
@@ -315,7 +318,7 @@ public class NotificationsClient implements ITapisClient
    */
   public List<TapisSubscription> getSubscriptions(String ownedBy) throws TapisClientException
   {
-    return getSubscriptions(ownedBy, DEFAULT_SEARCH);
+    return getSubscriptions(DEFAULT_SEARCH, ownedBy);
   }
 
   /**
@@ -329,7 +332,7 @@ public class NotificationsClient implements ITapisClient
    */
   public List<TapisSubscription> getSubscriptions(String searchStr, String ownedBy) throws TapisClientException
   {
-    return getSubscriptions(ownedBy, searchStr, DEFAULT_SELECT_SUMMARY);
+    return getSubscriptions(searchStr, DEFAULT_SELECT_SUMMARY, ownedBy);
   }
 
   /**
@@ -344,11 +347,12 @@ public class NotificationsClient implements ITapisClient
    */
   public List<TapisSubscription> getSubscriptions(String searchStr, String selectStr, String ownedBy) throws TapisClientException
   {
-    return getSubscriptions(searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, selectStr, ownedBy);
+    return getSubscriptions(searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, selectStr,
+                            ownedBy, false);
   }
 
   /**
-   * Get list using all supported parameters: searchStr, limit, orderBy, skip, startAfter, select
+   * Get list using all supported parameters: searchStr, limit, orderBy, skip, startAfter, select, ownedBy, anyOwner
    * Retrieve subscriptions. Use search and select query parameters to limit results.
    * For example search=(name.like.MySub*)~(enabled.eq.true)
    *
@@ -359,7 +363,7 @@ public class NotificationsClient implements ITapisClient
    * @throws TapisClientException - If api call throws an exception
    */
   public List<TapisSubscription> getSubscriptions(String searchStr, int limit, String orderBy, int skip, String startAfter,
-                                String selectStr, String ownedBy) throws TapisClientException
+                                String selectStr, String ownedBy, boolean anyOwner) throws TapisClientException
   {
     RespSubscriptions resp = null;
     String selectStr1 = DEFAULT_SELECT_SUMMARY;
@@ -367,7 +371,8 @@ public class NotificationsClient implements ITapisClient
 
     try
     {
-      resp = subscriptionsApi.getSubscriptions(ownedBy, searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr1);
+      resp = subscriptionsApi.getSubscriptions(searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL,
+                                               selectStr1, ownedBy, anyOwner);
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -383,14 +388,15 @@ public class NotificationsClient implements ITapisClient
    * @return Subscriptions accessible to the caller
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<TapisSubscription> searchSubscriptions(ReqSearchSubscriptions req, String selectStr, String ownedBy)
+  public List<TapisSubscription> searchSubscriptions(ReqSearchSubscriptions req, String selectStr, String ownedBy,
+                                                     boolean anyOwner)
           throws TapisClientException
   {
     RespSubscriptions resp = null;
     String selectStr1 = DEFAULT_SELECT_SUMMARY;
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
-    try { resp = subscriptionsApi.searchSubscriptionsRequestBody(req, ownedBy, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
-                                              DEFAULT_COMPUTETOTAL, selectStr1); }
+    try { resp = subscriptionsApi.searchSubscriptionsRequestBody(req, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
+                                                                 DEFAULT_COMPUTETOTAL, selectStr1, ownedBy); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
@@ -407,18 +413,42 @@ public class NotificationsClient implements ITapisClient
    * @param orderBy - orderBy for sorting, e.g. orderBy=created(desc).
    * @param skip - number of results to skip (may not be used with startAfter)
    * @param startAfter - where to start when sorting, e.g. limit=10&orderBy=name(asc)&startAfter=101 (may not be used with skip)
-   * @param anyOwner - flag indicating if subscription owned by any user should be included. Has precedence over ownedBy
-   * @param ownedBy - Use specified user in place of the requesting user. Leave null or blank to use requesting user.
+   * @param ownedBy - Get subscriptions owned by a user other than the requesting user. Ignored if anyOwner=true
+   * @param anyOwner - If true retrieve all subscriptions owned by any user. ownedBy will be ignored.
+   * @return - Full response from the api call, including metadata and list of subscriptions.
    * @throws TapisClientException - If api call throws an exception
-   * @throws IllegalArgumentException - If subjectFilter is wildcard
+   * @throws IllegalArgumentException - If subjectFilter is empty or the wildcard character
    */
-  public List<TapisSubscription> getSubscriptionsBySubject(String subjectFilter, int limit, String orderBy, int skip,
-                                                           String startAfter, boolean anyOwner, String ownedBy)
+  public RespSubscriptions getSubscriptionsBySubject(String subjectFilter, int limit, String orderBy, int skip,
+                                                     String startAfter, String ownedBy, boolean anyOwner)
           throws TapisClientException, IllegalArgumentException
   {
-    // TODO return the full result instead of just a list. Full result included metadata.
-    var retList = new ArrayList<TapisSubscription>();
-    return retList;
+    if (StringUtils.isBlank(subjectFilter) || FILTER_WILDCARD.equals(subjectFilter))
+      throw new IllegalArgumentException("Invalid subjectFilter. subjectFilter may not be empty or equal to '*'");
+
+    // TODO return the full result including metadata.
+    return null;
+  }
+
+  /**
+   * Get all subscriptions matching a specific subjectFilter and owned by any user.
+   *
+   * @param subjectFilter a specific subject filter. Wildcard not allowed.
+   * @param limit - indicates maximum number of results to be included, -1 for unlimited
+   * @param orderBy - orderBy for sorting, e.g. orderBy=created(desc).
+   * @param skip - number of results to skip (may not be used with startAfter)
+   * @param startAfter - where to start when sorting, e.g. limit=10&orderBy=name(asc)&startAfter=101 (may not be used with skip)
+   * @return - Full response from the api call, including metadata and list of subscriptions.
+   * @throws TapisClientException - If api call throws an exception
+   * @throws IllegalArgumentException - If subjectFilter is empty or the wildcard character
+   */
+  public RespSubscriptions getSubscriptionsBySubjectForAllOwners(String subjectFilter, int limit, String orderBy, int skip,
+                                                                 String startAfter)
+          throws TapisClientException, IllegalArgumentException
+  {
+    String ownedBy = null;
+    boolean anyOwner = true;
+    return getSubscriptionsBySubject(subjectFilter, limit, orderBy, skip, startAfter, ownedBy, anyOwner);
   }
 
   /**
