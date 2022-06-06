@@ -276,22 +276,23 @@ public class NotificationsClient implements ITapisClient
   }
 
   /**
-   * Delete all subscriptions matching a specific subjectFilter and owned by any user.
+   * Delete all subscriptions where subjectFilter matches a specific subject
+   *   and subscription is owned by any user.
    *
-   * @param subjectFilter a specific subject. Wildcard not allowed.
+   * @param subject a specific subject. Wildcard not allowed.
    * @return number of records modified as a result of the action
    * @throws TapisClientException - If api call throws an exception
-   * @throws IllegalArgumentException - If subjectFilter is empty or the wildcard string
+   * @throws IllegalArgumentException - If subject is empty or the wildcard string
    */
-  public int deleteSubscriptionsBySubjectForAllOwners(String subjectFilter)
+  public int deleteSubscriptionsBySubjectFilterForAllOwners(String subject)
           throws TapisClientException, IllegalArgumentException
   {
-    if (StringUtils.isBlank(subjectFilter) || FILTER_WILDCARD.equals(subjectFilter))
-      throw new IllegalArgumentException("Invalid subjectFilter. subjectFilter may not be empty or equal to '*'");
+    if (StringUtils.isBlank(subject) || FILTER_WILDCARD.equals(subject))
+      throw new IllegalArgumentException("Invalid subject. subject may not be empty or equal to '*'");
 
     // TODO
     //    RespChangeCount resp = null;
-//    try { resp = subscriptionsApi.deleteSubscriptionsBySubject(subjectFilter, ownedBy, anyOwner); }
+//    try { resp = subscriptionsApi.deleteSubscriptionsBySubjectFilter(subjectFilter, ownedBy, anyOwner); }
 //    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
 //    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
 //    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
@@ -314,7 +315,7 @@ public class NotificationsClient implements ITapisClient
 
     // TODO
     //    RespChangeCount resp = null;
-//    try { resp = subscriptionsApi.deleteSubscriptionsBySubject(subjectFilter, ownedBy, anyOwner); }
+//    try { resp = subscriptionsApi.deleteSubscriptionsBySubjectFilter(subjectFilter, ownedBy, anyOwner); }
 //    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
 //    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
 //    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
@@ -451,12 +452,12 @@ public class NotificationsClient implements ITapisClient
   }
 
   /**
-   * Get all subscriptions owned by requesting user and matching a specific subjectFilter.
+   * Get all subscriptions owned by requesting user and where subjectFilter matches a specific subject.
    * Use flag anyOwner=true to get all subscriptions regardless of owner.
    * Use ownedBy to see subscriptions owned by a specific user other than the requesting user.
    * Note that anyOwner=true has precedence over ownedBy.
    *
-   * @param subjectFilter a specific subject. Wildcard not allowed.
+   * @param subject a specific subject. Wildcard not allowed.
    * @param limit - indicates maximum number of results to be included, -1 for unlimited
    * @param orderBy - orderBy for sorting, e.g. orderBy=created(desc).
    * @param skip - number of results to skip (may not be used with startAfter)
@@ -465,17 +466,17 @@ public class NotificationsClient implements ITapisClient
    * @param anyOwner - If true retrieve all subscriptions owned by any user. ownedBy will be ignored.
    * @return - Full response from the api call, including metadata and list of subscriptions.
    * @throws TapisClientException - If api call throws an exception
-   * @throws IllegalArgumentException - If subjectFilter is empty or the wildcard string
+   * @throws IllegalArgumentException - If subject is empty or the wildcard string
    */
-  public RespSubscriptions getSubscriptionsBySubject(String subjectFilter, int limit, String orderBy, int skip,
+  public RespSubscriptions getSubscriptionsBySubject(String subject, int limit, String orderBy, int skip,
                                                      String startAfter, String ownedBy, boolean anyOwner)
           throws TapisClientException, IllegalArgumentException
   {
-    if (StringUtils.isBlank(subjectFilter) || FILTER_WILDCARD.equals(subjectFilter))
-      throw new IllegalArgumentException("Invalid subjectFilter. subjectFilter may not be empty or equal to '*'");
+    if (StringUtils.isBlank(subject) || FILTER_WILDCARD.equals(subject))
+      throw new IllegalArgumentException("Invalid subject. subject may not be empty or equal to '*'");
 
     //Build a search string for subjectFilter
-    String searchStr = String.format("search=(subject_filter.eq.%s)", subjectFilter);
+    String searchStr = String.format("search=(subject_filter.eq.%s)", subject);
     RespSubscriptions resp = null;
     String selectStr = DEFAULT_SELECT_ALL;
     try
@@ -490,9 +491,9 @@ public class NotificationsClient implements ITapisClient
   }
 
   /**
-   * Get all subscriptions matching a specific subjectFilter and owned by any user.
+   * Get all subscriptions where subjectFilter matches a specific subject.
    *
-   * @param subjectFilter a specific subject. Wildcard not allowed.
+   * @param subject a specific subject. Wildcard not allowed.
    * @param limit - indicates maximum number of results to be included, -1 for unlimited
    * @param orderBy - orderBy for sorting, e.g. orderBy=created(desc).
    * @param skip - number of results to skip (may not be used with startAfter)
@@ -501,13 +502,13 @@ public class NotificationsClient implements ITapisClient
    * @throws TapisClientException - If api call throws an exception
    * @throws IllegalArgumentException - If subjectFilter is empty or the wildcard string
    */
-  public RespSubscriptions getSubscriptionsBySubjectForAllOwners(String subjectFilter, int limit, String orderBy,
+  public RespSubscriptions getSubscriptionsBySubjectForAllOwners(String subject, int limit, String orderBy,
                                                                  int skip, String startAfter)
           throws TapisClientException, IllegalArgumentException
   {
     String ownedBy = null;
     boolean anyOwner = true;
-    return getSubscriptionsBySubject(subjectFilter, limit, orderBy, skip, startAfter, ownedBy, anyOwner);
+    return getSubscriptionsBySubject(subject, limit, orderBy, skip, startAfter, ownedBy, anyOwner);
   }
 
   /**
