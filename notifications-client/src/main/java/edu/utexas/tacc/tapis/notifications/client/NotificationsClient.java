@@ -467,8 +467,7 @@ public class NotificationsClient implements ITapisClient
    * @return Subscriptions accessible to the caller
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<TapisSubscription> searchSubscriptions(ReqSearchSubscriptions req, String selectStr, String ownedBy,
-                                                     boolean anyOwner)
+  public List<TapisSubscription> searchSubscriptions(ReqSearchSubscriptions req, String selectStr, String ownedBy)
           throws TapisClientException
   {
     RespSubscriptions resp = null;
