@@ -298,7 +298,7 @@ public final class Utils
     rSys.enabled(true);
     rSys.effectiveUserId(sys[6]);
     rSys.defaultAuthnMethod(AuthnEnum.valueOf(accMethod.name()));
-    rSys.authnCredential(SystemsClient.buildReqPostCredential(credential));
+    rSys.authnCredential(SystemsClient.buildReqPostPutCredential(credential));
     rSys.bucketName(sys[8]);
     rSys.rootDir(sys[9]);
     rSys.port(port).useProxy(prot1UseProxy).proxyHost(prot1ProxyHost).proxyPort(prot1ProxyPort);

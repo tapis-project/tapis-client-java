@@ -37,7 +37,7 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPatchSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostCredential;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostPutCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSchedulerProfile;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPutSystem;
@@ -711,7 +711,7 @@ public class SystemsClient implements ITapisClient
    * @param req Request containing credentials (password, keys, etc).
    * @throws TapisClientException - If api call throws an exception
    */
-  public void updateUserCredential(String systemId, String userName, ReqPostCredential req) throws TapisClientException
+  public void updateUserCredential(String systemId, String userName, Credential req) throws TapisClientException
   {
     updateUserCredential(systemId, userName, req, DEFAULT_SKIP_CREDENTIAL_CHECK);
   }
@@ -724,7 +724,7 @@ public class SystemsClient implements ITapisClient
    * @param req Request containing credentials (password, keys, etc).
    * @throws TapisClientException - If api call throws an exception
    */
-  public void updateUserCredential(String systemId, String userName, ReqPostCredential req, Boolean skipCredCheck) throws TapisClientException
+  public void updateUserCredential(String systemId, String userName, Credential req, Boolean skipCredCheck) throws TapisClientException
   {
     // Submit the request
     try { credsApi.createUserCredential(systemId, userName, req, skipCredCheck); }
@@ -874,7 +874,7 @@ public class SystemsClient implements ITapisClient
     rSys.enabled(sys.getEnabled());
     rSys.effectiveUserId(sys.getEffectiveUserId());
     rSys.defaultAuthnMethod(sys.getDefaultAuthnMethod());
-    rSys.authnCredential(buildReqPostCredential(sys.getAuthnCredential()));
+    rSys.authnCredential(buildReqPostPutCredential(sys.getAuthnCredential()));
     rSys.bucketName(sys.getBucketName());
     rSys.rootDir(sys.getRootDir());
     rSys.port(sys.getPort()).useProxy(sys.getUseProxy()).proxyHost(sys.getProxyHost()).proxyPort(sys.getProxyPort());
@@ -914,7 +914,7 @@ public class SystemsClient implements ITapisClient
     rSys.host(sys.getHost());
     rSys.effectiveUserId(sys.getEffectiveUserId());
     rSys.defaultAuthnMethod(sys.getDefaultAuthnMethod());
-    rSys.authnCredential(buildReqPostCredential(sys.getAuthnCredential()));
+    rSys.authnCredential(buildReqPostPutCredential(sys.getAuthnCredential()));
     rSys.port(sys.getPort()).useProxy(sys.getUseProxy()).proxyHost(sys.getProxyHost()).proxyPort(sys.getProxyPort());
     rSys.dtnSystemId(sys.getDtnSystemId());
     rSys.dtnMountPoint(sys.getDtnMountPoint()).dtnMountSourcePath(sys.getDtnMountSourcePath());
@@ -956,12 +956,12 @@ public class SystemsClient implements ITapisClient
   }
 
   /**
-   * Utility method to build a ReqPostCredential using attributes from a Credential.
+   * Utility method to build a ReqPostPutCredential using attributes from a Credential.
    */
-  public static ReqPostCredential buildReqPostCredential(Credential credential)
+  public static ReqPostPutCredential buildReqPostPutCredential(Credential credential)
   {
     if (credential == null) return null;
-    var rCred = new ReqPostCredential();
+    var rCred = new ReqPostPutCredential();
     rCred.password(credential.getPassword());
     rCred.publicKey(credential.getPublicKey());
     rCred.privateKey(credential.getPrivateKey());
