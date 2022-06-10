@@ -249,11 +249,7 @@ public class NotificationsClient implements ITapisClient
   public int disableSubscription(String name, String ownedBy) throws TapisClientException
   {
     RespChangeCount resp = null;
-<<<<<<< HEAD
-    try { resp = subscriptionsApi.enableSubscription(id, null); }
-=======
     try { resp = subscriptionsApi.disableSubscription(name, ownedBy); }
->>>>>>> job-subscribe
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
@@ -270,14 +266,9 @@ public class NotificationsClient implements ITapisClient
    */
   public boolean isEnabled(String name, String ownedBy) throws TapisClientException
   {
-<<<<<<< HEAD
-    RespChangeCount resp = null;
-    try { resp = subscriptionsApi.disableSubscription(id, null); }
-=======
     // Submit the request and return the response
     RespBoolean resp = null;
     try { resp = subscriptionsApi.isEnabled(name, ownedBy); }
->>>>>>> job-subscribe
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getaBool() != null)
@@ -300,10 +291,6 @@ public class NotificationsClient implements ITapisClient
    */
   public TapisSubscription getSubscriptionByName(String name, String ownedBy) throws TapisClientException
   {
-<<<<<<< HEAD
-    RespChangeCount resp = null;
-    try { resp = subscriptionsApi.deleteSubscriptionByName(id, null); }
-=======
     return getSubscriptionByName(name, DEFAULT_SELECT_ALL, ownedBy);
   }
 
@@ -340,7 +327,6 @@ public class NotificationsClient implements ITapisClient
   {
     RespChangeCount resp = null;
     try { resp = subscriptionsApi.deleteSubscriptionByName(name, ownedBy); }
->>>>>>> job-subscribe
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
@@ -374,11 +360,7 @@ public class NotificationsClient implements ITapisClient
     String selectStr1 = DEFAULT_SELECT_ALL;
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
     RespSubscription resp = null;
-<<<<<<< HEAD
-    try {resp = subscriptionsApi.getSubscriptionByName(subscriptionId, selectStr1, null); }
-=======
     try {resp = subscriptionsApi.getSubscriptionByUuid(uuid, selectStr1); }
->>>>>>> job-subscribe
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null) return null;
@@ -468,12 +450,8 @@ public class NotificationsClient implements ITapisClient
 
     try
     {
-<<<<<<< HEAD
-      resp = subscriptionsApi.getSubscriptions(searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr1, null, false);
-=======
       resp = subscriptionsApi.getSubscriptions(searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL,
                                                selectStr1, ownedBy, anyOwner);
->>>>>>> job-subscribe
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -496,11 +474,7 @@ public class NotificationsClient implements ITapisClient
     String selectStr1 = DEFAULT_SELECT_SUMMARY;
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
     try { resp = subscriptionsApi.searchSubscriptionsRequestBody(req, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
-<<<<<<< HEAD
-                                              DEFAULT_COMPUTETOTAL, selectStr1, null); }
-=======
                                                                  DEFAULT_COMPUTETOTAL, selectStr1, ownedBy); }
->>>>>>> job-subscribe
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
@@ -527,18 +501,6 @@ public class NotificationsClient implements ITapisClient
                                                      String startAfter, String ownedBy, boolean anyOwner)
           throws TapisClientException, IllegalArgumentException
   {
-<<<<<<< HEAD
-    // Submit the request and return the response
-    RespBoolean resp = null;
-    try { resp = subscriptionsApi.isEnabled(subscriptionId, null); }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null && resp.getResult().getaBool() != null)
-    {
-      return resp.getResult().getaBool();
-    }
-    else
-=======
     if (StringUtils.isBlank(subject) || FILTER_WILDCARD.equals(subject))
       throw new IllegalArgumentException("Invalid subject. subject may not be empty or equal to '*'");
 
@@ -547,7 +509,6 @@ public class NotificationsClient implements ITapisClient
     RespSubscriptions resp = null;
     String selectStr = DEFAULT_SELECT_ALL;
     try
->>>>>>> job-subscribe
     {
       resp = subscriptionsApi.getSubscriptions(searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL,
                                                selectStr, ownedBy, anyOwner);
@@ -679,11 +640,7 @@ public class NotificationsClient implements ITapisClient
   }
 
   /**
-<<<<<<< HEAD
-   * Utility method to build a Event object.
-=======
    * Utility method to build an Event object.
->>>>>>> job-subscribe
    */
   public static Event buildEvent(String source, String type, String subject, String data, String seriesId,
                                  String timestamp)
