@@ -340,14 +340,15 @@ public class JobsClient
     /* ---------------------------------------------------------------------------- */
     /* getJobList:                                                                  */
     /* ---------------------------------------------------------------------------- */
-    public List<JobListDTO> getJobList(int limit, int skip, int startAfter, String orderBy, boolean computeTotal, String select)
+    public List<JobListDTO> getJobList(int limit, int skip, int startAfter, String orderBy, 
+                                       boolean computeTotal, String select)
      throws TapisClientException
     {
     	RespGetJobList resp = null;
         try {
             // Get the API object using default networking.
             var jobsApi = new JobsApi(_apiClient);
-            resp = jobsApi.getJobList(limit, skip, startAfter, orderBy, computeTotal,false);
+            resp = jobsApi.getJobList(limit, skip, startAfter, orderBy, computeTotal, select, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -358,14 +359,15 @@ public class JobsClient
     /* ---------------------------------------------------------------------------- */
     /* getJobSearchList:                                                            */
     /* ---------------------------------------------------------------------------- */
-    public List<Job> getJobSearchList(int limit, int skip, int startAfter, String orderBy, boolean computeTotal, String select)
+    public List<Job> getJobSearchList(int limit, int skip, int startAfter, String orderBy, 
+                                      boolean computeTotal, String select)
      throws TapisClientException
     {
     	RespJobSearchAllAttributes resp = null;
         try {
             // Get the API object using default networking.
             var jobsApi = new JobsApi(_apiClient);
-            resp = jobsApi.getJobSearchList(limit, skip, startAfter, orderBy, computeTotal,  select, false);
+            resp = jobsApi.getJobSearchList(limit, skip, startAfter, orderBy, computeTotal, select, null, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
