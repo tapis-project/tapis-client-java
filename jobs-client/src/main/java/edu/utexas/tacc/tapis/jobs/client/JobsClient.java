@@ -20,7 +20,11 @@ import edu.utexas.tacc.tapis.jobs.client.gen.model.JobCancelDisplay;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobHideDisplay;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobHistoryDisplayDTO;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobListDTO;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.JobShareDisplay;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.JobShareListDTO;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobStatusDisplay;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.JobUnShareDisplay;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqShareJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqSubmitJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqSubscribe;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespBasic;
@@ -28,6 +32,7 @@ import edu.utexas.tacc.tapis.jobs.client.gen.model.RespCancelJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJobList;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJobOutputList;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJobShareList;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJobStatus;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetSubscriptions;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespHideJob;
@@ -35,7 +40,9 @@ import edu.utexas.tacc.tapis.jobs.client.gen.model.RespJobHistory;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespJobSearchAllAttributes;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespProbe;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespResourceUrl;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.RespShareJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespSubmitJob;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.RespUnShareJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.ResultChangeCount;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.TapisSubscription;
 import okhttp3.Call;
@@ -300,7 +307,7 @@ public class JobsClient
     }
     
     /* ---------------------------------------------------------------------------- */
-    /* cancelJob:                                                                      */
+    /* cancelJob:                                                                   */
     /* ---------------------------------------------------------------------------- */
     public JobCancelDisplay cancelJob(String jobUuid)
      throws TapisClientException
@@ -460,6 +467,51 @@ public class JobsClient
     	try {
     		var jobsApi = new JobsApi(_apiClient);
     		resp = jobsApi.unhideJob(jobUuid, false);
+    	}catch (ApiException e) {Utils.throwTapisClientException(e.getCode(),e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+    	return resp == null ? null : resp.getResult();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* sharejob:                                                                    */
+    /* ---------------------------------------------------------------------------- */
+    public JobShareDisplay shareJob(String jobUuid, ReqShareJob req)
+    		throws TapisClientException
+    {
+    	RespShareJob resp = new  RespShareJob();
+    	try {
+    		var jobsApi = new JobsApi(_apiClient);
+    		resp = jobsApi.shareJob(jobUuid, req, false);
+    	}catch (ApiException e) {Utils.throwTapisClientException(e.getCode(),e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+    	return resp == null ? null : resp.getResult();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* getJobShare:                                                                 */
+    /* ---------------------------------------------------------------------------- */
+    public List<JobShareListDTO> getJobShare(String jobUuid, int limit, int skip)
+    		throws TapisClientException
+    {
+    	RespGetJobShareList resp = new  RespGetJobShareList();
+    	try {
+    		var jobsApi = new JobsApi(_apiClient);
+    		resp = jobsApi.getJobShare(jobUuid, limit, skip, false);
+    	}catch (ApiException e) {Utils.throwTapisClientException(e.getCode(),e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+    	return resp == null ? null : resp.getResult();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* deleteJobShare:                                                              */
+    /* ---------------------------------------------------------------------------- */
+    public JobUnShareDisplay deleteJobShare(String jobUuid, String user)
+    		throws TapisClientException
+    {
+    	RespUnShareJob resp = new  RespUnShareJob() ;
+    	try {
+    		var jobsApi = new JobsApi(_apiClient);
+    		resp = jobsApi.deleteJobShare(jobUuid, user, false);
     	}catch (ApiException e) {Utils.throwTapisClientException(e.getCode(),e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
     	return resp == null ? null : resp.getResult();
