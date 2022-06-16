@@ -570,16 +570,28 @@ public class NotificationsClient implements ITapisClient
   // -----------------------------------------------------------------------
   /**
    * Publish an event
-   * See the helper method buildReqPostEvent() for an example of how to build a pre-populated
-   *   Event instance.
+   * See the helper method buildReqPostEvent() for an example of how to build a pre-populated Event.
    *
    * @param req Request body specifying attributes
    * @throws TapisClientException - If api call throws an exception
    */
   public void postEvent(Event req) throws TapisClientException
   {
+    postEvent(req, null);
+  }
+
+  /**
+   * Publish an event
+   * See the helper method buildReqPostEvent() for an example of how to build a pre-populated Event instance.
+   *
+   * @param req Request body specifying attributes
+   * @param tenant Set the tenant. By default, oboTenant is used.
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public void postEvent(Event req, String tenant) throws TapisClientException
+  {
     // Submit the request
-    try { eventsApi.postEvent(req); }
+    try { eventsApi.postEvent(req, tenant); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
   }
