@@ -610,6 +610,9 @@ public class FilesClient implements ITapisClient
     if (resp != null && resp.getResult() != null) return resp; else return null;
   }
 
+  // Support returning healthCheck as a Response. Used by Jobs code
+  public GeneralApi getGeneralApi() { return fileHealth; }
+
   // ************************************************************************
   // *********************** Private Methods ********************************
   // ************************************************************************
