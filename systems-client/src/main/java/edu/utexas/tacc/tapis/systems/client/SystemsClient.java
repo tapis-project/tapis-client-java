@@ -71,8 +71,13 @@ public class SystemsClient implements ITapisClient
   // Header key for JWT
   public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
 
-  // Named null values to make it clear what is being passed in to a method
-  private static final String nullImpersonationId = null;
+  // Named values to make it clear what is being passed in to a method
+  private static final String impersonationIdNull = null;
+  private static final AuthnMethod authnMethodNull = null;
+  private static final boolean sharedAppCtxFalse = false;
+  private static final boolean requireExecPermFalse = false;
+  private static final boolean returnCredentialsFalse = false;
+  private static final boolean returnCredentialsTrue = true;
 
   // ************************************************************************
   // *********************** Enums ******************************************
@@ -222,7 +227,7 @@ public class SystemsClient implements ITapisClient
    * @return url pointing to created resource
    * @throws TapisClientException - If api call throws an exception
    */
-  public String createSystem(ReqPostSystem req, Boolean skipCredCheck) throws TapisClientException
+  public String createSystem(ReqPostSystem req, boolean skipCredCheck) throws TapisClientException
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
@@ -277,7 +282,7 @@ public class SystemsClient implements ITapisClient
    * @return url pointing to updated resource
    * @throws TapisClientException - If api call throws an exception
    */
-  public String putSystem(String systemId, ReqPutSystem req, Boolean skipCredCheck) throws TapisClientException
+  public String putSystem(String systemId, ReqPutSystem req, boolean skipCredCheck) throws TapisClientException
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
@@ -374,7 +379,8 @@ public class SystemsClient implements ITapisClient
   }
 
   /**
-   * Get a system by systemId without returning credentials
+   * Get a system by systemId using all default parameters
+   *  - no credentials returned, do not require exec perm, no impersonation, no shared app ctx
    *
    * @param systemId System systemId
    * @return The system or null if system not found
@@ -382,7 +388,8 @@ public class SystemsClient implements ITapisClient
    */
   public TapisSystem getSystem(String systemId) throws TapisClientException
   {
-    return getSystem(systemId, null, false, DEFAULT_SELECT_ALL, false, nullImpersonationId);
+    return getSystem(systemId, authnMethodNull, requireExecPermFalse, DEFAULT_SELECT_ALL, requireExecPermFalse,
+                     impersonationIdNull, sharedAppCtxFalse);
   }
 
   /**
@@ -398,11 +405,11 @@ public class SystemsClient implements ITapisClient
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public TapisSystem getSystem(String systemId, Boolean returnCredentials, AuthnMethod authnMethod,
-                               Boolean requireExecPerm)
-          throws TapisClientException
+  public TapisSystem getSystem(String systemId, boolean returnCredentials, AuthnMethod authnMethod,
+                               boolean requireExecPerm) throws TapisClientException
   {
-    return getSystem(systemId, authnMethod, requireExecPerm, DEFAULT_SELECT_ALL, returnCredentials, nullImpersonationId);
+    return getSystem(systemId, authnMethod, requireExecPerm, DEFAULT_SELECT_ALL, returnCredentials,
+                     impersonationIdNull, sharedAppCtxFalse);
   }
 
   /**
@@ -419,7 +426,8 @@ public class SystemsClient implements ITapisClient
    */
   public TapisSystem getSystemWithCredentials(String systemId, AuthnMethod authnMethod) throws TapisClientException
   {
-    return getSystem(systemId, true, authnMethod, false);
+    return getSystem(systemId, authnMethod, requireExecPermFalse, DEFAULT_SELECT_ALL, returnCredentialsTrue,
+                     impersonationIdNull, sharedAppCtxFalse);
   }
 
   /**
@@ -433,7 +441,8 @@ public class SystemsClient implements ITapisClient
    */
   public TapisSystem getSystemWithCredentials(String systemId) throws TapisClientException
   {
-    return getSystemWithCredentials(systemId, null);
+    return getSystem(systemId, authnMethodNull, requireExecPermFalse, DEFAULT_SELECT_ALL, returnCredentialsTrue,
+                     impersonationIdNull, sharedAppCtxFalse);
   }
 
   /**
@@ -449,11 +458,13 @@ public class SystemsClient implements ITapisClient
    * @param returnCredentials - Include credentials in returned system object
    * @param impersonationId - use provided Tapis username instead of oboUser when checking auth and
    *                          resolving effectiveUserId
+   * @param sharedAppCtx - Indicates system will be used as part of a shared application context.
+   *                       Tapis authorization will be skipped.
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public TapisSystem getSystem(String systemId, AuthnMethod authnMethod, Boolean requireExecPerm, String selectStr,
-                               Boolean returnCredentials, String impersonationId)
+  public TapisSystem getSystem(String systemId, AuthnMethod authnMethod, boolean requireExecPerm, String selectStr,
+                               boolean returnCredentials, String impersonationId, boolean sharedAppCtx)
           throws TapisClientException
   {
     String selectStr1 = DEFAULT_SELECT_ALL;
@@ -462,7 +473,8 @@ public class SystemsClient implements ITapisClient
     String authnMethodStr = (authnMethod==null ? null : authnMethod.name());
     try
     {
-      resp = sysApi.getSystem(systemId, authnMethodStr, requireExecPerm, selectStr1, returnCredentials, impersonationId);
+      resp = sysApi.getSystem(systemId, authnMethodStr, requireExecPerm, selectStr1, returnCredentials,
+                              impersonationId, sharedAppCtx);
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -724,7 +736,7 @@ public class SystemsClient implements ITapisClient
    * @param req Request containing credentials (password, keys, etc).
    * @throws TapisClientException - If api call throws an exception
    */
-  public void updateUserCredential(String systemId, String userName, Credential req, Boolean skipCredCheck) throws TapisClientException
+  public void updateUserCredential(String systemId, String userName, Credential req, boolean skipCredCheck) throws TapisClientException
   {
     // Submit the request
     try { credsApi.createUserCredential(systemId, userName, req, skipCredCheck); }
