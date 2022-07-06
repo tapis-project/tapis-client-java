@@ -4,17 +4,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
-import edu.utexas.tacc.tapis.files.client.gen.Pair;
-import edu.utexas.tacc.tapis.files.client.gen.model.HeaderByteRange;
 import edu.utexas.tacc.tapis.files.client.gen.model.RespBasic;
 import okhttp3.Call;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
 import okhttp3.Response;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -37,7 +31,6 @@ import edu.utexas.tacc.tapis.files.client.gen.api.ContentApi;
 import edu.utexas.tacc.tapis.files.client.gen.api.FileOperationsApi;
 import edu.utexas.tacc.tapis.files.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.files.client.gen.api.PermissionsApi;
-//import edu.utexas.tacc.tapis.files.client.gen.api.ShareApi;
 import edu.utexas.tacc.tapis.files.client.gen.api.TransfersApi;
 import edu.utexas.tacc.tapis.files.client.gen.model.CreatePermissionRequest;
 import edu.utexas.tacc.tapis.files.client.gen.model.FileInfo;
@@ -274,7 +267,6 @@ public class FilesClient implements ITapisClient
 
   public StreamedFile getFileContents(String systemId, String path, boolean zip) throws TapisClientException
   {
-    String nullImpersonationId = null;
     return getFileContents(systemId, path, zip, nullImpersonationId);
   }
 
@@ -527,8 +519,22 @@ public class FilesClient implements ITapisClient
    */
   public TransferTask getTransferTaskHistory(String transferTaskId) throws TapisClientException
   {
+    return getTransferTaskHistory(transferTaskId, nullImpersonationId);
+  }
+
+  /**
+   * Get history of a transfer task
+   *
+   * @param transferTaskId Transfer task ID
+   * @param impersonationId - use provided Tapis username instead of oboUser when checking auth and
+   *                          resolving effectiveUserId
+   * @return transfer task with history
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public TransferTask getTransferTaskHistory(String transferTaskId, String impersonationId) throws TapisClientException
+  {
     TransferTaskResponse resp = null;
-    try { resp = fileTransfers.getTransferTaskDetails(transferTaskId); }
+    try { resp = fileTransfers.getTransferTaskDetails(transferTaskId, impersonationId); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
