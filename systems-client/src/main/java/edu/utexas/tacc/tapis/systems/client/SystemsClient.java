@@ -73,6 +73,17 @@ public class SystemsClient implements ITapisClient
 
   // Named null values to make it clear what is being passed in to a method
   private static final String nullImpersonationId = null;
+  private static final AuthnMethod nullAuthnMethod = null;
+
+  private static final boolean DEFAULT_RESOLVE_EFFECTIVE_USER = false;
+  private static final AuthnMethod DEFAULT_AUTHN_METHOD = null;
+  private static final boolean DEFAULT_REQUIRE_EXEC_PERM = false;
+  private static final boolean DEFAULT_RETURN_CREDENTIALS = false;
+  private static final boolean DEFAULT_SHOW_DELETED = false;
+
+  private static final boolean resolveEffectiverUserTrue = true;
+  private static final boolean requireExecPermFalse = false;
+  private static final boolean returnCredentialsTrue = true;
 
   // ************************************************************************
   // *********************** Enums ******************************************
@@ -186,7 +197,7 @@ public class SystemsClient implements ITapisClient
   /**
    * Check service ready status
    *
-   * @return Service ready status status as a string
+   * @return Service ready status as a string
    * @throws TapisClientException - If api call throws an exception
    */
   public String checkReady() throws TapisClientException
@@ -382,7 +393,8 @@ public class SystemsClient implements ITapisClient
    */
   public TapisSystem getSystem(String systemId) throws TapisClientException
   {
-    return getSystem(systemId, null, false, DEFAULT_SELECT_ALL, false, nullImpersonationId);
+    return getSystem(systemId, DEFAULT_AUTHN_METHOD, DEFAULT_REQUIRE_EXEC_PERM, DEFAULT_SELECT_ALL,
+                     DEFAULT_RETURN_CREDENTIALS, nullImpersonationId, DEFAULT_RESOLVE_EFFECTIVE_USER);
   }
 
   /**
@@ -390,6 +402,8 @@ public class SystemsClient implements ITapisClient
    * Fetching of credentials is highly restricted. Only certain Tapis services are authorized.
    * If authnMethod is null then default authn method for the system is used.
    * Use of this method is highly restricted.
+   * Called by Jobs and Files which always expect effectiveUserId to be resolved,
+   *   so we use resolveEffectiveUserId=true rather the default value of false.
    *
    * @param systemId System systemId
    * @param returnCredentials - Include credentials in returned system object
@@ -402,7 +416,8 @@ public class SystemsClient implements ITapisClient
                                Boolean requireExecPerm)
           throws TapisClientException
   {
-    return getSystem(systemId, authnMethod, requireExecPerm, DEFAULT_SELECT_ALL, returnCredentials, nullImpersonationId);
+    return getSystem(systemId, authnMethod, requireExecPerm, DEFAULT_SELECT_ALL, returnCredentials, nullImpersonationId,
+                     resolveEffectiverUserTrue);
   }
 
   /**
@@ -410,6 +425,10 @@ public class SystemsClient implements ITapisClient
    * If authnMethod is null then default authn method for the system is used.
    * Use of this method is highly restricted. Only certain Tapis services are
    * authorized to call this method.
+   * Called by services which always expect effectiveUserId to be resolved,
+   *   so we use resolveEffectiveUserId=true rather the default value of false.
+   *
+   * Use by Files service.
    *
    * @param systemId System systemId
    * @param authnMethod - Desired authentication method used when fetching credentials,
@@ -419,13 +438,16 @@ public class SystemsClient implements ITapisClient
    */
   public TapisSystem getSystemWithCredentials(String systemId, AuthnMethod authnMethod) throws TapisClientException
   {
-    return getSystem(systemId, true, authnMethod, false);
+  return getSystem(systemId, authnMethod, requireExecPermFalse, DEFAULT_SELECT_ALL, returnCredentialsTrue,
+                   nullImpersonationId, resolveEffectiverUserTrue);
   }
 
   /**
    * Get a system by systemId returning credentials for default authn method.
    * Use of this method is highly restricted. Only certain Tapis services are
    * authorized to call this method.
+   * Called by services which always expect effectiveUserId to be resolved,
+   *   so we use resolveEffectiveUserId=true rather the default value of false.
    *
    * @param systemId System Id
    * @return The system or null if system not found
@@ -433,7 +455,8 @@ public class SystemsClient implements ITapisClient
    */
   public TapisSystem getSystemWithCredentials(String systemId) throws TapisClientException
   {
-    return getSystemWithCredentials(systemId, null);
+    return getSystem(systemId, nullAuthnMethod, requireExecPermFalse, DEFAULT_SELECT_ALL, returnCredentialsTrue,
+                     nullImpersonationId, resolveEffectiverUserTrue);
   }
 
   /**
@@ -449,11 +472,13 @@ public class SystemsClient implements ITapisClient
    * @param returnCredentials - Include credentials in returned system object
    * @param impersonationId - use provided Tapis username instead of oboUser when checking auth and
    *                          resolving effectiveUserId
+   * @param resolveEffectiveUser - If effectiveUserId is set to ${apiUserId} then resolve it, else always return value
+   *                         provided in system definition. By default, this is false.
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
   public TapisSystem getSystem(String systemId, AuthnMethod authnMethod, Boolean requireExecPerm, String selectStr,
-                               Boolean returnCredentials, String impersonationId)
+                               Boolean returnCredentials, String impersonationId, Boolean resolveEffectiveUser)
           throws TapisClientException
   {
     String selectStr1 = DEFAULT_SELECT_ALL;
@@ -462,7 +487,8 @@ public class SystemsClient implements ITapisClient
     String authnMethodStr = (authnMethod==null ? null : authnMethod.name());
     try
     {
-      resp = sysApi.getSystem(systemId, authnMethodStr, requireExecPerm, selectStr1, returnCredentials, impersonationId);
+      resp = sysApi.getSystem(systemId, authnMethodStr, requireExecPerm, selectStr1, returnCredentials,
+                              impersonationId, resolveEffectiveUser);
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -491,7 +517,8 @@ public class SystemsClient implements ITapisClient
    */
   public List<TapisSystem> getSystems(String searchStr) throws TapisClientException
   {
-    return getSystems(searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_SELECT_SUMMARY, false);
+    return getSystems(searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
+                      DEFAULT_SELECT_SUMMARY, DEFAULT_RESOLVE_EFFECTIVE_USER, DEFAULT_SHOW_DELETED);
   }
 
   /**
@@ -506,12 +533,13 @@ public class SystemsClient implements ITapisClient
    * @param skip
    * @param startAfter
    * @param selectStr
+   * @param resolveEffectiveUser
    * @param showDeleted
    * @return list of systems available to the caller and matching search conditions.
    * @throws TapisClientException - If api call throws an exception
    */
   public List<TapisSystem> getSystems(String searchStr, int limit, String orderBy, int skip, String startAfter,
-                                      String selectStr, boolean showDeleted)
+                                      String selectStr, boolean resolveEffectiveUser, boolean showDeleted)
           throws TapisClientException
   {
     String selectStr1 = DEFAULT_SELECT_SUMMARY;
@@ -519,7 +547,8 @@ public class SystemsClient implements ITapisClient
     RespSystems resp = null;
     try
     {
-      resp = sysApi.getSystems(searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr1, showDeleted);
+      resp = sysApi.getSystems(searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr1,
+                               resolveEffectiveUser, showDeleted);
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
