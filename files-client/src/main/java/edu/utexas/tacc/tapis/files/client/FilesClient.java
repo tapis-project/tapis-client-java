@@ -254,8 +254,7 @@ public class FilesClient implements ITapisClient
 
   public StreamedFile getFileContents(String systemId, String path, boolean zip) throws TapisClientException
   {
-    String nullImpersonationId = null;
-    return getFileContents(systemId, path, zip, nullImpersonationId);
+    return getFileContents(systemId, path, zip, impersonationIdNull);
   }
 
   /**
@@ -604,8 +603,22 @@ public class FilesClient implements ITapisClient
    */
   public TransferTask getTransferTaskHistory(String transferTaskId) throws TapisClientException
   {
+    return getTransferTaskHistory(transferTaskId, impersonationIdNull);
+  }
+
+  /**
+   * Get history of a transfer task
+   *
+   * @param transferTaskId Transfer task ID
+   * @param impersonationId - use provided Tapis username instead of oboUser when checking auth and
+   *                          resolving effectiveUserId
+   * @return transfer task with history
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public TransferTask getTransferTaskHistory(String transferTaskId, String impersonationId) throws TapisClientException
+  {
     RespTransferTask resp = null;
-    try { resp = fileTransfers.getTransferTaskDetails(transferTaskId); }
+    try { resp = fileTransfers.getTransferTaskDetails(transferTaskId, impersonationId); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;

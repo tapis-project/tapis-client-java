@@ -6,6 +6,7 @@ import edu.utexas.tacc.tapis.systems.client.SystemsClient.AuthnMethod;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
+import edu.utexas.tacc.tapis.tokens.client.TokensClient;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
@@ -15,6 +16,7 @@ import org.testng.annotations.Test;
 import java.util.Map;
 
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_ALL;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_TARGET_SITE;
 
 import static edu.utexas.tacc.tapis.systems.client.Utils.*;
 
@@ -43,6 +45,7 @@ public class FilesSvcTest
   // Named null values to make it clear what is being passed in to a method
   private static final String impersonationIdNull = null;
   private static final boolean sharedAppCtxFalse = false;
+  private static final boolean resolveEffectiverUserTrue = true;
 
   // Test data
   int numSystems = 2;
@@ -197,7 +200,13 @@ public class FilesSvcTest
     sys0 = systems.get(2);
     // This should succeed
     sysClient = getClientFilesSvc(tenantName, testUser2, filesServiceJWT);
-    tmpSys = sysClient.getSystem(sys0[1], null, true, DEFAULT_SELECT_ALL, false, impersonationIdNull, sharedAppCtxFalse);
+    /*
+      return getSystem(systemId, DEFAULT_AUTHN_METHOD, DEFAULT_REQUIRE_EXEC_PERM, DEFAULT_SELECT_ALL,
+                   DEFAULT_RETURN_CREDENTIALS, nullImpersonationId, DEFAULT_RESOLVE_EFFECTIVE_USER);
+
+     */
+    tmpSys = sysClient.getSystem(sys0[1], null, true, DEFAULT_SELECT_ALL, false, impersonationIdNull,
+                                 resolveEffectiverUserTrue, sharedAppCtxFalse);
     Assert.assertNotNull(tmpSys, "Failed to find item: " + sys0[1]);
     System.out.println("Found item: " + sys0[1]);
     // Verify most attributes
@@ -207,7 +216,8 @@ public class FilesSvcTest
     // this should fail
     sysClient = getClientFilesSvc(tenantName, testUser3, filesServiceJWT);
     try {
-      sysClient.getSystem(sys0[1], null, true, DEFAULT_SELECT_ALL, false, impersonationIdNull, sharedAppCtxFalse);
+      sysClient.getSystem(sys0[1], null, true, DEFAULT_SELECT_ALL, false, impersonationIdNull,
+                          resolveEffectiverUserTrue, sharedAppCtxFalse);
       Assert.fail("Fetch of system did not require EXECUTE permission as expected");
     } catch (TapisClientException tce) {
       Assert.assertTrue(tce.getTapisMessage().contains("SYSLIB_UNAUTH"), "Wrong exception message: " + tce.getTapisMessage());

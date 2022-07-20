@@ -1112,7 +1112,7 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
       security:
         - TapisJWT: []
-  /jobs/{jobuuid}/resubmit:
+  /jobs/{jobUuid}/resubmit:
     post:
       tags:
         - jobs
@@ -1128,7 +1128,7 @@ paths:
           - archive application output
       operationId: resubmitJob
       parameters:
-        - name: jobuuid
+        - name: jobUuid
           in: path
           required: true
           schema:
