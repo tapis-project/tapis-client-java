@@ -33,8 +33,8 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.JobRuntime;
 import edu.utexas.tacc.tapis.systems.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSchedulerProfile;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSchedulerProfile;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RuntimeTypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerTypeEnum;
@@ -65,14 +65,14 @@ public final class Utils
   public static final String adminTenantName = "admin";
   public static final String filesSvcName = "files";
   public static final String sysType = SystemTypeEnum.LINUX.name();
+  public static final String schedulerProfileName = "taccTest";
 
-  // Long term JWTs expire approx 1 July 2026
+  // Long term JWTs expire approx 1 Sep 2022 (DEV Env only)
   public static final String testUser1JWT ="eyJ0eXATODO";
   public static final String testUser2JWT ="eyJ0eXATODO";
   public static final String testUser3JWT = "eyJ0eXATODO";
   public static final String adminUserJWT ="eyJ0eXATODO";
-  public static final String filesSvcJWT = "eyJ0eXATODO";
-
+  public static final String filesSvcJWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJmMDA1Njg5Mi1iMGYyLTRkMjQtYjNjNy1hM2I2ODYxOGY3MzQiLCJpc3MiOiJodHRwczovL2FkbWluLmRldmVsb3AudGFwaXMuaW8vdjMvdG9rZW5zIiwic3ViIjoiZmlsZXNAYWRtaW4iLCJ0YXBpcy90ZW5hbnRfaWQiOiJhZG1pbiIsInRhcGlzL3Rva2VuX3R5cGUiOiJhY2Nlc3MiLCJ0YXBpcy9kZWxlZ2F0aW9uIjpmYWxzZSwidGFwaXMvZGVsZWdhdGlvbl9zdWIiOm51bGwsInRhcGlzL3VzZXJuYW1lIjoiZmlsZXMiLCJ0YXBpcy9hY2NvdW50X3R5cGUiOiJzZXJ2aWNlIiwiZXhwIjoxNjYyMTQ0MTg2LCJ0YXBpcy90YXJnZXRfc2l0ZSI6InRhY2MifQ.DpNR3WEh91b05-aBCMn2CjqvznP80rgCLvDi4Z1J8uTPXgOBrIjDrmBT8cT2W3sJ12Fp4N5Twlf90TPAisHdpkzaPxOH-9LvMplDAkw7AZ_3BIkqBLLTKRNMkFvm35D_pTV3Az9fu_zL0u-yD8QM_sWqD7VXCimAC3h8LO7NBOR3dT8tNeVvfs-JI_emeG1yA3eN29YiSg2vpHrPWRZY3MVX8UG_YhSO0HS34OT6V2WwLqJfQ_BXUdEOC8ru_jK1b9Grs0_uYLaPEvs_RJ8egRNg8UKc6kiLSSMZ4L3wEfGZvrXuGTFG0Av99h89hSOfUlw1byUp_CJq9erFfqRhpg";
   // TAPIS_BASE_URL_SUFFIX should be set according to the dev, staging or prod environment
   // dev     -> develop.tapis.io
   // staging -> staging.tapis.io
@@ -98,7 +98,6 @@ public final class Utils
   public static final String defaultDescription = null;
   public static final String defaultRootDir = null;
   public static final String defaultBucketName = null;
-  public static final List<JobRuntime> defaultJobRuntimes = null;
   public static final String defaultJobWorkingDir = null;
   public static final String defaultBatchScheduler = SchedulerTypeEnum.SLURM.toString();
   public static final String defaultBatchDefaultLogicalQueue = null;
@@ -110,7 +109,7 @@ public final class Utils
   public static final boolean defaultUseProxy = false;
   public static final int defaultProxyPort = -1;
   public static final String defaultProxyHost = null;
-  public static final boolean defaultJobIsBatch = false;
+  public static final boolean defaultCanRunBatch = false;
   public static final int defaultJobMaxJobs = -1;
   public static final int defaultJobMaxJobsPerUser = -1;
   public static final int defaultQMaxJobs = -1;
@@ -129,8 +128,8 @@ public final class Utils
   public static final KeyValuePair kv2 = new KeyValuePair().key("HOME").value("/home/testuser2");
   public static final KeyValuePair kv3 = new KeyValuePair().key("TMP").value("/tmp");
   public static final List<KeyValuePair> jobEnvVariables = new ArrayList<>(List.of(kv1,kv2,kv3));
-  public static final boolean jobIsBatchTrue = true;
-  public static final boolean jobIsBatchFalse = false;
+  public static final boolean canRunBatchTrue = true;
+  public static final boolean canRunBatchFalse = false;
   public static final int jobMaxJobs = -1;
   public static final int jobMaxJobsMAX = Integer.MAX_VALUE;
   public static final int jobMaxJobsPerUser = -1;
@@ -223,7 +222,7 @@ public final class Utils
       //                 13=batchSchedulerProfile
       String[] sys0 = {tenantName, id, "description "+suffix, sysType, testUser1, hostName, "effUser"+suffix,
               "fakePassword"+suffix,"bucket"+suffix, "/root"+suffix, "jobWorkDir"+suffix, SchedulerTypeEnum.SLURM.name(),
-              "batchDefaultLogicalQueue"+suffix, "batchSchedulerProfile"+suffix};
+              "batchDefaultLogicalQueue"+suffix, schedulerProfileName};
       systems.put(i, sys0);
     }
     return systems;
@@ -255,11 +254,11 @@ public final class Utils
   public static String getFilesSvcPassword()
   {
     String s = System.getenv(TAPIS_ENV_FILES_SVC_PASSWORD);
-    if (StringUtils.isBlank(s))
-    {
-      System.out.println("ERROR: Files service password must be set using environment variable:  " + TAPIS_ENV_FILES_SVC_PASSWORD);
-      System.exit(1);
-    }
+//    if (StringUtils.isBlank(s))
+//    {
+//      System.out.println("ERROR: Files service password must be set using environment variable:  " + TAPIS_ENV_FILES_SVC_PASSWORD);
+//      System.exit(1);
+//    }
     return s;
   }
   public static String getServicePort()
@@ -284,13 +283,13 @@ public final class Utils
   }
 
   /*
-   * Build a ReqCreateSystem object to be used for client call to create a system given most attributes for the system.
+   * Build a ReqPostSystem object to be used for client call to create a system given most attributes for the system.
    */
-  public static ReqCreateSystem createReqSystem(String[] sys, int port, SystemsClient.AuthnMethod authnMethod,
+  public static ReqPostSystem createReqSystem(String[] sys, int port, SystemsClient.AuthnMethod authnMethod,
                                                 Credential credential)
   {
     var accMethod = authnMethod != null ? authnMethod : prot1AuthnMethod;
-    ReqCreateSystem rSys = new ReqCreateSystem();
+    ReqPostSystem rSys = new ReqPostSystem();
     rSys.setId(sys[1]);
     rSys.description(sys[2]);
     rSys.setSystemType(SystemTypeEnum.valueOf(sys[3]));
@@ -299,16 +298,16 @@ public final class Utils
     rSys.enabled(true);
     rSys.effectiveUserId(sys[6]);
     rSys.defaultAuthnMethod(AuthnEnum.valueOf(accMethod.name()));
-    rSys.authnCredential(SystemsClient.buildReqCreateCredential(credential));
+    rSys.authnCredential(SystemsClient.buildReqPostPutCredential(credential));
     rSys.bucketName(sys[8]);
     rSys.rootDir(sys[9]);
     rSys.port(port).useProxy(prot1UseProxy).proxyHost(prot1ProxyHost).proxyPort(prot1ProxyPort);
     rSys.canExec(canExecTrue);
+    rSys.canRunBatch(canRunBatchFalse);
     rSys.setJobRuntimes(jobRuntimes1);
     rSys.jobWorkingDir(sys[10]);
     rSys.jobEnvVariables(jobEnvVariables);
     rSys.jobMaxJobs(jobMaxJobs).jobMaxJobsPerUser(jobMaxJobsPerUser);
-    rSys.jobIsBatch(jobIsBatchFalse);
     rSys.batchScheduler(SchedulerTypeEnum.fromValue(sys[11])).batchDefaultLogicalQueue(sys[12]);
     rSys.batchSchedulerProfile(sys[13]).batchLogicalQueues(jobQueues1);
     rSys.jobCapabilities(jobCaps1);
@@ -326,7 +325,7 @@ public final class Utils
   public static String createSystemMinimal(SystemsClient clt, String[] sys)
           throws TapisClientException
   {
-    ReqCreateSystem rSys = new ReqCreateSystem();
+    ReqPostSystem rSys = new ReqPostSystem();
     rSys.setId(sys[1]);
     rSys.setSystemType(SystemTypeEnum.valueOf(sys[3]));
     rSys.setHost(sys[5]);
@@ -346,16 +345,16 @@ public final class Utils
   public static String createSystemFromTapisSystem(SystemsClient clt, TapisSystem sys)
           throws TapisClientException
   {
-    ReqCreateSystem rSys = SystemsClient.buildReqCreateSystem(sys);
+    ReqPostSystem rSys = SystemsClient.buildReqPostSystem(sys);
     return clt.createSystem(rSys);
   }
 
   /*
-   * Build a ReqCreateSchedulerProfile object to be used for client call to create a profile give most attributes.
+   * Build a ReqPostSchedulerProfile object to be used for client call to create a profile give most attributes.
    */
-  public static ReqCreateSchedulerProfile createReqSchedulerProfile(String[] profile)
+  public static ReqPostSchedulerProfile createReqSchedulerProfile(String[] profile)
   {
-    ReqCreateSchedulerProfile rProfile = new ReqCreateSchedulerProfile();
+    ReqPostSchedulerProfile rProfile = new ReqPostSchedulerProfile();
     rProfile.setName(profile[1]);
     rProfile.description(profile[2]);
     rProfile.owner(profile[3]);
@@ -392,7 +391,7 @@ public final class Utils
   /**
    * Verify most attributes for a TapisSystem using default create data for following attributes:
    *     port, useProxy, proxyHost, proxyPort, defaultAuthnMethod,
-   *     canExec, jobWorkingDir, jobMaxJobs, jobMaxJobsPerUser, jobIsBatch, batchScheduler, batchDefaultLogicalQueue,
+   *     canExec, canRunBatch, jobWorkingDir, jobMaxJobs, jobMaxJobsPerUser, batchScheduler, batchDefaultLogicalQueue,
    *     batchSchedulerProfile, jobEnvVariables, jobLogicalQueues, capabilities, tags, notes
    * @param tmpSys - system retrieved from the service
    * @param sys0 - Data used to create the system
@@ -419,13 +418,13 @@ public final class Utils
     Assert.assertNotNull(tmpSys.getProxyPort());
     Assert.assertEquals(tmpSys.getProxyPort().intValue(), prot1ProxyPort);
     Assert.assertEquals(tmpSys.getCanExec(), Boolean.valueOf(canExecTrue));
+    Assert.assertEquals(tmpSys.getCanRunBatch(), Boolean.valueOf(canRunBatchFalse));
     Assert.assertEquals(tmpSys.getJobWorkingDir(), sys0[10]);
     // TODO check jobRuntimes
     Assert.assertNotNull(tmpSys.getJobMaxJobs());
     Assert.assertEquals(tmpSys.getJobMaxJobs().intValue(), jobMaxJobsMAX);
     Assert.assertNotNull(tmpSys.getJobMaxJobsPerUser());
     Assert.assertEquals(tmpSys.getJobMaxJobsPerUser().intValue(), jobMaxJobsPerUserMAX);
-    Assert.assertEquals(tmpSys.getJobIsBatch(), Boolean.valueOf(jobIsBatchFalse));
     Assert.assertEquals(tmpSys.getBatchScheduler(), SchedulerTypeEnum.valueOf(sys0[11]));
     Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), sys0[12]);
     Assert.assertEquals(tmpSys.getBatchSchedulerProfile(), sys0[13]);
@@ -522,7 +521,8 @@ public final class Utils
     Assert.assertEquals(tmpSys.getEnabled(), Boolean.valueOf(defaultIsEnabled));
     // Effective user should result to requestor which in this case is testuser1
     Assert.assertEquals(tmpSys.getEffectiveUserId(), testUser1);
-    Assert.assertEquals(tmpSys.getJobRuntimes(), defaultJobRuntimes);
+    Assert.assertEquals(tmpSys.getCanRunBatch(), Boolean.valueOf(defaultCanRunBatch));
+    Assert.assertNull(tmpSys.getJobRuntimes());
     Assert.assertNotNull(tmpSys.getPort());
     Assert.assertEquals(tmpSys.getPort().intValue(), defaultPort);
     Assert.assertNotNull(tmpSys.getUseProxy());
@@ -537,7 +537,6 @@ public final class Utils
     Assert.assertEquals(tmpSys.getJobMaxJobs().intValue(), jobMaxJobsMAX);
     Assert.assertNotNull(tmpSys.getJobMaxJobsPerUser());
     Assert.assertEquals(tmpSys.getJobMaxJobsPerUser().intValue(), jobMaxJobsPerUserMAX);
-    Assert.assertEquals(tmpSys.getJobIsBatch(), Boolean.valueOf(defaultJobIsBatch));
     Assert.assertEquals(tmpSys.getBatchScheduler(), schedulerType);
     Assert.assertEquals(tmpSys.getBatchDefaultLogicalQueue(), defaultBatchDefaultLogicalQueue);
     Assert.assertEquals(tmpSys.getBatchSchedulerProfile(), defaultBatchSchedulerProfile);

@@ -7,16 +7,12 @@ import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SEARCH;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_ALL;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_SUMMARY;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP_CREDENTIAL_CHECK;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
 
 import java.util.Collections;
 import java.util.List;
 
-import edu.utexas.tacc.tapis.systems.client.gen.api.SchedulerProfilesApi;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateCredential;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfile;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfiles;
-import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerProfile;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.JsonObject;
@@ -31,27 +27,33 @@ import edu.utexas.tacc.tapis.systems.client.gen.ApiException;
 import edu.utexas.tacc.tapis.systems.client.gen.api.CredentialsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.PermissionsApi;
+import edu.utexas.tacc.tapis.systems.client.gen.api.SchedulerProfilesApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.SystemsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
 import edu.utexas.tacc.tapis.systems.client.gen.model.CategoryEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.DatatypeEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSchedulerProfile;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPatchSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostPutCredential;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSchedulerProfile;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPutSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqSearchSystems;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPatchSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespBasic;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespBoolean;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespChangeCount;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespNameArray;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespResourceUrl;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfile;
+import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfiles;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystems;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
+import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerProfile;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
 
 /**
@@ -68,6 +70,20 @@ public class SystemsClient implements ITapisClient
 
   // Header key for JWT
   public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
+
+  // Named null values to make it clear what is being passed in to a method
+  private static final String nullImpersonationId = null;
+  private static final AuthnMethod nullAuthnMethod = null;
+
+  private static final boolean DEFAULT_RESOLVE_EFFECTIVE_USER = true;
+  private static final AuthnMethod DEFAULT_AUTHN_METHOD = null;
+  private static final boolean DEFAULT_REQUIRE_EXEC_PERM = false;
+  private static final boolean DEFAULT_RETURN_CREDENTIALS = false;
+  private static final boolean DEFAULT_SHOW_DELETED = false;
+
+  private static final boolean resolveEffectiverUserTrue = true;
+  private static final boolean requireExecPermFalse = false;
+  private static final boolean returnCredentialsTrue = true;
 
   // ************************************************************************
   // *********************** Enums ******************************************
@@ -181,7 +197,7 @@ public class SystemsClient implements ITapisClient
   /**
    * Check service ready status
    *
-   * @return Service ready status status as a string
+   * @return Service ready status as a string
    * @throws TapisClientException - If api call throws an exception
    */
   public String checkReady() throws TapisClientException
@@ -196,18 +212,32 @@ public class SystemsClient implements ITapisClient
 
   /**
    * Create a system
-   * See the helper method buildReqCreateSystem() for an example of how to build a pre-populated
-   *   ReqCreateSystem instance from a TapisSystem instance.
+   * See the helper method buildReqPostSystem() for an example of how to build a pre-populated
+   *   ReqPostSystem instance from a TapisSystem instance.
    *
-   * @param req - Pre-populated ReqCreateSystem instance
+   * @param req - Pre-populated ReqPostSystem instance
    * @return url pointing to created resource
    * @throws TapisClientException - If api call throws an exception
    */
-  public String createSystem(ReqCreateSystem req) throws TapisClientException
+  public String createSystem(ReqPostSystem req) throws TapisClientException
+  {
+    return createSystem(req, DEFAULT_SKIP_CREDENTIAL_CHECK);
+  }
+
+  /**
+   * Create a system
+   * See the helper method buildReqPostSystem() for an example of how to build a pre-populated
+   *   ReqPostSystem instance from a TapisSystem instance.
+   *
+   * @param req - Pre-populated ReqPostSystem instance
+   * @return url pointing to created resource
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public String createSystem(ReqPostSystem req, Boolean skipCredCheck) throws TapisClientException
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
-    try { resp = sysApi.createSystem(req); }
+    try { resp = sysApi.createSystem(req, skipCredCheck); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
@@ -244,9 +274,25 @@ public class SystemsClient implements ITapisClient
    */
   public String putSystem(String systemId, ReqPutSystem req) throws TapisClientException
   {
+    return putSystem(systemId, req, DEFAULT_SKIP_CREDENTIAL_CHECK);
+  }
+
+  /**
+   * Update all attributes of a system
+   * NOTE: Not all attributes are updatable.
+   * See the helper method buildReqPutSystem() for an example of how to build a pre-populated
+   *   ReqPutSystem instance from a TapisSystem instance.
+   *
+   * @param systemId - Id of resource to be updated
+   * @param req - Pre-populated ReqPutSystem instance
+   * @return url pointing to updated resource
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public String putSystem(String systemId, ReqPutSystem req, Boolean skipCredCheck) throws TapisClientException
+  {
     // Submit the request and return the response
     RespResourceUrl resp = null;
-    try { resp = sysApi.putSystem(systemId, req); }
+    try { resp = sysApi.putSystem(systemId, req, skipCredCheck); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
@@ -339,7 +385,13 @@ public class SystemsClient implements ITapisClient
   }
 
   /**
-   * Get a system by systemId without returning credentials
+   * Get a system by systemId using default arguments.
+   *  authnMethod = null
+   *  requireExec = false
+   *  select = ALL
+   *  returnCreds = false
+   *  impersonationId = null
+   *  resolveEffectiveUser = true
    *
    * @param systemId System systemId
    * @return The system or null if system not found
@@ -347,7 +399,8 @@ public class SystemsClient implements ITapisClient
    */
   public TapisSystem getSystem(String systemId) throws TapisClientException
   {
-    return getSystem(systemId, false, null, false, DEFAULT_SELECT_ALL);
+    return getSystem(systemId, DEFAULT_AUTHN_METHOD, DEFAULT_REQUIRE_EXEC_PERM, DEFAULT_SELECT_ALL,
+                     DEFAULT_RETURN_CREDENTIALS, nullImpersonationId, DEFAULT_RESOLVE_EFFECTIVE_USER);
   }
 
   /**
@@ -355,6 +408,8 @@ public class SystemsClient implements ITapisClient
    * Fetching of credentials is highly restricted. Only certain Tapis services are authorized.
    * If authnMethod is null then default authn method for the system is used.
    * Use of this method is highly restricted.
+   * Called by Jobs and Files which always expect effectiveUserId to be resolved,
+   *   so we use resolveEffectiveUserId=true.
    *
    * @param systemId System systemId
    * @param returnCredentials - Include credentials in returned system object
@@ -367,7 +422,8 @@ public class SystemsClient implements ITapisClient
                                Boolean requireExecPerm)
           throws TapisClientException
   {
-    return getSystem(systemId, returnCredentials, authnMethod, requireExecPerm, DEFAULT_SELECT_ALL);
+    return getSystem(systemId, authnMethod, requireExecPerm, DEFAULT_SELECT_ALL, returnCredentials, nullImpersonationId,
+                     resolveEffectiverUserTrue);
   }
 
   /**
@@ -375,6 +431,10 @@ public class SystemsClient implements ITapisClient
    * If authnMethod is null then default authn method for the system is used.
    * Use of this method is highly restricted. Only certain Tapis services are
    * authorized to call this method.
+   * Called by services which always expect effectiveUserId to be resolved,
+   *   so we use resolveEffectiveUserId=true.
+   *
+   * Use by Files service.
    *
    * @param systemId System systemId
    * @param authnMethod - Desired authentication method used when fetching credentials,
@@ -384,13 +444,16 @@ public class SystemsClient implements ITapisClient
    */
   public TapisSystem getSystemWithCredentials(String systemId, AuthnMethod authnMethod) throws TapisClientException
   {
-    return getSystem(systemId, true, authnMethod, false);
+  return getSystem(systemId, authnMethod, requireExecPermFalse, DEFAULT_SELECT_ALL, returnCredentialsTrue,
+                   nullImpersonationId, resolveEffectiverUserTrue);
   }
 
   /**
    * Get a system by systemId returning credentials for default authn method.
    * Use of this method is highly restricted. Only certain Tapis services are
    * authorized to call this method.
+   * Called by services which always expect effectiveUserId to be resolved,
+   *   so we use resolveEffectiveUserId=true.
    *
    * @param systemId System Id
    * @return The system or null if system not found
@@ -398,7 +461,8 @@ public class SystemsClient implements ITapisClient
    */
   public TapisSystem getSystemWithCredentials(String systemId) throws TapisClientException
   {
-    return getSystemWithCredentials(systemId, null);
+    return getSystem(systemId, nullAuthnMethod, requireExecPermFalse, DEFAULT_SELECT_ALL, returnCredentialsTrue,
+                     nullImpersonationId, resolveEffectiverUserTrue);
   }
 
   /**
@@ -408,22 +472,30 @@ public class SystemsClient implements ITapisClient
    * Use of this method is highly restricted.
    *
    * @param systemId System Id
-   * @param returnCredentials - Include credentials in returned system object
    * @param authnMethod - Desired authn method used when fetching credentials, for default pass in null.
    * @param requireExecPerm Check for EXECUTE permission as well as READ permission
    * @param selectStr - Attributes to be included in result. For example select=id,owner,host
+   * @param returnCredentials - Include credentials in returned system object
+   * @param impersonationId - use provided Tapis username instead of oboUser when checking auth and
+   *                          resolving effectiveUserId
+   * @param resolveEffectiveUser - If effectiveUserId is set to ${apiUserId} then resolve it, else always return value
+   *                         provided in system definition. By default, this is true.
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public TapisSystem getSystem(String systemId, Boolean returnCredentials, AuthnMethod authnMethod,
-                               Boolean requireExecPerm, String selectStr)
+  public TapisSystem getSystem(String systemId, AuthnMethod authnMethod, Boolean requireExecPerm, String selectStr,
+                               Boolean returnCredentials, String impersonationId, Boolean resolveEffectiveUser)
           throws TapisClientException
   {
     String selectStr1 = DEFAULT_SELECT_ALL;
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
     RespSystem resp = null;
     String authnMethodStr = (authnMethod==null ? null : authnMethod.name());
-    try {resp = sysApi.getSystem(systemId, returnCredentials, authnMethodStr, requireExecPerm, selectStr1); }
+    try
+    {
+      resp = sysApi.getSystem(systemId, authnMethodStr, requireExecPerm, selectStr1, returnCredentials,
+                              impersonationId, resolveEffectiveUser);
+    }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
@@ -451,7 +523,8 @@ public class SystemsClient implements ITapisClient
    */
   public List<TapisSystem> getSystems(String searchStr) throws TapisClientException
   {
-    return getSystems(searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_SELECT_SUMMARY, false);
+    return getSystems(searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
+                      DEFAULT_SELECT_SUMMARY, DEFAULT_RESOLVE_EFFECTIVE_USER, DEFAULT_SHOW_DELETED);
   }
 
   /**
@@ -466,12 +539,13 @@ public class SystemsClient implements ITapisClient
    * @param skip
    * @param startAfter
    * @param selectStr
+   * @param resolveEffectiveUser
    * @param showDeleted
    * @return list of systems available to the caller and matching search conditions.
    * @throws TapisClientException - If api call throws an exception
    */
   public List<TapisSystem> getSystems(String searchStr, int limit, String orderBy, int skip, String startAfter,
-                                      String selectStr, boolean showDeleted)
+                                      String selectStr, boolean resolveEffectiveUser, boolean showDeleted)
           throws TapisClientException
   {
     String selectStr1 = DEFAULT_SELECT_SUMMARY;
@@ -479,7 +553,8 @@ public class SystemsClient implements ITapisClient
     RespSystems resp = null;
     try
     {
-      resp = sysApi.getSystems(searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr1, showDeleted);
+      resp = sysApi.getSystems(searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr1,
+                               resolveEffectiveUser, showDeleted);
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -671,10 +746,23 @@ public class SystemsClient implements ITapisClient
    * @param req Request containing credentials (password, keys, etc).
    * @throws TapisClientException - If api call throws an exception
    */
-  public void updateUserCredential(String systemId, String userName, ReqCreateCredential req) throws TapisClientException
+  public void updateUserCredential(String systemId, String userName, Credential req) throws TapisClientException
+  {
+    updateUserCredential(systemId, userName, req, DEFAULT_SKIP_CREDENTIAL_CHECK);
+  }
+
+  /**
+   * Create or update credential for given system and user.
+   *
+   * @param systemId System Id
+   * @param userName Id of user
+   * @param req Request containing credentials (password, keys, etc).
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public void updateUserCredential(String systemId, String userName, Credential req, Boolean skipCredCheck) throws TapisClientException
   {
     // Submit the request
-    try { credsApi.createUserCredential(systemId, userName, req); }
+    try { credsApi.createUserCredential(systemId, userName, req, skipCredCheck); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
   }
@@ -733,14 +821,14 @@ public class SystemsClient implements ITapisClient
 
   /**
    * Create a scheduler profile
-   * See the helper method buildReqCreateSchedulerProfile() for an example of how to build a pre-populated
-   *   ReqCreateSchedulerProfile instance from a SchedulerProfile instance.
+   * See the helper method buildReqPostSchedulerProfile() for an example of how to build a pre-populated
+   *   ReqPostSchedulerProfile instance from a SchedulerProfile instance.
    *
-   * @param req - Pre-populated ReqCreateSchedulerProfile instance
+   * @param req - Pre-populated ReqPostSchedulerProfile instance
    * @return url pointing to created resource
    * @throws TapisClientException - If api call throws an exception
    */
-  public String createSchedulerProfile(ReqCreateSchedulerProfile req) throws TapisClientException
+  public String createSchedulerProfile(ReqPostSchedulerProfile req) throws TapisClientException
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
@@ -807,12 +895,12 @@ public class SystemsClient implements ITapisClient
   // ************************************************************************
 
   /**
-   * Utility method to build a ReqCreateSystem object using attributes from a TapisSystem.
+   * Utility method to build a ReqPostSystem object using attributes from a TapisSystem.
    */
-  public static ReqCreateSystem buildReqCreateSystem(TapisSystem sys)
+  public static ReqPostSystem buildReqPostSystem(TapisSystem sys)
   {
     if (sys == null) return null;
-    var rSys = new ReqCreateSystem();
+    var rSys = new ReqPostSystem();
     rSys.id(sys.getId());
     rSys.description(sys.getDescription());
     rSys.systemType(sys.getSystemType());
@@ -821,7 +909,7 @@ public class SystemsClient implements ITapisClient
     rSys.enabled(sys.getEnabled());
     rSys.effectiveUserId(sys.getEffectiveUserId());
     rSys.defaultAuthnMethod(sys.getDefaultAuthnMethod());
-    rSys.authnCredential(buildReqCreateCredential(sys.getAuthnCredential()));
+    rSys.authnCredential(buildReqPostPutCredential(sys.getAuthnCredential()));
     rSys.bucketName(sys.getBucketName());
     rSys.rootDir(sys.getRootDir());
     rSys.port(sys.getPort()).useProxy(sys.getUseProxy()).proxyHost(sys.getProxyHost()).proxyPort(sys.getProxyPort());
@@ -833,7 +921,8 @@ public class SystemsClient implements ITapisClient
     rSys.jobWorkingDir(sys.getJobWorkingDir());
     rSys.jobEnvVariables(sys.getJobEnvVariables());
     rSys.jobMaxJobs(sys.getJobMaxJobs()).jobMaxJobsPerUser(sys.getJobMaxJobsPerUser());
-    rSys.jobIsBatch(sys.getJobIsBatch());
+    rSys.canRunBatch(sys.getCanRunBatch());
+    rSys.mpiCmd(sys.getMpiCmd());
     rSys.batchScheduler(sys.getBatchScheduler());
     rSys.batchLogicalQueues(sys.getBatchLogicalQueues());
     rSys.batchDefaultLogicalQueue(sys.getBatchDefaultLogicalQueue());
@@ -845,6 +934,7 @@ public class SystemsClient implements ITapisClient
     else if (notes instanceof String) rSys.notes(ClientTapisGsonUtils.getGson().fromJson((String) notes, JsonObject.class));
     else if (notes instanceof JsonObject) rSys.notes(notes);
     else rSys.notes(null);
+    rSys.importRefId(sys.getImportRefId());
     return rSys;
   }
 
@@ -859,7 +949,7 @@ public class SystemsClient implements ITapisClient
     rSys.host(sys.getHost());
     rSys.effectiveUserId(sys.getEffectiveUserId());
     rSys.defaultAuthnMethod(sys.getDefaultAuthnMethod());
-    rSys.authnCredential(buildReqCreateCredential(sys.getAuthnCredential()));
+    rSys.authnCredential(buildReqPostPutCredential(sys.getAuthnCredential()));
     rSys.port(sys.getPort()).useProxy(sys.getUseProxy()).proxyHost(sys.getProxyHost()).proxyPort(sys.getProxyPort());
     rSys.dtnSystemId(sys.getDtnSystemId());
     rSys.dtnMountPoint(sys.getDtnMountPoint()).dtnMountSourcePath(sys.getDtnMountSourcePath());
@@ -867,7 +957,8 @@ public class SystemsClient implements ITapisClient
     rSys.jobWorkingDir(sys.getJobWorkingDir());
     rSys.jobEnvVariables(sys.getJobEnvVariables());
     rSys.jobMaxJobs(sys.getJobMaxJobs()).jobMaxJobsPerUser(sys.getJobMaxJobsPerUser());
-    rSys.jobIsBatch(sys.getJobIsBatch());
+    rSys.canRunBatch(sys.getCanRunBatch());
+    rSys.mpiCmd(sys.getMpiCmd());
     rSys.batchScheduler(sys.getBatchScheduler());
     rSys.batchLogicalQueues(sys.getBatchLogicalQueues());
     rSys.batchDefaultLogicalQueue(sys.getBatchDefaultLogicalQueue());
@@ -879,6 +970,7 @@ public class SystemsClient implements ITapisClient
     else if (notes instanceof String) rSys.notes(ClientTapisGsonUtils.getGson().fromJson((String) notes, JsonObject.class));
     else if (notes instanceof JsonObject) rSys.notes(notes);
     else rSys.notes(null);
+    rSys.importRefId(sys.getImportRefId());
     return rSys;
   }
 
@@ -899,12 +991,12 @@ public class SystemsClient implements ITapisClient
   }
 
   /**
-   * Utility method to build a ReqCreateCredential using attributes from a Credential.
+   * Utility method to build a ReqPostPutCredential using attributes from a Credential.
    */
-  public static ReqCreateCredential buildReqCreateCredential(Credential credential)
+  public static ReqPostPutCredential buildReqPostPutCredential(Credential credential)
   {
     if (credential == null) return null;
-    var rCred = new ReqCreateCredential();
+    var rCred = new ReqPostPutCredential();
     rCred.password(credential.getPassword());
     rCred.publicKey(credential.getPublicKey());
     rCred.privateKey(credential.getPrivateKey());
@@ -915,12 +1007,12 @@ public class SystemsClient implements ITapisClient
   }
 
   /**
-   * Utility method to build a ReqCreateSchedulerProfile using attributes from a SchedulerProfile.
+   * Utility method to build a ReqPostSchedulerProfile using attributes from a SchedulerProfile.
    */
-  public static ReqCreateSchedulerProfile buildReqCreateSchedulerProfile(SchedulerProfile profile)
+  public static ReqPostSchedulerProfile buildReqPostSchedulerProfile(SchedulerProfile profile)
   {
     if (profile == null) return null;
-    var rProfile = new ReqCreateSchedulerProfile();
+    var rProfile = new ReqPostSchedulerProfile();
     rProfile.name(profile.getName());
     rProfile.description(profile.getDescription());
     rProfile.owner(profile.getOwner());
@@ -965,6 +1057,20 @@ public class SystemsClient implements ITapisClient
     cap.setPrecedence(precedence);
     cap.setValue(value);
     return cap;
+  }
+
+  /**
+   * Utility method to map a SchedulerHiddenOptionEnum to the string used by the scheduler.
+   * @param hiddenOptionEnum - Scheduler hidden option enum
+   * @return String containing the option as expected by the batch scheduler. Empty string if no mapping found.
+   */
+  public static String getSchedulerHiddenOptionValue(SchedulerHiddenOptionEnum hiddenOptionEnum)
+  {
+    return switch (hiddenOptionEnum)
+    {
+      case MEM -> "--mem";
+      default -> "";
+    };
   }
 
   // ************************************************************************

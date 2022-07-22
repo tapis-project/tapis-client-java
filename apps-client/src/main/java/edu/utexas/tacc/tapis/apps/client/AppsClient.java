@@ -1,14 +1,10 @@
 package edu.utexas.tacc.tapis.apps.client;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.google.gson.JsonObject;
 import com.google.gson.internal.LinkedTreeMap;
 import edu.utexas.tacc.tapis.apps.client.gen.api.GeneralApi;
-import edu.utexas.tacc.tapis.apps.client.gen.model.ArgMetaSpec;
-import edu.utexas.tacc.tapis.apps.client.gen.model.ArgSpec;
 import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqPutApp;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespApps;
@@ -25,7 +21,7 @@ import edu.utexas.tacc.tapis.apps.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.apps.client.gen.ApiException;
 import edu.utexas.tacc.tapis.apps.client.gen.api.PermissionsApi;
 import edu.utexas.tacc.tapis.apps.client.gen.api.ApplicationsApi;
-import edu.utexas.tacc.tapis.apps.client.gen.model.ReqCreateApp;
+import edu.utexas.tacc.tapis.apps.client.gen.model.ReqPostApp;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqPerms;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqSearchApps;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqPatchApp;
@@ -59,10 +55,12 @@ public class AppsClient implements ITapisClient
   // Header key for JWT
   public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
 
+  // Named null values to make it clear what is being passed in to a method
+  private static final String nullImpersonationId = null;
+
   // Defaults
   public static final boolean DEFAULT_STRICT_FILE_INPUTS = false;
-  public static final boolean DEFAULT_FILE_INPUT_IN_PLACE = false;
-  public static final boolean DEFAULT_FILE_INPUT_META_REQUIRED = false;
+  public static final boolean DEFAULT_FILE_INPUT_AUTO_MOUNT_LOCAL = true;
   public static final int DEFAULT_MAX_JOBS = Integer.MAX_VALUE;
 
   // ************************************************************************
@@ -181,14 +179,14 @@ public class AppsClient implements ITapisClient
 
   /**
    * Create an app
-   * See the helper method buildReqCreateApp() for an example of how to build a pre-populated
-   *   ReqCreateApp instance from a TapisApp instance.
+   * See the helper method buildReqPostApp() for an example of how to build a pre-populated
+   *   ReqPostApp instance from a TapisApp instance.
    *
    * @param req Request body specifying attributes
    * @return url pointing to created resource
    * @throws TapisClientException - If api call throws an exception
    */
-  public String createApp(ReqCreateApp req) throws TapisClientException
+  public String createApp(ReqPostApp req) throws TapisClientException
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
@@ -338,57 +336,6 @@ public class AppsClient implements ITapisClient
   }
 
   /**
-   * Get a specific version of an app using minimal attributes
-   *
-   * @param appId Id of the application
-   * @param appVersion Version of the application
-   * @return The app or null if app not found
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public TapisApp getApp(String appId, String appVersion) throws TapisClientException
-  {
-    return getApp(appId, appVersion, Boolean.FALSE, DEFAULT_SELECT_ALL);
-  }
-
-  /**
-   * Get a specific version of an app
-   *
-   * @param appId Id of the application
-   * @param appVersion Version of the application
-   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
-   * @return The app or null if app not found
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm) throws TapisClientException
-  {
-    return getApp(appId, appVersion, requireExecPerm, DEFAULT_SELECT_ALL);
-  }
-
-  /**
-   * Get a specific version of an app using all supported parameters.
-   *
-   * @param appId Id of the application
-   * @param appVersion Version of the application
-   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
-   * @param selectStr - Attributes to be included in result. For example select=id,version,owner
-   * @return The app or null if app not found
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm, String selectStr) throws TapisClientException
-  {
-    String selectStr1 = DEFAULT_SELECT_ALL;
-    if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
-    RespApp resp = null;
-    try {resp = appApi.getApp(appId, appVersion, requireExecPerm, selectStr1); }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null) return null;
-    // Postprocess the app
-    TapisApp app = postProcessApp(resp.getResult());
-    return app;
-  }
-
-  /**
    * Get latest version of an app using all supported parameters
    *
    * @param appId Id of the application
@@ -403,6 +350,66 @@ public class AppsClient implements ITapisClient
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
     RespApp resp = null;
     try {resp = appApi.getAppLatestVersion(appId, requireExecPerm, selectStr1); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp == null || resp.getResult() == null) return null;
+    // Postprocess the app
+    TapisApp app = postProcessApp(resp.getResult());
+    return app;
+  }
+
+  /**
+   * Get a specific version of an app using minimal attributes
+   *
+   * @param appId Id of the application
+   * @param appVersion Version of the application
+   * @return The app or null if app not found
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public TapisApp getApp(String appId, String appVersion) throws TapisClientException
+  {
+    return getApp(appId, appVersion, Boolean.FALSE, nullImpersonationId, DEFAULT_SELECT_ALL);
+  }
+
+  /**
+   * Get a specific version of an app including the two auth related flags
+   *
+   * @param appId Id of the application
+   * @param appVersion Version of the application
+   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
+   * @param impersonationId - use provided Tapis username instead of oboUser
+   * @return The app or null if app not found
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm, String impersonationId)
+          throws TapisClientException
+  {
+    return getApp(appId, appVersion, requireExecPerm, impersonationId, DEFAULT_SELECT_ALL);
+  }
+  public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm) throws TapisClientException
+  {
+    return getApp(appId, appVersion, requireExecPerm, nullImpersonationId, DEFAULT_SELECT_ALL);
+  }
+
+  /**
+   * Get a specific version of an app using all supported parameters.
+   *
+   * @param appId Id of the application
+   * @param appVersion Version of the application
+   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
+   * @param impersonationId - use provided Tapis username instead of oboUser
+   * @param selectStr - Attributes to be included in result. For example select=id,version,owner
+   * @return The app or null if app not found
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm, String impersonationId,
+                         String selectStr)
+          throws TapisClientException
+  {
+    String selectStr1 = DEFAULT_SELECT_ALL;
+    if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
+    RespApp resp = null;
+    try {resp = appApi.getApp(appId, appVersion, requireExecPerm, impersonationId, selectStr1); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
@@ -516,7 +523,7 @@ public class AppsClient implements ITapisClient
     try { resp = appApi.isEnabled(appId); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null)
+    if (resp != null && resp.getResult() != null && resp.getResult().getaBool() != null)
     {
       return resp.getResult().getaBool();
     }
@@ -608,22 +615,22 @@ public class AppsClient implements ITapisClient
   // -----------------------------------------------------------------------
 
   /**
-   * Utility method to build a ReqCreateApp object using attributes from a TapisApp.
+   * Utility method to build a ReqPostApp object using attributes from a TapisApp.
    */
-  public static ReqCreateApp buildReqCreateApp(TapisApp app)
+  public static ReqPostApp buildReqPostApp(TapisApp app)
   {
     if (app == null) return null;
-    ReqCreateApp rApp = new ReqCreateApp();
+    ReqPostApp rApp = new ReqPostApp();
     rApp.id(app.getId());
     rApp.version(app.getVersion());
     rApp.description(app.getDescription());
-    rApp.appType(app.getAppType());
     rApp.owner(app.getOwner());
     rApp.enabled(app.getEnabled());
     rApp.runtime(app.getRuntime());
     rApp.runtimeVersion(app.getRuntimeVersion());
     rApp.runtimeOptions(app.getRuntimeOptions());
     rApp.containerImage(app.getContainerImage());
+    rApp.jobType(app.getJobType());
     rApp.maxJobs(app.getMaxJobs()).maxJobsPerUser(app.getMaxJobsPerUser());
     rApp.strictFileInputs(app.getStrictFileInputs());
     rApp.jobAttributes(app.getJobAttributes());
@@ -660,38 +667,6 @@ public class AppsClient implements ITapisClient
     else if (notes instanceof JsonObject) rApp.notes(notes);
     else rApp.notes(null);
     return rApp;
-  }
-
-  /**
-   * Utility method to build an ArgSpec given value, metaName, metaRequired and metaKeyValuePairs
-   *
-   * @param value
-   * @param metaName
-   * @param metaDescription
-   * @param metaRequired
-   * @param metaKVPairs - List of Strings in the form key=value.
-   * @return a new ArgSpec object
-   */
-  public static ArgSpec buildArg(String value, String metaName, String metaDescription,
-                                 boolean metaRequired, List<String> metaKVPairs)
-  {
-    var arg = new ArgSpec();
-    var argMeta = new ArgMetaSpec();
-    var argMetaKVPairs = new ArrayList<KeyValuePair>();
-    List<String> argKVPairs = Collections.emptyList();
-    if (metaKVPairs != null) argKVPairs = metaKVPairs;
-    // Convert strings in the form key=value into KeyValuePair objects
-    for (String kvPairStr : argKVPairs)
-    {
-      argMetaKVPairs.add(kvPairFromString(kvPairStr));
-    }
-    argMeta.setName(metaName);
-    argMeta.setDescription(metaDescription);
-    argMeta.setRequired(metaRequired);
-    argMeta.setKeyValuePairs(argMetaKVPairs);
-    arg.setArg(value);
-    arg.setMeta(argMeta);
-    return arg;
   }
 
   // ************************************************************************

@@ -3,7 +3,7 @@
   <parent>
     <groupId>edu.utexas.tacc.tapis</groupId>
     <artifactId>tapis-client-java</artifactId>
-    <version>2.0.6-SNAPSHOT</version>
+    <version>2.0.48-SNAPSHOT</version>
   </parent>
 
   <artifactId>apps-client</artifactId>
@@ -44,16 +44,16 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>tokens-client</artifactId>
-        <version>${project.version}</version>
-        <scope>test</scope>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>tokens-client</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
-    
+
     <plugins>
       <!-- Capture the git commit hash and branch identifiers. -->
       <!-- See parent pom for configuration details. -->

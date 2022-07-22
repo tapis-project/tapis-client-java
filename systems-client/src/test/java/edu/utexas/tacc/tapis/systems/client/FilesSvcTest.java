@@ -4,7 +4,7 @@ import edu.utexas.tacc.tapis.auth.client.AuthClient;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.systems.client.SystemsClient.AuthnMethod;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqCreateSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
 import edu.utexas.tacc.tapis.tokens.client.TokensClient;
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +42,9 @@ import static edu.utexas.tacc.tapis.systems.client.Utils.*;
 @Test(groups={"integration"})
 public class FilesSvcTest
 {
+  // Named null values to make it clear what is being passed in to a method
+  private static final String nullImpersonationId = null;
+
   // Test data
   int numSystems = 2;
   Map<Integer, String[]> systems = Utils.makeSystems(numSystems, "CltFiles");
@@ -99,7 +102,7 @@ public class FilesSvcTest
       String[] sys0 = systems.get(i);
       System.out.println("Creating system with name: " + sys0[1]);
       try {
-        ReqCreateSystem rSys = Utils.createReqSystem(sys0, prot1Port, prot1AuthnMethod, cred0);
+        ReqPostSystem rSys = Utils.createReqSystem(sys0, prot1Port, prot1AuthnMethod, cred0);
         String respUrl = sysClient.createSystem(rSys);
         System.out.println("Created system: " + respUrl);
         Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
@@ -195,7 +198,12 @@ public class FilesSvcTest
     sys0 = systems.get(2);
     // This should succeed
     sysClient = getClientFilesSvc(tenantName, testUser2, filesServiceJWT);
-    tmpSys = sysClient.getSystem(sys0[1], false, null, true, DEFAULT_SELECT_ALL);
+    /*
+      return getSystem(systemId, DEFAULT_AUTHN_METHOD, DEFAULT_REQUIRE_EXEC_PERM, DEFAULT_SELECT_ALL,
+                   DEFAULT_RETURN_CREDENTIALS, nullImpersonationId, DEFAULT_RESOLVE_EFFECTIVE_USER);
+
+     */
+    tmpSys = sysClient.getSystem(sys0[1], null, true, DEFAULT_SELECT_ALL, false, nullImpersonationId, false);
     Assert.assertNotNull(tmpSys, "Failed to find item: " + sys0[1]);
     System.out.println("Found item: " + sys0[1]);
     // Verify most attributes
@@ -205,7 +213,7 @@ public class FilesSvcTest
     // this should fail
     sysClient = getClientFilesSvc(tenantName, testUser3, filesServiceJWT);
     try {
-      sysClient.getSystem(sys0[1], false, null, true, DEFAULT_SELECT_ALL);
+      sysClient.getSystem(sys0[1], null, true, DEFAULT_SELECT_ALL, false, nullImpersonationId, false);
       Assert.fail("Fetch of system did not require EXECUTE permission as expected");
     } catch (TapisClientException tce) {
       Assert.assertTrue(tce.getTapisMessage().contains("SYSLIB_UNAUTH"), "Wrong exception message: " + tce.getTapisMessage());
@@ -224,7 +232,7 @@ public class FilesSvcTest
 //      System.out.println("Created system: " + respUrl);
 //      System.out.println("Testing credentials for user: " + newPermsUser);
 //      Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
-//      ReqCreateCredential reqCred = new ReqCreateCredential();
+//      ReqPostCredential reqCred = new ReqPostCredential();
 //      reqCred.password(sys0[7]).privateKey("fakePrivateKey").publicKey("fakePublicKey")
 //           .authnKey("fakeAccessKey").accessSecret("fakeAccessSecret").certificate("fakeCert");
 //      // Store and retrieve multiple secret types: password, ssh keys, access key and secret
@@ -257,7 +265,7 @@ public class FilesSvcTest
 //      getClientUsr(serviceURL, ownerUserJWT).deleteUserCredential(sys0[1], newPermsUser);
 //
 //      // Set just ACCESS_KEY only and test
-//      reqCred = new ReqCreateCredential().accessKey("fakeAccessKey2").accessSecret("fakeAccessSecret2");
+//      reqCred = new ReqPostCredential().accessKey("fakeAccessKey2").accessSecret("fakeAccessSecret2");
 //      getClientUsr(serviceURL, ownerUserJWT).updateUserCredential(sys0[1], newPermsUser, reqCred);
 //      cred1 = getClientFilesSvc().getUserCredential(sys0[1], newPermsUser, AuthnMethod.ACCESS_KEY);
 //      Assert.assertEquals(cred1.getAccessKey(), reqCred.getAccessKey());
