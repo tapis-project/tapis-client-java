@@ -1062,14 +1062,14 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
       security:
         - TapisJWT: []
-  /jobs/{jobuuid}/resubmit_request:
+  /jobs/{jobUuid}/resubmit_request:
     get:
       tags:
         - jobs
       description: 'Get Resubmit request for of a job in JSON format.  '
       operationId: getResubmitRequestJson
       parameters:
-        - name: jobuuid
+        - name: jobUuid
           in: path
           required: true
           schema:

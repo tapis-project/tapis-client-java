@@ -79,8 +79,8 @@ public class SystemsClient implements ITapisClient
   private static final boolean returnCredentialsTrue = true;
 
   // Default values
-  private static final boolean DEFAULT_RESOLVE_EFFECTIVE_USER = false;
   private static final AuthnMethod DEFAULT_AUTHN_METHOD = authnMethodNull;
+  private static final boolean DEFAULT_RESOLVE_EFFECTIVE_USER = true;
   private static final boolean DEFAULT_REQUIRE_EXEC_PERM = false;
   private static final boolean DEFAULT_RETURN_CREDENTIALS = false;
   private static final boolean DEFAULT_SHOW_DELETED = false;
@@ -386,8 +386,14 @@ public class SystemsClient implements ITapisClient
   }
 
   /**
-   * Get a system by systemId using all default parameters
-   *  - no credentials returned, do not require exec perm, no impersonation, no shared app ctx
+   * Get a system by systemId using default arguments.
+   *  authnMethod = null
+   *  requireExec = false
+   *  select = ALL
+   *  returnCreds = false
+   *  impersonationId = null
+   *  resolveEffectiveUser = true
+   *  sharedAppCtx = false
    *
    * @param systemId System systemId
    * @return The system or null if system not found
@@ -446,8 +452,9 @@ public class SystemsClient implements ITapisClient
    * Get a system using arguments convenient for other services.
    * Use of returnCredentials, impersonationId and sharedAppCtx is restricted. Only certain Tapis services are authorized.
    * If authnMethod is null then default authn method for the system is used.
-   * Called by services which always expect effectiveUserId to be resolved,
-   *   so we use resolveEffectiveUserId=true rather the default value of false.
+   * Use of this method is highly restricted.
+   * Called by Jobs and Files which always expect effectiveUserId to be resolved,
+   *   so we use resolveEffectiveUserId=true.
    *
    * @param systemId System systemId
    * @param returnCredentials - Include credentials in returned system object
@@ -470,7 +477,7 @@ public class SystemsClient implements ITapisClient
    * Use of this method is highly restricted. Only certain Tapis services are
    * authorized to call this method.
    * Called by services which always expect effectiveUserId to be resolved,
-   *   so we use resolveEffectiveUserId=true rather the default value of false.
+   *   so we use resolveEffectiveUserId=true.
    *
    * Use by Files service.
    *
@@ -491,7 +498,7 @@ public class SystemsClient implements ITapisClient
    * Use of this method is highly restricted. Only certain Tapis services are
    * authorized to call this method.
    * Called by services which always expect effectiveUserId to be resolved,
-   *   so we use resolveEffectiveUserId=true rather the default value of false.
+   *   so we use resolveEffectiveUserId=true.
    *
    * @param systemId System Id
    * @return The system or null if system not found
@@ -517,7 +524,7 @@ public class SystemsClient implements ITapisClient
    * @param impersonationId - use provided Tapis username instead of oboUser when checking auth and
    *                          resolving effectiveUserId
    * @param resolveEffectiveUser - If effectiveUserId is set to ${apiUserId} then resolve it, else always return value
-   *                         provided in system definition. By default, this is false.
+   *                               provided in system definition. By default, this is true.
    * @param sharedAppCtx - Indicates system will be used as part of a shared application context.
    *                       Tapis authorization will be skipped.
    * @return The system or null if system not found
