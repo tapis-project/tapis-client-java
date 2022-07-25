@@ -35,19 +35,19 @@ import edu.utexas.tacc.tapis.files.client.gen.api.TransfersApi;
 import edu.utexas.tacc.tapis.files.client.gen.model.FileInfo;
 import edu.utexas.tacc.tapis.files.client.gen.model.FilePermission;
 import edu.utexas.tacc.tapis.files.client.gen.model.TransferTask;
-
-import edu.utexas.tacc.tapis.files.client.gen.model.ReqCreatePerm;
-import edu.utexas.tacc.tapis.files.client.gen.model.ReqMkdir;
-import edu.utexas.tacc.tapis.files.client.gen.model.ReqMoveCopy;
+import edu.utexas.tacc.tapis.files.client.gen.model.FileListingResponse;
+import edu.utexas.tacc.tapis.files.client.gen.model.FileStringResponse;
+import edu.utexas.tacc.tapis.files.client.gen.model.StringResponse;
+import edu.utexas.tacc.tapis.files.client.gen.model.CreatePermissionRequest;
+import edu.utexas.tacc.tapis.files.client.gen.model.MkdirRequest;
+import edu.utexas.tacc.tapis.files.client.gen.model.MoveCopyRequest;
 import edu.utexas.tacc.tapis.files.client.gen.model.ReqShareUpdate;
 import edu.utexas.tacc.tapis.files.client.gen.model.ReqTransfer;
 import edu.utexas.tacc.tapis.files.client.gen.model.RespBasic;
-import edu.utexas.tacc.tapis.files.client.gen.model.RespFileList;
-import edu.utexas.tacc.tapis.files.client.gen.model.RespPerm;
+import edu.utexas.tacc.tapis.files.client.gen.model.FilePermissionResponse;
 import edu.utexas.tacc.tapis.files.client.gen.model.RespShareInfo;
-import edu.utexas.tacc.tapis.files.client.gen.model.RespString;
-import edu.utexas.tacc.tapis.files.client.gen.model.RespTransferTask;
-import edu.utexas.tacc.tapis.files.client.gen.model.RespTransferTaskList;
+import edu.utexas.tacc.tapis.files.client.gen.model.TransferTaskResponse;
+import edu.utexas.tacc.tapis.files.client.gen.model.TransferTaskListResponse;
 import edu.utexas.tacc.tapis.files.client.gen.model.ResultShareInfo;
 
 /**
@@ -206,7 +206,7 @@ public class FilesClient implements ITapisClient
                                   String impersonationId)
           throws TapisClientException
   {
-    RespFileList resp = null;
+    FileListingResponse resp = null;
     try { resp = fileOperations.listFiles(systemId, path, limit, offset, recurse, impersonationId); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -287,17 +287,17 @@ public class FilesClient implements ITapisClient
    *
    * @param systemId system
    * @param path path relative to system rootDir
-   * @param newPAth The new path of the file/folder
-   * @return RespString
+   * @param newPath The new path of the file/folder
+   * @return FileStringResponse
    * @throws TapisClientException - If api call throws an exception
    */
-  public RespString moveCopy(String systemId, String path, String newPAth, ReqMoveCopy.OperationEnum operation)
+  public FileStringResponse moveCopy(String systemId, String path, String newPath, MoveCopyRequest.OperationEnum operation)
           throws TapisClientException
   {
-    RespString resp = null;
-    var renameReq = new ReqMoveCopy();
+    FileStringResponse resp = null;
+    var renameReq = new MoveCopyRequest();
     renameReq.setOperation(operation);
-    renameReq.setNewPath(newPAth);
+    renameReq.setNewPath(newPath);
     try { resp = fileOperations.moveCopy(systemId, path, renameReq); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -311,13 +311,13 @@ public class FilesClient implements ITapisClient
    * @param systemId system
    * @param path path relative to system rootDir
    * @param inputStream file to upload
-   * @return RespString
+   * @return FileStringResponse
    * @throws TapisClientException - If api call throws an exception
    */
-  public RespString insert(String systemId, String path, InputStream inputStream) throws TapisClientException
+  public FileStringResponse insert(String systemId, String path, InputStream inputStream) throws TapisClientException
   {
     File tmp = null;
-    RespString resp = null;
+    FileStringResponse resp = null;
     try {
       tmp = File.createTempFile("files-java-client", null);
       try (FileOutputStream out = new FileOutputStream(tmp)) {
@@ -340,12 +340,12 @@ public class FilesClient implements ITapisClient
    *
    * @param systemId system
    * @param path path relative to system rootDir
-   * @return RespString
+   * @return FileStringResponse
    * @throws TapisClientException - If api call throws an exception
    */
-  public RespString delete(String systemId, String path) throws TapisClientException
+  public FileStringResponse delete(String systemId, String path) throws TapisClientException
   {
-    RespString resp = null;
+    FileStringResponse resp = null;
     try { resp = fileOperations.delete(systemId, path); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -358,10 +358,10 @@ public class FilesClient implements ITapisClient
    *
    * @param systemId system
    * @param path path relative to system rootDir
-   * @return RespString
+   * @return FileStringResponse
    * @throws TapisClientException - If api call throws an exception
    */
-  public RespString mkdir(String systemId, String path) throws TapisClientException
+  public FileStringResponse mkdir(String systemId, String path) throws TapisClientException
   {
     return mkdir(systemId, path, sharedAppCtxFalse);
   }
@@ -377,10 +377,10 @@ public class FilesClient implements ITapisClient
    * @return RespString
    * @throws TapisClientException - If api call throws an exception
    */
-  public RespString mkdir(String systemId, String path, boolean sharedAppCtx) throws TapisClientException
+  public FileStringResponse mkdir(String systemId, String path, boolean sharedAppCtx) throws TapisClientException
   {
-    RespString resp = null;
-    var req = new ReqMkdir();
+    FileStringResponse resp = null;
+    var req = new MkdirRequest();
     req.setPath(path);
     try { resp = fileOperations.mkdir(systemId, sharedAppCtx, req); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
@@ -404,7 +404,7 @@ public class FilesClient implements ITapisClient
   public FilePermission getFilePermissions(String systemId, String path, String username)
           throws TapisClientException
   {
-    RespPerm resp = null;
+    FilePermissionResponse resp = null;
     try { resp = filePermissions.getPermissions(systemId, path, username); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -423,10 +423,10 @@ public class FilesClient implements ITapisClient
    * @return FilePermission object
    * @throws TapisClientException - If api call throws an exception
    */
-  public FilePermission grantPermissions(String systemId, String path, ReqCreatePerm req)
+  public FilePermission grantPermissions(String systemId, String path, CreatePermissionRequest req)
           throws TapisClientException
   {
-    RespPerm resp = null;
+    FilePermissionResponse resp = null;
     try { resp = filePermissions.grantPermissions(systemId, path, req); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -441,12 +441,12 @@ public class FilesClient implements ITapisClient
    * @param systemId system
    * @param path path relative to system rootDir
    * @param username Username to list
-   * @return FilePermissionRespString
+   * @return FilePermissionStringResponse
    * @throws TapisClientException - If api call throws an exception
    */
   public String removePermissions(String systemId, String path, String username) throws TapisClientException
   {
-    RespString resp = null;
+    StringResponse resp = null;
     try { resp = filePermissions.deletePermissions(systemId, path, username); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -556,7 +556,7 @@ public class FilesClient implements ITapisClient
   public TransferTask createTransferTask(ReqTransfer req) throws TapisClientException
   {
     // Submit the request and return the result
-    RespTransferTask resp = null;
+    TransferTaskResponse resp = null;
     try { resp = fileTransfers.createTransferTask(req); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -572,7 +572,7 @@ public class FilesClient implements ITapisClient
    */
   public TransferTask getTransferTask(String transferTaskId) throws TapisClientException
   {
-    RespTransferTask resp = null;
+    TransferTaskResponse resp = null;
     try { resp = fileTransfers.getTransferTask(transferTaskId); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -587,7 +587,7 @@ public class FilesClient implements ITapisClient
    */
   public List<TransferTask> getRecentTransferTasks(int limit, int offset) throws TapisClientException
   {
-    RespTransferTaskList resp = null;
+    TransferTaskListResponse resp = null;
     try { resp = fileTransfers.getRecentTransferTasks(limit, offset); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -617,7 +617,7 @@ public class FilesClient implements ITapisClient
    */
   public TransferTask getTransferTaskHistory(String transferTaskId, String impersonationId) throws TapisClientException
   {
-    RespTransferTask resp = null;
+    TransferTaskResponse resp = null;
     try { resp = fileTransfers.getTransferTaskDetails(transferTaskId, impersonationId); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -631,9 +631,9 @@ public class FilesClient implements ITapisClient
    * @return transfer task
    * @throws TapisClientException - If api call throws an exception
    */
-  public RespString cancelTransferTask(String transferTaskId) throws TapisClientException
+  public StringResponse cancelTransferTask(String transferTaskId) throws TapisClientException
   {
-    RespString resp = null;
+    StringResponse resp = null;
     try { resp = fileTransfers.cancelTransferTask(transferTaskId); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
