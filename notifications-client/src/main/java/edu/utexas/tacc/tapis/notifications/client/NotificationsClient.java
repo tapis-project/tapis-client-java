@@ -1,10 +1,7 @@
 package edu.utexas.tacc.tapis.notifications.client;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
-import com.google.gson.JsonObject;
-import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.Gson;
 import edu.utexas.tacc.tapis.notifications.client.gen.api.TestApi;
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +26,6 @@ import edu.utexas.tacc.tapis.notifications.client.gen.model.RespSubscriptions;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.Event;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.ReqPatchSubscription;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.ReqPostSubscription;
-import edu.utexas.tacc.tapis.notifications.client.gen.model.ReqPutSubscription;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.ReqSearchSubscriptions;
 import edu.utexas.tacc.tapis.notifications.client.gen.model.TapisSubscription;
 
@@ -55,6 +51,9 @@ public class NotificationsClient implements ITapisClient
   // ************************************************************************
   // *********************** Constants **************************************
   // ************************************************************************
+
+  // Filter wildcard
+  public static final String FILTER_WILDCARD = "*";
 
   // Header key for JWT
   public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
@@ -205,37 +204,17 @@ public class NotificationsClient implements ITapisClient
   /**
    * Update selected attributes of a subscription
    *
-   * @param id Id of resource
+   * @param name name of resource
    * @param req Request body specifying attributes
+   * @param ownedBy - Use specified user in place of the requesting user. Leave null or blank to use requesting user.
    * @return url pointing to updated resource
    * @throws TapisClientException - If api call throws an exception
    */
-  public String patchSubscription(String id, String version, ReqPatchSubscription req) throws TapisClientException
+  public String patchSubscription(String name, ReqPatchSubscription req, String ownedBy) throws TapisClientException
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
-    try { resp = subscriptionsApi.patchSubscription(id, req); }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
-  }
-
-  /**
-   * Update all attributes of a subscription
-   * NOTE: Not all attributes are updatable.
-   * See the helper method buildReqPutSubscription() for an example of how to build a pre-populated
-   *   ReqPutSubscription instance from a TapisSubscription instance.
-   *
-   * @param id - Id of resource to be updated
-   * @param req - Pre-populated ReqPutSubscription instance
-   * @return url pointing to updated resource
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public String putSubscription(String id, ReqPutSubscription req) throws TapisClientException
-  {
-    // Submit the request and return the response
-    RespResourceUrl resp = null;
-    try { resp = subscriptionsApi.putSubscription(id, req); }
+    try { resp = subscriptionsApi.patchSubscriptionByName(name, req, ownedBy); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
@@ -244,14 +223,15 @@ public class NotificationsClient implements ITapisClient
   /**
    * Update enabled attribute to true.
    *
-   * @param id Subscription id
+   * @param name Subscription name
+   * @param ownedBy - Use specified user in place of the requesting user. Leave null or blank to use requesting user.
    * @return number of records modified as a result of the action
    * @throws TapisClientException - If api call throws an exception
    */
-  public int enableSubscription(String id) throws TapisClientException
+  public int enableSubscription(String name, String ownedBy) throws TapisClientException
   {
     RespChangeCount resp = null;
-    try { resp = subscriptionsApi.enableSubscription(id); }
+    try { resp = subscriptionsApi.enableSubscription(name, ownedBy); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
@@ -261,14 +241,15 @@ public class NotificationsClient implements ITapisClient
   /**
    * Update enabled attribute to false.
    *
-   * @param id Subscription id
+   * @param name Subscription name
+   * @param ownedBy - Use specified user in place of the requesting user. Leave null or blank to use requesting user.
    * @return number of records modified as a result of the action
    * @throws TapisClientException - If api call throws an exception
    */
-  public int disableSubscription(String id) throws TapisClientException
+  public int disableSubscription(String name, String ownedBy) throws TapisClientException
   {
     RespChangeCount resp = null;
-    try { resp = subscriptionsApi.disableSubscription(id); }
+    try { resp = subscriptionsApi.disableSubscription(name, ownedBy); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
@@ -276,172 +257,18 @@ public class NotificationsClient implements ITapisClient
   }
 
   /**
-   * Delete a subscription
+   * Check if subscription is enabled
    *
-   * @param id Subscription id
-   * @return number of records modified as a result of the action
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public int deleteSubscription(String id) throws TapisClientException
-  {
-    RespChangeCount resp = null;
-    try { resp = subscriptionsApi.deleteSubscription(id); }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
-    else return -1;
-  }
-
-  /**
-   * Change subscription owner given the resource id and new owner id.
-   *
-   * @param id Subscription id
-   * @param newOwnerName New owner id
-   * @return number of records modified as a result of the action
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public int changeSubscriptionOwner(String id, String newOwnerName) throws TapisClientException
-  {
-    RespChangeCount resp = null;
-    try { resp = subscriptionsApi.changeSubscriptionOwner(id, newOwnerName); }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
-    else return -1;
-  }
-
-  /**
-   * Get a subscription, return all attributes
-   *
-   * @param subscriptionId Id of the subscription
-   * @return The subscription or null if resource not found
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public TapisSubscription getSubscription(String subscriptionId) throws TapisClientException
-  {
-    return getSubscription(subscriptionId, DEFAULT_SELECT_ALL);
-  }
-
-  /**
-   * Get a subscription using all supported parameters.
-   *
-   * @param subscriptionId Id of the subscription
-   * @param selectStr - Attributes to be included in result. For example select=id,version,owner
-   * @return The subscription or null if resource not found
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public TapisSubscription getSubscription(String subscriptionId, String selectStr) throws TapisClientException
-  {
-    String selectStr1 = DEFAULT_SELECT_ALL;
-    if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
-    RespSubscription resp = null;
-    try {resp = subscriptionsApi.getSubscription(subscriptionId, selectStr1); }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null) return null;
-    // Postprocess the subscription
-    TapisSubscription subscription = postProcessSubscription(resp.getResult());
-    return subscription;
-  }
-
-  /**
-   * Retrieve subscriptions.
-   *
-   * @return Subscriptions accessible to the caller
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public List<TapisSubscription> getSubscriptions() throws TapisClientException
-  {
-    return getSubscriptions(DEFAULT_SEARCH);
-  }
-
-  /**
-   * Retrieve subscriptions. Use search query parameter to limit results.
-   * For example search=(id.like.MySub*)~(enabled.eq.true)
-   *
-   * @param searchStr Search string. Empty or null to return all notifications.
-   * @return Subscriptions accessible to the caller
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public List<TapisSubscription> getSubscriptions(String searchStr) throws TapisClientException
-  {
-    return getSubscriptions(searchStr, DEFAULT_SELECT_SUMMARY);
-  }
-
-  /**
-   * Retrieve subscriptions. Use search and select query parameters to limit results.
-   * For example search=(id.like.MySub*)~(enabled.eq.true)
-   *
-   * @param searchStr Search string. Empty or null to return all notifications.
-   * @param selectStr - Attributes to be included in result. For example select=id,owner
-   * @return Subscriptions accessible to the caller
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public List<TapisSubscription> getSubscriptions(String searchStr, String selectStr) throws TapisClientException
-  {
-    return getSubscriptions(searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
-                            selectStr, false);
-  }
-
-  /**
-   * Get list using all supported parameters: searchStr, limit, orderBy, skip, startAfter, select, showDeleted
-   * Retrieve subscriptions. Use search and select query parameters to limit results.
-   * For example search=(id.like.MySub*)~(enabled.eq.true)
-   *
-   * @param searchStr Search string. Empty or null to return all notifications.
-   * @param selectStr - Attributes to be included in result. For example select=id,owner
-   * @return Subscriptions accessible to the caller
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public List<TapisSubscription> getSubscriptions(String searchStr, int limit, String orderBy, int skip, String startAfter,
-                                String selectStr, boolean showDeleted) throws TapisClientException
-  {
-    RespSubscriptions resp = null;
-    String selectStr1 = DEFAULT_SELECT_SUMMARY;
-    if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
-
-    try
-    {
-      resp = subscriptionsApi.getSubscriptions(searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr1);
-    }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp == null || resp.getResult() == null) return null;
-    // Postprocess Subscriptions in the result
-    for (TapisSubscription subscription : resp.getResult()) postProcessSubscription(subscription);
-    return resp.getResult();
-  }
-
-  /**
-   * Get subscriptions using search based on an array of strings representing an SQL-like WHERE clause
-   *
-   * @param req Request body specifying SQL-like search strings.
-   * @return Subscriptions accessible to the caller
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public List<TapisSubscription> searchSubscriptions(ReqSearchSubscriptions req, String selectStr) throws TapisClientException
-  {
-    RespSubscriptions resp = null;
-    String selectStr1 = DEFAULT_SELECT_SUMMARY;
-    if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
-    try { resp = subscriptionsApi.searchSubscriptionsRequestBody(req, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
-                                              DEFAULT_COMPUTETOTAL, selectStr1); }
-    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
-  }
-
-  /**
-   * Check if resource is enabled
-   *
+   * @param name Name of the subscription
+   * @param ownedBy - Use specified user in place of the requesting user. Leave null or blank to use requesting user.
    * @return boolean indicating if enabled
    * @throws TapisClientException - If api call throws an exception
    */
-  public boolean isEnabled(String subscriptionId) throws TapisClientException
+  public boolean isEnabled(String name, String ownedBy) throws TapisClientException
   {
     // Submit the request and return the response
     RespBoolean resp = null;
-    try { resp = subscriptionsApi.isEnabled(subscriptionId); }
+    try { resp = subscriptionsApi.isEnabled(name, ownedBy); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getaBool() != null)
@@ -454,21 +281,317 @@ public class NotificationsClient implements ITapisClient
     }
   }
 
+  /**
+   * Get a subscription by name, return all attributes
+   *
+   * @param name Name of the subscription
+   * @param ownedBy - Use specified user in place of the requesting user. Leave null or blank to use requesting user.
+   * @return The subscription or null if resource not found
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public TapisSubscription getSubscriptionByName(String name, String ownedBy) throws TapisClientException
+  {
+    return getSubscriptionByName(name, DEFAULT_SELECT_ALL, ownedBy);
+  }
+
+  /**
+   * Get a subscription by name using all supported parameters.
+   *
+   * @param name Name of the subscription
+   * @param selectStr - Attributes to be included in result. For example select=name,version,owner
+   * @param ownedBy - Use specified user in place of the requesting user. Leave null or blank to use requesting user.
+   * @return The subscription or null if resource not found
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public TapisSubscription getSubscriptionByName(String name, String selectStr, String ownedBy) throws TapisClientException
+  {
+    String selectStr1 = DEFAULT_SELECT_ALL;
+    if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
+    RespSubscription resp = null;
+    try {resp = subscriptionsApi.getSubscriptionByName(name, selectStr1, ownedBy); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp == null) return null;
+    return resp.getResult();
+  }
+
+  /**
+   * Delete a subscription by name
+   *
+   * @param name Subscription name
+   * @param ownedBy - Use specified user in place of the requesting user. Leave null or blank to use requesting user.
+   * @return number of records modified as a result of the action
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public int deleteSubscriptionByName(String name, String ownedBy) throws TapisClientException
+  {
+    RespChangeCount resp = null;
+    try { resp = subscriptionsApi.deleteSubscriptionByName(name, ownedBy); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
+    else return -1;
+  }
+
+  /**
+   * Get a subscription by UUID, return all attributes
+   *
+   * @param uuid UUID of the subscription
+   * @return The subscription or null if resource not found
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public TapisSubscription getSubscriptionByUuid(String uuid) throws TapisClientException
+  {
+    return getSubscriptionByUuid(uuid, DEFAULT_SELECT_ALL);
+  }
+
+  /**
+   * Get a subscription by UUID using all supported parameters.
+   *
+   * @param uuid UUID of the subscription
+   * @param selectStr - Attributes to be included in result. For example select=name,version,owner
+   * @return The subscription or null if resource not found
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public TapisSubscription getSubscriptionByUuid(String uuid, String selectStr) throws TapisClientException
+  {
+    if (StringUtils.isBlank(uuid))
+      throw new IllegalArgumentException("Invalid UUID. Subscription UUID may not be blank.");
+    String selectStr1 = DEFAULT_SELECT_ALL;
+    if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
+    RespSubscription resp = null;
+    try {resp = subscriptionsApi.getSubscriptionByUuid(uuid, selectStr1); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp == null) return null;
+    return resp.getResult();
+  }
+
+  /**
+   * Delete a subscription given the subscription UUID
+   *
+   * @param uuid - UUID of the subscription to be deleted.
+   * @return number of records modified as a result of the action
+   * @throws TapisClientException - If api call throws an exception
+   * @throws IllegalArgumentException - If UUID is blank
+   */
+  public int deleteSubscriptionByUUID(String uuid) throws TapisClientException, IllegalArgumentException
+  {
+    if (StringUtils.isBlank(uuid))
+      throw new IllegalArgumentException("Invalid UUID. Subscription UUID may not be blank.");
+    RespChangeCount resp = null;
+    try { resp = subscriptionsApi.deleteSubscriptionByUuid(uuid); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
+    else return -1;
+  }
+
+  /**
+   * Retrieve subscriptions owned by requesting user.
+   *
+   * @param ownedBy - Use specified user in place of the requesting user. Leave null or blank to use requesting user.
+   * @return Subscriptions accessible to the caller
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public List<TapisSubscription> getSubscriptions(String ownedBy) throws TapisClientException
+  {
+    return getSubscriptions(DEFAULT_SEARCH, ownedBy);
+  }
+
+  /**
+   * Retrieve subscriptions. Use search query parameter to limit results.
+   * For example search=(name.like.MySub*)~(enabled.eq.true)
+   *
+   * @param searchStr Search string. Empty or null to return all notifications.
+   * @param ownedBy - Use specified user in place of the requesting user. Leave null or blank to use requesting user.
+   * @return Subscriptions accessible to the caller
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public List<TapisSubscription> getSubscriptions(String searchStr, String ownedBy) throws TapisClientException
+  {
+    return getSubscriptions(searchStr, DEFAULT_SELECT_SUMMARY, ownedBy);
+  }
+
+  /**
+   * Retrieve subscriptions. Use search and select query parameters to limit results.
+   * For example search=(name.like.MySub*)~(enabled.eq.true)
+   *
+   * @param searchStr Search string. Empty or null to return all notifications.
+   * @param selectStr - Attributes to be included in result. For example select=name,owner
+   * @param ownedBy - Use specified user in place of the requesting user. Leave null or blank to use requesting user.
+   * @return Subscriptions accessible to the caller
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public List<TapisSubscription> getSubscriptions(String searchStr, String selectStr, String ownedBy) throws TapisClientException
+  {
+    return getSubscriptions(searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, selectStr,
+                            ownedBy, false);
+  }
+
+  /**
+   * Get list using all supported parameters: searchStr, limit, orderBy, skip, startAfter, select, ownedBy, anyOwner
+   * Retrieve subscriptions. Use search and select query parameters to limit results.
+   * For example search=(name.like.MySub*)~(enabled.eq.true)
+   *
+   * @param searchStr Search string. Empty or null to return all notifications.
+   * @param selectStr - Attributes to be included in result. For example select=name,owner
+   * @param ownedBy - Use specified user in place of the requesting user. Leave null or blank to use requesting user.
+   * @param anyOwner - If true retrieve all subscriptions owned by any user. ownedBy will be ignored.
+   * @return Subscriptions accessible to the caller
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public List<TapisSubscription> getSubscriptions(String searchStr, int limit, String orderBy, int skip, String startAfter,
+                                String selectStr, String ownedBy, boolean anyOwner) throws TapisClientException
+  {
+    RespSubscriptions resp = null;
+    String selectStr1 = DEFAULT_SELECT_SUMMARY;
+    if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
+
+    try
+    {
+      resp = subscriptionsApi.getSubscriptions(searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL,
+                                               selectStr1, ownedBy, anyOwner);
+    }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp == null) return null;
+    return resp.getResult();
+  }
+
+  /**
+   * Get subscriptions using search based on an array of strings representing an SQL-like WHERE clause
+   *
+   * @param req Request body specifying SQL-like search strings.
+   * @param ownedBy - Use specified user in place of the requesting user. Leave null or blank to use requesting user.
+   * @return Subscriptions accessible to the caller
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public List<TapisSubscription> searchSubscriptions(ReqSearchSubscriptions req, String selectStr, String ownedBy)
+          throws TapisClientException
+  {
+    RespSubscriptions resp = null;
+    String selectStr1 = DEFAULT_SELECT_SUMMARY;
+    if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
+    try { resp = subscriptionsApi.searchSubscriptionsRequestBody(req, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
+                                                                 DEFAULT_COMPUTETOTAL, selectStr1, ownedBy); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
+  }
+
+  /**
+   * Get all subscriptions owned by requesting user and where subjectFilter matches a specific subject.
+   * Use flag anyOwner=true to get all subscriptions regardless of owner.
+   * Use ownedBy to see subscriptions owned by a specific user other than the requesting user.
+   * Note that anyOwner=true has precedence over ownedBy.
+   *
+   * @param subject a specific subject. Wildcard not allowed.
+   * @param limit - indicates maximum number of results to be included, -1 for unlimited
+   * @param orderBy - orderBy for sorting, e.g. orderBy=created(desc).
+   * @param skip - number of results to skip (may not be used with startAfter)
+   * @param startAfter - where to start when sorting, e.g. limit=10&orderBy=name(asc)&startAfter=101 (may not be used with skip)
+   * @param ownedBy - Get subscriptions owned by a user other than the requesting user. Ignored if anyOwner=true
+   * @param anyOwner - If true retrieve all subscriptions owned by any user. ownedBy will be ignored.
+   * @return - Full response from the api call, including metadata and list of subscriptions.
+   * @throws TapisClientException - If api call throws an exception
+   * @throws IllegalArgumentException - If subject is empty or the wildcard string
+   */
+  public RespSubscriptions getSubscriptionsBySubject(String subject, int limit, String orderBy, int skip,
+                                                     String startAfter, String ownedBy, boolean anyOwner)
+          throws TapisClientException, IllegalArgumentException
+  {
+    if (StringUtils.isBlank(subject) || FILTER_WILDCARD.equals(subject))
+      throw new IllegalArgumentException("Invalid subject. subject may not be empty or equal to '*'");
+
+    //Build a search string for subjectFilter
+    String searchStr = String.format("search=(subject_filter.eq.%s)", subject);
+    RespSubscriptions resp = null;
+    String selectStr = DEFAULT_SELECT_ALL;
+    try
+    {
+      resp = subscriptionsApi.getSubscriptions(searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL,
+                                               selectStr, ownedBy, anyOwner);
+    }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+
+    return resp;
+  }
+
+  /**
+   * Get all subscriptions where subjectFilter matches a specific subject.
+   *
+   * @param subject a specific subject. Wildcard not allowed.
+   * @param limit - indicates maximum number of results to be included, -1 for unlimited
+   * @param orderBy - orderBy for sorting, e.g. orderBy=created(desc).
+   * @param skip - number of results to skip (may not be used with startAfter)
+   * @param startAfter - where to start when sorting, e.g. limit=10&orderBy=name(asc)&startAfter=101 (may not be used with skip)
+   * @return - Full response from the api call, including metadata and list of subscriptions.
+   * @throws TapisClientException - If api call throws an exception
+   * @throws IllegalArgumentException - If subjectFilter is empty or the wildcard string
+   */
+  public RespSubscriptions getSubscriptionsBySubjectForAllOwners(String subject, int limit, String orderBy,
+                                                                 int skip, String startAfter)
+          throws TapisClientException, IllegalArgumentException
+  {
+    String ownedBy = null;
+    boolean anyOwnerTrue = true;
+    return getSubscriptionsBySubject(subject, limit, orderBy, skip, startAfter, ownedBy, anyOwnerTrue);
+  }
+
+  /**
+   * Delete all subscriptions where subjectFilter matches a specific subject
+   *   and subscription is owned by any user.
+   *
+   * @param subject a specific subject. Wildcard not allowed.
+   * @return number of records modified as a result of the action
+   * @throws TapisClientException - If api call throws an exception
+   * @throws IllegalArgumentException - If subject is empty or the wildcard string
+   */
+  public int deleteSubscriptionsBySubjectForAllOwners(String subject)
+          throws TapisClientException, IllegalArgumentException
+  {
+    if (StringUtils.isBlank(subject) || FILTER_WILDCARD.equals(subject))
+      throw new IllegalArgumentException("Invalid subject. subject may not be empty or equal to '*'");
+
+    String ownedBy = null;
+    boolean anyOwnerTrue = true;
+    RespChangeCount resp = null;
+    try { resp = subscriptionsApi.deleteSubscriptionsBySubject(subject, ownedBy, anyOwnerTrue); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
+    else return -1;
+  }
+
   // -----------------------------------------------------------------------
   // ------------------------- Events -------------------------------
   // -----------------------------------------------------------------------
   /**
    * Publish an event
-   * See the helper method buildReqPostEvent() for an example of how to build a pre-populated
-   *   Event instance.
+   * See the helper method buildReqPostEvent() for an example of how to build a pre-populated Event.
    *
    * @param req Request body specifying attributes
    * @throws TapisClientException - If api call throws an exception
    */
   public void postEvent(Event req) throws TapisClientException
   {
+    postEvent(req, null);
+  }
+
+  /**
+   * Publish an event
+   * See the helper method buildReqPostEvent() for an example of how to build a pre-populated Event instance.
+   *
+   * @param req Request body specifying attributes
+   * @param tenant Set the tenant. By default, oboTenant is used.
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public void postEvent(Event req, String tenant) throws TapisClientException
+  {
     // Submit the request
-    try { eventsApi.postEvent(req); }
+    try { eventsApi.postEvent(req, tenant); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
   }
@@ -494,9 +617,7 @@ public class NotificationsClient implements ITapisClient
 
     if (resp != null && resp.getResult() != null)
     {
-      // Postprocess the subscription
-      TapisSubscription subscription = postProcessSubscription(resp.getResult());
-      return subscription;
+      return resp.getResult();
     }
     else
     {
@@ -519,46 +640,22 @@ public class NotificationsClient implements ITapisClient
   {
     if (subscription == null) return null;
     ReqPostSubscription rSubscription = new ReqPostSubscription();
-    rSubscription.id(subscription.getId());
+    rSubscription.name(subscription.getName());
     rSubscription.description(subscription.getDescription());
     rSubscription.owner(subscription.getOwner());
     rSubscription.enabled(subscription.getEnabled());
     rSubscription.typeFilter(subscription.getTypeFilter());
     rSubscription.subjectFilter(subscription.getSubjectFilter());
-    rSubscription.deliveryMethods(subscription.getDeliveryMethods());
-    // Notes requires special handling. It must be null or a JsonObject
-    Object notes = subscription.getNotes();
-    if (notes == null) rSubscription.notes(null);
-    else if (notes instanceof String) rSubscription.notes(ClientTapisGsonUtils.getGson().fromJson((String) notes, JsonObject.class));
-    else if (notes instanceof JsonObject) rSubscription.notes(notes);
-    else rSubscription.notes(null);
+    rSubscription.deliveryTargets(subscription.getDeliveryTargets());
+    rSubscription.ttlMinutes(subscription.getTtlMinutes());
     return rSubscription;
   }
 
   /**
-   * Utility method to build a ReqPutSubscription object using attributes from a TapisSubscription.
+   * Utility method to build an Event object.
    */
-  public static ReqPutSubscription buildReqPutSubscription(TapisSubscription subscription)
-  {
-    if (subscription == null) return null;
-    ReqPutSubscription rSubscription = new ReqPutSubscription();
-    rSubscription.description(subscription.getDescription());
-    rSubscription.typeFilter(subscription.getTypeFilter());
-    rSubscription.subjectFilter(subscription.getSubjectFilter());
-    rSubscription.deliveryMethods(subscription.getDeliveryMethods());
-    // Notes requires special handling. It must be null or a JsonObject
-    Object notes = subscription.getNotes();
-    if (notes == null) rSubscription.notes(null);
-    else if (notes instanceof String) rSubscription.notes(ClientTapisGsonUtils.getGson().fromJson((String) notes, JsonObject.class));
-    else if (notes instanceof JsonObject) rSubscription.notes(notes);
-    else rSubscription.notes(null);
-    return rSubscription;
-  }
-
-  /**
-   * Utility method to build a Event object.
-   */
-  public static Event buildEvent(String source, String type, String subject, OffsetDateTime timestamp)
+  public static Event buildEvent(String source, String type, String subject, String data, String seriesId,
+                                 String timestamp)
   {
     // If any required attributes null then return null.
     if (StringUtils.isBlank(source) || StringUtils.isBlank(type) || timestamp == null) return null;
@@ -566,28 +663,13 @@ public class NotificationsClient implements ITapisClient
     rEvent.source(source);
     rEvent.type(type);
     rEvent.subject(subject);
-//    rEvent.time(timestamp);
+    rEvent.data(data);
+    rEvent.seriesId(seriesId);
+    rEvent.timestamp(timestamp);
     return rEvent;
   }
 
   // ************************************************************************
   // *********************** Private Methods ********************************
   // ************************************************************************
-  /**
-   * Do any client side postprocessing of a returned resource.
-   * Currently, this just involves transforming the notes attribute into a json string
-   * @param subscription Subscription to process
-   * @return - Resulting Subscription
-   */
-  TapisSubscription postProcessSubscription(TapisSubscription subscription)
-  {
-    // If we have a notes attribute convert it from a LinkedTreeMap to a string with json.
-    if (subscription != null && subscription.getNotes() != null)
-    {
-      LinkedTreeMap lmap = (LinkedTreeMap) subscription.getNotes();
-      JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(lmap.toString(), JsonObject.class);
-      subscription.setNotes(tmpNotes.toString());
-    }
-    return subscription;
-  }
-}
+ }

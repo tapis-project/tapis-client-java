@@ -1,6 +1,5 @@
 package edu.utexas.tacc.tapis.jobs.client;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -14,26 +13,38 @@ import edu.utexas.tacc.tapis.jobs.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.jobs.client.gen.ApiException;
 import edu.utexas.tacc.tapis.jobs.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.jobs.client.gen.api.JobsApi;
+import edu.utexas.tacc.tapis.jobs.client.gen.api.SubscriptionsApi;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.FileInfo;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.Job;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobCancelDisplay;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobHideDisplay;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobHistoryDisplayDTO;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobListDTO;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.JobShareDisplay;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.JobShareListDTO;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobStatusDisplay;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.JobUnShareDisplay;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqShareJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqSubmitJob;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqSubscribe;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespBasic;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespCancelJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJobList;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJobOutputList;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJobShareList;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJobStatus;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetSubscriptions;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespHideJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespJobHistory;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespJobSearchAllAttributes;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespProbe;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.RespResourceUrl;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.RespShareJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespSubmitJob;
-
+import edu.utexas.tacc.tapis.jobs.client.gen.model.RespUnShareJob;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.ResultChangeCount;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.TapisSubscription;
 import okhttp3.Call;
 import okhttp3.Response;
 
@@ -296,7 +307,7 @@ public class JobsClient
     }
     
     /* ---------------------------------------------------------------------------- */
-    /* cancelJob:                                                                      */
+    /* cancelJob:                                                                   */
     /* ---------------------------------------------------------------------------- */
     public JobCancelDisplay cancelJob(String jobUuid)
      throws TapisClientException
@@ -317,7 +328,7 @@ public class JobsClient
     /* ---------------------------------------------------------------------------- */
     /* getJobHistory:                                                               */
     /* ---------------------------------------------------------------------------- */
-   public List<JobHistoryDisplayDTO> getJobHistory(String jobUuid, int limit, String orderBy, int skip, String startAfter, int totalCount)
+   public List<JobHistoryDisplayDTO> getJobHistory(String jobUuid, int limit, String orderBy, int skip, String startAfter)
      throws TapisClientException
     {
         RespJobHistory resp = null;
@@ -336,14 +347,16 @@ public class JobsClient
     /* ---------------------------------------------------------------------------- */
     /* getJobList:                                                                  */
     /* ---------------------------------------------------------------------------- */
-    public List<JobListDTO> getJobList(int limit, int skip, int startAfter, String orderBy, boolean computeTotal, String select)
+    public List<JobListDTO> getJobList(int limit, int skip, int startAfter, String orderBy, 
+                                       boolean computeTotal, String listType)
      throws TapisClientException
     {
     	RespGetJobList resp = null;
         try {
             // Get the API object using default networking.
             var jobsApi = new JobsApi(_apiClient);
-            resp = jobsApi.getJobList(limit, skip, startAfter, orderBy, computeTotal,false);
+            resp = jobsApi.getJobList(limit, skip, startAfter, orderBy, computeTotal, listType, false);
+            		
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -354,14 +367,15 @@ public class JobsClient
     /* ---------------------------------------------------------------------------- */
     /* getJobSearchList:                                                            */
     /* ---------------------------------------------------------------------------- */
-    public List<Job> getJobSearchList(int limit, int skip, int startAfter, String orderBy, boolean computeTotal, String select)
+    public List<Job> getJobSearchList(int limit, int skip, int startAfter, String orderBy, 
+                                      boolean computeTotal, String select, String listType)
      throws TapisClientException
     {
     	RespJobSearchAllAttributes resp = null;
         try {
             // Get the API object using default networking.
             var jobsApi = new JobsApi(_apiClient);
-            resp = jobsApi.getJobSearchList(limit, skip, startAfter, orderBy, computeTotal,  select, false);
+            resp = jobsApi.getJobSearchList(limit, skip, startAfter, orderBy, computeTotal, select, listType, false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -456,6 +470,110 @@ public class JobsClient
     	}catch (ApiException e) {Utils.throwTapisClientException(e.getCode(),e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
     	return resp == null ? null : resp.getResult();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* sharejob:                                                                    */
+    /* ---------------------------------------------------------------------------- */
+    public JobShareDisplay shareJob(String jobUuid, ReqShareJob req)
+    		throws TapisClientException
+    {
+    	RespShareJob resp = new  RespShareJob();
+    	try {
+    		var jobsApi = new JobsApi(_apiClient);
+    		resp = jobsApi.shareJob(jobUuid, req, false);
+    	}catch (ApiException e) {Utils.throwTapisClientException(e.getCode(),e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+    	return resp == null ? null : resp.getResult();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* getJobShare:                                                                 */
+    /* ---------------------------------------------------------------------------- */
+    public List<JobShareListDTO> getJobShare(String jobUuid, int limit, int skip)
+    		throws TapisClientException
+    {
+    	RespGetJobShareList resp = new  RespGetJobShareList();
+    	try {
+    		var jobsApi = new JobsApi(_apiClient);
+    		resp = jobsApi.getJobShare(jobUuid, limit, skip, false);
+    	}catch (ApiException e) {Utils.throwTapisClientException(e.getCode(),e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+    	return resp == null ? null : resp.getResult();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* deleteJobShare:                                                              */
+    /* ---------------------------------------------------------------------------- */
+    public JobUnShareDisplay deleteJobShare(String jobUuid, String user)
+    		throws TapisClientException
+    {
+    	RespUnShareJob resp = new  RespUnShareJob() ;
+    	try {
+    		var jobsApi = new JobsApi(_apiClient);
+    		resp = jobsApi.deleteJobShare(jobUuid, user, false);
+    	}catch (ApiException e) {Utils.throwTapisClientException(e.getCode(),e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+    	return resp == null ? null : resp.getResult();
+    }
+    
+    /* **************************************************************************** */
+    /*                           Subscription Methods                               */
+    /* **************************************************************************** */
+    /* ---------------------------------------------------------------------------- */
+    /* subscribe:                                                                   */
+    /* ---------------------------------------------------------------------------- */
+    public String subscribe(String jobUuid, ReqSubscribe reqSubscribe)
+     throws TapisClientException
+    {
+        RespResourceUrl resp = null;
+        try {
+            // Get the API object using default networking.
+            var subApi = new SubscriptionsApi(_apiClient);
+            resp = subApi.subscribe(jobUuid, reqSubscribe, false);
+        }
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+               
+        var resultUrl = resp == null ? null : resp.getResult();
+        return resultUrl == null ? null : resultUrl.getUrl();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* getSubscriptions:                                                            */
+    /* ---------------------------------------------------------------------------- */
+    public List<TapisSubscription> getSubscriptions(String jobUuid, int limit, int skip)
+     throws TapisClientException
+    {
+        RespGetSubscriptions resp = null;
+        try {
+            // Get the API object using default networking.
+            var subApi = new SubscriptionsApi(_apiClient);
+            resp = subApi.getSubscriptions(jobUuid, limit, skip, false);
+        }
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+               
+        return resp == null ? null : resp.getResult();
+    }
+    
+    /* ---------------------------------------------------------------------------- */
+    /* deleteSubscriptions:                                                         */
+    /* ---------------------------------------------------------------------------- */
+    public int deleteSubscriptions(String jobUuid)
+     throws TapisClientException
+    {
+        ResultChangeCount resp = null;
+        try {
+            // Get the API object using default networking.
+            var subApi = new SubscriptionsApi(_apiClient);
+            resp = subApi.deleteSubscriptions(jobUuid, false);
+        }
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+               
+        var changes = resp == null ? null : resp.getChanges();
+        return changes == null ? 0 : changes;
     }
     
     /* **************************************************************************** */
