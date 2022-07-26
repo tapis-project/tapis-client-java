@@ -13,6 +13,7 @@ import edu.utexas.tacc.tapis.jobs.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.jobs.client.gen.ApiException;
 import edu.utexas.tacc.tapis.jobs.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.jobs.client.gen.api.JobsApi;
+import edu.utexas.tacc.tapis.jobs.client.gen.api.ShareApi;
 import edu.utexas.tacc.tapis.jobs.client.gen.api.SubscriptionsApi;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.FileInfo;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.Job;
@@ -328,7 +329,7 @@ public class JobsClient
     /* ---------------------------------------------------------------------------- */
     /* getJobHistory:                                                               */
     /* ---------------------------------------------------------------------------- */
-   public List<JobHistoryDisplayDTO> getJobHistory(String jobUuid, int limit, String orderBy, int skip, String startAfter)
+   public List<JobHistoryDisplayDTO> getJobHistory(String jobUuid, int limit, int skip)
      throws TapisClientException
     {
         RespJobHistory resp = null;
@@ -480,8 +481,8 @@ public class JobsClient
     {
     	RespShareJob resp = new  RespShareJob();
     	try {
-    		var jobsApi = new JobsApi(_apiClient);
-    		resp = jobsApi.shareJob(jobUuid, req, false);
+    		var shareApi = new ShareApi(_apiClient);
+    		resp = shareApi.shareJob(jobUuid, req, false);
     	}catch (ApiException e) {Utils.throwTapisClientException(e.getCode(),e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
     	return resp == null ? null : resp.getResult();
@@ -495,8 +496,8 @@ public class JobsClient
     {
     	RespGetJobShareList resp = new  RespGetJobShareList();
     	try {
-    		var jobsApi = new JobsApi(_apiClient);
-    		resp = jobsApi.getJobShare(jobUuid, limit, skip, false);
+    		var shareApi = new ShareApi(_apiClient);
+    		resp = shareApi.getJobShare(jobUuid, limit, skip, false);
     	}catch (ApiException e) {Utils.throwTapisClientException(e.getCode(),e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
     	return resp == null ? null : resp.getResult();
@@ -510,8 +511,8 @@ public class JobsClient
     {
     	RespUnShareJob resp = new  RespUnShareJob() ;
     	try {
-    		var jobsApi = new JobsApi(_apiClient);
-    		resp = jobsApi.deleteJobShare(jobUuid, user, false);
+    		var shareApi = new ShareApi(_apiClient);
+    		resp = shareApi.deleteJobShare(jobUuid, user, false);
     	}catch (ApiException e) {Utils.throwTapisClientException(e.getCode(),e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
     	return resp == null ? null : resp.getResult();
