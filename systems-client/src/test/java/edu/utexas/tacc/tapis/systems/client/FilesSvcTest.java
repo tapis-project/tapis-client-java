@@ -157,7 +157,7 @@ public class FilesSvcTest
   public void testAllTests() throws Exception {
     // Test 1. retrieving a system including default authn method
     String[] sys0 = systems.get(1);
-    TapisSystem tmpSys = sysClient.getSystemWithCredentials(sys0[1], null);
+    TapisSystem tmpSys = sysClient.getSystemWithCredentials(sys0[1]);
     Assert.assertNotNull(tmpSys, "Failed to find item: " + sys0[1]);
     System.out.println("Found item: " + sys0[1]);
     // Verify most attributes
@@ -178,24 +178,24 @@ public class FilesSvcTest
     Assert.assertNull(cred.getAccessSecret(), "AuthnCredential access secret should be null");
     Assert.assertNull(cred.getCertificate(), "AuthnCredential certificate should be null");
 
-    // Test 2. retrieval using specified authn method
-    tmpSys = sysClient.getSystemWithCredentials(sys0[1], AuthnMethod.PASSWORD);
-    // Verify most attributes
-    verifySystemAttributes(tmpSys, sys0);
-    // Verify credentials. Only cred for default authnMethod is returned. In this case PASSWORD.
-    cred = tmpSys.getAuthnCredential();
-    Assert.assertNotNull(cred, "AuthnCredential should not be null");
-// TODO Not working as described above. For now test by getting cred directly
-// TODO fix it
-    cred = sysClient.getUserCredential(sys0[1], sys0[6], AuthnMethod.PASSWORD);
-// TODO
-    Assert.assertEquals(cred.getPassword(), cred0.getPassword());
-    Assert.assertNull(cred.getPrivateKey(), "AuthnCredential private key should be null");
-    Assert.assertNull(cred.getPublicKey(), "AuthnCredential public key should be null");
-    Assert.assertNull(cred.getAccessKey(), "AuthnCredential access key should be null");
-    Assert.assertNull(cred.getAccessSecret(), "AuthnCredential access secret should be null");
-    Assert.assertNull(cred.getCertificate(), "AuthnCredential certificate should be null");
-
+//    // Test 2. retrieval using specified authn method
+//    tmpSys = sysClient.getSystemWithCredentials(sys0[1], AuthnMethod.PASSWORD);
+//    // Verify most attributes
+//    verifySystemAttributes(tmpSys, sys0);
+//    // Verify credentials. Only cred for default authnMethod is returned. In this case PASSWORD.
+//    cred = tmpSys.getAuthnCredential();
+//    Assert.assertNotNull(cred, "AuthnCredential should not be null");
+//// TODO Not working as described above. For now test by getting cred directly
+//// TODO fix it
+//    cred = sysClient.getUserCredential(sys0[1], sys0[6], AuthnMethod.PASSWORD);
+//// TODO
+//    Assert.assertEquals(cred.getPassword(), cred0.getPassword());
+//    Assert.assertNull(cred.getPrivateKey(), "AuthnCredential private key should be null");
+//    Assert.assertNull(cred.getPublicKey(), "AuthnCredential public key should be null");
+//    Assert.assertNull(cred.getAccessKey(), "AuthnCredential access key should be null");
+//    Assert.assertNull(cred.getAccessSecret(), "AuthnCredential access secret should be null");
+//    Assert.assertNull(cred.getCertificate(), "AuthnCredential certificate should be null");
+//
     // Test 3. retrieving a system with a call that adds a check for READ+EXECUTE permission - succeed
     sys0 = systems.get(2);
     // This should succeed

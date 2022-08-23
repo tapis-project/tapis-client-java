@@ -405,61 +405,22 @@ public class SystemsClient implements ITapisClient
                      DEFAULT_RETURN_CREDENTIALS, impersonationIdNull, DEFAULT_RESOLVE_EFFECTIVE_USER, sharedAppCtxFalse);
   }
 
-//  /**
-//   * Get a system using most supported parameters.
-//   * Fetching of credentials is highly restricted. Only certain Tapis services are authorized.
-//   * If authnMethod is null then default authn method for the system is used.
-//   * Use of this method is highly restricted.
-//   * Called by Jobs and Files which always expect effectiveUserId to be resolved,
-//   *   so we use resolveEffectiveUserId=true rather the default value of false.
-//   *
-//   * @param systemId System systemId
-//   * @param returnCredentials - Include credentials in returned system object
-//   * @param authnMethod - Desired authn method used when fetching credentials, for default pass in null.
-//   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
-//   * @return The system or null if system not found
-//   * @throws TapisClientException - If api call throws an exception
-//   */
-//  public TapisSystem getSystem(String systemId, boolean returnCredentials, AuthnMethod authnMethod,
-//                               boolean requireExecPerm) throws TapisClientException
-//  {
-//    // TODO-CONFIRM This method is called by Jobs service which expects effectiveUser to be resolved.
-//    return getSystem(systemId, authnMethod, requireExecPerm, DEFAULT_SELECT_ALL, returnCredentials,
-//                     impersonationIdNull, resolveEffectiveUserTrue, sharedAppCtxFalse);
-//  }
-
-  /**
-   * Get a system using arguments convenient for other services.
-   * Use of returnCredentials, impersonationId and sharedAppCtx is restricted. Only certain Tapis services are authorized.
-   * If authnMethod is null then default authn method for the system is used.
-   * Called by services which always expect effectiveUserId to be resolved,
-   *   so we use resolveEffectiveUserId=true rather the default value of false.
-   *
-   * @param systemId System systemId
-   * @param returnCredentials - Include credentials in returned system object
-   * @param authnMethod - Desired authn method used when fetching credentials, for default pass in null.
-   * @return The system or null if system not found
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public TapisSystem getSystem(String systemId, boolean returnCredentials, AuthnMethod authnMethod, boolean requireExec)
-          throws TapisClientException
-  {
-    return getSystem(systemId, authnMethod, requireExec, DEFAULT_SELECT_ALL, returnCredentials, impersonationIdNull,
-                     resolveEffectiveUserTrue, sharedAppCtxFalse);
-  }
-
   /**
    * Get a system using arguments convenient for other services.
    * Use of returnCredentials, impersonationId and sharedAppCtx is restricted. Only certain Tapis services are authorized.
    * If authnMethod is null then default authn method for the system is used.
    * Use of this method is highly restricted.
-   * Called by Jobs and Files which always expect effectiveUserId to be resolved,
-   *   so we use resolveEffectiveUserId=true.
+   * Called by Jobs which always expects effectiveUserId to be resolved, so we use resolveEffectiveUserId=true.
    *
    * @param systemId System systemId
-   * @param returnCredentials - Include credentials in returned system object
    * @param authnMethod - Desired authn method used when fetching credentials, for default pass in null.
    * @param requireExecPerm Check for EXECUTE permission as well as READ permission
+   * @param selectStr - Attributes to be included in result. For example select=id,owner,host
+   * @param returnCredentials - Include credentials in returned system object
+   * @param impersonationId - use provided Tapis username instead of oboUser when checking auth and
+   *                          resolving effectiveUserId
+   * @param sharedAppCtx - Indicates system will be used as part of a shared application context.
+   *                       Tapis authorization will be skipped.
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
@@ -472,33 +433,9 @@ public class SystemsClient implements ITapisClient
   }
 
   /**
-   * Get a system by systemId returning credentials for specified authn method.
-   * If authnMethod is null then default authn method for the system is used.
-   * Use of this method is highly restricted. Only certain Tapis services are
-   * authorized to call this method.
-   * Called by services which always expect effectiveUserId to be resolved,
-   *   so we use resolveEffectiveUserId=true.
-   *
-   * Use by Files service.
-   *
-   * @param systemId System systemId
-   * @param authnMethod - Desired authentication method used when fetching credentials,
-   *                      default authentication method used if this is null
-   * @return The system or null if system not found
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public TapisSystem getSystemWithCredentials(String systemId, AuthnMethod authnMethod) throws TapisClientException
-  {
-    return getSystem(systemId, authnMethod, DEFAULT_REQUIRE_EXEC_PERM, DEFAULT_SELECT_ALL, returnCredentialsTrue,
-                     impersonationIdNull, resolveEffectiveUserTrue, sharedAppCtxFalse);
-  }
-
-  /**
    * Get a system by systemId returning credentials for default authn method.
-   * Use of this method is highly restricted. Only certain Tapis services are
-   * authorized to call this method.
-   * Called by services which always expect effectiveUserId to be resolved,
-   *   so we use resolveEffectiveUserId=true.
+   * Use of this method is restricted. Only certain Tapis services are authorized to call this method.
+   * Called by services which always expect effectiveUserId to be resolved, so we use resolveEffectiveUserId=true.
    *
    * @param systemId System Id
    * @return The system or null if system not found
@@ -506,13 +443,16 @@ public class SystemsClient implements ITapisClient
    */
   public TapisSystem getSystemWithCredentials(String systemId) throws TapisClientException
   {
-    return getSystem(systemId, authnMethodNull, DEFAULT_REQUIRE_EXEC_PERM, DEFAULT_SELECT_ALL, returnCredentialsTrue,
-                     impersonationIdNull, resolveEffectiveUserTrue, sharedAppCtxFalse);
+    return getSystem(systemId, DEFAULT_AUTHN_METHOD, DEFAULT_REQUIRE_EXEC_PERM, DEFAULT_SELECT_ALL,
+                     returnCredentialsTrue, impersonationIdNull, resolveEffectiveUserTrue, sharedAppCtxFalse);
   }
 
   /**
    * Get a system using all supported parameters.
-   * Use of returnCredentials, impersonationId and sharedAppCtx is restricted. Only certain Tapis services are authorized.
+   *
+   * Only certain Tapis services are authorized to use
+   *    returnCredentials = true, impersonationId != null or sharedAppCtx = true.
+   *
    * If authnMethod is null then default authn method for the system is used.
    * If selectStr is null or empty then all attributes are selected.
    *
@@ -1126,7 +1066,7 @@ public class SystemsClient implements ITapisClient
 
   /**
    * Do any client side postprocessing of a returned system.
-   * Currently this just involves transforming the notes attribute into a json string
+   * Currently, this just involves transforming the notes attribute into a json string
    * @param tSys - TapisSystem to process
    * @return - Resulting TapisSystem
    */
