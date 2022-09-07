@@ -199,24 +199,38 @@ public class FilesClient implements ITapisClient
    * @param recurse Flag indicating if a recursive listing is to be provided.
    * @param impersonationId - use provided Tapis username instead of oboUser when checking auth and
    *                          resolving effectiveUserId
+   * @param sharedAppCtx - Indicates the request is part of a shared application context.
+   *                       Tapis authorization will be skipped.
    * @return list of FileInfo objects
    * @throws TapisClientException - If api call throws an exception
    */
   public List<FileInfo> listFiles(String systemId, String path, int limit, long offset, boolean recurse,
-                                  String impersonationId)
+                                  String impersonationId, boolean sharedAppCtx)
           throws TapisClientException
   {
     FileListingResponse resp = null;
-    try { resp = fileOperations.listFiles(systemId, path, limit, offset, recurse, impersonationId); }
+    try { resp = fileOperations.listFiles(systemId, path, limit, offset, recurse, impersonationId, sharedAppCtx); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
   }
 
+  /*
+   * listFiles wrapper method for convenience / backward compatibility
+   */
+  public List<FileInfo> listFiles(String systemId, String path, int limit, long offset, boolean recurse, String impersonationId)
+          throws TapisClientException
+  {
+    return listFiles(systemId, path, limit, offset, recurse, impersonationId, sharedAppCtxFalse);
+  }
+
+  /*
+   * listFiles wrapper method for convenience / backward compatibility
+   */
   public List<FileInfo> listFiles(String systemId, String path, int limit, long offset, boolean recurse)
           throws TapisClientException
   {
-    return listFiles(systemId, path, limit, offset, recurse, impersonationIdNull);
+    return listFiles(systemId, path, limit, offset, recurse, impersonationIdNull, sharedAppCtxFalse);
   }
 
   /**
