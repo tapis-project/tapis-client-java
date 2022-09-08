@@ -233,6 +233,15 @@ public class FilesClient implements ITapisClient
     return listFiles(systemId, path, limit, offset, recurse, impersonationIdNull, sharedAppCtxFalse);
   }
 
+  /*
+   * listFiles wrapper method for convenience / backward compatibility
+   */
+  public List<FileInfo> listFiles(String systemId, String path, int limit, long offset, boolean recurse, boolean sharedAppCtx)
+          throws TapisClientException
+  {
+    return listFiles(systemId, path, limit, offset, recurse, impersonationIdNull, sharedAppCtx);
+  }
+
   /**
    * Retrieve a file from a system.
    *
