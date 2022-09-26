@@ -250,10 +250,12 @@ public class FilesClient implements ITapisClient
    * @param zip Flag indicating if contents of a folder should be zipped
    * @param impersonationId - use provided Tapis username instead of oboUser when checking auth and
    *                          resolving effectiveUserId
+   * @param sharedAppCtx - Indicates the request is part of a shared application context.
+   *                       Tapis authorization will be skipped.
    * @return data stream
    * @throws TapisClientException - If api call throws an exception
    */
-  public StreamedFile getFileContents(String systemId, String path, boolean zip, String impersonationId)
+  public StreamedFile getFileContents(String systemId, String path, boolean zip, String impersonationId, boolean sharedAppCtx)
           throws TapisClientException
   {
 
@@ -262,7 +264,7 @@ public class FilesClient implements ITapisClient
       String filename = FilenameUtils.getName(path);
 
       try {
-          Call call = fileContents.getContentsCall(systemId, path, null, zip, null, impersonationId, null);
+          Call call = fileContents.getContentsCall(systemId, path, null, zip, null, impersonationId, sharedAppCtx, null);
           Response response =  call.execute();
           stream = response.body().byteStream();
 
@@ -277,7 +279,7 @@ public class FilesClient implements ITapisClient
 
   public StreamedFile getFileContents(String systemId, String path, boolean zip) throws TapisClientException
   {
-    return getFileContents(systemId, path, zip, impersonationIdNull);
+    return getFileContents(systemId, path, zip, impersonationIdNull, sharedAppCtxFalse);
   }
 
   /**
@@ -295,7 +297,7 @@ public class FilesClient implements ITapisClient
     String filename = FilenameUtils.getName(StringUtils.stripEnd(path, "/"));
 
     try {
-      Call call = fileContents.getContentsCall(systemId, path, null, true, null, impersonationIdNull, null);
+      Call call = fileContents.getContentsCall(systemId, path, null, true, null, impersonationIdNull, sharedAppCtxFalse, null);
       Response response =  call.execute();
       filename = FilenameUtils.removeExtension(filename) + ".zip";
       zipStream = response.body().byteStream();
