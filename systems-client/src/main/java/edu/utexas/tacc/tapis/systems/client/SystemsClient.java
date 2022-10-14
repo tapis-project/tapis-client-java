@@ -10,9 +10,11 @@ import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP_CREDENTIAL_CHECK;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
 
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.JsonObject;
@@ -1075,9 +1077,21 @@ public class SystemsClient implements ITapisClient
     // If we have a notes attribute convert it from a LinkedTreeMap to a string with json.
     if (tSys != null && tSys.getNotes() != null)
     {
-      LinkedTreeMap lmap = (LinkedTreeMap) tSys.getNotes();
-      JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(lmap.toString(), JsonObject.class);
-      tSys.setNotes(tmpNotes.toString());
+      Object notes = tSys.getNotes();
+      // We expect notes to be of type LinkedTreeMap. Make sure that is the case.
+      if (!(notes instanceof LinkedTreeMap<?,?>))
+      {
+        // Log an error
+        System.out.printf("ERROR: Notes object contained in system was not of type LinkedTreeMap. Notes: %s", notes.toString());
+        return tSys;
+      }
+
+      // Used to reconstitute sorted maps from json.
+      Type linkedTreeMapType = new TypeToken<LinkedTreeMap<String,String>>(){}.getType();
+      // Convert the LinkedTreeMap to a string and make sure it is valid json.
+      var lmap = (LinkedTreeMap<String, String>) tSys.getNotes();
+      String tmpNotesStr = ClientTapisGsonUtils.getGson().toJson(lmap, linkedTreeMapType);
+      tSys.setNotes(tmpNotesStr);
     }
     return tSys;
   }

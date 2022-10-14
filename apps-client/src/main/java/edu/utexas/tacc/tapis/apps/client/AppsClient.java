@@ -1,9 +1,13 @@
 package edu.utexas.tacc.tapis.apps.client;
 
+import java.lang.reflect.Type;
 import java.util.List;
+import java.util.TreeMap;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.internal.LinkedTreeMap;
+import com.google.gson.reflect.TypeToken;
 import edu.utexas.tacc.tapis.apps.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqPutApp;
@@ -336,7 +340,7 @@ public class AppsClient implements ITapisClient
   }
 
   /**
-   * Get latest version of an app using all supported parameters
+   * Get the latest version of an app using all supported parameters
    *
    * @param appId Id of the application
    * @param requireExecPerm Check for EXECUTE permission as well as READ permission
@@ -674,7 +678,7 @@ public class AppsClient implements ITapisClient
   // ************************************************************************
   /**
    * Do any client side postprocessing of a returned app.
-   * Currently this just involves transforming the notes attribute into a json string
+   * Currently, this just involves transforming the notes attribute into a json string
    * @param app App to process
    * @return - Resulting App
    */
@@ -683,9 +687,21 @@ public class AppsClient implements ITapisClient
     // If we have a notes attribute convert it from a LinkedTreeMap to a string with json.
     if (app != null && app.getNotes() != null)
     {
-      LinkedTreeMap lmap = (LinkedTreeMap) app.getNotes();
-      JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(lmap.toString(), JsonObject.class);
-      app.setNotes(tmpNotes.toString());
+      Object notes = app.getNotes();
+      // We expect notes to be of type LinkedTreeMap. Make sure that is the case.
+      if (!(notes instanceof LinkedTreeMap<?,?>))
+      {
+        // Log an error
+        System.out.printf("ERROR: Notes object contained in application was not of type LinkedTreeMap. Notes: %s", notes.toString());
+        return app;
+      }
+
+      // Used to reconstitute sorted maps from json.
+      Type linkedTreeMapType = new TypeToken<LinkedTreeMap<String,String>>(){}.getType();
+      // Convert the LinkedTreeMap to a string and make sure it is valid json.
+      var lmap = (LinkedTreeMap<String, String>) app.getNotes();
+      String tmpNotesStr = ClientTapisGsonUtils.getGson().toJson(lmap, linkedTreeMapType);
+      app.setNotes(tmpNotesStr);
     }
     return app;
   }
