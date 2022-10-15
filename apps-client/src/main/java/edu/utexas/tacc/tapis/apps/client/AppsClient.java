@@ -2,20 +2,18 @@ package edu.utexas.tacc.tapis.apps.client;
 
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.TreeMap;
-
+import org.apache.commons.lang3.StringUtils;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.reflect.TypeToken;
+
 import edu.utexas.tacc.tapis.apps.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqPutApp;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespApps;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespBasic;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespBoolean;
-import org.apache.commons.lang3.StringUtils;
-import com.google.gson.Gson;
 
 import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
@@ -58,6 +56,9 @@ public class AppsClient implements ITapisClient
 
   // Header key for JWT
   public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
+
+  // Create a TypeToken to be used by gson for processing of LinkedTreeMap objects
+  private static final Type linkedTreeMapType = new TypeToken<LinkedTreeMap<String,String>>(){}.getType();
 
   // Named null values to make it clear what is being passed in to a method
   private static final String nullImpersonationId = null;
@@ -696,8 +697,6 @@ public class AppsClient implements ITapisClient
         return app;
       }
 
-      // Used to reconstitute sorted maps from json.
-      Type linkedTreeMapType = new TypeToken<LinkedTreeMap<String,String>>(){}.getType();
       // Convert the LinkedTreeMap to a string and make sure it is valid json.
       var lmap = (LinkedTreeMap<String, String>) app.getNotes();
       String tmpNotesStr = ClientTapisGsonUtils.getGson().toJson(lmap, linkedTreeMapType);

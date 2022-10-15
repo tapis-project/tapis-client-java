@@ -1,22 +1,10 @@
 package edu.utexas.tacc.tapis.systems.client;
 
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_COMPUTETOTAL;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_ORDERBY;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SEARCH;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_ALL;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_SUMMARY;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP_CREDENTIAL_CHECK;
-import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
-
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
-
-import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
-
+import com.google.gson.reflect.TypeToken;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.LinkedTreeMap;
 
@@ -57,6 +45,15 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystems;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerProfile;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_COMPUTETOTAL;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_ORDERBY;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SEARCH;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_ALL;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_SUMMARY;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP_CREDENTIAL_CHECK;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
 
 /**
  * Class providing a convenient front-end to the automatically generated client code
@@ -72,6 +69,9 @@ public class SystemsClient implements ITapisClient
 
   // Header key for JWT
   public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
+
+  // Create a TypeToken to be used by gson for processing of LinkedTreeMap objects
+  private static final Type linkedTreeMapType = new TypeToken<LinkedTreeMap<String,String>>(){}.getType();
 
   // Named values to make it clear what is being passed in to a method
   private static final String impersonationIdNull = null;
@@ -1086,8 +1086,6 @@ public class SystemsClient implements ITapisClient
         return tSys;
       }
 
-      // Used to reconstitute sorted maps from json.
-      Type linkedTreeMapType = new TypeToken<LinkedTreeMap<String,String>>(){}.getType();
       // Convert the LinkedTreeMap to a string and make sure it is valid json.
       var lmap = (LinkedTreeMap<String, String>) tSys.getNotes();
       String tmpNotesStr = ClientTapisGsonUtils.getGson().toJson(lmap, linkedTreeMapType);
