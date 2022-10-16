@@ -685,23 +685,23 @@ public class AppsClient implements ITapisClient
    */
   TapisApp postProcessApp(TapisApp app)
   {
-    // If we have a notes attribute convert it from a LinkedTreeMap to a string with json.
-    if (app != null && app.getNotes() != null)
-    {
-      Object notes = app.getNotes();
-      // We expect notes to be of type LinkedTreeMap. Make sure that is the case.
-      if (!(notes instanceof LinkedTreeMap<?,?>))
-      {
-        // Log an error
-        System.out.printf("ERROR: Notes object contained in application was not of type LinkedTreeMap. Notes: %s", notes.toString());
-        return app;
-      }
+    // If no app or no notes then we are done
+    if (app == null || app.getNotes() == null) return app;
 
-      // Convert the LinkedTreeMap to a string and make sure it is valid json.
-      var lmap = (LinkedTreeMap<String, String>) app.getNotes();
-      String tmpNotesStr = ClientTapisGsonUtils.getGson().toJson(lmap, linkedTreeMapType);
-      app.setNotes(tmpNotesStr);
+    // We have a notes attribute. Convert it from a LinkedTreeMap to a string with json.
+    Object notes = app.getNotes();
+    // We expect notes to be of type com.google.gson.internal.LinkedTreeMap. Make sure that is the case.
+    if (!(notes instanceof LinkedTreeMap<?,?>))
+    {
+      // Log an error
+      System.out.printf("ERROR: Notes object contained in application was not of type LinkedTreeMap. Notes: %s", notes.toString());
+      return app;
     }
+
+    // Convert the gson LinkedTreeMap to a string.
+    var lmap = (LinkedTreeMap<String, String>) app.getNotes();
+    String tmpNotesStr = ClientTapisGsonUtils.getGson().toJson(lmap, linkedTreeMapType);
+    app.setNotes(tmpNotesStr);
     return app;
   }
 
