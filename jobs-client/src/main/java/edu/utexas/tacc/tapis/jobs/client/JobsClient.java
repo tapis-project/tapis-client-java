@@ -28,6 +28,7 @@ import edu.utexas.tacc.tapis.jobs.client.gen.model.JobUnShareDisplay;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqShareJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqSubmitJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqSubscribe;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqUserEvent;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespBasic;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespCancelJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.RespGetJob;
@@ -307,6 +308,26 @@ public class JobsClient
         return resp == null ? null : resp.getResult();
     }
     
+    /* ---------------------------------------------------------------------------- */
+    /* sendEvent:                                                                   */
+    /* ---------------------------------------------------------------------------- */
+    public String sendEvent(String jobUuid, ReqUserEvent reqSubmitJob)
+     throws TapisClientException
+    {
+        RespBasic resp = null;
+        try {
+            // Get the API object using default networking.
+            var jobsApi = new JobsApi(_apiClient);
+            resp = jobsApi.sendEvent(jobUuid, reqSubmitJob, false);
+        }
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+        
+        // Return result value as a string.
+        Object obj = resp.getResult();
+        return obj == null ? null : obj.toString();
+    }
+
     /* ---------------------------------------------------------------------------- */
     /* cancelJob:                                                                   */
     /* ---------------------------------------------------------------------------- */
