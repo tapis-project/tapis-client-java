@@ -9,6 +9,7 @@ import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.reflect.TypeToken;
 
 import edu.utexas.tacc.tapis.apps.client.gen.api.GeneralApi;
+import edu.utexas.tacc.tapis.apps.client.gen.model.AppArgSpec;
 import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqPutApp;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespApps;
@@ -58,7 +59,7 @@ public class AppsClient implements ITapisClient
   public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
 
   // Create a TypeToken to be used by gson for processing of LinkedTreeMap objects
-  private static final Type linkedTreeMapType = new TypeToken<LinkedTreeMap<String,String>>(){}.getType();
+  private static final Type linkedTreeMapType = new TypeToken<LinkedTreeMap<Object,Object>>(){}.getType();
 
   // Named null values to make it clear what is being passed in to a method
   private static final String nullImpersonationId = null;
@@ -169,7 +170,7 @@ public class AppsClient implements ITapisClient
   /**
    * Check service ready status
    *
-   * @return Service ready status status as a string
+   * @return Service ready status as a string
    * @throws TapisClientException - If api call throws an exception
    */
   public String checkReady() throws TapisClientException
@@ -329,9 +330,13 @@ public class AppsClient implements ITapisClient
   }
 
   /**
-   * Get latest version of an app using minimal attributes
+   * Get most recent version of an app using minimal attributes.
    *
-   * @param appId Id of the application
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisApp class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
+   * *notes* attributes are found at TapisApp top level and in collections under TapisApp.JobAttributes.ParameterSet
+   *
+   * @param appId id of the application
    * @return The app or null if app not found
    * @throws TapisClientException - If api call throws an exception
    */
@@ -341,12 +346,16 @@ public class AppsClient implements ITapisClient
   }
 
   /**
-   * Get the latest version of an app using all supported parameters
+   * Get the most recent version of an app using all supported parameters
    *
-   * @param appId Id of the application
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisApp class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
+   * *notes* attributes are found at TapisApp top level and in collections under TapisApp.JobAttributes.ParameterSet
+   *
+   * @param appId id of the application
    * @param requireExecPerm Check for EXECUTE permission as well as READ permission
    * @param selectStr - Attributes to be included in result. For example select=id,version,owner
-   * @return Latest version of the app
+   * @return Most recent version of the app
    * @throws TapisClientException - If api call throws an exception
    */
   public TapisApp getAppLatestVersion(String appId, Boolean requireExecPerm, String selectStr) throws TapisClientException
@@ -366,7 +375,11 @@ public class AppsClient implements ITapisClient
   /**
    * Get a specific version of an app using minimal attributes
    *
-   * @param appId Id of the application
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisApp class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
+   * *notes* attributes are found at TapisApp top level and in collections under TapisApp.JobAttributes.ParameterSet
+   *
+   * @param appId id of the application
    * @param appVersion Version of the application
    * @return The app or null if app not found
    * @throws TapisClientException - If api call throws an exception
@@ -379,7 +392,11 @@ public class AppsClient implements ITapisClient
   /**
    * Get a specific version of an app including the two auth related flags
    *
-   * @param appId Id of the application
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisApp class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
+   * *notes* attributes are found at TapisApp top level and in collections under TapisApp.JobAttributes.ParameterSet
+   *
+   * @param appId id of the application
    * @param appVersion Version of the application
    * @param requireExecPerm Check for EXECUTE permission as well as READ permission
    * @param impersonationId - use provided Tapis username instead of oboUser
@@ -399,7 +416,11 @@ public class AppsClient implements ITapisClient
   /**
    * Get a specific version of an app using all supported parameters.
    *
-   * @param appId Id of the application
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisApp class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
+   * *notes* attributes are found at TapisApp top level and in collections under TapisApp.JobAttributes.ParameterSet
+   *
+   * @param appId id of the application
    * @param appVersion Version of the application
    * @param requireExecPerm Check for EXECUTE permission as well as READ permission
    * @param impersonationId - use provided Tapis username instead of oboUser
@@ -425,7 +446,12 @@ public class AppsClient implements ITapisClient
 
   /**
    * Retrieve applications.
-   * Latest version of each app is returned.
+   *
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisApp class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
+   * *notes* attributes are found at TapisApp top level and in collections under TapisApp.JobAttributes.ParameterSet
+   *
+   * Most recent version of each app is returned.
    *
    * @return Apps accessible to the caller
    * @throws TapisClientException - If api call throws an exception
@@ -438,7 +464,11 @@ public class AppsClient implements ITapisClient
   /**
    * Retrieve applications. Use search query parameter to limit results.
    * For example search=(id.like.MyApp*)~(enabled.eq.true)
-   * By default latest version of each app is returned.
+   * By default most recent version of each app is returned.
+   *
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisApp class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
+   * *notes* attributes are found at TapisApp top level and in collections under TapisApp.JobAttributes.ParameterSet
    *
    * @param searchStr Search string. Empty or null to return all apps.
    * @return Apps accessible to the caller
@@ -452,7 +482,11 @@ public class AppsClient implements ITapisClient
   /**
    * Retrieve applications. Use search and select query parameters to limit results.
    * For example search=(id.like.MyApp*)~(enabled.eq.true)
-   * By default latest version of each app is returned.
+   * By default most recent version of each app is returned.
+   *
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisApp class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
+   * *notes* attributes are found at TapisApp top level and in collections under TapisApp.JobAttributes.ParameterSet
    *
    * @param searchStr Search string. Empty or null to return all apps.
    * @param selectStr - Attributes to be included in result. For example select=id,owner
@@ -468,7 +502,11 @@ public class AppsClient implements ITapisClient
    * Get list using all supported parameters: searchStr, limit, orderBy, skip, startAfter, select, showDeleted
    * Retrieve applications. Use search and select query parameters to limit results.
    * For example search=(id.like.MyApp*)~(enabled.eq.true)
-   * By default latest version of each app is returned.
+   * By default most recent version of each app is returned.
+   *
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisApp class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
+   * *notes* attributes are found at TapisApp top level and in collections under TapisApp.JobAttributes.ParameterSet
    *
    * @param searchStr Search string. Empty or null to return all apps.
    * @param selectStr - Attributes to be included in result. For example select=id,owner
@@ -497,7 +535,11 @@ public class AppsClient implements ITapisClient
 
   /**
    * Get apps using search based on an array of strings representing an SQL-like WHERE clause
-   * By default latest version of each app is returned.
+   * By default most recent version of each app is returned.
+   *
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisApp class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
+   * *notes* attributes are found at TapisApp top level and in collections under TapisApp.JobAttributes.ParameterSet
    *
    * @param req Request body specifying SQL-like search strings.
    * @return Apps accessible to the caller
@@ -512,7 +554,10 @@ public class AppsClient implements ITapisClient
                                               DEFAULT_COMPUTETOTAL, selectStr1); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-    if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
+    if (resp == null || resp.getResult() == null) return null;
+    // Postprocess Apps in the result
+    for (TapisApp app : resp.getResult()) postProcessApp(app);
+    return resp.getResult();
   }
 
   /**
@@ -679,29 +724,53 @@ public class AppsClient implements ITapisClient
   // ************************************************************************
   /**
    * Do any client side postprocessing of a returned app.
-   * Currently, this just involves transforming the notes attribute into a json string
+   * This involves transforming any notes attributes from a LinkedTreeMap into a json string.
+   *
+   * Notes attributes are found at the top level and in AppArgSpec values in TapisApp.JobAttributes.ParameterSet.
+   * Collections in parameterSet are appArgs, containerArgs and schedulerOptions.
    * @param app App to process
    * @return - Resulting App
+   * @throws TapisClientException if a notes object is not of type LinkedTreeMap
    */
-  TapisApp postProcessApp(TapisApp app)
+  TapisApp postProcessApp(TapisApp app) throws TapisClientException
   {
-    // If no app or no notes then we are done
-    if (app == null || app.getNotes() == null) return app;
+    // If no app then nothing to do.
+    if (app == null) return app;
+    String appId = app.getId();
 
-    // We have a notes attribute. Convert it from a LinkedTreeMap to a string with json.
-    Object notes = app.getNotes();
-    // We expect notes to be of type com.google.gson.internal.LinkedTreeMap. Make sure that is the case.
-    if (!(notes instanceof LinkedTreeMap<?,?>))
+    // Convert top level notes if present.
+    Object topNotes = app.getNotes();
+    if (topNotes != null) app.setNotes(convertLinkedTreeMapToString(topNotes, appId, "TopNotes"));
+
+    // Convert any notes attributes in ArgSpec objects
+    if (app.getJobAttributes() != null && app.getJobAttributes().getParameterSet() != null)
     {
-      // Log an error
-      System.out.printf("ERROR: Notes object contained in application was not of type LinkedTreeMap. Notes: %s", notes.toString());
-      return app;
+      var appArgs = app.getJobAttributes().getParameterSet().getAppArgs();
+      var containerArgs = app.getJobAttributes().getParameterSet().getContainerArgs();
+      var schedulerOptions = app.getJobAttributes().getParameterSet().getSchedulerOptions();
+      // Process appArgs, containerArgs and schedulerOptions
+      if (appArgs != null)
+      {
+        for (AppArgSpec argSpec : appArgs)
+        {
+          argSpec.setNotes(convertLinkedTreeMapToString(argSpec.getNotes(), appId, "AppArg"));
+        }
+      }
+      if (containerArgs != null)
+      {
+        for (AppArgSpec argSpec : containerArgs)
+        {
+          argSpec.setNotes(convertLinkedTreeMapToString(argSpec.getNotes(), appId, "ContainerArg"));
+        }
+      }
+      if (schedulerOptions != null)
+      {
+        for (AppArgSpec argSpec : schedulerOptions)
+        {
+          argSpec.setNotes(convertLinkedTreeMapToString(argSpec.getNotes(), appId, "SchedulerOption"));
+        }
+      }
     }
-
-    // Convert the gson LinkedTreeMap to a string.
-    var lmap = (LinkedTreeMap<String, String>) app.getNotes();
-    String tmpNotesStr = ClientTapisGsonUtils.getGson().toJson(lmap, linkedTreeMapType);
-    app.setNotes(tmpNotesStr);
     return app;
   }
 
@@ -714,5 +783,26 @@ public class AppsClient implements ITapisClient
     // Everything after "=" is the value
     if (e1 > 0) v = s.substring(e1+1, s.length()-1);
     return new KeyValuePair().key(k).value(v);
+  }
+
+  /*
+   * Convert a notes LinkedTreeMap to a json string.
+   * If notes is not of type LinedTreeMap log an error and throw exception.
+   */
+  private static Object convertLinkedTreeMapToString(Object notes, String appId, String notesLabel)
+          throws TapisClientException
+  {
+    // We expect notes to be of type com.google.gson.internal.LinkedTreeMap. Make sure that is the case.
+    if (!(notes instanceof LinkedTreeMap<?,?>))
+    {
+      // Log an error and throw exception
+      String msg =
+         String.format("ERROR: Notes attribute in application not of type LinkedTreeMap. App: %s. Where found: %s. Notes: %s",
+                       appId, notesLabel, notes);
+      throw new TapisClientException(msg);
+    }
+    // Convert the gson LinkedTreeMap to a string.
+    var lmap = (LinkedTreeMap<String, String>) notes;
+    return  ClientTapisGsonUtils.getGson().toJson(lmap, linkedTreeMapType);
   }
 }

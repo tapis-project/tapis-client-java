@@ -71,7 +71,7 @@ public class SystemsClient implements ITapisClient
   public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
 
   // Create a TypeToken to be used by gson for processing of LinkedTreeMap objects
-  private static final Type linkedTreeMapType = new TypeToken<LinkedTreeMap<String,String>>(){}.getType();
+  private static final Type linkedTreeMapType = new TypeToken<LinkedTreeMap<Object,Object>>(){}.getType();
 
   // Named values to make it clear what is being passed in to a method
   private static final String impersonationIdNull = null;
@@ -397,6 +397,9 @@ public class SystemsClient implements ITapisClient
    *  resolveEffectiveUser = true
    *  sharedAppCtx = false
    *
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
+   *
    * @param systemId System systemId
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
@@ -413,6 +416,9 @@ public class SystemsClient implements ITapisClient
    * If authnMethod is null then default authn method for the system is used.
    * Use of this method is highly restricted.
    * Called by Jobs which always expects effectiveUserId to be resolved, so we use resolveEffectiveUserId=true.
+   *
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
    *
    * @param systemId System systemId
    * @param authnMethod - Desired authn method used when fetching credentials, for default pass in null.
@@ -439,6 +445,9 @@ public class SystemsClient implements ITapisClient
    * Use of this method is restricted. Only certain Tapis services are authorized to call this method.
    * Called by services which always expect effectiveUserId to be resolved, so we use resolveEffectiveUserId=true.
    *
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
+   *
    * @param systemId System Id
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
@@ -457,6 +466,9 @@ public class SystemsClient implements ITapisClient
    *
    * If authnMethod is null then default authn method for the system is used.
    * If selectStr is null or empty then all attributes are selected.
+   *
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
    *
    * @param systemId System Id
    * @param authnMethod - Desired authn method used when fetching credentials, for default pass in null.
@@ -495,6 +507,9 @@ public class SystemsClient implements ITapisClient
   /**
    * Get list of all systems
    *
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
+   *
    * @return List of all systems available to the caller.
    * @throws TapisClientException - If api call throws an exception
    */
@@ -505,6 +520,9 @@ public class SystemsClient implements ITapisClient
 
   /**
    * Get list of systems using search. For example search=(id.like.MySys*)~(enabled.eq.true)
+   *
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
    *
    * @param searchStr list of conditions used for searching
    * @return list of systems available to the caller and matching search conditions.
@@ -521,6 +539,9 @@ public class SystemsClient implements ITapisClient
    * For example search=(id.like.MySys*)~(enabled.eq.true)&limit=10&orderBy=id(asc)&startAfter=my.sys1
    * Use only one of skip or startAfter
    * When using startAfter orderBy must be specified.
+   *
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
    *
    * @param searchStr list of conditions used for searching
    * @param limit
@@ -561,6 +582,9 @@ public class SystemsClient implements ITapisClient
    * Use only one of skip or startAfter
    * When using startAfter orderBy must be specified.
    *
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
+   *
    * @param req
    * @param limit
    * @param orderBy
@@ -589,6 +613,9 @@ public class SystemsClient implements ITapisClient
   /**
    * Dedicated search endpoint using requestBody only
    * Search for systems using an array of strings that represent an SQL-like WHERE clause
+   *
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
    *
    * @param req Request body containing an array of strings representing an SQL-like WHERE clause.
    * @return list of systems available to the caller and matching search conditions.
@@ -1068,11 +1095,13 @@ public class SystemsClient implements ITapisClient
 
   /**
    * Do any client side postprocessing of a returned system.
-   * Currently, this just involves transforming the notes attribute into a json string
+   * This involves transforming any notes attributes from a LinkedTreeMap into a json string.
+   *
    * @param tSys - TapisSystem to process
    * @return - Resulting TapisSystem
+   * @throws TapisClientException if notes object is not of type LinkedTreeMap
    */
-  TapisSystem postProcessSystem(TapisSystem tSys)
+  TapisSystem postProcessSystem(TapisSystem tSys) throws TapisClientException
   {
     // If no system or no notes then we are done
     if (tSys == null || tSys.getNotes() == null) return tSys;
@@ -1082,9 +1111,10 @@ public class SystemsClient implements ITapisClient
     // We expect notes to be of type com.google.gson.internal.LinkedTreeMap. Make sure that is the case.
     if (!(notes instanceof LinkedTreeMap<?,?>))
     {
-      // Log an error
-      System.out.printf("ERROR: Notes object contained in system was not of type LinkedTreeMap. Notes: %s", notes.toString());
-      return tSys;
+      // Log an error and throw exception
+      String msg = String.format("ERROR: Notes attribute in system not of type LinkedTreeMap. System: %s. Notes: %s",
+                                 tSys.getId(), notes);
+      throw new TapisClientException(msg);
     }
 
     // Convert the gson LinkedTreeMap to a string.
