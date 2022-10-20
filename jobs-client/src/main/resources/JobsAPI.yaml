@@ -1418,6 +1418,7 @@ paths:
         - JOB_SUBSCRIPTION - a change to the job's subscriptions has occurred
         - JOB_SHARE_EVENT - a job resource has been shared or unshared
         - JOB_ERROR_MESSAGE - the job experienced an error
+        - JOB_USER_EVENT - user generated events
         - ALL - all job event categories
       operationId: subscribe
       parameters:
