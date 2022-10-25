@@ -2,24 +2,16 @@ package edu.utexas.tacc.tapis.files.client;
 
 
 import edu.utexas.tacc.tapis.auth.client.AuthClient;
-import edu.utexas.tacc.tapis.auth.client.gen.model.TokenResponse;
 import edu.utexas.tacc.tapis.files.client.gen.model.FileInfo;
 import edu.utexas.tacc.tapis.files.client.gen.model.FilePermission;
-import edu.utexas.tacc.tapis.files.client.gen.model.MkdirRequest;
 import edu.utexas.tacc.tapis.files.client.gen.model.TransferTask;
-import edu.utexas.tacc.tapis.files.client.gen.model.TransferTaskListResponse;
-import edu.utexas.tacc.tapis.files.client.gen.model.TransferTaskRequest;
-import edu.utexas.tacc.tapis.files.client.gen.model.TransferTaskRequestElement;
-import edu.utexas.tacc.tapis.tokens.client.TokensClient;
-import edu.utexas.tacc.tapis.tokens.client.model.CreateTokenParms;
+import edu.utexas.tacc.tapis.files.client.gen.model.ReqTransfer;
+import edu.utexas.tacc.tapis.files.client.gen.model.ReqTransferElement;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.InputStream;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -39,8 +31,8 @@ public class ITestFilesClient {
 
         client.mkdir(systemId, "a");
 
-        TransferTaskRequest req = new TransferTaskRequest();
-        TransferTaskRequestElement element = new TransferTaskRequestElement();
+        ReqTransfer req = new ReqTransfer();
+        ReqTransferElement element = new ReqTransferElement();
         element.setDestinationURI("tapis://tapis-demo/b/");
         element.setSourceURI("tapis://tapis-demo/a/");
         req.addElementsItem(element);
