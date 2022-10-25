@@ -2,8 +2,9 @@ package edu.utexas.tacc.tapis.security.client.model;
 
 public class SKShareHasPrivilegeParms 
 {
-    private String  grantee;         
-    private String  resourceType;    
+    private String  grantee;
+    private String  tenant;
+    private String  resourceType;
     private String  resourceId1;     
     private String  resourceId2;     
     private String  privilege;
@@ -11,12 +12,14 @@ public class SKShareHasPrivilegeParms
     private boolean excludePublicNoAuthn = true;
     
     // Accessors.
-    public String getGrantee() {
-        return grantee;
-    }
+    public String getGrantee() { return grantee; }
     public void setGrantee(String grantee) {
         this.grantee = grantee;
     }
+    public String getTenant() { return tenant; }
+    public void setTenant(String tenant) {
+    this.tenant = tenant;
+  }
     public String getResourceType() {
         return resourceType;
     }

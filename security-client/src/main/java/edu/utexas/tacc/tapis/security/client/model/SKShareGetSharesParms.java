@@ -2,9 +2,10 @@ package edu.utexas.tacc.tapis.security.client.model;
 
 public class SKShareGetSharesParms 
 {
-    private String  grantor;         
-    private String  grantee;         
-    private String  resourceType;    
+    private String  grantor;
+    private String  grantee;
+    private String  tenant;
+    private String  resourceType;
     private String  resourceId1;     
     private String  resourceId2;     
     private String  privilege;    
@@ -30,6 +31,12 @@ public class SKShareGetSharesParms
     public String getResourceType() {
         return resourceType;
     }
+    public String getTenant() {
+    return tenant;
+  }
+    public void setTenant(String tenant) {
+    this.tenant = tenant;
+  }
     public void setResourceType(String resourceType) {
         this.resourceType = resourceType;
     }

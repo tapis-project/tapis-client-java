@@ -64,15 +64,14 @@ public class UserTest
     System.out.println("Using Tokens URL: " + baseURL);
     // Get short term user JWT from tokens service
 //    var authClient = new AuthClient(baseURL);
-//    var tokClient = new TokensClient(baseURL, filesSvcName, filesSvcPasswd);
     try {
 //      ownerUserJWT = authClient.getToken(ownerUser1, ownerUser1);
 //      newOwnerUserJWT = authClient.getToken(newOwnerUser, newOwnerUser);
       // Sometimes auth or tokens service is down. Use long term tokens instead.
-      // Long term JWT for testuser1 - expires approx 1 July 2026
-      ownerUserJWT = testUser1JWT;
-      // Long term JWT for testuser3 - expires approx 1 July 2026
-      newOwnerUserJWT = testUser3JWT;
+      // Long term JWT for testuser1
+//      ownerUserJWT = System.getenv("TAPIS_JWT_" + testUser1.toUpperCase());
+      // Long term JWT for testuser3
+//      newOwnerUserJWT = System.getenv("TAPIS_JWT_" + testUser3.toUpperCase());
 //      filesServiceJWT = tokClient.getSvcToken(adminTenantName, filesSvcName, DEFAULT_TARGET_SITE);
     } catch (Exception e) {
       throw new Exception("Exception while creating tokens or auth service", e);
