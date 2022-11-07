@@ -401,7 +401,7 @@ public class NotificationsClient implements ITapisClient
 
   /**
    * Retrieve subscriptions. Use search query parameter to limit results.
-   * For example search=(name.like.MySub*)~(enabled.eq.true)
+   * For example searchStr might be "(name.like.MySub*)~(enabled.eq.true)"
    *
    * @param searchStr Search string. Empty or null to return all notifications.
    * @param ownedBy - Use specified user in place of the requesting user. Leave null or blank to use requesting user.
@@ -415,7 +415,7 @@ public class NotificationsClient implements ITapisClient
 
   /**
    * Retrieve subscriptions. Use search and select query parameters to limit results.
-   * For example search=(name.like.MySub*)~(enabled.eq.true)
+   * For example searchStr might be "(name.like.MySub*)~(enabled.eq.true)"
    *
    * @param searchStr Search string. Empty or null to return all notifications.
    * @param selectStr - Attributes to be included in result. For example select=name,owner
@@ -432,7 +432,7 @@ public class NotificationsClient implements ITapisClient
   /**
    * Get list using all supported parameters: searchStr, limit, orderBy, skip, startAfter, select, ownedBy, anyOwner
    * Retrieve subscriptions. Use search and select query parameters to limit results.
-   * For example search=(name.like.MySub*)~(enabled.eq.true)
+   * For example searchStr might be "(name.like.MySub*)~(enabled.eq.true)"
    *
    * @param searchStr Search string. Empty or null to return all notifications.
    * @param selectStr - Attributes to be included in result. For example select=name,owner
@@ -505,7 +505,7 @@ public class NotificationsClient implements ITapisClient
       throw new IllegalArgumentException("Invalid subject. subject may not be empty or equal to '*'");
 
     //Build a search string for subjectFilter
-    String searchStr = String.format("search=(subject_filter.eq.%s)", subject);
+    String searchStr = String.format("(subject_filter.eq.%s)", subject);
     RespSubscriptions resp = null;
     String selectStr = DEFAULT_SELECT_ALL;
     try

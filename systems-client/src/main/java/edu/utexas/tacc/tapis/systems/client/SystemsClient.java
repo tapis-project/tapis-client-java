@@ -3,6 +3,8 @@ package edu.utexas.tacc.tapis.systems.client;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
+
+import edu.utexas.tacc.tapis.systems.client.gen.model.ListTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.JsonObject;
@@ -86,6 +88,7 @@ public class SystemsClient implements ITapisClient
   private static final boolean DEFAULT_REQUIRE_EXEC_PERM = false;
   private static final boolean DEFAULT_RETURN_CREDENTIALS = false;
   private static final boolean DEFAULT_SHOW_DELETED = false;
+  private static final ListTypeEnum DEFAULT_LIST_TYPE_ENUM = ListTypeEnum.ALL;
 
 
   // ************************************************************************
@@ -534,6 +537,18 @@ public class SystemsClient implements ITapisClient
                       DEFAULT_SELECT_SUMMARY, DEFAULT_RESOLVE_EFFECTIVE_USER, DEFAULT_SHOW_DELETED);
   }
 
+
+  /*
+   * Get systems using all supported parameters except listType. For backward compatibility
+   */
+  public List<TapisSystem> getSystems(String searchStr, int limit, String orderBy, int skip, String startAfter,
+                                      String selectStr, boolean resolveEffectiveUser, boolean showDeleted)
+          throws TapisClientException
+  {
+    return getSystems(searchStr, DEFAULT_LIST_TYPE_ENUM, limit, orderBy, skip, startAfter, selectStr,
+                      resolveEffectiveUser, showDeleted);
+  }
+
   /**
    * Get list of systems using all supported parameters: searchStr, limit, orderBy, skip, startAfter, select, showDeleted
    * For example search=(id.like.MySys*)~(enabled.eq.true)&limit=10&orderBy=id(asc)&startAfter=my.sys1
@@ -544,17 +559,19 @@ public class SystemsClient implements ITapisClient
    * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
    *
    * @param searchStr list of conditions used for searching
-   * @param limit
-   * @param orderBy
-   * @param skip
-   * @param startAfter
-   * @param selectStr
-   * @param resolveEffectiveUser
-   * @param showDeleted
+   * @param listTypeEnum - allows for filtering results based on authorization: OWNED, SHARED_PUBLIC, ALL
+   * @param limit - indicates maximum number of results to be included, -1 for unlimited
+   * @param orderBy - orderBy entries for sorting, e.g. orderBy=created(desc).
+   * @param skip - number of results to skip (may not be used with startAfter)
+   * @param startAfter - where to start when sorting, e.g. limit=10&orderBy=id(asc)&startAfter=101 (may not be used with skip)
+   * @param selectStr - List of attributes to be included as part of each result item.
+   * @param resolveEffectiveUser - If effectiveUserId is set to ${apiUserId} then resolve it, else always return value
+   *                               provided in system definition. By default, this is true.
+   * @param showDeleted - whether to included resources that have been marked as deleted.
    * @return list of systems available to the caller and matching search conditions.
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<TapisSystem> getSystems(String searchStr, int limit, String orderBy, int skip, String startAfter,
+  public List<TapisSystem> getSystems(String searchStr, ListTypeEnum listTypeEnum, int limit, String orderBy, int skip, String startAfter,
                                       String selectStr, boolean resolveEffectiveUser, boolean showDeleted)
           throws TapisClientException
   {
@@ -563,7 +580,7 @@ public class SystemsClient implements ITapisClient
     RespSystems resp = null;
     try
     {
-      resp = sysApi.getSystems(searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr1,
+      resp = sysApi.getSystems(searchStr, listTypeEnum, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr1,
                                resolveEffectiveUser, showDeleted);
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
@@ -585,23 +602,18 @@ public class SystemsClient implements ITapisClient
    * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
    * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
    *
-   * @param req
-   * @param limit
-   * @param orderBy
-   * @param skip
-   * @param startAfter
-   * @param selectStr
    * @return list of systems available to the caller and matching search conditions.
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<TapisSystem> searchSystems(ReqSearchSystems req, int limit, String orderBy, int skip, String startAfter,
-                                         String selectStr)
+  public List<TapisSystem> searchSystems(ReqSearchSystems req, ListTypeEnum listTypeEnum, int limit, String orderBy,
+                                         int skip, String startAfter,                                         String selectStr)
           throws TapisClientException
   {
     String selectStr1 = DEFAULT_SELECT_SUMMARY;
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
     RespSystems resp = null;
-    try { resp = sysApi.searchSystemsRequestBody(req, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr1); }
+    try { resp = sysApi.searchSystemsRequestBody(req, listTypeEnum, limit, orderBy, skip, startAfter,
+                                                 DEFAULT_COMPUTETOTAL, selectStr1); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null || resp.getResult() == null) return Collections.emptyList();
@@ -623,7 +635,8 @@ public class SystemsClient implements ITapisClient
    */
   public List<TapisSystem> searchSystems(ReqSearchSystems req) throws TapisClientException
   {
-    return searchSystems(req, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_SELECT_SUMMARY);
+    return searchSystems(req, DEFAULT_LIST_TYPE_ENUM, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
+                         DEFAULT_SELECT_SUMMARY);
   }
 
   /**

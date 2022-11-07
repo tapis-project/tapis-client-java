@@ -2,6 +2,8 @@ package edu.utexas.tacc.tapis.apps.client;
 
 import java.lang.reflect.Type;
 import java.util.List;
+
+import edu.utexas.tacc.tapis.apps.client.gen.model.ListTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -68,6 +70,7 @@ public class AppsClient implements ITapisClient
   public static final boolean DEFAULT_STRICT_FILE_INPUTS = false;
   public static final boolean DEFAULT_FILE_INPUT_AUTO_MOUNT_LOCAL = true;
   public static final int DEFAULT_MAX_JOBS = Integer.MAX_VALUE;
+  private static final ListTypeEnum DEFAULT_LIST_TYPE_ENUM = ListTypeEnum.ALL;
 
   // ************************************************************************
   // *********************** Fields *****************************************
@@ -498,6 +501,13 @@ public class AppsClient implements ITapisClient
     return getApps(searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, selectStr, false);
   }
 
+
+  public List<TapisApp> getApps(String searchStr, int limit, String orderBy, int skip, String startAfter,
+                                String selectStr, boolean showDeleted) throws TapisClientException
+  {
+    return getApps(searchStr, DEFAULT_LIST_TYPE_ENUM, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, selectStr, false);
+  }
+
   /**
    * Get list using all supported parameters: searchStr, limit, orderBy, skip, startAfter, select, showDeleted
    * Retrieve applications. Use search and select query parameters to limit results.
@@ -514,8 +524,8 @@ public class AppsClient implements ITapisClient
    * @return Apps accessible to the caller
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<TapisApp> getApps(String searchStr, int limit, String orderBy, int skip, String startAfter,
-                                String selectStr, boolean showDeleted) throws TapisClientException
+  public List<TapisApp> getApps(String searchStr, ListTypeEnum listTypeEnum, int limit, String orderBy, int skip,
+                                String startAfter, String selectStr, boolean showDeleted) throws TapisClientException
   {
     RespApps resp = null;
     String selectStr1 = DEFAULT_SELECT_SUMMARY;
@@ -523,7 +533,8 @@ public class AppsClient implements ITapisClient
 
     try
     {
-      resp = appApi.getApps(searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr1, showDeleted);
+      resp = appApi.getApps(searchStr, listTypeEnum, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL,
+                            selectStr1, showDeleted);
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -550,8 +561,8 @@ public class AppsClient implements ITapisClient
     RespApps resp = null;
     String selectStr1 = DEFAULT_SELECT_SUMMARY;
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
-    try { resp = appApi.searchAppsRequestBody(req, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
-                                              DEFAULT_COMPUTETOTAL, selectStr1); }
+    try { resp = appApi.searchAppsRequestBody(req, DEFAULT_LIST_TYPE_ENUM, DEFAULT_LIMIT, DEFAULT_ORDERBY,
+                                              DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_COMPUTETOTAL, selectStr1); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
