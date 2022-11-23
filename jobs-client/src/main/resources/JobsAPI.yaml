@@ -494,7 +494,7 @@ paths:
       tags:
         - jobs
       description: |-
-        Download job's output files for previously submitted job by its UUID. The job must be in a terminal state - FINISHED or FAILED.  
+        Download job's output files for previously submitted job by its UUID. The job must be in a terminal state (FINISHED or FAILED or CANCELLED).  
 
         The caller must be the job owner, creator or a tenant administrator.
         The URL must ends with '/' even if there is no outputPath is specified. 
@@ -1177,7 +1177,10 @@ paths:
     post:
       tags:
         - jobs
-      description: Send a user event to an active job. The job must be in the same tenant as the caller, but no other authorization is needed. If the job has terminated the request will be rejected. The caller must specify a payload of non-empty string data. Subscribers that register interest in events of type JOB_USER_EVENT will receive a notification as a result of this call.
+      description: |-
+        Send a user event to an active job. The job must be in the same tenant as the caller, but no other authorization is needed. If the job has terminated the request will be rejected. The caller must specify a payload of non-empty string data in the *eventData* field. The *eventDetail* field can be set to further qualify the type of user event, which is useful when filtering events. If not provided the *eventDetail* defaults to "DEFAULT".
+
+        Subscribers that register interest in events of type JOB_USER_EVENT will receive a notification as a result of this call.
       operationId: sendEvent
       parameters:
         - name: jobUuid
@@ -1498,6 +1501,10 @@ components:
           type: string
         version:
           type: string
+        commit:
+          type: string
+        build:
+          type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
         result:
@@ -1512,6 +1519,10 @@ components:
         message:
           type: string
         version:
+          type: string
+        commit:
+          type: string
+        build:
           type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
@@ -1531,6 +1542,10 @@ components:
           type: string
         version:
           type: string
+        commit:
+          type: string
+        build:
+          type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
         result:
@@ -1543,6 +1558,10 @@ components:
         message:
           type: string
         version:
+          type: string
+        commit:
+          type: string
+        build:
           type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
@@ -1566,6 +1585,10 @@ components:
         message:
           type: string
         version:
+          type: string
+        commit:
+          type: string
+        build:
           type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
@@ -1748,6 +1771,10 @@ components:
           type: string
         version:
           type: string
+        commit:
+          type: string
+        build:
+          type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
         result:
@@ -1774,6 +1801,10 @@ components:
         message:
           type: string
         version:
+          type: string
+        commit:
+          type: string
+        build:
           type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
@@ -1837,6 +1868,10 @@ components:
           type: string
         version:
           type: string
+        commit:
+          type: string
+        build:
+          type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
         result:
@@ -1877,6 +1912,10 @@ components:
           type: string
         version:
           type: string
+        commit:
+          type: string
+        build:
+          type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
         result:
@@ -1891,6 +1930,10 @@ components:
         message:
           type: string
         version:
+          type: string
+        commit:
+          type: string
+        build:
           type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
@@ -1911,6 +1954,10 @@ components:
         message:
           type: string
         version:
+          type: string
+        commit:
+          type: string
+        build:
           type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
@@ -1943,6 +1990,10 @@ components:
           type: string
         version:
           type: string
+        commit:
+          type: string
+        build:
+          type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
         result:
@@ -1962,6 +2013,10 @@ components:
         message:
           type: string
         version:
+          type: string
+        commit:
+          type: string
+        build:
           type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
@@ -1998,6 +2053,10 @@ components:
         message:
           type: string
         version:
+          type: string
+        commit:
+          type: string
+        build:
           type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
@@ -2212,6 +2271,10 @@ components:
           type: string
         version:
           type: string
+        commit:
+          type: string
+        build:
+          type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
         result:
@@ -2225,15 +2288,21 @@ components:
           type: string
         version:
           type: string
+        commit:
+          type: string
+        build:
+          type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
         result:
           $ref: '#/components/schemas/Job'
     ReqUserEvent:
       required:
-        - eventDetail
+        - eventData
       type: object
       properties:
+        eventData:
+          type: string
         eventDetail:
           type: string
     ResultChangeCount:
@@ -2260,6 +2329,10 @@ components:
         message:
           type: string
         version:
+          type: string
+        commit:
+          type: string
+        build:
           type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
@@ -2307,6 +2380,10 @@ components:
         message:
           type: string
         version:
+          type: string
+        commit:
+          type: string
+        build:
           type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
