@@ -601,7 +601,7 @@ public class UserTest
     Assert.assertFalse(StringUtils.isBlank(respUrl), "Invalid response: " + respUrl);
 
     // Get list of all systems
-    List<TapisSystem> systemsList = usrClient.getSystems(null, -1, null, -1, null, null, false, false);
+    List<TapisSystem> systemsList = usrClient.getSystems(null, -1, null, -1, null, null, false);
     Assert.assertNotNull(systemsList);
     Assert.assertFalse(systemsList.isEmpty());
     var systemNames = new ArrayList<String>();

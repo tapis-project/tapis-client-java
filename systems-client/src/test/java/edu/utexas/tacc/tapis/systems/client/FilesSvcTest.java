@@ -5,7 +5,6 @@ import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.systems.client.SystemsClient.AuthnMethod;
 import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ResolveEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
 import edu.utexas.tacc.tapis.tokens.client.TokensClient;
 import org.apache.commons.lang3.StringUtils;
@@ -46,8 +45,6 @@ public class FilesSvcTest
   // Named null values to make it clear what is being passed in to a method
   private static final String impersonationIdNull = null;
   private static final boolean sharedAppCtxFalse = false;
-  private static final boolean resolveEffectiverUserTrue = true;
-  private static final ResolveEnum resolveEnumALL = ResolveEnum.ALL;
 
   // Test data
   int numSystems = 2;
@@ -204,11 +201,10 @@ public class FilesSvcTest
     sysClient = getClientFilesSvc(tenantName, testUser2, filesServiceJWT);
     /*
       return getSystem(systemId, DEFAULT_AUTHN_METHOD, DEFAULT_REQUIRE_EXEC_PERM, DEFAULT_SELECT_ALL,
-                   DEFAULT_RETURN_CREDENTIALS, nullImpersonationId, DEFAULT_RESOLVE_EFFECTIVE_USER);
+                   DEFAULT_RETURN_CREDENTIALS, nullImpersonationId);
 
      */
-    tmpSys = sysClient.getSystem(sys0[1], null, true, DEFAULT_SELECT_ALL, false, impersonationIdNull,
-                                 resolveEnumALL, sharedAppCtxFalse);
+    tmpSys = sysClient.getSystem(sys0[1], null, true, DEFAULT_SELECT_ALL, false, impersonationIdNull, sharedAppCtxFalse);
     Assert.assertNotNull(tmpSys, "Failed to find item: " + sys0[1]);
     System.out.println("Found item: " + sys0[1]);
     // Verify most attributes
@@ -218,8 +214,7 @@ public class FilesSvcTest
     // this should fail
     sysClient = getClientFilesSvc(tenantName, testUser3, filesServiceJWT);
     try {
-      sysClient.getSystem(sys0[1], null, true, DEFAULT_SELECT_ALL, false, impersonationIdNull,
-                          resolveEnumALL, sharedAppCtxFalse);
+      sysClient.getSystem(sys0[1], null, true, DEFAULT_SELECT_ALL, false, impersonationIdNull, sharedAppCtxFalse);
       Assert.fail("Fetch of system did not require EXECUTE permission as expected");
     } catch (TapisClientException tce) {
       Assert.assertTrue(tce.getTapisMessage().contains("SYSLIB_UNAUTH"), "Wrong exception message: " + tce.getTapisMessage());
