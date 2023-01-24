@@ -7,6 +7,9 @@ import java.io.InputStream;
 import java.time.Instant;
 import java.util.List;
 
+import edu.utexas.tacc.tapis.files.client.gen.model.NativeLinuxGetFaclResponse;
+import edu.utexas.tacc.tapis.files.client.gen.model.NativeLinuxSetFaclRequest;
+import edu.utexas.tacc.tapis.files.client.gen.model.NativeLinuxSetFaclResponse;
 import okhttp3.Call;
 import okhttp3.Response;
 import org.apache.commons.io.FilenameUtils;
@@ -666,7 +669,67 @@ public class FilesClient implements ITapisClient
     if (resp != null && resp.getResult() != null) return resp; else return null;
   }
 
-  // Support returning healthCheck as a Response. Used by Jobs code
+  /**
+   * Gets file ACLs from a linux system.
+   * @param systemId system Id.
+   * @param path path, relative to root directory, of file or directory to get ACLs.
+   *
+   * @return NativeLinuxGetFaclResponse object containing result of getfacl.
+   * @throws TapisClientException
+   */
+  public NativeLinuxGetFaclResponse nativeLinuxGetFacl(String systemId, String path)
+          throws TapisClientException {
+    NativeLinuxGetFaclResponse resp = null;
+    try {
+
+      resp = fileOperations.getFacl(systemId, path);
+    } catch (ApiException e) {
+      Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);
+    }
+
+    return resp;
+  }
+
+  /**
+   * Sets file ACLs for a given file or directory.
+   *
+   * @param systemId system Id.
+   * @param path path, relative to root directory, of file or directory to set ACLs.
+   * @param operation ADD, REMOVE, REMOVE_ALL, REMOVE_DEFAULT.
+   * @param recursion NONE, PHYSICAL, LOGICAL.  NONE will not recurse.  PYSICAL will recurse,
+   *                  but will not follow symlinks.  LOGICAL will recurse following symlinks.
+   * @param aclString String containing the acls to set.  These are only used for ADD or REMOVE,
+   *                  and not needed for REMOVE_ALL, or REMOVE_DEFAULT.  Multiple ACL entries
+   *                  may be separated by commas.  See setacl man page for the specifics.
+   *                  Examples:
+   *                      "user:testuser:rw"
+   *                      "user:testuser:rw,user:anotheruser:rwx,group:agroup:rw"
+   *                     "default:user:testuser:rw"
+   * @return NativeLinuxSetFaclResponse object containing information about the exit code of the command,
+   *            stdout, stderr, and other status information.
+   * @throws TapisClientException
+   */
+  public NativeLinuxSetFaclResponse nativeLinuxSetFacl(String systemId, String path,
+                                                       NativeLinuxSetFaclRequest.OperationEnum operation,
+                                                       NativeLinuxSetFaclRequest.RecursionMethodEnum recursion,
+                                                       String aclString) throws TapisClientException {
+    NativeLinuxSetFaclRequest request = new NativeLinuxSetFaclRequest();
+    request.setOperation(operation);
+    request.setRecursionMethod(recursion);
+    request.setAclString(aclString);
+
+    NativeLinuxSetFaclResponse response = null;
+    try {
+      response = fileOperations.setFacl(systemId, path, request);
+    } catch (ApiException e) {
+      Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);
+    }
+
+    return response;
+  }
+
+
+    // Support returning healthCheck as a Response. Used by Jobs code
   public GeneralApi getGeneralApi() { return fileHealth; }
 
   // ************************************************************************
