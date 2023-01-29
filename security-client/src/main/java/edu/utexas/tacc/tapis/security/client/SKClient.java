@@ -1201,7 +1201,7 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* shareResource:                                                               */
     /* ---------------------------------------------------------------------------- */
-    public ResultResourceUrl shareResource(ReqShareResource reqShareResource)
+    public String shareResource(ReqShareResource reqShareResource)
        throws TapisClientException
     {
         RespResourceUrl resp = null;
@@ -1210,17 +1210,17 @@ public class SKClient
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
-        return resp.getResult();
+        return resp.getResult().getUrl();
     }
     
     /* ---------------------------------------------------------------------------- */
     /* getShare:                                                                    */
     /* ---------------------------------------------------------------------------- */
-    public SkShare getShare(int id) throws TapisClientException
+    public SkShare getShare(int id, String tenant) throws TapisClientException
     {
         RespShare resp = null;
         var shareApi = new ShareApi(_apiClient);
-        try {resp = shareApi.getShare(id, Boolean.FALSE);}
+        try {resp = shareApi.getShare(id, tenant, Boolean.FALSE);}
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
@@ -1234,7 +1234,7 @@ public class SKClient
     {
         RespShareList resp = null;
         var shareApi = new ShareApi(_apiClient);
-        try {resp = shareApi.getShares(p.getGrantor(), p.getGrantee(), p.getResourceType(),
+        try {resp = shareApi.getShares(p.getGrantor(), p.getGrantee(), p.getTenant(), p.getResourceType(),
                 p.getResourceId1(), p.getResourceId2(), p.getPrivilege(), p.getCreatedBy(),
                 p.getCreatedByTenant(), p.isIncludePublicGrantees(), p.isRequireNullId2(), 
                 p.getId(), Boolean.FALSE);}
@@ -1247,47 +1247,50 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* deleteShareById:                                                             */
     /* ---------------------------------------------------------------------------- */
-    public ResultChangeCount deleteShareById(int id) throws TapisClientException
+    public int deleteShareById(int id, String tenant) throws TapisClientException
     {
         RespChangeCount resp = null;
         var shareApi = new ShareApi(_apiClient);
-        try {resp = shareApi.deleteShareById(id, Boolean.FALSE);}
+        try {resp = shareApi.deleteShareById(id, tenant, Boolean.FALSE);}
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
-        return resp.getResult();
+        var changes = resp.getResult().getChanges();
+        return changes == null ? 0 : changes;
     }
 
     /* ---------------------------------------------------------------------------- */
     /* deleteShare:                                                                 */
     /* ---------------------------------------------------------------------------- */
-    public ResultChangeCount deleteShare(SKShareDeleteShareParms p) throws TapisClientException
+    public int deleteShare(SKShareDeleteShareParms p) throws TapisClientException
     {
         RespChangeCount resp = null;
         var shareApi = new ShareApi(_apiClient);
-        try {resp = shareApi.deleteShare(p.getGrantee(), p.getResourceType(),
+        try {resp = shareApi.deleteShare(p.getGrantor(), p.getGrantee(), p.getTenant(), p.getResourceType(),
                 p.getResourceId1(), p.getResourceId2(), p.getPrivilege(), Boolean.FALSE);}
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
-        return resp.getResult();
+        var changes = resp.getResult().getChanges();
+        return changes == null ? 0 : changes;
     }
     
     /* ---------------------------------------------------------------------------- */
     /* hasPrivilege:                                                                */
     /* ---------------------------------------------------------------------------- */
-    public ResultBoolean hasPrivilege(SKShareHasPrivilegeParms p)
+    public boolean hasPrivilege(SKShareHasPrivilegeParms p)
         throws TapisClientException
     {
         RespBoolean resp = null;
         var shareApi = new ShareApi(_apiClient);
-        try {resp = shareApi.hasPrivilege(p.getGrantee(), p.getResourceType(),
+        try {resp = shareApi.hasPrivilege(p.getGrantee(), p.getTenant(), p.getResourceType(),
                 p.getResourceId1(), p.getResourceId2(), p.getPrivilege(), 
                 p.isExcludePublic(), p.isExcludePublicNoAuthn(), Boolean.FALSE);}
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
         
-        return resp.getResult();
+        var bool = resp.getResult().getaBool();
+        return bool == null ? false : bool;
     }
     
     /* **************************************************************************** */

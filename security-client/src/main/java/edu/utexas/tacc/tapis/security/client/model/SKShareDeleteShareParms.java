@@ -2,18 +2,32 @@ package edu.utexas.tacc.tapis.security.client.model;
 
 public class SKShareDeleteShareParms 
 {
-    private String  grantee;         
+    private String  grantee;
+    private String  grantor;
+    private String  tenant;
     private String  resourceType;    
     private String  resourceId1;     
     private String  resourceId2;     
     private String  privilege;
     
     // Accessors.
-    public String getGrantee() {
-        return grantee;
+    public String getGrantor() {
+      return grantor;
     }
+    public void setGrantor(String grantor) {
+    this.grantor = grantor;
+  }
+    public String getGrantee() {
+    return grantee;
+  }
     public void setGrantee(String grantee) {
-        this.grantee = grantee;
+    this.grantee = grantee;
+  }
+    public String getTenant() {
+        return tenant;
+    }
+    public void setTenant(String tenant) {
+        this.tenant = tenant;
     }
     public String getResourceType() {
         return resourceType;

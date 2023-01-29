@@ -3,7 +3,7 @@
   <parent>
     <groupId>edu.utexas.tacc.tapis</groupId>
     <artifactId>tapis-client-java</artifactId>
-    <version>2.0.34-SNAPSHOT</version>
+    <version>2.0.66-SNAPSHOT</version>
   </parent>
 
   <artifactId>systems-client</artifactId>
@@ -23,6 +23,7 @@
      mvn install -DspecPath="https://raw.githubusercontent.com/tapis-project/openapi-systems/local/SystemsAPI.yaml"
      -->
     <specPath>https://raw.githubusercontent.com/tapis-project/openapi-systems/globus/SystemsAPI.yaml</specPath>
+    <specPath>/home/scblack/src_git/github/globus/openapi-systems/SystemsAPI.yaml</specPath>
 
     <!-- Skip integration tests by default -->
     <!-- To run tests TAPIS_FILES_SVC_PASSWORD must be set in the env -->

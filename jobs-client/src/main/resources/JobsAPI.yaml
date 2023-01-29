@@ -19,9 +19,30 @@ servers:
 tags:
   - name: jobs
     description: manage job execution and data
+  - name: subscriptions
+    description: manage job subscriptions
   - name: general
     description: informational endpoints
 paths:
+  /jobs/healthcheck:
+    get:
+      tags:
+        - general
+      description: Lightwieght health check for liveness. No authorization required.
+      operationId: checkHealth
+      responses:
+        '200':
+          description: Message received.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespProbe'
+        '503':
+          description: Service unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespProbe'
   /jobs/ready:
     get:
       tags:
@@ -62,25 +83,6 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
         '500':
           description: Server error.
-  /jobs/healthcheck:
-    get:
-      tags:
-        - general
-      description: Lightwieght health check for liveness. No authorization required.
-      operationId: checkHealth
-      responses:
-        '200':
-          description: Message received.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespProbe'
-        '503':
-          description: Service unavailable.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespProbe'
   /jobs/{jobUuid}/hide:
     post:
       tags:
@@ -409,9 +411,10 @@ paths:
       tags:
         - jobs
       description: |-
-        Retrieve list of jobs for the user.
+        Retrieve list of jobs for which the user is the job owner, creator or a tenant administrator.
 
-        The caller must be the job owner, creator or a tenant administrator.
+        Also list the jobs that are shared with the user. 
+        listType allowed are: MY_JOBS, SHARED_JOBS, ALL_JOBS
       operationId: getJobList
       parameters:
         - name: limit
@@ -437,6 +440,11 @@ paths:
           in: query
           schema:
             type: boolean
+        - name: listType
+          in: query
+          schema:
+            type: string
+            default: MY_JOBS
         - name: pretty
           in: query
           schema:
@@ -486,7 +494,7 @@ paths:
       tags:
         - jobs
       description: |-
-        Download job's output files for previously submitted job by its UUID. The job must be in a terminal state - FINISHED or FAILED.  
+        Download job's output files for previously submitted job by its UUID. The job must be in a terminal state (FINISHED or FAILED or CANCELLED).  
 
         The caller must be the job owner, creator or a tenant administrator.
         The URL must ends with '/' even if there is no outputPath is specified. 
@@ -641,7 +649,9 @@ paths:
       description: |-
         Retrieve list of jobs for the user based on search conditions in the query paramter on the dedicated search end-point.
 
-        The caller must be the job owner, creator or a tenant administrator.
+        The caller must be the job owner, creator or a tenant administrator. 
+
+        List of Jobs shared with the user can also be searched
       operationId: getJobSearchList
       parameters:
         - name: limit
@@ -671,6 +681,11 @@ paths:
           in: query
           schema:
             type: string
+        - name: listType
+          in: query
+          schema:
+            type: string
+            default: MY_JOBS
         - name: pretty
           in: query
           schema:
@@ -800,6 +815,194 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
       security:
         - TapisJWT: []
+  /jobs/{jobUuid}/share/{user}:
+    delete:
+      tags:
+        - share
+      description: |-
+        Delete all share information of a previously shared job for a specific user
+
+        The caller must be the job owner, creator or a tenant administrator.
+      operationId: deleteJobShare
+      parameters:
+        - name: jobUuid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: user
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Job's share information deleted for a specific user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespUnShareJob'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Job not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  /jobs/{jobUuid}/share:
+    get:
+      tags:
+        - share
+      description: |-
+        Retrieve share information of a job by its UUID.
+
+        The caller must be the job owner, creator or a tenant administrator.
+      operationId: getJobShare
+      parameters:
+        - name: jobUuid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            format: int32
+        - name: skip
+          in: query
+          schema:
+            type: integer
+            format: int32
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Job's share information retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespGetJobShareList'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: Job not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+    post:
+      tags:
+        - share
+      description: Share a job with a user of the tenant. The caller must be the job owner, creator or a tenant administrator.
+      operationId: shareJob
+      parameters:
+        - name: jobUuid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqShareJob'
+        required: true
+      responses:
+        '200':
+          description: Job is shared sucessfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespShareJob'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   /jobs/{jobUuid}/status:
     get:
       tags:
@@ -859,11 +1062,181 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
       security:
         - TapisJWT: []
+  /jobs/{jobUuid}/resubmit_request:
+    get:
+      tags:
+        - jobs
+      description: 'Get Resubmit request for of a job in JSON format.  '
+      operationId: getResubmitRequestJson
+      parameters:
+        - name: jobUuid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Resumbit request for the job is retrieved sucessfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespGetResubmit'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  /jobs/{jobUuid}/resubmit:
+    post:
+      tags:
+        - jobs
+      description: |-
+        Resubmit a job for execution using the job's original parameters.  The main phases of job execution are:
+
+          - validate input
+          - check resource availability
+          - stage input files
+          - stage application code
+          - launch application
+          - monitor application
+          - archive application output
+
+        When a job is submitted its request payload is captured and available for resubmission using this API. The resubmitted job is assigned a new UUID and does not reference or have any special access to the original job's information once the orginal job's request is copied. The resubmitted job's execution can differ from the original job's if the application, system or other aspects of the execution environment have changed.
+      operationId: resubmitJob
+      parameters:
+        - name: jobUuid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Job created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespSubmitJob'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  /jobs/{jobUuid}/sendEvent:
+    post:
+      tags:
+        - jobs
+      description: |-
+        Send a user event to an active job. The job must be in the same tenant as the caller, but no other authorization is needed. If the job has terminated the request will be rejected. The caller must specify a payload of non-empty string data in the *eventData* field. The *eventDetail* field can be set to further qualify the type of user event, which is useful when filtering events. If not provided the *eventDetail* defaults to "DEFAULT".
+
+        Subscribers that register interest in events of type JOB_USER_EVENT will receive a notification as a result of this call.
+      operationId: sendEvent
+      parameters:
+        - name: jobUuid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqUserEvent'
+        required: true
+      responses:
+        '200':
+          description: Event created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
   /jobs/submit:
     post:
       tags:
         - jobs
-      description: |
+      description: |-
         Submit a job for execution.  The main phases of job execution are:
 
           - validate input
@@ -873,6 +1246,8 @@ paths:
           - launch application
           - monitor application
           - archive application output
+
+        At a minimum, the job name, application ID and application version must be specified in the request payload. The optional parameters available in a job request provide great flexibility but must be considered in the context of the application and system definitions. The actual values used during job execution are a combination of the values in this request and those specified in the job's application and system definitions. It's often desirable to keep the submission request simple by specifying common values in these other two definitions. See the [Job Submission Request](https://tapis.readthedocs.io/en/latest/technical/jobs.html#the-job-submission-request) documentation for details.
       operationId: submitJob
       parameters:
         - name: pretty
@@ -919,23 +1294,17 @@ paths:
                 $ref: '#/components/schemas/RespBasic'
       security:
         - TapisJWT: []
-  /jobs/{jobuuid}/resubmit:
-    post:
+  /jobs/subscribe/{uuid}:
+    delete:
       tags:
-        - jobs
-      description: |
-        Resubmit a job for execution using the original parameters.  The main phases of job execution are:
+        - subscriptions
+      description: |-
+        Depending on the UUID provide, this API either deletes a single subscription from a job or all subscriptions from a job. To delete single subscription, provide the UUID of that subscription as listed in the subscription retrieval result for the job.  To delete all a job's subscriptions, specify the job UUID.
 
-          - validate input
-          - check resource availability
-          - stage input files
-          - stage application code
-          - launch application
-          - monitor application
-          - archive application output
-      operationId: resubmitJob
+        Like all Job subscription APIs, modifications only affect running jobs and never change the saved job definition. As a consequence, job resubmissions are not affected by runtime subscription changes.
+      operationId: deleteSubscriptions
       parameters:
-        - name: jobuuid
+        - name: uuid
           in: path
           required: true
           schema:
@@ -951,7 +1320,138 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RespSubmitJob'
+                $ref: '#/components/schemas/ResultChangeCount'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+  /jobs/subscribe/{jobUuid}:
+    get:
+      tags:
+        - subscriptions
+      description: Retrieve a job's subscriptions fom the Notifications service. After subscriptions expire or are deleted by user action they may no longer be listed in Notification service. To inspect the initial set of subscriptions assigned to a job, retrieve the job definition.
+      operationId: getSubscriptions
+      parameters:
+        - name: jobUuid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 100
+        - name: skip
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Job created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespGetSubscriptions'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+      security:
+        - TapisJWT: []
+    post:
+      tags:
+        - subscriptions
+      description: |
+        Subcribe to a running job identified by it's UUID. The caller must be the job owner or a tenant administrator.
+
+        Like all Job subscription APIs, modifications only affect running jobs and never change the saved job definition. As a consequence, job resubmissions are not affected by runtime subscription changes.
+
+        The events to which one can subscribe are:
+
+        - JOB_NEW_STATUS - the job has transitioned to a new status
+        - JOB_INPUT_TRANSACTION_ID - a request to stage job input files has been submitted
+        - JOB_ARCHIVE_TRANSACTION_ID - a request to archive job output files has been submitted
+        - JOB_SUBSCRIPTION - a change to the job's subscriptions has occurred
+        - JOB_SHARE_EVENT - a job resource has been shared or unshared
+        - JOB_ERROR_MESSAGE - the job experienced an error
+        - JOB_USER_EVENT - user generated events
+        - ALL - all job event categories
+      operationId: subscribe
+      parameters:
+        - name: jobUuid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pretty
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReqSubscribe'
+        required: true
+      responses:
+        '200':
+          description: Job subscription created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespResourceUrl'
         '400':
           description: Input error.
           content:
@@ -1001,6 +1501,10 @@ components:
           type: string
         version:
           type: string
+        commit:
+          type: string
+        build:
+          type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
         result:
@@ -1015,6 +1519,10 @@ components:
         message:
           type: string
         version:
+          type: string
+        commit:
+          type: string
+        build:
           type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
@@ -1034,6 +1542,10 @@ components:
           type: string
         version:
           type: string
+        commit:
+          type: string
+        build:
+          type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
         result:
@@ -1046,6 +1558,10 @@ components:
         message:
           type: string
         version:
+          type: string
+        commit:
+          type: string
+        build:
           type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
@@ -1069,6 +1585,10 @@ components:
         message:
           type: string
         version:
+          type: string
+        commit:
+          type: string
+        build:
           type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
@@ -1225,6 +1745,21 @@ components:
           type: string
         cmdPrefix:
           type: string
+        sharedAppCtx:
+          type: boolean
+        sharedAppCtxAttribs:
+          type: array
+          items:
+            type: string
+            enum:
+              - SAC_EXEC_SYSTEM_ID
+              - SAC_EXEC_SYSTEM_EXEC_DIR
+              - SAC_EXEC_SYSTEM_INPUT_DIR
+              - SAC_EXEC_SYSTEM_OUTPUT_DIR
+              - SAC_ARCHIVE_SYSTEM_ID
+              - SAC_ARCHIVE_SYSTEM_DIR
+        notes:
+          type: string
         mpi:
           type: boolean
     RespGetJob:
@@ -1236,6 +1771,10 @@ components:
           type: string
         version:
           type: string
+        commit:
+          type: string
+        build:
+          type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
         result:
@@ -1246,8 +1785,8 @@ components:
         event:
           type: string
         created:
-          type: integer
-          format: int64
+          type: string
+          format: date-time
         eventDetail:
           type: string
         description:
@@ -1262,6 +1801,10 @@ components:
         message:
           type: string
         version:
+          type: string
+        commit:
+          type: string
+        build:
           type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
@@ -1281,8 +1824,8 @@ components:
         appId:
           type: string
         created:
-          type: integer
-          format: int64
+          type: string
+          format: date-time
         status:
           type: string
           enum:
@@ -1300,11 +1843,11 @@ components:
             - CANCELLED
             - FAILED
         remoteStarted:
-          type: integer
-          format: int64
+          type: string
+          format: date-time
         ended:
-          type: integer
-          format: int64
+          type: string
+          format: date-time
         tenant:
           type: string
         execSystemId:
@@ -1314,8 +1857,8 @@ components:
         appVersion:
           type: string
         lastUpdated:
-          type: integer
-          format: int64
+          type: string
+          format: date-time
     RespGetJobList:
       type: object
       properties:
@@ -1324,6 +1867,10 @@ components:
         message:
           type: string
         version:
+          type: string
+        commit:
+          type: string
+        build:
           type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
@@ -1347,8 +1894,8 @@ components:
         url:
           type: string
         lastModified:
-          type: integer
-          format: int64
+          type: string
+          format: date-time
         name:
           type: string
         path:
@@ -1365,6 +1912,10 @@ components:
           type: string
         version:
           type: string
+        commit:
+          type: string
+        build:
+          type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
         result:
@@ -1380,12 +1931,115 @@ components:
           type: string
         version:
           type: string
+        commit:
+          type: string
+        build:
+          type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
         result:
           type: array
           items:
             $ref: '#/components/schemas/Job'
+    JobUnShareDisplay:
+      type: object
+      properties:
+        message:
+          type: string
+    RespUnShareJob:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          $ref: '#/components/schemas/JobUnShareDisplay'
+    JobShareListDTO:
+      type: object
+      properties:
+        tenant:
+          type: string
+        createdby:
+          type: string
+        jobUuid:
+          type: string
+        grantee:
+          type: string
+        jobResource:
+          type: string
+        jobPermission:
+          type: string
+        created:
+          type: string
+          format: date-time
+    RespGetJobShareList:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobShareListDTO'
+    JobShareDisplay:
+      type: object
+      properties:
+        message:
+          type: string
+    RespShareJob:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          $ref: '#/components/schemas/JobShareDisplay'
+    ReqShareJob:
+      type: object
+      properties:
+        grantee:
+          type: string
+        jobResource:
+          type: array
+          items:
+            type: string
+            enum:
+              - JOB_HISTORY
+              - JOB_RESUBMIT_REQUEST
+              - JOB_OUTPUT
+              - JOB_INPUT
+        jobPermission:
+          type: string
+          enum:
+            - READ
     JobStatusDisplay:
       type: object
       properties:
@@ -1400,23 +2054,14 @@ components:
           type: string
         version:
           type: string
+        commit:
+          type: string
+        build:
+          type: string
         metadata:
           $ref: '#/components/schemas/ResultMetadata'
         result:
           $ref: '#/components/schemas/JobStatusDisplay'
-    RespSubmitJob:
-      type: object
-      properties:
-        status:
-          type: string
-        message:
-          type: string
-        version:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/ResultMetadata'
-        result:
-          $ref: '#/components/schemas/Job'
     IncludeExcludeFilter:
       type: object
       properties:
@@ -1441,6 +2086,8 @@ components:
           type: boolean
         arg:
           type: string
+        notes:
+          type: object
     JobFileInput:
       type: object
       properties:
@@ -1495,29 +2142,20 @@ components:
           type: string
         value:
           type: string
-    NotificationMechanism:
+        description:
+          type: string
+    NotifDeliveryTarget:
       type: object
       properties:
-        mechanism:
+        deliveryMethod:
           type: string
           enum:
             - WEBHOOK
             - EMAIL
             - QUEUE
             - ACTOR
-        webhookURL:
+        deliveryAddress:
           type: string
-        emailAddress:
-          type: string
-    NotificationSubscription:
-      type: object
-      properties:
-        filter:
-          type: string
-        notificationMechanisms:
-          type: array
-          items:
-            $ref: '#/components/schemas/NotificationMechanism'
     ReqSubmitJob:
       required:
         - appId
@@ -1590,12 +2228,171 @@ components:
         subscriptions:
           type: array
           items:
-            $ref: '#/components/schemas/NotificationSubscription'
+            $ref: '#/components/schemas/ReqSubscribe'
         isMpi:
           type: boolean
         mpiCmd:
           type: string
         cmdPrefix:
+          type: string
+        notes:
+          type: object
+    ReqSubscribe:
+      type: object
+      properties:
+        description:
+          type: string
+        enabled:
+          type: boolean
+        eventCategoryFilter:
+          type: string
+          enum:
+            - JOB_NEW_STATUS
+            - JOB_INPUT_TRANSACTION_ID
+            - JOB_ARCHIVE_TRANSACTION_ID
+            - JOB_SUBSCRIPTION
+            - JOB_SHARE_EVENT
+            - JOB_ERROR_MESSAGE
+            - JOB_USER_EVENT
+            - ALL
+        deliveryTargets:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotifDeliveryTarget'
+        ttlminutes:
+          type: integer
+          format: int32
+    RespGetResubmit:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          $ref: '#/components/schemas/ReqSubmitJob'
+    RespSubmitJob:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          $ref: '#/components/schemas/Job'
+    ReqUserEvent:
+      required:
+        - eventData
+      type: object
+      properties:
+        eventData:
+          type: string
+        eventDetail:
+          type: string
+    ResultChangeCount:
+      type: object
+      properties:
+        changes:
+          type: integer
+          format: int32
+    DeliveryTarget:
+      type: object
+      properties:
+        deliveryMethod:
+          type: string
+          enum:
+            - WEBHOOK
+            - EMAIL
+        deliveryAddress:
+          type: string
+    RespGetSubscriptions:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/TapisSubscription'
+    TapisSubscription:
+      type: object
+      properties:
+        tenant:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        owner:
+          type: string
+        enabled:
+          type: boolean
+        typeFilter:
+          type: string
+        subjectFilter:
+          type: string
+        deliveryTargets:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeliveryTarget'
+        ttlMinutes:
+          type: integer
+          format: int32
+        uuid:
+          type: string
+        expiry:
+          type: string
+        created:
+          type: string
+        updated:
+          type: string
+    RespResourceUrl:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ResultMetadata'
+        result:
+          $ref: '#/components/schemas/ResultResourceUrl'
+    ResultResourceUrl:
+      type: object
+      properties:
+        url:
           type: string
   securitySchemes:
     TapisJWT:

@@ -1,13 +1,16 @@
 package edu.utexas.tacc.tapis.systems.client;
 
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import com.google.gson.reflect.TypeToken;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.LinkedTreeMap;
-import org.apache.commons.lang3.StringUtils;
 
 import edu.utexas.tacc.tapis.systems.client.gen.api.SchedulerProfilesApi;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostCredential;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostPutCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfile;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfiles;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
@@ -32,7 +35,7 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPatchSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostCredential;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostPutCredential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSchedulerProfile;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPutSystem;
@@ -50,6 +53,7 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystems;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerProfile;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ListTypeEnum;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_COMPUTETOTAL;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_ORDERBY;
@@ -59,7 +63,6 @@ import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SELECT_SUMMARY;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP_CREDENTIAL_CHECK;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
-
 
 /**
  * Class providing a convenient front-end to the automatically generated client code
@@ -75,6 +78,23 @@ public class SystemsClient implements ITapisClient
 
   // Header key for JWT
   public static final String TAPIS_JWT_HEADER = "X-Tapis-Token";
+
+  // Create a TypeToken to be used by gson for processing of LinkedTreeMap objects
+  private static final Type linkedTreeMapType = new TypeToken<LinkedTreeMap<Object,Object>>(){}.getType();
+
+  // Named values to make it clear what is being passed in to a method
+  private static final String impersonationIdNull = null;
+  private static final AuthnMethod authnMethodNull = null;
+  private static final boolean sharedAppCtxFalse = false;
+  private static final boolean returnCredentialsTrue = true;
+
+  // Default values
+  private static final AuthnMethod DEFAULT_AUTHN_METHOD = authnMethodNull;
+  private static final boolean DEFAULT_REQUIRE_EXEC_PERM = false;
+  private static final boolean DEFAULT_RETURN_CREDENTIALS = false;
+  private static final boolean DEFAULT_SHOW_DELETED = false;
+  private static final ListTypeEnum DEFAULT_LIST_TYPE_ENUM = ListTypeEnum.ALL;
+
 
   // ************************************************************************
   // *********************** Enums ******************************************
@@ -188,7 +208,7 @@ public class SystemsClient implements ITapisClient
   /**
    * Check service ready status
    *
-   * @return Service ready status status as a string
+   * @return Service ready status as a string
    * @throws TapisClientException - If api call throws an exception
    */
   public String checkReady() throws TapisClientException
@@ -224,7 +244,7 @@ public class SystemsClient implements ITapisClient
    * @return url pointing to created resource
    * @throws TapisClientException - If api call throws an exception
    */
-  public String createSystem(ReqPostSystem req, Boolean skipCredCheck) throws TapisClientException
+  public String createSystem(ReqPostSystem req, boolean skipCredCheck) throws TapisClientException
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
@@ -279,7 +299,7 @@ public class SystemsClient implements ITapisClient
    * @return url pointing to updated resource
    * @throws TapisClientException - If api call throws an exception
    */
-  public String putSystem(String systemId, ReqPutSystem req, Boolean skipCredCheck) throws TapisClientException
+  public String putSystem(String systemId, ReqPutSystem req, boolean skipCredCheck) throws TapisClientException
   {
     // Submit the request and return the response
     RespResourceUrl resp = null;
@@ -376,7 +396,16 @@ public class SystemsClient implements ITapisClient
   }
 
   /**
-   * Get a system by systemId without returning credentials
+   * Get a system by systemId using default arguments.
+   *  authnMethod = null
+   *  requireExec = false
+   *  select = ALL
+   *  returnCreds = false
+   *  impersonationId = null
+   *  sharedAppCtx = false
+   *
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
    *
    * @param systemId System systemId
    * @return The system or null if system not found
@@ -384,50 +413,16 @@ public class SystemsClient implements ITapisClient
    */
   public TapisSystem getSystem(String systemId) throws TapisClientException
   {
-    return getSystem(systemId, false, null, false, DEFAULT_SELECT_ALL);
-  }
-
-  /**
-   * Get a system using most supported parameters.
-   * Fetching of credentials is highly restricted. Only certain Tapis services are authorized.
-   * If authnMethod is null then default authn method for the system is used.
-   * Use of this method is highly restricted.
-   *
-   * @param systemId System systemId
-   * @param returnCredentials - Include credentials in returned system object
-   * @param authnMethod - Desired authn method used when fetching credentials, for default pass in null.
-   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
-   * @return The system or null if system not found
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public TapisSystem getSystem(String systemId, Boolean returnCredentials, AuthnMethod authnMethod,
-                               Boolean requireExecPerm)
-          throws TapisClientException
-  {
-    return getSystem(systemId, returnCredentials, authnMethod, requireExecPerm, DEFAULT_SELECT_ALL);
-  }
-
-  /**
-   * Get a system by systemId returning credentials for specified authn method.
-   * If authnMethod is null then default authn method for the system is used.
-   * Use of this method is highly restricted. Only certain Tapis services are
-   * authorized to call this method.
-   *
-   * @param systemId System systemId
-   * @param authnMethod - Desired authentication method used when fetching credentials,
-   *                      default authentication method used if this is null
-   * @return The system or null if system not found
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public TapisSystem getSystemWithCredentials(String systemId, AuthnMethod authnMethod) throws TapisClientException
-  {
-    return getSystem(systemId, true, authnMethod, false);
+    return getSystem(systemId, DEFAULT_AUTHN_METHOD, DEFAULT_REQUIRE_EXEC_PERM, DEFAULT_SELECT_ALL,
+                     DEFAULT_RETURN_CREDENTIALS, impersonationIdNull, sharedAppCtxFalse);
   }
 
   /**
    * Get a system by systemId returning credentials for default authn method.
-   * Use of this method is highly restricted. Only certain Tapis services are
-   * authorized to call this method.
+   * Use of this method is restricted. Only certain Tapis services are authorized to call this method.
+   *
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
    *
    * @param systemId System Id
    * @return The system or null if system not found
@@ -435,32 +430,47 @@ public class SystemsClient implements ITapisClient
    */
   public TapisSystem getSystemWithCredentials(String systemId) throws TapisClientException
   {
-    return getSystemWithCredentials(systemId, null);
+    return getSystem(systemId, DEFAULT_AUTHN_METHOD, DEFAULT_REQUIRE_EXEC_PERM, DEFAULT_SELECT_ALL,
+                     returnCredentialsTrue, impersonationIdNull, sharedAppCtxFalse);
   }
 
   /**
    * Get a system using all supported parameters.
-   * Fetching of credentials is highly restricted. Only certain Tapis services are authorized.
+   *
+   * Only certain Tapis services are authorized to use
+   *    returnCredentials = true, impersonationId != null or sharedAppCtx = true.
+   *
    * If authnMethod is null then default authn method for the system is used.
-   * Use of this method is highly restricted.
+   * If selectStr is null or empty then all attributes are selected.
+   *
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
    *
    * @param systemId System Id
-   * @param returnCredentials - Include credentials in returned system object
    * @param authnMethod - Desired authn method used when fetching credentials, for default pass in null.
    * @param requireExecPerm Check for EXECUTE permission as well as READ permission
    * @param selectStr - Attributes to be included in result. For example select=id,owner,host
+   * @param returnCredentials - Include credentials in returned system object
+   * @param impersonationId - use provided Tapis username instead of oboUser when checking auth and
+   *                          resolving effectiveUserId
+   * @param sharedAppCtx - Indicates system will be used as part of a shared application context.
+   *                       Tapis authorization will be skipped.
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
-  public TapisSystem getSystem(String systemId, Boolean returnCredentials, AuthnMethod authnMethod,
-                               Boolean requireExecPerm, String selectStr)
+  public TapisSystem getSystem(String systemId, AuthnMethod authnMethod, boolean requireExecPerm, String selectStr,
+                               boolean returnCredentials, String impersonationId, boolean sharedAppCtx)
           throws TapisClientException
   {
     String selectStr1 = DEFAULT_SELECT_ALL;
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
     RespSystem resp = null;
     String authnMethodStr = (authnMethod==null ? null : authnMethod.name());
-    try {resp = sysApi.getSystem(systemId, returnCredentials, authnMethodStr, requireExecPerm, selectStr1); }
+    try
+    {
+      resp = sysApi.getSystem(systemId, authnMethodStr, requireExecPerm, selectStr1, returnCredentials,
+                              impersonationId, sharedAppCtx);
+    }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
@@ -470,6 +480,9 @@ public class SystemsClient implements ITapisClient
 
   /**
    * Get list of all systems
+   *
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
    *
    * @return List of all systems available to the caller.
    * @throws TapisClientException - If api call throws an exception
@@ -482,13 +495,28 @@ public class SystemsClient implements ITapisClient
   /**
    * Get list of systems using search. For example search=(id.like.MySys*)~(enabled.eq.true)
    *
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
+   *
    * @param searchStr list of conditions used for searching
    * @return list of systems available to the caller and matching search conditions.
    * @throws TapisClientException - If api call throws an exception
    */
   public List<TapisSystem> getSystems(String searchStr) throws TapisClientException
   {
-    return getSystems(searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_SELECT_SUMMARY, false);
+    return getSystems(searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
+                      DEFAULT_SELECT_SUMMARY, DEFAULT_SHOW_DELETED);
+  }
+
+
+  /*
+   * Get systems using all supported parameters except listType. For backward compatibility
+   */
+  public List<TapisSystem> getSystems(String searchStr, int limit, String orderBy, int skip, String startAfter,
+                                      String selectStr, boolean showDeleted)
+          throws TapisClientException
+  {
+    return getSystems(searchStr, DEFAULT_LIST_TYPE_ENUM, limit, orderBy, skip, startAfter, selectStr, showDeleted);
   }
 
   /**
@@ -497,17 +525,21 @@ public class SystemsClient implements ITapisClient
    * Use only one of skip or startAfter
    * When using startAfter orderBy must be specified.
    *
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
+   *
    * @param searchStr list of conditions used for searching
-   * @param limit
-   * @param orderBy
-   * @param skip
-   * @param startAfter
-   * @param selectStr
-   * @param showDeleted
+   * @param listTypeEnum - allows for filtering results based on authorization: OWNED, SHARED_PUBLIC, ALL
+   * @param limit - indicates maximum number of results to be included, -1 for unlimited
+   * @param orderBy - orderBy entries for sorting, e.g. orderBy=created(desc).
+   * @param skip - number of results to skip (may not be used with startAfter)
+   * @param startAfter - where to start when sorting, e.g. limit=10&orderBy=id(asc)&startAfter=101 (may not be used with skip)
+   * @param selectStr - List of attributes to be included as part of each result item.
+   * @param showDeleted - whether to included resources that have been marked as deleted.
    * @return list of systems available to the caller and matching search conditions.
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<TapisSystem> getSystems(String searchStr, int limit, String orderBy, int skip, String startAfter,
+  public List<TapisSystem> getSystems(String searchStr, ListTypeEnum listTypeEnum, int limit, String orderBy, int skip, String startAfter,
                                       String selectStr, boolean showDeleted)
           throws TapisClientException
   {
@@ -516,7 +548,8 @@ public class SystemsClient implements ITapisClient
     RespSystems resp = null;
     try
     {
-      resp = sysApi.getSystems(searchStr, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr1, showDeleted);
+      resp = sysApi.getSystems(searchStr, listTypeEnum, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL,
+                               selectStr1, showDeleted);
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -534,23 +567,21 @@ public class SystemsClient implements ITapisClient
    * Use only one of skip or startAfter
    * When using startAfter orderBy must be specified.
    *
-   * @param req
-   * @param limit
-   * @param orderBy
-   * @param skip
-   * @param startAfter
-   * @param selectStr
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
+   *
    * @return list of systems available to the caller and matching search conditions.
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<TapisSystem> searchSystems(ReqSearchSystems req, int limit, String orderBy, int skip, String startAfter,
-                                         String selectStr)
+  public List<TapisSystem> searchSystems(ReqSearchSystems req, ListTypeEnum listTypeEnum, int limit, String orderBy,
+                                         int skip, String startAfter,                                         String selectStr)
           throws TapisClientException
   {
     String selectStr1 = DEFAULT_SELECT_SUMMARY;
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
     RespSystems resp = null;
-    try { resp = sysApi.searchSystemsRequestBody(req, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr1); }
+    try { resp = sysApi.searchSystemsRequestBody(req, listTypeEnum, limit, orderBy, skip, startAfter,
+                                                 DEFAULT_COMPUTETOTAL, selectStr1); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null || resp.getResult() == null) return Collections.emptyList();
@@ -563,13 +594,17 @@ public class SystemsClient implements ITapisClient
    * Dedicated search endpoint using requestBody only
    * Search for systems using an array of strings that represent an SQL-like WHERE clause
    *
+   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
+   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
+   *
    * @param req Request body containing an array of strings representing an SQL-like WHERE clause.
    * @return list of systems available to the caller and matching search conditions.
    * @throws TapisClientException - If api call throws an exception
    */
   public List<TapisSystem> searchSystems(ReqSearchSystems req) throws TapisClientException
   {
-    return searchSystems(req, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER, DEFAULT_SELECT_SUMMARY);
+    return searchSystems(req, DEFAULT_LIST_TYPE_ENUM, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
+                         DEFAULT_SELECT_SUMMARY);
   }
 
   /**
@@ -708,7 +743,7 @@ public class SystemsClient implements ITapisClient
    * @param req Request containing credentials (password, keys, etc).
    * @throws TapisClientException - If api call throws an exception
    */
-  public void updateUserCredential(String systemId, String userName, ReqPostCredential req) throws TapisClientException
+  public void updateUserCredential(String systemId, String userName, Credential req) throws TapisClientException
   {
     updateUserCredential(systemId, userName, req, DEFAULT_SKIP_CREDENTIAL_CHECK);
   }
@@ -721,7 +756,7 @@ public class SystemsClient implements ITapisClient
    * @param req Request containing credentials (password, keys, etc).
    * @throws TapisClientException - If api call throws an exception
    */
-  public void updateUserCredential(String systemId, String userName, ReqPostCredential req, Boolean skipCredCheck) throws TapisClientException
+  public void updateUserCredential(String systemId, String userName, Credential req, boolean skipCredCheck) throws TapisClientException
   {
     // Submit the request
     try { credsApi.createUserCredential(systemId, userName, req, skipCredCheck); }
@@ -871,7 +906,7 @@ public class SystemsClient implements ITapisClient
     rSys.enabled(sys.getEnabled());
     rSys.effectiveUserId(sys.getEffectiveUserId());
     rSys.defaultAuthnMethod(sys.getDefaultAuthnMethod());
-    rSys.authnCredential(buildReqPostCredential(sys.getAuthnCredential()));
+    rSys.authnCredential(buildReqPostPutCredential(sys.getAuthnCredential()));
     rSys.bucketName(sys.getBucketName());
     rSys.rootDir(sys.getRootDir());
     rSys.port(sys.getPort()).useProxy(sys.getUseProxy()).proxyHost(sys.getProxyHost()).proxyPort(sys.getProxyPort());
@@ -911,7 +946,7 @@ public class SystemsClient implements ITapisClient
     rSys.host(sys.getHost());
     rSys.effectiveUserId(sys.getEffectiveUserId());
     rSys.defaultAuthnMethod(sys.getDefaultAuthnMethod());
-    rSys.authnCredential(buildReqPostCredential(sys.getAuthnCredential()));
+    rSys.authnCredential(buildReqPostPutCredential(sys.getAuthnCredential()));
     rSys.port(sys.getPort()).useProxy(sys.getUseProxy()).proxyHost(sys.getProxyHost()).proxyPort(sys.getProxyPort());
     rSys.dtnSystemId(sys.getDtnSystemId());
     rSys.dtnMountPoint(sys.getDtnMountPoint()).dtnMountSourcePath(sys.getDtnMountSourcePath());
@@ -953,12 +988,12 @@ public class SystemsClient implements ITapisClient
   }
 
   /**
-   * Utility method to build a ReqPostCredential using attributes from a Credential.
+   * Utility method to build a ReqPostPutCredential using attributes from a Credential.
    */
-  public static ReqPostCredential buildReqPostCredential(Credential credential)
+  public static ReqPostPutCredential buildReqPostPutCredential(Credential credential)
   {
     if (credential == null) return null;
-    var rCred = new ReqPostCredential();
+    var rCred = new ReqPostPutCredential();
     rCred.password(credential.getPassword());
     rCred.publicKey(credential.getPublicKey());
     rCred.privateKey(credential.getPrivateKey());
@@ -1041,19 +1076,32 @@ public class SystemsClient implements ITapisClient
 
   /**
    * Do any client side postprocessing of a returned system.
-   * Currently this just involves transforming the notes attribute into a json string
+   * This involves transforming any notes attributes from a LinkedTreeMap into a json string.
+   *
    * @param tSys - TapisSystem to process
    * @return - Resulting TapisSystem
+   * @throws TapisClientException if notes object is not of type LinkedTreeMap
    */
-  TapisSystem postProcessSystem(TapisSystem tSys)
+  TapisSystem postProcessSystem(TapisSystem tSys) throws TapisClientException
   {
-    // If we have a notes attribute convert it from a LinkedTreeMap to a string with json.
-    if (tSys != null && tSys.getNotes() != null)
+    // If no system or no notes then we are done
+    if (tSys == null || tSys.getNotes() == null) return tSys;
+
+    // We have a notes attribute. Convert it from a LinkedTreeMap to a string with json.
+    Object notes = tSys.getNotes();
+    // We expect notes to be of type com.google.gson.internal.LinkedTreeMap. Make sure that is the case.
+    if (!(notes instanceof LinkedTreeMap<?,?>))
     {
-      LinkedTreeMap lmap = (LinkedTreeMap) tSys.getNotes();
-      JsonObject tmpNotes = ClientTapisGsonUtils.getGson().fromJson(lmap.toString(), JsonObject.class);
-      tSys.setNotes(tmpNotes.toString());
+      // Log an error and throw exception
+      String msg = String.format("ERROR: Notes attribute in system not of type LinkedTreeMap. System: %s. Notes: %s",
+                                 tSys.getId(), notes);
+      throw new TapisClientException(msg);
     }
+
+    // Convert the gson LinkedTreeMap to a string.
+    var lmap = (LinkedTreeMap<String, String>) tSys.getNotes();
+    String tmpNotesStr = ClientTapisGsonUtils.getGson().toJson(lmap, linkedTreeMapType);
+    tSys.setNotes(tmpNotesStr);
     return tSys;
   }
 }
