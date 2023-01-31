@@ -26,7 +26,7 @@ import edu.utexas.tacc.tapis.globusproxy.client.gen.model.ReqRename;
 import edu.utexas.tacc.tapis.globusproxy.client.gen.model.ResultCancelTask;
 import edu.utexas.tacc.tapis.globusproxy.client.gen.model.TransferTask;
 import edu.utexas.tacc.tapis.globusproxy.client.gen.model.InlineObject1;
-import edu.utexas.tacc.tapis.globusproxy.client.gen.model.InlineObject2;
+//import edu.utexas.tacc.tapis.globusproxy.client.gen.model.InlineObject2;
 import edu.utexas.tacc.tapis.globusproxy.client.gen.model.InlineResponse2004Result;
 
 /**
@@ -266,11 +266,10 @@ public class GlobusProxyClient implements ITapisClient
     ArrayList<GlobusFileInfo> fileInfoList =  new ArrayList<>();
     try
     {
-      var resp = operationsApi.listFiles(clientId, endpointId, path, accessToken, refreshToken,
-                                                     limit, offset, filter);
+      var resp = operationsApi.listFiles(clientId, endpointId, path, accessToken, refreshToken, limit, offset, filter);
       // Make sure we are non-null down to the data
-      if (resp == null || resp.getResult() == null || resp.getResult().getDATA() == null) return fileInfoList;
-      var resultList = resp.getResult().getDATA();
+      if (resp == null || resp.getResult() == null) return fileInfoList;
+      var resultList = resp.getResult();
       for (int i = 0; i < resultList.size(); i++)
       {
         var fiRaw = resultList.get(i);
@@ -469,7 +468,7 @@ public class GlobusProxyClient implements ITapisClient
    * @return cancel result
    * @throws TapisClientException - If api call throws an exception
    */
-  public ResultCancelTask cancelTransferTask(String clientId, String accessToken, String taskId)
+  public ResultCancelTask cancelTransferTask(String clientId, String taskId, String accessToken, String refreshToken)
           throws TapisClientException
   {
     if (StringUtils.isBlank(clientId) || StringUtils.isBlank(accessToken) || StringUtils.isBlank(taskId)) return null;
@@ -479,7 +478,7 @@ public class GlobusProxyClient implements ITapisClient
     {
       // NOTE: IF openapi spec changes this class name may change. Not clear how to make code more robust and
       //       not depend on the generated class names.
-      var resp = transfersApi.cancelTransferTask(clientId, taskId, accessToken);
+      var resp = transfersApi.cancelTransferTask(clientId, taskId, accessToken, refreshToken);
       if (resp == null || resp.getResult() == null) return null;
       var r = resp.getResult();
     }
