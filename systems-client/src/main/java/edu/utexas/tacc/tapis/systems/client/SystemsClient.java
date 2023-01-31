@@ -4,17 +4,9 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.StringUtils;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.LinkedTreeMap;
-
-import edu.utexas.tacc.tapis.systems.client.gen.api.SchedulerProfilesApi;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostPutCredential;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfile;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfiles;
-import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerProfile;
 
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.client.shared.ITapisClient;
