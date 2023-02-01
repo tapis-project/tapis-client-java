@@ -17,9 +17,10 @@ mkdir -p $PRG_PATH/target
 TMP_DIR=$(mktemp -d)
 
 # Download latest openapi spec from repo
-# curl -o target/openapi_v3.yml $SPEC_PATH
-# Could also copy from local file for testing
-cp ../../globus-proxy/service/resources/openapi_v3.yml target/openapi_v3.yml
+curl -o target/openapi_v3.yml $SPEC_PATH
+#
+# NOTE Could also copy from local file for testing
+# cp ../../globus-proxy/service/resources/openapi_v3.yml target/openapi_v3.yml
 
 # Run swagger-cli from docker image to generate bundled json file from openapi yaml file
 set -xv
