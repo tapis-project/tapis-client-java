@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gson.JsonObject;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ModuleLoadSpec;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerProfile;
 import org.apache.commons.lang3.StringUtils;
@@ -873,14 +874,16 @@ public class UserTest
     SchedulerProfile tmpProfile = usrClient.getSchedulerProfile(p0[1]);
     Assert.assertNotNull(tmpProfile, "Failed to create item: " + p0[1]);
     System.out.println("Scheduler Profile retrieved: " + tmpProfile.getName());
+    var modSpecList = tmpProfile.getModuleLoads();
+    Assert.assertNotNull(modSpecList, "moduleLoads was null");
+    Assert.assertEquals(modSpecList.size(), 1);
+    ModuleLoadSpec modSpec = modSpecList.get(0);
     Assert.assertEquals(tmpProfile.getName(), p0[1]);
     Assert.assertEquals(tmpProfile.getDescription(), p0[2]);
     Assert.assertEquals(tmpProfile.getOwner(), p0[3]);
-    Assert.assertEquals(tmpProfile.getModuleLoadCommand(), p0[4]);
-
-    Assert.assertNotNull(tmpProfile.getModulesToLoad());
-    Assert.assertEquals(tmpProfile.getModulesToLoad().size(), modulesToLoad.size());
-
+    Assert.assertEquals(modSpec.getModuleLoadCommand(), p0[4]);
+    Assert.assertNotNull(modSpec.getModulesToLoad(), "moduleLoadSpec modulesToLoad was null");
+    Assert.assertEquals(modSpec.getModulesToLoad().size(), modulesToLoad.size());
     Assert.assertNotNull(tmpProfile.getHiddenOptions());
     Assert.assertFalse(tmpProfile.getHiddenOptions().isEmpty());
     Assert.assertEquals(tmpProfile.getHiddenOptions().size(), hiddenOptions.size());

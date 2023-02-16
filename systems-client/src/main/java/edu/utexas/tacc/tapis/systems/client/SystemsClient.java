@@ -1005,8 +1005,7 @@ public class SystemsClient implements ITapisClient
     rProfile.name(profile.getName());
     rProfile.description(profile.getDescription());
     rProfile.owner(profile.getOwner());
-    rProfile.moduleLoadCommand(profile.getModuleLoadCommand());
-    rProfile.modulesToLoad(profile.getModulesToLoad());
+    rProfile.moduleLoads(profile.getModuleLoads());
     rProfile.hiddenOptions(profile.getHiddenOptions());
     return rProfile;
   }
