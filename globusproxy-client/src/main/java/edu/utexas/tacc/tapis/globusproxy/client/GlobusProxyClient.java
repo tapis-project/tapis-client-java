@@ -268,8 +268,10 @@ public class GlobusProxyClient implements ITapisClient
     {
       var resp = operationsApi.listFiles(clientId, endpointId, path, accessToken, refreshToken, limit, offset, filter);
       // Make sure we are non-null down to the data
-      if (resp == null || resp.getResult() == null) return fileInfoList;
-      var resultList = resp.getResult();
+      if (resp == null || resp.getResult() == null || resp.getResult().getDATA() == null) return fileInfoList;
+
+      // So we should have a list of file info objects
+      var resultList = resp.getResult().getDATA();
       for (int i = 0; i < resultList.size(); i++)
       {
         var fiRaw = resultList.get(i);
@@ -318,70 +320,77 @@ public class GlobusProxyClient implements ITapisClient
     return retVal;
   }
 
-//  /**
-//   * Create a directory
-//   *
-//   * @param clientId Id of client
-//   * @param endpointId - Id of endpoint
-//   * @param accessToken - globus access token
-//   * @return status
-//   * @throws TapisClientException - If api call throws an exception
-//   */
-//  public String makeDir(String clientId, String endpointId, String accessToken, String refreshToken, String path)
-//          throws TapisClientException
-//  {
-//    if (StringUtils.isBlank(endpointId) || StringUtils.isBlank(accessToken) || StringUtils.isBlank(path)) return null;
-//
-//    String retVal = null;
-//    // NOTE: IF openapi spec changes this class name may change. Not clear how to make code more robust and
-//    //       not depend on the generated class names.
+  /**
+   * Create a directory
+   *
+   * @param clientId Id of client
+   * @param endpointId - Id of endpoint
+   * @param accessToken - globus access token
+   * @param refreshToken - globus refresh token
+   * @param path - path to create
+   * @return status
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public String makeDir(String clientId, String endpointId, String accessToken, String refreshToken, String path)
+          throws TapisClientException
+  {
+    if (StringUtils.isBlank(endpointId) || StringUtils.isBlank(accessToken) || StringUtils.isBlank(path)) return null;
+
+    String retVal = null;
+    // NOTE: IF openapi spec changes this class name may change. Not clear how to make code more robust and
+    //       not depend on the generated class names.
 //    var makeDirPath = new ReqMakeDir();
+//    var makeDirPath = new InlineObject1();
 //    makeDirPath.setPath(path);
-//    try
-//    {
-//      var resp = operationsApi.makeDir(clientId, endpointId, accessToken, refreshToken, makeDirPath);
-//      if (resp == null || resp.getResult() == null) return null;
-//      retVal = resp.getStatus();
-//    }
-//    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-//    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-//
-//    return retVal;
-//  }
-//
-//  /**
-//   * Rename a path
-//   *
-//   * @param clientId Id of client
-//   * @param endpointId - Id of endpoint
-//   * @param accessToken - globus access token
-//   * @return status
-//   * @throws TapisClientException - If api call throws an exception
-//   */
-//  public String renamePath(String clientId, String endpointId, String srcPath, String destPath,
-//                           String accessToken, String refreshToken)
-//          throws TapisClientException
-//  {
-//    if (StringUtils.isBlank(endpointId) || StringUtils.isBlank(accessToken) || StringUtils.isBlank(srcPath)
-//            || StringUtils.isBlank(destPath)) return null;
-//
-//    String retVal = null;
-//    // NOTE: IF openapi spec changes this class name may change. Not clear how to make code more robust and
-//    //       not depend on the generated class names.
-//    var reqRenameObj = new ReqRename();
-//    reqRenameObj.setSourcePath(srcPath);
-//    reqRenameObj.setDestinationPath(destPath);
-//    try
-//    {
-//      var resp = operationsApi.renamePath(clientId, endpointId, accessToken, refreshToken, reqRenameObj);
-//      if (resp == null || resp.getResult() == null) return null;
-//      retVal = resp.getStatus();
-//    }
-//    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
-//    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
-//
-//    return retVal;
-//  }
+    // TODO/TBD: Looks like globusProxy endpoint expects the path to be a path parameter. But the POST also seems to
+    //           require a body. So currently we require a request body but ignore it.
+    try
+    {
+      var resp = operationsApi.makeDir(clientId, endpointId, path, accessToken, refreshToken, null);
+      if (resp == null || resp.getResult() == null) return null;
+      retVal = resp.getStatus();
+    }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+
+    return retVal;
+  }
+
+  /**
+   * Rename a path
+   *
+   * @param clientId Id of client
+   * @param endpointId - Id of endpoint
+   * @param accessToken - globus access token
+   * @param refreshToken - globus refresh token
+   * @param srcPath - path to rename
+   * @param destPath - new path name
+   * @return status
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public String renamePath(String clientId, String endpointId, String srcPath, String destPath,
+                           String accessToken, String refreshToken)
+          throws TapisClientException
+  {
+    if (StringUtils.isBlank(endpointId) || StringUtils.isBlank(accessToken) || StringUtils.isBlank(srcPath)
+            || StringUtils.isBlank(destPath)) return null;
+
+    String retVal = null;
+    // NOTE: IF openapi spec changes this class name may change. Not clear how to make code more robust and
+    //       not depend on the generated class names.
+    InlineObject reqBody = new InlineObject();
+    reqBody.setDestination(destPath);
+    try
+    {
+      var resp = operationsApi.renamePath(clientId, endpointId, srcPath, accessToken, refreshToken, reqBody);
+      if (resp == null || resp.getResult() == null) return null;
+      retVal = resp.getStatus();
+    }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+
+    return retVal;
+  }
 
   // -----------------------------------------------------------------------
   // --------------------------- Transfers -------------------------------
