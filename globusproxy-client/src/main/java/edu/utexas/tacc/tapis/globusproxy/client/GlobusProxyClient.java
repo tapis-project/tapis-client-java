@@ -395,6 +395,25 @@ public class GlobusProxyClient implements ITapisClient
   // -----------------------------------------------------------------------
   // --------------------------- Transfers -------------------------------
   // -----------------------------------------------------------------------
+
+  /**
+   * Create a transfer task given clientId, endpoints and list of transfer items.
+   *
+   * @param clientId Id of client
+   * @param accessToken - globus access token
+   * @param refreshToken - globus refresh token
+   * @return transfer task
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public GlobusTransferTask createTransferTask(String clientId, String accessToken, String refreshToken,
+                                               String srcEndpointId, String dstEndPointId,
+                                               List<GlobusTransferItem> transferItems)
+          throws TapisClientException
+  {
+    ReqCreateTransfer reqTxfr = buildReqCreateTransfer(srcEndpointId, dstEndPointId, transferItems);
+    return createTransferTask(clientId, accessToken, refreshToken, reqTxfr);
+  }
+
   /**
    * Create a transfer task
    *
