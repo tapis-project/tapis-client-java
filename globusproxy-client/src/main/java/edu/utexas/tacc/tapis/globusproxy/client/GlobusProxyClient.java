@@ -8,7 +8,7 @@ import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
 import edu.utexas.tacc.tapis.client.shared.ITapisClient;
 
-import edu.utexas.tacc.tapis.globusproxy.client.gen.model.TransferItem;
+import edu.utexas.tacc.tapis.globusproxy.client.gen.model.GlobusTransferItem;
 import edu.utexas.tacc.tapis.globusproxy.client.gen.model.V3GlobusProxyTransfersClientIdTransferItems;
 import edu.utexas.tacc.tapis.globusproxy.client.gen.model.InlineObject;
 import edu.utexas.tacc.tapis.globusproxy.client.gen.model.ResultGlobusAuthInfo;
@@ -510,7 +510,7 @@ public class GlobusProxyClient implements ITapisClient
    * Note that null is returned if any incoming parameters are null or the strings are empty.
    */
   public static ReqCreateTransfer buildReqCreateTransfer(String srcEndpoint, String dstEndpoint,
-                                                         List<TransferItem> txfrItems)
+                                                         List<GlobusTransferItem> txfrItems)
   {
     if (StringUtils.isBlank(srcEndpoint) || StringUtils.isBlank(dstEndpoint) || txfrItems == null) return null;
     var rTransfer = new ReqCreateTransfer();
@@ -518,7 +518,7 @@ public class GlobusProxyClient implements ITapisClient
     rTransfer.setDestinationEndpoint(dstEndpoint);
     // Build up list of transfer items
     var rTxfrItems = rTransfer.getTransferItems();
-    for (TransferItem txfrItem : txfrItems)
+    for (GlobusTransferItem txfrItem : txfrItems)
     {
       var item = new V3GlobusProxyTransfersClientIdTransferItems();
       item.setSourcePath(txfrItem.getSourcePath());
@@ -536,10 +536,10 @@ public class GlobusProxyClient implements ITapisClient
    *
    * Note that null is returned if any incoming parameters are null or the strings are empty.
    */
-  public static TransferItem buildTransferItem(String srcPath, String dstPath, boolean recursive)
+  public static GlobusTransferItem buildTransferItem(String srcPath, String dstPath, boolean recursive)
   {
     if (StringUtils.isBlank(srcPath) || StringUtils.isBlank(dstPath)) return null;
-    var txfrItem = new TransferItem();
+    var txfrItem = new GlobusTransferItem();
     txfrItem.setSourcePath(srcPath);
     txfrItem.setDestinationPath(dstPath);
     txfrItem.setRecursive(recursive);
