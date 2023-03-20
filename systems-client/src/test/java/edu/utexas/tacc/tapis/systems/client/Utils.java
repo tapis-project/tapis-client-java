@@ -33,6 +33,7 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
 import edu.utexas.tacc.tapis.systems.client.gen.model.JobRuntime;
 import edu.utexas.tacc.tapis.systems.client.gen.model.KeyValuePair;
 import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
+import edu.utexas.tacc.tapis.systems.client.gen.model.ModuleLoadSpec;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSchedulerProfile;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.RuntimeTypeEnum;
@@ -354,12 +355,16 @@ public final class Utils
    */
   public static ReqPostSchedulerProfile createReqSchedulerProfile(String[] profile)
   {
+    List<ModuleLoadSpec> moduleLoadSpecList = new ArrayList<>();
+    ModuleLoadSpec moduleLoadSpec =  new ModuleLoadSpec();
+    moduleLoadSpec.setModuleLoadCommand(profile[4]);
+    moduleLoadSpec.setModulesToLoad(modulesToLoad);
+    moduleLoadSpecList.add(moduleLoadSpec);
     ReqPostSchedulerProfile rProfile = new ReqPostSchedulerProfile();
     rProfile.setName(profile[1]);
     rProfile.description(profile[2]);
     rProfile.owner(profile[3]);
-    rProfile.moduleLoadCommand(profile[4]);
-    rProfile.modulesToLoad(modulesToLoad);
+    rProfile.moduleLoads(moduleLoadSpecList);
     rProfile.hiddenOptions(hiddenOptions);
     return rProfile;
   }

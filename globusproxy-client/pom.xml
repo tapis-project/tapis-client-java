@@ -6,10 +6,23 @@
     <version>2.0.73-SNAPSHOT</version>
   </parent>
 
-  <artifactId>tokens-client</artifactId>
+  <artifactId>globusproxy-client</artifactId>
 
-  <name>Tapis Tokens Client</name>
-  <description>Java client for Tokens Service</description>
+  <name>Tapis GlobusProxy Client</name>
+  <description>Java client for GlobusProxy Service</description>
+
+  <properties>
+
+    <!-- Location of openapi spec. Default is dev branch -->
+    <!-- NOTE: In order to try out openapi updates using a local file do something similar to the following:
+     mvn clean install
+     mvn install -DspecPath="/home/scblack/src_git/github/globus/globus-proxy/service/resources/openapi_v3.yml"
+
+          or if yaml committed to local branch then do:
+     mvn install -DspecPath="https://raw.githubusercontent.com/tapis-project/openapi-globusproxy/local/GlobusProxyAPI.yaml"
+     -->
+    <specPath>${project.basedir}/target/globus-proxy.json</specPath>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -17,11 +30,23 @@
       <artifactId>shared-clientlib</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>auth-client</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>tokens-client</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
-
+    
     <!-- NOTE: THE CALLED SCRIPT INTRODUCES HIDDEN DEPENDENCIES -->
     <!--       These dependencies include Docker and curl.      -->
     <plugins>
@@ -31,7 +56,18 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>buildnumber-maven-plugin</artifactId>
       </plugin>
-      <!-- Run script to download latest tokens openapi_v3.yml and generate bundled json file  -->
+
+      <plugin>
+        <!-- The version is set in the parent pom -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <suiteXmlFiles>
+            <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+          </suiteXmlFiles>
+        </configuration>
+      </plugin>
+      <!-- Run script to download latest globuxproxy openapi_v3.yml and generate bundled json file  -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
@@ -60,30 +96,49 @@
               <goal>generate</goal>
             </goals>
             <configuration>
-              <inputSpec>${project.basedir}/target/tokens.json</inputSpec>
+              <!-- Location of openapi spec -->
+              <inputSpec>${specPath}</inputSpec>
               <enablePostProcessFile>true</enablePostProcessFile>
               <generateAliasAsModel>true</generateAliasAsModel>
               <output>${project.build.directory}/generated-sources/openapi</output>
               <generatorName>java</generatorName>
               <groupId>edu.utexas.tacc.tapis</groupId>
-              <invokerPackage>edu.utexas.tacc.tapis.tokens.client.gen</invokerPackage>
-              <apiPackage>edu.utexas.tacc.tapis.tokens.client.gen.api</apiPackage>
-              <modelPackage>edu.utexas.tacc.tapis.tokens.client.gen.model</modelPackage>
+              <invokerPackage>edu.utexas.tacc.tapis.globusproxy.client.gen</invokerPackage>
+              <apiPackage>edu.utexas.tacc.tapis.globusproxy.client.gen.api</apiPackage>
+              <modelPackage>edu.utexas.tacc.tapis.globusproxy.client.gen.model</modelPackage>
+              <!-- Turn off generation of stuff we do not need -->
               <generateApiTests>false</generateApiTests>
               <generateApiDocumentation>false</generateApiDocumentation>
               <generateModelTests>false</generateModelTests>
               <generateModelDocumentation>false</generateModelDocumentation>
               <configOptions>
                 <sourceFolder>src/gen/java/main</sourceFolder>
+                <!-- Use java 8 libraries instead of 3rd party libraries -->
+                <java8>true</java8>
                 <dateLibrary>java8</dateLibrary>
               </configOptions>
             </configuration>
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <configuration>
+          <createDependencyReducedPom>false</createDependencyReducedPom>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
 
-    <finalName>tokens-client</finalName>
+    <finalName>globusproxy-client</finalName>
   </build>
 
 </project>
