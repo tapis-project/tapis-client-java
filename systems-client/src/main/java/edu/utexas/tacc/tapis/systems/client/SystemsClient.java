@@ -46,7 +46,6 @@ import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
 import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerProfile;
 import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
 import edu.utexas.tacc.tapis.systems.client.gen.model.ListTypeEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ResolveEnum;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_COMPUTETOTAL;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_ORDERBY;
@@ -79,17 +78,14 @@ public class SystemsClient implements ITapisClient
   private static final String impersonationIdNull = null;
   private static final AuthnMethod authnMethodNull = null;
   private static final boolean sharedAppCtxFalse = false;
-  private static final boolean resolveEffectiveUserTrue = true;
   private static final boolean returnCredentialsTrue = true;
 
   // Default values
   private static final AuthnMethod DEFAULT_AUTHN_METHOD = authnMethodNull;
-  private static final boolean DEFAULT_RESOLVE_EFFECTIVE_USER = true;
   private static final boolean DEFAULT_REQUIRE_EXEC_PERM = false;
   private static final boolean DEFAULT_RETURN_CREDENTIALS = false;
   private static final boolean DEFAULT_SHOW_DELETED = false;
   private static final ListTypeEnum DEFAULT_LIST_TYPE_ENUM = ListTypeEnum.ALL;
-  private static final ResolveEnum DEFAULT_RESOLVE_TYPE_ENUM = ResolveEnum.ALL;
 
 
   // ************************************************************************
@@ -398,7 +394,6 @@ public class SystemsClient implements ITapisClient
    *  select = ALL
    *  returnCreds = false
    *  impersonationId = null
-   *  resolveEffectiveUser = true
    *  sharedAppCtx = false
    *
    * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
@@ -411,42 +406,12 @@ public class SystemsClient implements ITapisClient
   public TapisSystem getSystem(String systemId) throws TapisClientException
   {
     return getSystem(systemId, DEFAULT_AUTHN_METHOD, DEFAULT_REQUIRE_EXEC_PERM, DEFAULT_SELECT_ALL,
-                     DEFAULT_RETURN_CREDENTIALS, impersonationIdNull, DEFAULT_RESOLVE_TYPE_ENUM, sharedAppCtxFalse);
-  }
-
-  /**
-   * Get a system using arguments convenient for other services.
-   * Use of returnCredentials, impersonationId and sharedAppCtx is restricted. Only certain Tapis services are authorized.
-   * If authnMethod is null then default authn method for the system is used.
-   * Called by Jobs which always expects effectiveUserId to be resolved, so we use resolveEffectiveUserId=true.
-   *
-   * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
-   * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
-   *
-   * @param systemId System systemId
-   * @param authnMethod - Desired authn method used when fetching credentials, for default pass in null.
-   * @param requireExecPerm Check for EXECUTE permission as well as READ permission
-   * @param selectStr - Attributes to be included in result. For example select=id,owner,host
-   * @param returnCredentials - Include credentials in returned system object
-   * @param impersonationId - use provided Tapis username instead of oboUser when checking auth and
-   *                          resolving effectiveUserId
-   * @param sharedAppCtx - Indicates system will be used as part of a shared application context.
-   *                       Tapis authorization will be skipped.
-   * @return The system or null if system not found
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public TapisSystem getSystem(String systemId, AuthnMethod authnMethod, boolean requireExecPerm, String selectStr,
-                               boolean returnCredentials, String impersonationId, boolean sharedAppCtx)
-          throws TapisClientException
-  {
-    return getSystem(systemId, authnMethod, requireExecPerm, selectStr, returnCredentials, impersonationId,
-                     DEFAULT_RESOLVE_TYPE_ENUM, sharedAppCtx);
+                     DEFAULT_RETURN_CREDENTIALS, impersonationIdNull, sharedAppCtxFalse);
   }
 
   /**
    * Get a system by systemId returning credentials for default authn method.
    * Use of this method is restricted. Only certain Tapis services are authorized to call this method.
-   * Called by services which always expect effectiveUserId to be resolved, so we use resolveEffectiveUserId=true.
    *
    * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
    * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
@@ -458,7 +423,7 @@ public class SystemsClient implements ITapisClient
   public TapisSystem getSystemWithCredentials(String systemId) throws TapisClientException
   {
     return getSystem(systemId, DEFAULT_AUTHN_METHOD, DEFAULT_REQUIRE_EXEC_PERM, DEFAULT_SELECT_ALL,
-                     returnCredentialsTrue, impersonationIdNull, ResolveEnum.ALL, sharedAppCtxFalse);
+                     returnCredentialsTrue, impersonationIdNull, sharedAppCtxFalse);
   }
 
   /**
@@ -480,15 +445,14 @@ public class SystemsClient implements ITapisClient
    * @param returnCredentials - Include credentials in returned system object
    * @param impersonationId - use provided Tapis username instead of oboUser when checking auth and
    *                          resolving effectiveUserId
-   * @param resolveType - Controls which dynamic attributes are resolved: ALL, NONE, ROOT_DIR, EFFECTIVE_USER
    * @param sharedAppCtx - Indicates system will be used as part of a shared application context.
    *                       Tapis authorization will be skipped.
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
   public TapisSystem getSystem(String systemId, AuthnMethod authnMethod, boolean requireExecPerm, String selectStr,
-                               boolean returnCredentials, String impersonationId, ResolveEnum resolveType,
-                               boolean sharedAppCtx) throws TapisClientException
+                               boolean returnCredentials, String impersonationId, boolean sharedAppCtx)
+          throws TapisClientException
   {
     String selectStr1 = DEFAULT_SELECT_ALL;
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
@@ -497,7 +461,7 @@ public class SystemsClient implements ITapisClient
     try
     {
       resp = sysApi.getSystem(systemId, authnMethodStr, requireExecPerm, selectStr1, returnCredentials,
-                              impersonationId, resolveType, sharedAppCtx);
+                              impersonationId, sharedAppCtx);
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -533,7 +497,7 @@ public class SystemsClient implements ITapisClient
   public List<TapisSystem> getSystems(String searchStr) throws TapisClientException
   {
     return getSystems(searchStr, DEFAULT_LIMIT, DEFAULT_ORDERBY, DEFAULT_SKIP, DEFAULT_STARTAFTER,
-                      DEFAULT_SELECT_SUMMARY, DEFAULT_RESOLVE_EFFECTIVE_USER, DEFAULT_SHOW_DELETED);
+                      DEFAULT_SELECT_SUMMARY, DEFAULT_SHOW_DELETED);
   }
 
 
@@ -541,11 +505,10 @@ public class SystemsClient implements ITapisClient
    * Get systems using all supported parameters except listType. For backward compatibility
    */
   public List<TapisSystem> getSystems(String searchStr, int limit, String orderBy, int skip, String startAfter,
-                                      String selectStr, boolean resolveEffectiveUser, boolean showDeleted)
+                                      String selectStr, boolean showDeleted)
           throws TapisClientException
   {
-    return getSystems(searchStr, DEFAULT_LIST_TYPE_ENUM, limit, orderBy, skip, startAfter, selectStr,
-                      resolveEffectiveUser, showDeleted);
+    return getSystems(searchStr, DEFAULT_LIST_TYPE_ENUM, limit, orderBy, skip, startAfter, selectStr, showDeleted);
   }
 
   /**
@@ -564,14 +527,12 @@ public class SystemsClient implements ITapisClient
    * @param skip - number of results to skip (may not be used with startAfter)
    * @param startAfter - where to start when sorting, e.g. limit=10&orderBy=id(asc)&startAfter=101 (may not be used with skip)
    * @param selectStr - List of attributes to be included as part of each result item.
-   * @param resolveEffectiveUser - If effectiveUserId is set to ${apiUserId} then resolve it, else always return value
-   *                               provided in system definition. By default, this is true.
    * @param showDeleted - whether to included resources that have been marked as deleted.
    * @return list of systems available to the caller and matching search conditions.
    * @throws TapisClientException - If api call throws an exception
    */
   public List<TapisSystem> getSystems(String searchStr, ListTypeEnum listTypeEnum, int limit, String orderBy, int skip, String startAfter,
-                                      String selectStr, boolean resolveEffectiveUser, boolean showDeleted)
+                                      String selectStr, boolean showDeleted)
           throws TapisClientException
   {
     String selectStr1 = DEFAULT_SELECT_SUMMARY;
@@ -579,8 +540,8 @@ public class SystemsClient implements ITapisClient
     RespSystems resp = null;
     try
     {
-      resp = sysApi.getSystems(searchStr, listTypeEnum, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL, selectStr1,
-                               resolveEffectiveUser, showDeleted);
+      resp = sysApi.getSystems(searchStr, listTypeEnum, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL,
+                               selectStr1, showDeleted);
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -1044,8 +1005,7 @@ public class SystemsClient implements ITapisClient
     rProfile.name(profile.getName());
     rProfile.description(profile.getDescription());
     rProfile.owner(profile.getOwner());
-    rProfile.moduleLoadCommand(profile.getModuleLoadCommand());
-    rProfile.modulesToLoad(profile.getModulesToLoad());
+    rProfile.moduleLoads(profile.getModuleLoads());
     rProfile.hiddenOptions(profile.getHiddenOptions());
     return rProfile;
   }

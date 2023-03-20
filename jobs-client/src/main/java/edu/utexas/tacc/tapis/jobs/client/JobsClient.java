@@ -449,14 +449,14 @@ public class JobsClient
     /* getJobSearchListByPostSqlStr:                                                */
     /* ---------------------------------------------------------------------------- */
     public List<Job> getJobSearchListByPostSqlStr(String [] req, int limit, int skip, 
-    		int startAfter, String orderBy, boolean computeTotal, String select)
+    		int startAfter, String orderBy, boolean computeTotal, String select, String listType)
      throws TapisClientException
     {
 
     	RespJobSearchAllAttributes resp = null;
         try {  var jobsApi = new JobsApi(_apiClient);
         	resp = jobsApi.getJobSearchListByPostSqlStr(limit, skip, startAfter, orderBy, computeTotal,
-        			select, false, req);
+        			select, listType, false, req);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
