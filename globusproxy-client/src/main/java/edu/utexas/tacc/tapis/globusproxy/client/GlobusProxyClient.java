@@ -605,13 +605,8 @@ public class GlobusProxyClient implements ITapisClient
     transferTask.setSyncLevel(r.getSyncLevel());
     transferTask.setTaskId(r.getTaskId());
     transferTask.setVerifyChecksum(r.getVerifyChecksum());
-    // NOTE that although the generated code has two enum types for both Status and Type,
-    //   they come from the same sources defined in the openapi spec. Namely, GlobusTransferTaskStatusEnum
-    //   and GlobusTaskTypeEnum defined in the openapi spec. So it should be OK to set one from the other
-    String statusStr = r.getStatus() == null ? "" : r.getStatus().name();
-    String typeStr = r.getType() == null ? "" : r.getType().name();
-    transferTask.setStatus(GlobusTransferTask.StatusEnum.valueOf(statusStr));
-    transferTask.setType(GlobusTransferTask.TypeEnum.valueOf(typeStr));
+    transferTask.setStatus(r.getStatus());
+    transferTask.setType(r.getType());
     return transferTask;
   }
 }
