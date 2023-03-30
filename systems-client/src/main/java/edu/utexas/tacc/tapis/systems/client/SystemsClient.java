@@ -77,7 +77,8 @@ public class SystemsClient implements ITapisClient
   // Named values to make it clear what is being passed in to a method
   private static final String impersonationIdNull = null;
   private static final AuthnMethod authnMethodNull = null;
-  private static final boolean sharedAppCtxFalse = false;
+  private static final String sharedCtxNull = null;
+  private static final String resourceTenantNull = null;
   private static final boolean returnCredentialsTrue = true;
 
   // Default values
@@ -394,7 +395,7 @@ public class SystemsClient implements ITapisClient
    *  select = ALL
    *  returnCreds = false
    *  impersonationId = null
-   *  sharedAppCtx = false
+   *  sharedCtx = null
    *
    * Attributes named *notes* contain free form json and are represented as java Object type in generated TapisSystem class.
    * Client code converts all *notes* attributes to String type, so each *notes* Object can safely be cast to String.
@@ -406,7 +407,7 @@ public class SystemsClient implements ITapisClient
   public TapisSystem getSystem(String systemId) throws TapisClientException
   {
     return getSystem(systemId, DEFAULT_AUTHN_METHOD, DEFAULT_REQUIRE_EXEC_PERM, DEFAULT_SELECT_ALL,
-                     DEFAULT_RETURN_CREDENTIALS, impersonationIdNull, sharedAppCtxFalse);
+                     DEFAULT_RETURN_CREDENTIALS, impersonationIdNull, sharedCtxNull, resourceTenantNull);
   }
 
   /**
@@ -423,14 +424,23 @@ public class SystemsClient implements ITapisClient
   public TapisSystem getSystemWithCredentials(String systemId) throws TapisClientException
   {
     return getSystem(systemId, DEFAULT_AUTHN_METHOD, DEFAULT_REQUIRE_EXEC_PERM, DEFAULT_SELECT_ALL,
-                     returnCredentialsTrue, impersonationIdNull, sharedAppCtxFalse);
+                     returnCredentialsTrue, impersonationIdNull, sharedCtxNull, resourceTenantNull);
+  }
+
+  // Simple wrapper for backward compatibility.
+  public TapisSystem getSystem(String systemId, AuthnMethod authnMethod, boolean requireExecPerm, String selectStr,
+                               boolean returnCredentials, String impersonationId, String sharedCtx)
+          throws TapisClientException
+  {
+    return getSystem(systemId, authnMethod, requireExecPerm, selectStr, returnCredentials, impersonationId, sharedCtx,
+                     resourceTenantNull);
   }
 
   /**
    * Get a system using all supported parameters.
    *
    * Only certain Tapis services are authorized to use
-   *    returnCredentials = true, impersonationId != null or sharedAppCtx = true.
+   *    returnCredentials = true, impersonationId != null or sharedCtx = application grantor
    *
    * If authnMethod is null then default authn method for the system is used.
    * If selectStr is null or empty then all attributes are selected.
@@ -445,13 +455,13 @@ public class SystemsClient implements ITapisClient
    * @param returnCredentials - Include credentials in returned system object
    * @param impersonationId - use provided Tapis username instead of oboUser when checking auth and
    *                          resolving effectiveUserId
-   * @param sharedAppCtx - Indicates system will be used as part of a shared application context.
+   * @param sharedCtx - Indicates system will be used as part of a shared application context.
    *                       Tapis authorization will be skipped.
    * @return The system or null if system not found
    * @throws TapisClientException - If api call throws an exception
    */
   public TapisSystem getSystem(String systemId, AuthnMethod authnMethod, boolean requireExecPerm, String selectStr,
-                               boolean returnCredentials, String impersonationId, boolean sharedAppCtx)
+                               boolean returnCredentials, String impersonationId, String sharedCtx, String resourceTenant)
           throws TapisClientException
   {
     String selectStr1 = DEFAULT_SELECT_ALL;
@@ -461,7 +471,7 @@ public class SystemsClient implements ITapisClient
     try
     {
       resp = sysApi.getSystem(systemId, authnMethodStr, requireExecPerm, selectStr1, returnCredentials,
-                              impersonationId, sharedAppCtx);
+                              impersonationId, sharedCtx, resourceTenant);
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }

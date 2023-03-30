@@ -2,21 +2,11 @@ package edu.utexas.tacc.tapis.apps.client;
 
 import java.lang.reflect.Type;
 import java.util.List;
-
-import edu.utexas.tacc.tapis.apps.client.gen.model.ListTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.reflect.TypeToken;
-
-import edu.utexas.tacc.tapis.apps.client.gen.api.GeneralApi;
-import edu.utexas.tacc.tapis.apps.client.gen.model.AppArgSpec;
-import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
-import edu.utexas.tacc.tapis.apps.client.gen.model.ReqPutApp;
-import edu.utexas.tacc.tapis.apps.client.gen.model.RespApps;
-import edu.utexas.tacc.tapis.apps.client.gen.model.RespBasic;
-import edu.utexas.tacc.tapis.apps.client.gen.model.RespBoolean;
 
 import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
@@ -24,8 +14,16 @@ import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.client.shared.ITapisClient;
 import edu.utexas.tacc.tapis.apps.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.apps.client.gen.ApiException;
-import edu.utexas.tacc.tapis.apps.client.gen.api.PermissionsApi;
 import edu.utexas.tacc.tapis.apps.client.gen.api.ApplicationsApi;
+import edu.utexas.tacc.tapis.apps.client.gen.api.GeneralApi;
+import edu.utexas.tacc.tapis.apps.client.gen.api.PermissionsApi;
+import edu.utexas.tacc.tapis.apps.client.gen.model.AppArgSpec;
+import edu.utexas.tacc.tapis.apps.client.gen.model.KeyValuePair;
+import edu.utexas.tacc.tapis.apps.client.gen.model.ReqPutApp;
+import edu.utexas.tacc.tapis.apps.client.gen.model.RespApps;
+import edu.utexas.tacc.tapis.apps.client.gen.model.RespBasic;
+import edu.utexas.tacc.tapis.apps.client.gen.model.RespBoolean;
+import edu.utexas.tacc.tapis.apps.client.gen.model.ListTypeEnum;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqPostApp;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqPerms;
 import edu.utexas.tacc.tapis.apps.client.gen.model.ReqSearchApps;
@@ -35,7 +33,6 @@ import edu.utexas.tacc.tapis.apps.client.gen.model.RespNameArray;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespResourceUrl;
 import edu.utexas.tacc.tapis.apps.client.gen.model.RespApp;
 import edu.utexas.tacc.tapis.apps.client.gen.model.TapisApp;
-
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_COMPUTETOTAL;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SEARCH;
@@ -64,7 +61,8 @@ public class AppsClient implements ITapisClient
   private static final Type linkedTreeMapType = new TypeToken<LinkedTreeMap<Object,Object>>(){}.getType();
 
   // Named null values to make it clear what is being passed in to a method
-  private static final String nullImpersonationId = null;
+  private static final String impersonationIdNull = null;
+  private static final String resourceTenantNull = null;
 
   // Defaults
   public static final boolean DEFAULT_STRICT_FILE_INPUTS = false;
@@ -345,7 +343,14 @@ public class AppsClient implements ITapisClient
    */
   public TapisApp getApp(String appId) throws TapisClientException
   {
-    return getAppLatestVersion(appId, Boolean.FALSE, DEFAULT_SELECT_ALL);
+    return getAppLatestVersion(appId, Boolean.FALSE, DEFAULT_SELECT_ALL, resourceTenantNull);
+  }
+
+  // Simple wrapper for backward compatibility.
+  public TapisApp getAppLatestVersion(String appId, Boolean requireExecPerm, String selectStr)
+          throws TapisClientException
+  {
+    return getAppLatestVersion(appId, requireExecPerm, selectStr, resourceTenantNull);
   }
 
   /**
@@ -361,12 +366,13 @@ public class AppsClient implements ITapisClient
    * @return Most recent version of the app
    * @throws TapisClientException - If api call throws an exception
    */
-  public TapisApp getAppLatestVersion(String appId, Boolean requireExecPerm, String selectStr) throws TapisClientException
+  public TapisApp getAppLatestVersion(String appId, Boolean requireExecPerm, String selectStr, String resourceTenant)
+          throws TapisClientException
   {
     String selectStr1 = DEFAULT_SELECT_ALL;
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
     RespApp resp = null;
-    try {resp = appApi.getAppLatestVersion(appId, requireExecPerm, selectStr1); }
+    try {resp = appApi.getAppLatestVersion(appId, requireExecPerm, selectStr1, resourceTenant); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
@@ -389,7 +395,7 @@ public class AppsClient implements ITapisClient
    */
   public TapisApp getApp(String appId, String appVersion) throws TapisClientException
   {
-    return getApp(appId, appVersion, Boolean.FALSE, nullImpersonationId, DEFAULT_SELECT_ALL);
+    return getApp(appId, appVersion, Boolean.FALSE, impersonationIdNull, DEFAULT_SELECT_ALL, resourceTenantNull);
   }
 
   /**
@@ -409,11 +415,16 @@ public class AppsClient implements ITapisClient
   public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm, String impersonationId)
           throws TapisClientException
   {
-    return getApp(appId, appVersion, requireExecPerm, impersonationId, DEFAULT_SELECT_ALL);
+    return getApp(appId, appVersion, requireExecPerm, impersonationId, DEFAULT_SELECT_ALL, resourceTenantNull);
   }
   public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm) throws TapisClientException
   {
-    return getApp(appId, appVersion, requireExecPerm, nullImpersonationId, DEFAULT_SELECT_ALL);
+    return getApp(appId, appVersion, requireExecPerm, impersonationIdNull, DEFAULT_SELECT_ALL, resourceTenantNull);
+  }
+  public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm, String impersonationId, String selectStr)
+          throws TapisClientException
+  {
+    return getApp(appId, appVersion, requireExecPerm, impersonationId, selectStr, resourceTenantNull);
   }
 
   /**
@@ -432,13 +443,13 @@ public class AppsClient implements ITapisClient
    * @throws TapisClientException - If api call throws an exception
    */
   public TapisApp getApp(String appId, String appVersion, Boolean requireExecPerm, String impersonationId,
-                         String selectStr)
+                         String selectStr, String resourceTenant)
           throws TapisClientException
   {
     String selectStr1 = DEFAULT_SELECT_ALL;
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
     RespApp resp = null;
-    try {resp = appApi.getApp(appId, appVersion, requireExecPerm, impersonationId, selectStr1); }
+    try {resp = appApi.getApp(appId, appVersion, requireExecPerm, impersonationId, selectStr1, resourceTenant); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
