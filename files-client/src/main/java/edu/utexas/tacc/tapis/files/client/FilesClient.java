@@ -78,6 +78,9 @@ public class FilesClient implements ITapisClient
     private final TransfersApi fileTransfers;
     private final GeneralApi fileHealth;
     private final ApiClient apiClient;
+  private static int DEFAULT_CLIENT_CONNECTION_TIMEOUT=30000;
+  private static int DEFAULT_CLIENT_READ_TIMEOUT=30000;
+  private static int DEFAULT_CLIENT_WRITE_TIMEOUT=30000;
 
   /**
    * Default constructor which uses the compiled-in basePath based on the openapi spec
@@ -86,8 +89,15 @@ public class FilesClient implements ITapisClient
   public FilesClient()
   {
     apiClient = new ApiClient();
-    apiClient.setConnectTimeout(30000);
-    apiClient.setReadTimeout(30000);
+    apiClient.setConnectTimeout(DEFAULT_CLIENT_CONNECTION_TIMEOUT);
+    apiClient.setReadTimeout(DEFAULT_CLIENT_READ_TIMEOUT);
+    apiClient.setWriteTimeout(DEFAULT_CLIENT_WRITE_TIMEOUT);
+    JSON mapper = new JSON();
+    Gson gson = new GsonBuilder()
+            .registerTypeAdapter(Instant.class, new InstantAdapter())
+            .create();
+    mapper.setGson(gson);
+    apiClient.setJSON(mapper);
     fileOperations = new FileOperationsApi(apiClient);
     fileContents = new ContentApi(apiClient);
     filePermissions = new PermissionsApi(apiClient);
@@ -121,21 +131,9 @@ public class FilesClient implements ITapisClient
    * @param jwt the token to set in an HTTP header
    */
     public FilesClient(String basePath, String jwt) {
-        apiClient = new ApiClient();
-        JSON mapper = new JSON();
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapter(Instant.class, new InstantAdapter())
-                .create();
-        mapper.setGson(gson);
-        apiClient.setJSON(mapper);
+      this();
         if (!StringUtils.isBlank(basePath)) apiClient.setBasePath(basePath);
         if (!StringUtils.isBlank(jwt)) apiClient.addDefaultHeader("x-tapis-token", jwt);
-        fileOperations = new FileOperationsApi(apiClient);
-        fileContents = new ContentApi(apiClient);
-        filePermissions = new PermissionsApi(apiClient);
-        fileSharing = new SharingApi(apiClient);
-        fileTransfers = new TransfersApi(apiClient);
-        fileHealth = new GeneralApi(apiClient);
     }
 
     // getApiClient: Return underlying ApiClient
