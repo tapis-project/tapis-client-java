@@ -3,6 +3,8 @@ package edu.utexas.tacc.tapis.systems.client;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
+
+import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostChildSystem;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.JsonObject;
@@ -386,6 +388,76 @@ public class SystemsClient implements ITapisClient
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
     else return -1;
+  }
+
+  /**
+   * Unlink a child system from a parent.  This makes the child system a standalone system.
+   * unlinkChild and unlinkFromParent are identical in that they each make a childSystem become a standalone
+   * system.  The difference is in the authorization.  unlinkFromParent requires access to the child.  unlinkChild
+   * requires access to the parent.
+   * @param childSystemId - id of the child system to unlink
+   * @return  number of records modified as a result of the action
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public int unlinkFromParent(String childSystemId) throws TapisClientException {
+    RespChangeCount resp = null;
+    try { resp = sysApi.unlinkFromParent(childSystemId); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
+    else return -1;
+  }
+
+  /**
+   * Unlink a child system from a parent.  This makes the child system a standalone system.
+   * unlinkChild and unlinkFromParent are identical in that they each make a childSystem become a standalone
+   * system.  The difference is in the authorization.  unlinkFromParent requires access to the child.  unlinkChild
+   * requires access to the parent.
+   *
+   * @param parentSystemId - id of the parent of the child system to unlink
+   * @param childSystemId - id of the child system to unlink
+   * @return  number of records modified as a result of the action
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public int unlinkChild(String parentSystemId, String childSystemId) throws TapisClientException {
+    RespChangeCount resp = null;
+    try { resp = sysApi.unlinkChild(parentSystemId, childSystemId); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
+    else return -1;
+  }
+
+  /**
+   * Unlinks all child systems from a parent system.
+   *
+   * @param parentSystemId - id of the parent system
+   * @return  number of records modified as a result of the action
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public int unlinkAllChildren(String parentSystemId) throws TapisClientException {
+    RespChangeCount resp = null;
+    try { resp = sysApi.unlinkAllChildren(parentSystemId); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null && resp.getResult().getChanges() != null) return resp.getResult().getChanges();
+    else return -1;
+  }
+
+  /**
+   * Creates a child system from a parent systme.  The parent must have enabled child systems.
+   * @param parentSystemId - the id of the parent system
+   * @param request - Pre-populated ReqPostSystem instance
+   * @return url pointing to created resource
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public String createChildSystem(String parentSystemId, ReqPostChildSystem request) throws TapisClientException {
+    // Submit the request and return the response
+    RespResourceUrl resp = null;
+    try { resp = sysApi.createChildSystem(parentSystemId, request); }
+    catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
+    catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
+    if (resp != null && resp.getResult() != null) return resp.getResult().getUrl(); else return null;
   }
 
   /**
