@@ -408,14 +408,14 @@ public class JobsClient
     /* ---------------------------------------------------------------------------- */
     /* getJobOutputList:                                                            */
     /* ---------------------------------------------------------------------------- */
-    public List<FileInfo> getJobOutputList(String jobUuid, String path, int limit, int skip)
+    public List<FileInfo> getJobOutputList(String jobUuid, String path, boolean allowIfRunning, int limit, int skip)
      throws TapisClientException
     {
     	RespGetJobOutputList resp = null;
         try {
             // Get the API object using default networking.
             var jobsApi = new JobsApi(_apiClient);
-            resp = jobsApi.getJobOutputList(jobUuid, path, limit, skip,false);
+            resp = jobsApi.getJobOutputList(jobUuid, path, limit, skip, allowIfRunning=false,false);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -425,7 +425,7 @@ public class JobsClient
     /* ---------------------------------------------------------------------------- */
     /* getJobOutputDownload:                                                        */
     /* ---------------------------------------------------------------------------- */
-    public InputStream getJobOutputDownload(String jobUuid, String path, boolean compress, String format) throws TapisClientException, IOException {
+    public InputStream getJobOutputDownload(String jobUuid, String path, boolean compress, String format, boolean allowIfRunning) throws TapisClientException, IOException {
 		
     	       
     	InputStream stream = null;
@@ -435,7 +435,7 @@ public class JobsClient
         	// Get the API object using default networking.
             var jobsApi = new JobsApi(_apiClient);
              try {
-				Call outputFile = jobsApi.getJobOutputDownloadCall(jobUuid, path, compress, format, false,null);
+				Call outputFile = jobsApi.getJobOutputDownloadCall(jobUuid, path, compress, format, allowIfRunning=false,false,null);
 						Response response =  outputFile.execute();
 		          stream = response.body().byteStream();
              } catch (ApiException e) {
