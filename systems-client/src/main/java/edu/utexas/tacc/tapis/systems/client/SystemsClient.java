@@ -5,8 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import edu.utexas.tacc.tapis.systems.client.gen.api.ChildSystemsApi;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostChildSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUnlinkChildren;
+import edu.utexas.tacc.tapis.systems.client.gen.model.*;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.JsonObject;
@@ -23,33 +22,7 @@ import edu.utexas.tacc.tapis.systems.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.PermissionsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.SchedulerProfilesApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.SystemsApi;
-import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
-import edu.utexas.tacc.tapis.systems.client.gen.model.CategoryEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
-import edu.utexas.tacc.tapis.systems.client.gen.model.DatatypeEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPatchSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostPutCredential;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSchedulerProfile;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPutSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqSearchSystems;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespBasic;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespBoolean;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespChangeCount;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespCredential;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespNameArray;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespResourceUrl;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfile;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfiles;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystems;
-import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerProfile;
-import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ListTypeEnum;
+
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_COMPUTETOTAL;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_ORDERBY;
@@ -808,7 +781,7 @@ public class SystemsClient implements ITapisClient
    * @param req Request containing credentials (password, keys, etc).
    * @throws TapisClientException - If api call throws an exception
    */
-  public void updateUserCredential(String systemId, String userName, Credential req) throws TapisClientException
+  public void updateUserCredential(String systemId, String userName, ReqUpdateCredential req) throws TapisClientException
   {
     updateUserCredential(systemId, userName, req, DEFAULT_SKIP_CREDENTIAL_CHECK);
   }
@@ -821,7 +794,7 @@ public class SystemsClient implements ITapisClient
    * @param req Request containing credentials (password, keys, etc).
    * @throws TapisClientException - If api call throws an exception
    */
-  public void updateUserCredential(String systemId, String userName, Credential req, boolean skipCredCheck) throws TapisClientException
+  public void updateUserCredential(String systemId, String userName, ReqUpdateCredential req, boolean skipCredCheck) throws TapisClientException
   {
     // Submit the request
     try { credsApi.createUserCredential(systemId, userName, req, skipCredCheck); }
