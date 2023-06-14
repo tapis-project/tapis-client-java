@@ -65,6 +65,11 @@ public class JobsClient
     public static final String TAPIS_JWT_USER    = "X-Tapis-User";
     public static final String TAPIS_HASH_HEADER = "X-Tapis-User-Token-Hash";
     
+    // The distinguished string value of an environment variable that is interpreted 
+    // as the variable being unset (as opposed to set to the empty string, which is 
+    // a valid value).
+    public static final String TAPIS_ENV_VAR_UNSET = "!tapis_not_set";
+    
     // Configuration defaults.
     private static final String JOBS_CLIENT_USER_AGENT = "JobsClient";
     
