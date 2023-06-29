@@ -770,7 +770,8 @@ public class AppsClient implements ITapisClient
       var appArgs = app.getJobAttributes().getParameterSet().getAppArgs();
       var containerArgs = app.getJobAttributes().getParameterSet().getContainerArgs();
       var schedulerOptions = app.getJobAttributes().getParameterSet().getSchedulerOptions();
-      // Process appArgs, containerArgs and schedulerOptions
+      var envVariables = app.getJobAttributes().getParameterSet().getEnvVariables();
+      // Process appArgs, containerArgs, schedulerOptions and envVariables
       if (appArgs != null)
       {
         for (AppArgSpec argSpec : appArgs)
@@ -790,6 +791,13 @@ public class AppsClient implements ITapisClient
         for (AppArgSpec argSpec : schedulerOptions)
         {
           argSpec.setNotes(convertLinkedTreeMapToString(argSpec.getNotes(), appId, "SchedulerOption"));
+        }
+      }
+      if (envVariables != null)
+      {
+        for (KeyValuePair kvp : envVariables)
+        {
+          kvp.setNotes(convertLinkedTreeMapToString(kvp.getNotes(), appId, "EnvVariable"));
         }
       }
     }

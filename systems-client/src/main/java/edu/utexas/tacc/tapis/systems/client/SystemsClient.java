@@ -1115,30 +1115,54 @@ public class SystemsClient implements ITapisClient
    * Do any client side postprocessing of a returned system.
    * This involves transforming any notes attributes from a LinkedTreeMap into a json string.
    *
+   * There is a top level notes attribute as well as a notes attribute for any jobEnvVariables
    * @param tSys - TapisSystem to process
    * @return - Resulting TapisSystem
    * @throws TapisClientException if notes object is not of type LinkedTreeMap
    */
   TapisSystem postProcessSystem(TapisSystem tSys) throws TapisClientException
   {
-    // If no system or no notes then we are done
-    if (tSys == null || tSys.getNotes() == null) return tSys;
+    // If no system, then we are done
+    if (tSys == null) return tSys;
+    String sysId = tSys.getId();
 
-    // We have a notes attribute. Convert it from a LinkedTreeMap to a string with json.
-    Object notes = tSys.getNotes();
+    // Convert top level notes if present.
+    Object topNotes = tSys.getNotes();
+    if (topNotes != null) tSys.setNotes(convertLinkedTreeMapToString(topNotes, sysId, "TopNotes"));
+
+    // Now check for notes in jobEnvVariables
+    List<KeyValuePair> envVars = tSys.getJobEnvVariables();
+    if (envVars != null && !envVars.isEmpty())
+    {
+      for (KeyValuePair kvp : envVars)
+      {
+        if (kvp != null && kvp.getNotes() != null)
+        {
+          kvp.setNotes(convertLinkedTreeMapToString(kvp.getNotes(), sysId, "jobEnvVariable"));
+        }
+      }
+    }
+    return tSys;
+  }
+
+  /*
+   * Convert a notes LinkedTreeMap to a json string.
+   * If notes is not of type LinedTreeMap log an error and throw exception.
+   */
+  private static Object convertLinkedTreeMapToString(Object notes, String sysId, String notesLabel)
+          throws TapisClientException
+  {
     // We expect notes to be of type com.google.gson.internal.LinkedTreeMap. Make sure that is the case.
     if (!(notes instanceof LinkedTreeMap<?,?>))
     {
       // Log an error and throw exception
-      String msg = String.format("ERROR: Notes attribute in system not of type LinkedTreeMap. System: %s. Notes: %s",
-                                 tSys.getId(), notes);
+      String msg =
+              String.format("ERROR: Notes attribute in system not of type LinkedTreeMap. System: %s. Where found: %s. Notes: %s",
+                      sysId, notesLabel, notes);
       throw new TapisClientException(msg);
     }
-
     // Convert the gson LinkedTreeMap to a string.
-    var lmap = (LinkedTreeMap<String, String>) tSys.getNotes();
-    String tmpNotesStr = ClientTapisGsonUtils.getGson().toJson(lmap, linkedTreeMapType);
-    tSys.setNotes(tmpNotesStr);
-    return tSys;
+    var lmap = (LinkedTreeMap<String, String>) notes;
+    return  ClientTapisGsonUtils.getGson().toJson(lmap, linkedTreeMapType);
   }
-}
+ }
