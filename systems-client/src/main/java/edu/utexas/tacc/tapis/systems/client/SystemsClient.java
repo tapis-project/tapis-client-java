@@ -5,8 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import edu.utexas.tacc.tapis.systems.client.gen.api.ChildSystemsApi;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostChildSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqUnlinkChildren;
+import edu.utexas.tacc.tapis.systems.client.gen.model.*;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.JsonObject;
@@ -23,33 +22,7 @@ import edu.utexas.tacc.tapis.systems.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.PermissionsApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.SchedulerProfilesApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.SystemsApi;
-import edu.utexas.tacc.tapis.systems.client.gen.model.Capability;
-import edu.utexas.tacc.tapis.systems.client.gen.model.CategoryEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.Credential;
-import edu.utexas.tacc.tapis.systems.client.gen.model.DatatypeEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.LogicalQueue;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqMatchConstraints;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPatchSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPerms;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostPutCredential;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSchedulerProfile;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPostSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqPutSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ReqSearchSystems;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespBasic;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespBoolean;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespChangeCount;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespCredential;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespNameArray;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespResourceUrl;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfile;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSchedulerProfiles;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.RespSystems;
-import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerHiddenOptionEnum;
-import edu.utexas.tacc.tapis.systems.client.gen.model.SchedulerProfile;
-import edu.utexas.tacc.tapis.systems.client.gen.model.TapisSystem;
-import edu.utexas.tacc.tapis.systems.client.gen.model.ListTypeEnum;
+
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_COMPUTETOTAL;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_ORDERBY;
@@ -808,7 +781,7 @@ public class SystemsClient implements ITapisClient
    * @param req Request containing credentials (password, keys, etc).
    * @throws TapisClientException - If api call throws an exception
    */
-  public void updateUserCredential(String systemId, String userName, Credential req) throws TapisClientException
+  public void updateUserCredential(String systemId, String userName, ReqUpdateCredential req) throws TapisClientException
   {
     updateUserCredential(systemId, userName, req, DEFAULT_SKIP_CREDENTIAL_CHECK);
   }
@@ -821,7 +794,7 @@ public class SystemsClient implements ITapisClient
    * @param req Request containing credentials (password, keys, etc).
    * @throws TapisClientException - If api call throws an exception
    */
-  public void updateUserCredential(String systemId, String userName, Credential req, boolean skipCredCheck) throws TapisClientException
+  public void updateUserCredential(String systemId, String userName, ReqUpdateCredential req, boolean skipCredCheck) throws TapisClientException
   {
     // Submit the request
     try { credsApi.createUserCredential(systemId, userName, req, skipCredCheck); }
@@ -1142,30 +1115,54 @@ public class SystemsClient implements ITapisClient
    * Do any client side postprocessing of a returned system.
    * This involves transforming any notes attributes from a LinkedTreeMap into a json string.
    *
+   * There is a top level notes attribute as well as a notes attribute for any jobEnvVariables
    * @param tSys - TapisSystem to process
    * @return - Resulting TapisSystem
    * @throws TapisClientException if notes object is not of type LinkedTreeMap
    */
   TapisSystem postProcessSystem(TapisSystem tSys) throws TapisClientException
   {
-    // If no system or no notes then we are done
-    if (tSys == null || tSys.getNotes() == null) return tSys;
+    // If no system, then we are done
+    if (tSys == null) return tSys;
+    String sysId = tSys.getId();
 
-    // We have a notes attribute. Convert it from a LinkedTreeMap to a string with json.
-    Object notes = tSys.getNotes();
+    // Convert top level notes if present.
+    Object topNotes = tSys.getNotes();
+    if (topNotes != null) tSys.setNotes(convertLinkedTreeMapToString(topNotes, sysId, "TopNotes"));
+
+    // Now check for notes in jobEnvVariables
+    List<KeyValuePair> envVars = tSys.getJobEnvVariables();
+    if (envVars != null && !envVars.isEmpty())
+    {
+      for (KeyValuePair kvp : envVars)
+      {
+        if (kvp != null && kvp.getNotes() != null)
+        {
+          kvp.setNotes(convertLinkedTreeMapToString(kvp.getNotes(), sysId, "jobEnvVariable"));
+        }
+      }
+    }
+    return tSys;
+  }
+
+  /*
+   * Convert a notes LinkedTreeMap to a json string.
+   * If notes is not of type LinedTreeMap log an error and throw exception.
+   */
+  private static Object convertLinkedTreeMapToString(Object notes, String sysId, String notesLabel)
+          throws TapisClientException
+  {
     // We expect notes to be of type com.google.gson.internal.LinkedTreeMap. Make sure that is the case.
     if (!(notes instanceof LinkedTreeMap<?,?>))
     {
       // Log an error and throw exception
-      String msg = String.format("ERROR: Notes attribute in system not of type LinkedTreeMap. System: %s. Notes: %s",
-                                 tSys.getId(), notes);
+      String msg =
+              String.format("ERROR: Notes attribute in system not of type LinkedTreeMap. System: %s. Where found: %s. Notes: %s",
+                      sysId, notesLabel, notes);
       throw new TapisClientException(msg);
     }
-
     // Convert the gson LinkedTreeMap to a string.
-    var lmap = (LinkedTreeMap<String, String>) tSys.getNotes();
-    String tmpNotesStr = ClientTapisGsonUtils.getGson().toJson(lmap, linkedTreeMapType);
-    tSys.setNotes(tmpNotesStr);
-    return tSys;
+    var lmap = (LinkedTreeMap<String, String>) notes;
+    return  ClientTapisGsonUtils.getGson().toJson(lmap, linkedTreeMapType);
   }
-}
+ }
