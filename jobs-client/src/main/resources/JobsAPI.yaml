@@ -43,6 +43,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespProbe'
+  /jobs/eventLiveness:
+    post:
+      tags:
+        - general
+      description: Call back webhook used to test liveness of event send and notification delivery.
+      operationId: eventLiveness
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/JsonObject'
+        required: true
+      responses:
+        '200':
+          description: Liveness acknowledged.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespProbe'
+        '400':
+          description: Input error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not authorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Jobs service error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespProbe'
   /jobs/ready:
     get:
       tags:
@@ -1549,6 +1586,210 @@ components:
           $ref: '#/components/schemas/ResultMetadata'
         result:
           type: object
+    JsonArray:
+      type: object
+      properties:
+        asDouble:
+          type: number
+          format: double
+        asLong:
+          type: integer
+          format: int64
+        asBoolean:
+          type: boolean
+        asString:
+          type: string
+        asInt:
+          type: integer
+          format: int32
+        asNumber:
+          type: number
+        asFloat:
+          type: number
+          format: float
+        asByte:
+          type: string
+          format: byte
+        asCharacter:
+          type: string
+        asBigDecimal:
+          type: number
+        asBigInteger:
+          type: integer
+        asShort:
+          type: integer
+          format: int32
+        empty:
+          type: boolean
+        asJsonArray:
+          $ref: '#/components/schemas/JsonArray'
+        jsonArray:
+          type: boolean
+        asJsonPrimitive:
+          $ref: '#/components/schemas/JsonPrimitive'
+        asJsonObject:
+          $ref: '#/components/schemas/JsonObject'
+        jsonObject:
+          type: boolean
+        jsonPrimitive:
+          type: boolean
+        jsonNull:
+          type: boolean
+        asJsonNull:
+          $ref: '#/components/schemas/JsonNull'
+    JsonNull:
+      type: object
+      properties:
+        asDouble:
+          type: number
+          format: double
+        asLong:
+          type: integer
+          format: int64
+        asBoolean:
+          type: boolean
+        asString:
+          type: string
+        asInt:
+          type: integer
+          format: int32
+        asJsonArray:
+          $ref: '#/components/schemas/JsonArray'
+        jsonArray:
+          type: boolean
+        asJsonPrimitive:
+          $ref: '#/components/schemas/JsonPrimitive'
+        asJsonObject:
+          $ref: '#/components/schemas/JsonObject'
+        jsonObject:
+          type: boolean
+        jsonPrimitive:
+          type: boolean
+        jsonNull:
+          type: boolean
+        asJsonNull:
+          $ref: '#/components/schemas/JsonNull'
+        asNumber:
+          type: number
+        asFloat:
+          type: number
+          format: float
+        asByte:
+          type: string
+          format: byte
+        asCharacter:
+          type: string
+        asBigDecimal:
+          type: number
+        asBigInteger:
+          type: integer
+        asShort:
+          type: integer
+          format: int32
+    JsonObject:
+      type: object
+      properties:
+        asDouble:
+          type: number
+          format: double
+        asLong:
+          type: integer
+          format: int64
+        asBoolean:
+          type: boolean
+        asString:
+          type: string
+        asInt:
+          type: integer
+          format: int32
+        asJsonArray:
+          $ref: '#/components/schemas/JsonArray'
+        jsonArray:
+          type: boolean
+        asJsonPrimitive:
+          $ref: '#/components/schemas/JsonPrimitive'
+        asJsonObject:
+          $ref: '#/components/schemas/JsonObject'
+        jsonObject:
+          type: boolean
+        jsonPrimitive:
+          type: boolean
+        jsonNull:
+          type: boolean
+        asJsonNull:
+          $ref: '#/components/schemas/JsonNull'
+        asNumber:
+          type: number
+        asFloat:
+          type: number
+          format: float
+        asByte:
+          type: string
+          format: byte
+        asCharacter:
+          type: string
+        asBigDecimal:
+          type: number
+        asBigInteger:
+          type: integer
+        asShort:
+          type: integer
+          format: int32
+    JsonPrimitive:
+      type: object
+      properties:
+        asDouble:
+          type: number
+          format: double
+        asLong:
+          type: integer
+          format: int64
+        asBoolean:
+          type: boolean
+        asString:
+          type: string
+        asInt:
+          type: integer
+          format: int32
+        number:
+          type: boolean
+        boolean:
+          type: boolean
+        asNumber:
+          type: number
+        asFloat:
+          type: number
+          format: float
+        asByte:
+          type: string
+          format: byte
+        asCharacter:
+          type: string
+        asBigDecimal:
+          type: number
+        asBigInteger:
+          type: integer
+        asShort:
+          type: integer
+          format: int32
+        string:
+          type: boolean
+        asJsonArray:
+          $ref: '#/components/schemas/JsonArray'
+        jsonArray:
+          type: boolean
+        asJsonPrimitive:
+          $ref: '#/components/schemas/JsonPrimitive'
+        asJsonObject:
+          $ref: '#/components/schemas/JsonObject'
+        jsonObject:
+          type: boolean
+        jsonPrimitive:
+          type: boolean
+        jsonNull:
+          type: boolean
+        asJsonNull:
+          $ref: '#/components/schemas/JsonNull'
     JobHideDisplay:
       type: object
       properties:
@@ -1744,6 +1985,10 @@ components:
         archiveTransactionId:
           type: string
         archiveCorrelationId:
+          type: string
+        stageAppTransactionId:
+          type: string
+        stageAppCorrelationId:
           type: string
         tapisQueue:
           type: string
