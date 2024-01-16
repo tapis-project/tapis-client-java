@@ -43,43 +43,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespProbe'
-  /jobs/eventLiveness:
-    post:
-      tags:
-        - general
-      description: Call back webhook used to test liveness of event send and notification delivery.
-      operationId: eventLiveness
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/JsonObject'
-        required: true
-      responses:
-        '200':
-          description: Liveness acknowledged.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespProbe'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '500':
-          description: Jobs service error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespProbe'
   /jobs/ready:
     get:
       tags:
