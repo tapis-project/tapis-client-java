@@ -1671,9 +1671,9 @@ components:
           type: string
         dtnSystemId:
           type: string
-        dtnMountSourcePath:
+        dtnSystemInputDir:
           type: string
-        dtnMountPoint:
+        dtnSystemOutputDir:
           type: string
         nodeCount:
           type: integer
@@ -2234,6 +2234,10 @@ components:
         archiveSystemId:
           type: string
         archiveSystemDir:
+          type: string
+        dtnSystemInputDir:
+          type: string
+        dtnSystemOutputDir:
           type: string
         nodeCount:
           type: integer
