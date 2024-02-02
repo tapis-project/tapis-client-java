@@ -554,7 +554,7 @@ public class SystemsClient implements ITapisClient
                                       String selectStr, boolean showDeleted)
           throws TapisClientException
   {
-    return getSystems(searchStr, DEFAULT_LIST_TYPE_ENUM, limit, orderBy, skip, startAfter, selectStr, showDeleted);
+    return getSystems(searchStr, DEFAULT_LIST_TYPE_ENUM, limit, orderBy, skip, startAfter, selectStr, showDeleted, null);
   }
 
   /**
@@ -574,11 +574,12 @@ public class SystemsClient implements ITapisClient
    * @param startAfter - where to start when sorting, e.g. limit=10&orderBy=id(asc)&startAfter=101 (may not be used with skip)
    * @param selectStr - List of attributes to be included as part of each result item.
    * @param showDeleted - whether to included resources that have been marked as deleted.
+   * @param impersonationId - use provided Tapis username instead of oboUser when checking auth and resolving effectiveUserId
    * @return list of systems available to the caller and matching search conditions.
    * @throws TapisClientException - If api call throws an exception
    */
   public List<TapisSystem> getSystems(String searchStr, ListTypeEnum listTypeEnum, int limit, String orderBy, int skip, String startAfter,
-                                      String selectStr, boolean showDeleted)
+                                      String selectStr, boolean showDeleted, String impersonationId)
           throws TapisClientException
   {
     String selectStr1 = DEFAULT_SELECT_SUMMARY;
@@ -587,7 +588,7 @@ public class SystemsClient implements ITapisClient
     try
     {
       resp = sysApi.getSystems(searchStr, listTypeEnum, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL,
-                               selectStr1, showDeleted);
+                               selectStr1, showDeleted, impersonationId);
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
