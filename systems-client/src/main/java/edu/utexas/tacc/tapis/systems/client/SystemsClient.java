@@ -950,8 +950,6 @@ public class SystemsClient implements ITapisClient
     rSys.rootDir(sys.getRootDir());
     rSys.port(sys.getPort()).useProxy(sys.getUseProxy()).proxyHost(sys.getProxyHost()).proxyPort(sys.getProxyPort());
     rSys.dtnSystemId(sys.getDtnSystemId());
-    rSys.dtnMountPoint(sys.getDtnMountPoint()).dtnMountSourcePath(sys.getDtnMountSourcePath());
-    rSys.isDtn(sys.getIsDtn());
     rSys.canExec(sys.getCanExec());
     rSys.jobRuntimes(sys.getJobRuntimes());
     rSys.jobWorkingDir(sys.getJobWorkingDir());
@@ -988,7 +986,6 @@ public class SystemsClient implements ITapisClient
     rSys.authnCredential(buildReqPostPutCredential(sys.getAuthnCredential()));
     rSys.port(sys.getPort()).useProxy(sys.getUseProxy()).proxyHost(sys.getProxyHost()).proxyPort(sys.getProxyPort());
     rSys.dtnSystemId(sys.getDtnSystemId());
-    rSys.dtnMountPoint(sys.getDtnMountPoint()).dtnMountSourcePath(sys.getDtnMountSourcePath());
     rSys.jobRuntimes(sys.getJobRuntimes());
     rSys.jobWorkingDir(sys.getJobWorkingDir());
     rSys.jobEnvVariables(sys.getJobEnvVariables());
