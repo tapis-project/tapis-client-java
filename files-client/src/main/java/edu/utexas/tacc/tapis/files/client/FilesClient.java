@@ -69,7 +69,7 @@ public class FilesClient implements ITapisClient
   // Named values to make it clear what is being passed in to a method
   private static final String impersonationIdNull = null;
   private static final String sharedCtxNull = null;
-  private static final String regexNull = null;
+  private static final String patternNull = null;
 
   // Timeouts.
   private static int DEFAULT_CLIENT_CONNECTION_TIMEOUT=120000;
@@ -205,12 +205,12 @@ public class FilesClient implements ITapisClient
    * @return list of FileInfo objects
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<FileInfo> listFiles(String systemId, String path, String regex, int limit, long offset, boolean recurse,
+  public List<FileInfo> listFiles(String systemId, String path, String pattern, int limit, long offset, boolean recurse,
                                   String impersonationId, String sharedCtx)
           throws TapisClientException
   {
     FileListingResponse resp = null;
-    try { resp = fileOperations.listFiles(systemId, path, regex, limit, offset, recurse, impersonationId, sharedCtx); }
+    try { resp = fileOperations.listFiles(systemId, path, pattern, limit, offset, recurse, impersonationId, sharedCtx); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
@@ -222,7 +222,7 @@ public class FilesClient implements ITapisClient
   public List<FileInfo> listFiles(String systemId, String path, int limit, long offset, boolean recurse, String impersonationId)
           throws TapisClientException
   {
-    return listFiles(systemId, path, regexNull, limit, offset, recurse, impersonationId, sharedCtxNull);
+    return listFiles(systemId, path, patternNull, limit, offset, recurse, impersonationId, sharedCtxNull);
   }
 
   /*
@@ -231,7 +231,7 @@ public class FilesClient implements ITapisClient
   public List<FileInfo> listFiles(String systemId, String path, int limit, long offset, boolean recurse)
           throws TapisClientException
   {
-    return listFiles(systemId, path, regexNull, limit, offset, recurse, impersonationIdNull, sharedCtxNull);
+    return listFiles(systemId, path, patternNull, limit, offset, recurse, impersonationIdNull, sharedCtxNull);
   }
 
   /**
