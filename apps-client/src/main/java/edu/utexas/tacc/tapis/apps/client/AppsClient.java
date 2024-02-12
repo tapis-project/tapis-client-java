@@ -582,17 +582,28 @@ public class AppsClient implements ITapisClient
     return resp.getResult();
   }
 
-  /**
+  /*
    * Check if resource is enabled
-   *
-   * @return boolean indicating if enabled
-   * @throws TapisClientException - If api call throws an exception
+   * Simple wrapper for backward compatibility
    */
   public boolean isEnabled(String appId) throws TapisClientException
   {
+    return isEnabled(appId, null);
+  }
+
+  /**
+   * Check if resource is enabled
+   *
+   * @param appId Application to check
+   * @param appVersion Optional, check both top level attr enabled and attribute versionEnabled.
+   * @return boolean indicating if enabled
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public boolean isEnabled(String appId, String appVersion) throws TapisClientException
+  {
     // Submit the request and return the response
     RespBoolean resp = null;
-    try { resp = appApi.isEnabled(appId); }
+    try { resp = appApi.isEnabled(appId, appVersion); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null && resp.getResult().getaBool() != null)
