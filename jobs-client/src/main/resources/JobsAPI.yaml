@@ -1741,6 +1741,14 @@ components:
           type: string
         stageAppCorrelationId:
           type: string
+        dtnInputTransactionId:
+          type: string
+        dtnInputCorrelationId:
+          type: string
+        dtnOutputTransactionId:
+          type: string
+        dtnOutputCorrelationId:
+          type: string
         tapisQueue:
           type: string
         visible:
@@ -1775,6 +1783,9 @@ components:
               - SAC_EXEC_SYSTEM_OUTPUT_DIR
               - SAC_ARCHIVE_SYSTEM_ID
               - SAC_ARCHIVE_SYSTEM_DIR
+              - SAC_DTN_SYSTEM_ID
+              - SAC_DTN_SYSTEM_INPUT_DIR
+              - SAC_DTN_SYSTEM_OUTPUT_DIR
         notes:
           type: string
         mpi:
@@ -2118,6 +2129,8 @@ components:
           type: string
         description:
           type: string
+        envKey:
+          type: string
         autoMountLocal:
           type: boolean
         sourceUrl:
@@ -2132,6 +2145,8 @@ components:
         name:
           type: string
         description:
+          type: string
+        envKey:
           type: string
         sourceUrls:
           type: array
