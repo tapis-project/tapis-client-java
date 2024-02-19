@@ -1637,6 +1637,16 @@ components:
             - FINISHED
             - CANCELLED
             - FAILED
+        condition:
+          type: string
+          enum:
+            - CANCELLED_BY_USER
+            - NORMAL_COMPLETION
+            - SCHEDULER_TIMEOUT
+            - SCHEDULER_TERMINATION
+            - TAPIS_EXECUTION_TIMEOUT
+            - TAPIS_LAUNCH_FAILURE
+            - TAPIS_RECOVERY_TIMEOUT
         lastMessage:
           type: string
         created:
@@ -1870,6 +1880,16 @@ components:
             - FINISHED
             - CANCELLED
             - FAILED
+        condition:
+          type: string
+          enum:
+            - CANCELLED_BY_USER
+            - NORMAL_COMPLETION
+            - SCHEDULER_TIMEOUT
+            - SCHEDULER_TERMINATION
+            - TAPIS_EXECUTION_TIMEOUT
+            - TAPIS_LAUNCH_FAILURE
+            - TAPIS_RECOVERY_TIMEOUT
         remoteStarted:
           type: string
           format: date-time
