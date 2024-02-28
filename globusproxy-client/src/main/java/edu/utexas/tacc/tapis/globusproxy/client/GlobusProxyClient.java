@@ -171,7 +171,7 @@ public class GlobusProxyClient implements ITapisClient
     // Submit the request
     try
     {
-      var resp = authApi.getAuthInfo(clientId);
+      var resp = authApi.getAuthInfo(clientId, null);
       // If response came back null return null
       if (resp == null || resp.getResult() == null) return null;
       // Marshal only the result from the response.
