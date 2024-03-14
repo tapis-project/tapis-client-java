@@ -38,6 +38,7 @@ import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SKIP;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_ORDERBY;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_STARTAFTER;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SUBSCRIPTION_TTL;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_TEST_NUM_EVENTS;
 import static edu.utexas.tacc.tapis.client.shared.Utils.EMPTY_JSON;
 
 /**
@@ -604,14 +605,17 @@ public class NotificationsClient implements ITapisClient
    *
    * @throws TapisClientException - If api call throws an exception
    */
-  public TapisSubscription beginTestSequence(Integer subscriptionTTL) throws TapisClientException
+  public TapisSubscription beginTestSequence(Integer subscriptionTTL, Integer numberOfEvents) throws TapisClientException
   {
     RespSubscription resp = null;
     Integer subscrTTL = subscriptionTTL;
+    Integer numEvents = numberOfEvents;
+    Boolean endSeries = true;
     if (subscriptionTTL == null) subscrTTL = DEFAULT_SUBSCRIPTION_TTL;
+    if (numberOfEvents == null) numEvents = DEFAULT_TEST_NUM_EVENTS;
     // Submit the request
     // Json body is not used but appears to be required when generating the client from the openapi spec.
-    try { resp = testApi.beginTestSequence(subscrTTL, EMPTY_JSON); }
+    try { resp = testApi.beginTestSequence(subscrTTL, numEvents, endSeries, EMPTY_JSON); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
 
