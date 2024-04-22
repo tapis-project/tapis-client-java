@@ -40,7 +40,7 @@ public class ITestFilesClient {
         TransferTask newTask = client.createTransferTask(req);
 
         //Now make sure that we can get the task back;
-        TransferTask t = client.getTransferTask(newTask.getUuid().toString());
+        TransferTask t = client.getTransferTask(newTask.getUuid().toString(), null, false);
         Assert.assertNotNull(t);
         Assert.assertEquals(t.getUuid(), newTask.getUuid());
 
