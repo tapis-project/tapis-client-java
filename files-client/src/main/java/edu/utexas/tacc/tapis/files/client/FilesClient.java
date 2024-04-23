@@ -588,19 +588,26 @@ public class FilesClient implements ITapisClient
    * @return transfer task
    * @throws TapisClientException - If api call throws an exception
    */
-  public TransferTask getTransferTask(String transferTaskId, String impersonationId, boolean includeSummary)
+  public TransferTask getTransferTask(String transferTaskId, boolean includeSummary, String impersonationId)
           throws TapisClientException
   {
     TransferTaskResponse resp = null;
-    try { resp = fileTransfers.getTransferTask(transferTaskId, impersonationId, includeSummary); }
+    try { resp = fileTransfers.getTransferTask(transferTaskId, includeSummary, impersonationId); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
   }
-  // Convenience wrapper for getTransferTask. Used by Jobs service.
-  public TransferTask getTransferTask(String transferTaskId) throws TapisClientException
+
+  /**
+   * Get transfer task top level attributes.
+   * Simple wrapper for convenience. Many callers do not need summary attributes or impersonation support.
+   * @param transferTaskUuid UUID of transfer task.
+   * @return transfer task
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public TransferTask getTransferTask(String transferTaskUuid) throws TapisClientException
   {
-    return getTransferTask(transferTaskId, null, false);
+    return getTransferTask(transferTaskUuid, false, null);
   }
 
   /**
