@@ -97,14 +97,14 @@
           <repository>
             <id>tapis-local-snapshots</id>
             <name>Local repo for snapshots</name>
-            <url>http://maven03.tacc.utexas.edu:8081/repository/maven-snapshots</url>
+            <url>https://maven03.tacc.utexas.edu/repository/maven-snapshots</url>
             <releases>  <enabled>false</enabled> </releases>
             <snapshots> <enabled>true</enabled>  </snapshots>
           </repository>
           <repository>
             <id>tapis-local-releases</id>
             <name>Local repo for releases</name>
-            <url>http://maven03.tacc.utexas.edu:8081/repository/maven-releases</url>
+            <url>https://maven03.tacc.utexas.edu/repository/maven-releases</url>
           </repository>
         </repositories>
       </profile>
