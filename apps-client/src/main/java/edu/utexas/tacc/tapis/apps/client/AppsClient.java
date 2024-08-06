@@ -372,7 +372,7 @@ public class AppsClient implements ITapisClient
     String selectStr1 = DEFAULT_SELECT_ALL;
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
     RespApp resp = null;
-    try {resp = appApi.getAppLatestVersion(appId, requireExecPerm, selectStr1, resourceTenant); }
+    try {resp = appApi.getAppLatestVersion(appId, requireExecPerm, selectStr1, resourceTenant, impersonationIdNull); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null) return null;
@@ -545,7 +545,7 @@ public class AppsClient implements ITapisClient
     try
     {
       resp = appApi.getApps(searchStr, listTypeEnum, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL,
-                            selectStr1, showDeleted);
+                            selectStr1, showDeleted, impersonationIdNull);
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
