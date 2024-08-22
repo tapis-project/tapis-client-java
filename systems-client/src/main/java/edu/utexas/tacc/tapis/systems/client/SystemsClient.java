@@ -980,9 +980,7 @@ public class SystemsClient implements ITapisClient
     var rSys = new ReqPutSystem();
     rSys.description(sys.getDescription());
     rSys.host(sys.getHost());
-    rSys.effectiveUserId(sys.getEffectiveUserId());
     rSys.defaultAuthnMethod(sys.getDefaultAuthnMethod());
-    rSys.authnCredential(buildReqPostPutCredential(sys.getAuthnCredential()));
     rSys.port(sys.getPort()).useProxy(sys.getUseProxy()).proxyHost(sys.getProxyHost()).proxyPort(sys.getProxyPort());
     rSys.dtnSystemId(sys.getDtnSystemId());
     rSys.jobRuntimes(sys.getJobRuntimes());
