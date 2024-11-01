@@ -69,6 +69,7 @@ public class FilesClient implements ITapisClient
   // Named values to make it clear what is being passed in to a method
   private static final String impersonationIdNull = null;
   private static final String sharedCtxNull = null;
+  private static final String patternNull = null;
 
   // Timeouts.
   private static int DEFAULT_CLIENT_CONNECTION_TIMEOUT=120000;
@@ -204,12 +205,12 @@ public class FilesClient implements ITapisClient
    * @return list of FileInfo objects
    * @throws TapisClientException - If api call throws an exception
    */
-  public List<FileInfo> listFiles(String systemId, String path, int limit, long offset, boolean recurse,
+  public List<FileInfo> listFiles(String systemId, String path, String pattern, int limit, long offset, boolean recurse,
                                   String impersonationId, String sharedCtx)
           throws TapisClientException
   {
     FileListingResponse resp = null;
-    try { resp = fileOperations.listFiles(systemId, path, limit, offset, recurse, impersonationId, sharedCtx); }
+    try { resp = fileOperations.listFiles(systemId, path, pattern, limit, offset, recurse, impersonationId, sharedCtx); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
@@ -221,7 +222,7 @@ public class FilesClient implements ITapisClient
   public List<FileInfo> listFiles(String systemId, String path, int limit, long offset, boolean recurse, String impersonationId)
           throws TapisClientException
   {
-    return listFiles(systemId, path, limit, offset, recurse, impersonationId, sharedCtxNull);
+    return listFiles(systemId, path, patternNull, limit, offset, recurse, impersonationId, sharedCtxNull);
   }
 
   /*
@@ -230,7 +231,7 @@ public class FilesClient implements ITapisClient
   public List<FileInfo> listFiles(String systemId, String path, int limit, long offset, boolean recurse)
           throws TapisClientException
   {
-    return listFiles(systemId, path, limit, offset, recurse, impersonationIdNull, sharedCtxNull);
+    return listFiles(systemId, path, patternNull, limit, offset, recurse, impersonationIdNull, sharedCtxNull);
   }
 
   /**
@@ -581,16 +582,32 @@ public class FilesClient implements ITapisClient
    * Get a transfer task
    *
    * @param transferTaskId Transfer task ID
+   * @param impersonationId - use provided Tapis username instead of oboUser when checking auth and
+   *                          resolving effectiveUserId
+   * @param includeSummary - indicates if summary information such as *estimatedTotalBytes* should be included.
    * @return transfer task
    * @throws TapisClientException - If api call throws an exception
    */
-  public TransferTask getTransferTask(String transferTaskId) throws TapisClientException
+  public TransferTask getTransferTask(String transferTaskId, boolean includeSummary, String impersonationId)
+          throws TapisClientException
   {
     TransferTaskResponse resp = null;
-    try { resp = fileTransfers.getTransferTask(transferTaskId); }
+    try { resp = fileTransfers.getTransferTask(transferTaskId, includeSummary, impersonationId); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp != null && resp.getResult() != null) return resp.getResult(); else return null;
+  }
+
+  /**
+   * Get transfer task top level attributes.
+   * Simple wrapper for convenience. Many callers do not need summary attributes or impersonation support.
+   * @param transferTaskUuid UUID of transfer task.
+   * @return transfer task
+   * @throws TapisClientException - If api call throws an exception
+   */
+  public TransferTask getTransferTask(String transferTaskUuid) throws TapisClientException
+  {
+    return getTransferTask(transferTaskUuid, false, null);
   }
 
   /**
@@ -609,19 +626,7 @@ public class FilesClient implements ITapisClient
   }
 
   /**
-   * Get history of a transfer task
-   *
-   * @param transferTaskId Transfer task ID
-   * @return transfer task with history
-   * @throws TapisClientException - If api call throws an exception
-   */
-  public TransferTask getTransferTaskHistory(String transferTaskId) throws TapisClientException
-  {
-    return getTransferTaskHistory(transferTaskId, impersonationIdNull);
-  }
-
-  /**
-   * Get history of a transfer task
+   * Get details of a transfer task
    *
    * @param transferTaskId Transfer task ID
    * @param impersonationId - use provided Tapis username instead of oboUser when checking auth and
@@ -629,7 +634,7 @@ public class FilesClient implements ITapisClient
    * @return transfer task with history
    * @throws TapisClientException - If api call throws an exception
    */
-  public TransferTask getTransferTaskHistory(String transferTaskId, String impersonationId) throws TapisClientException
+  public TransferTask getTransferTaskDetails(String transferTaskId, String impersonationId) throws TapisClientException
   {
     TransferTaskResponse resp = null;
     try { resp = fileTransfers.getTransferTaskDetails(transferTaskId, impersonationId); }

@@ -163,7 +163,7 @@ public class GlobusProxyClient implements ITapisClient
    * @return The authorization URL
    * @throws TapisClientException - If api call throws an exception
    */
-  public ResultGlobusAuthInfo getAuthInfo(String clientId) throws TapisClientException
+  public ResultGlobusAuthInfo getAuthInfo(String clientId, String endpointId) throws TapisClientException
   {
     if (StringUtils.isBlank(clientId)) return null;
 
@@ -171,7 +171,7 @@ public class GlobusProxyClient implements ITapisClient
     // Submit the request
     try
     {
-      var resp = authApi.getAuthInfo(clientId);
+      var resp = authApi.getAuthInfo(clientId, endpointId);
       // If response came back null return null
       if (resp == null || resp.getResult() == null) return null;
       // Marshal only the result from the response.

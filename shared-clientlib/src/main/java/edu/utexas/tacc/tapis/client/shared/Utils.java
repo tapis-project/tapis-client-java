@@ -31,6 +31,9 @@ public class Utils
   // Default Notification Subscription TTL
   public static final int DEFAULT_SUBSCRIPTION_TTL = 60;
 
+  // Default number of initial events sent when starting a test sequence
+  public static final int DEFAULT_TEST_NUM_EVENTS = 1;
+
   // Empty json body
   public static final String EMPTY_JSON = "{}";
 
