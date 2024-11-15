@@ -24,6 +24,7 @@ import edu.utexas.tacc.tapis.systems.client.gen.api.SchedulerProfilesApi;
 import edu.utexas.tacc.tapis.systems.client.gen.api.SystemsApi;
 
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_COMPUTETOTAL;
+import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_CREATE_TMS_KEYS;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_LIMIT;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_ORDERBY;
 import static edu.utexas.tacc.tapis.client.shared.Utils.DEFAULT_SEARCH;
@@ -784,7 +785,8 @@ public class SystemsClient implements ITapisClient
    */
   public void updateUserCredential(String systemId, String userName, ReqUpdateCredential req) throws TapisClientException
   {
-    updateUserCredential(systemId, userName, req, DEFAULT_SKIP_CREDENTIAL_CHECK);
+    updateUserCredential(systemId, userName, req, DEFAULT_CREATE_TMS_KEYS,
+            DEFAULT_SKIP_CREDENTIAL_CHECK);
   }
 
   /**
@@ -795,10 +797,12 @@ public class SystemsClient implements ITapisClient
    * @param req Request containing credentials (password, keys, etc).
    * @throws TapisClientException - If api call throws an exception
    */
-  public void updateUserCredential(String systemId, String userName, ReqUpdateCredential req, boolean skipCredCheck) throws TapisClientException
+  public void updateUserCredential(String systemId, String userName, ReqUpdateCredential req, boolean createTmsKeys,
+                                   boolean skipCredCheck)
+          throws TapisClientException
   {
     // Submit the request
-    try { credsApi.createUserCredential(systemId, userName, req, skipCredCheck); }
+    try { credsApi.createUserCredential(systemId, userName, req, createTmsKeys, skipCredCheck); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
   }
