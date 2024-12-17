@@ -13,9 +13,9 @@
 
 package edu.utexas.tacc.tapis.meta.client.gen.api;
 
-import org.junit.Ignore;
-import org.junit.Test;
 import edu.utexas.tacc.tapis.meta.client.gen.ApiException;
+import org.testng.annotations.Ignore;
+import org.testng.annotations.Test;
 
 /**
  * API tests for DocumentApi
