@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## 2.0.141 - 2025-01-07
+## 2.0.142 - 2025-01-07
 
 ### New features:
 - Add support for scheduler profile hidden option PARTITION.

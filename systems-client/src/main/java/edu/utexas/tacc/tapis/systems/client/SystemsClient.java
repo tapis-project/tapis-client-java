@@ -1101,6 +1101,7 @@ public class SystemsClient implements ITapisClient
     return switch (hiddenOptionEnum)
     {
       case MEM -> "--mem";
+      case PARTITION -> "--partition";
       default -> "";
     };
   }
