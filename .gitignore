@@ -69,3 +69,4 @@ Icon
 
 /meta-client/http.test/rest-client.private.env.json
 /.run/MetaClientTest.run.xml
+/bin/
