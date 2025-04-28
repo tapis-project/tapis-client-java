@@ -105,19 +105,19 @@ public class SystemsClient implements ITapisClient
     childSystemsApi = new ChildSystemsApi(apiClient);
   }
 
-  /**
+  /*
    * Constructor that overrides the compiled-in basePath value in ApiClient.
    * The path should include the URL prefix up to and including the service root.
    * In production environments the protocol should be https and the host/port will
    * be specific to that environment.
    *
-   * @param path the base path URL prefix up to and including the service root
+   * @param basePath base path URL prefix up to and including the service root. e.g. https://dev.develop.tapis.io
    * @param jwt the token to set in an HTTP header
    */
-  public SystemsClient(String path, String jwt)
+  public SystemsClient(String basePath, String jwt)
   {
     apiClient = new ApiClient();
-    if (!StringUtils.isBlank(path)) apiClient.setBasePath(path);
+    if (!StringUtils.isBlank(basePath)) apiClient.setBasePath(basePath);
     if (!StringUtils.isBlank(jwt)) apiClient.addDefaultHeader(TAPIS_JWT_HEADER, jwt);
     sysApi = new SystemsApi(apiClient);
     schedulerProfilesApi = new SchedulerProfilesApi(apiClient);
@@ -137,7 +137,7 @@ public class SystemsClient implements ITapisClient
   // Update base path for default client.
   public String getBasePath() { return apiClient.getBasePath(); }
 
-  // Update base path for default client.
+  // Update base path for default client. E.g. basePath=https://dev.develop.tapis.io
   public SystemsClient setBasePath(String basePath) { apiClient.setBasePath(basePath); return this;}
 
   // Add http header to default client

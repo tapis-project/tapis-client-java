@@ -6,8 +6,14 @@ import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+//import io.jsonwebtoken.Claims;
+//import io.jsonwebtoken.Jwts;
+
+// ========================================================================
+// NOTE: This test is never run.
+//       If that changes then io.jsonwebtoken calls will need to be ported
+//       to com.auth0.java-wt calls
+// ========================================================================
 
 /**
  *  Test the auth client by retrieving a user token
@@ -56,27 +62,28 @@ public class AuthClientTest
     int lastDot = usrToken.lastIndexOf(".");
     if (lastDot + 1 < usrToken.length()) remnant = usrToken.substring(0, lastDot + 1); // should always be true
 
-    // Parse the header and claims. If for some reason the remnant
-    // isn't of the form header.body. then parsing will fail.
-    var jwt = Jwts.parser().parse(remnant);
-    // Check that tenant_id is dev, username is testuser1, account_type is user
-    // Get the claims.
-    Claims claims = (Claims) jwt.getBody();
-    String jwtTokenType = (String) claims.get("tapis/token_type");
-    System.out.println("tapis/account_type: " + jwtTokenType);
-    String jwtTenant = (String) claims.get("tapis/tenant_id");
-    System.out.println("tapis/tenant_id: " + jwtTenant);
-    String jwtUser = (String) claims.get("tapis/username");
-    System.out.println("tapis/username: " + jwtUser);
-    String jwtAccountType = (String) claims.get("tapis/account_type");
-    System.out.println("tapis/account_type: " + jwtAccountType);
-    String jwtGrantType = (String) claims.get("tapis/grant_type");
-    System.out.println("tapis/grant_type: " + jwtGrantType);
-    Assert.assertEquals(jwtTokenType, "access");
-    Assert.assertEquals(jwtTenant, tenantName);
-    Assert.assertEquals(jwtUser, userName);
-    Assert.assertEquals(jwtAccountType, "user");
-    Assert.assertEquals(jwtGrantType, "password");
+    // TODO replace with com.auth0.jwt
+//    // Parse the header and claims. If for some reason the remnant
+//    // isn't of the form header.body. then parsing will fail.
+//    var jwt = Jwts.parser().build().parse(remnant);
+//    // Check that tenant_id is dev, username is testuser1, account_type is user
+//    // Get the claims.
+//    Claims claims = (Claims) jwt.getBody();
+//    String jwtTokenType = (String) claims.get("tapis/token_type");
+//    System.out.println("tapis/account_type: " + jwtTokenType);
+//    String jwtTenant = (String) claims.get("tapis/tenant_id");
+//    System.out.println("tapis/tenant_id: " + jwtTenant);
+//    String jwtUser = (String) claims.get("tapis/username");
+//    System.out.println("tapis/username: " + jwtUser);
+//    String jwtAccountType = (String) claims.get("tapis/account_type");
+//    System.out.println("tapis/account_type: " + jwtAccountType);
+//    String jwtGrantType = (String) claims.get("tapis/grant_type");
+//    System.out.println("tapis/grant_type: " + jwtGrantType);
+//    Assert.assertEquals(jwtTokenType, "access");
+//    Assert.assertEquals(jwtTenant, tenantName);
+//    Assert.assertEquals(jwtUser, userName);
+//    Assert.assertEquals(jwtAccountType, "user");
+//    Assert.assertEquals(jwtGrantType, "password");
   }
 
   @AfterSuite
