@@ -33,6 +33,10 @@ public class TokensClient
   // ************************************************************************
   // *********************** Constants **************************************
   // ************************************************************************
+  // Header keys for when a service is calling tokens on-behalf-of (OBO) a tapis user
+  public static final String TAPIS_HEADER_SVCJWT = "X-Tapis-Token";
+  public static final String TAPIS_HEADER_OBO_TENANT = "X-Tapis-Tenant";
+  public static final String TAPIS_HEADER_OBO_USER = "X-Tapis-User";
 
   // ************************************************************************
   // ************************* Enums ****************************************
@@ -52,9 +56,8 @@ public class TokensClient
   // *********************** Constructors ***********************************
   // ************************************************************************
 
-  /**
-   * Default constructor which uses the compiled-in basePath based on the openapi spec
-   *   used to autogenerate the client.
+  /*
+   * Default constructor which uses the compiled-in basePath based on the openapi spec used to autogenerate the client.
    */
   public TokensClient()
   {
@@ -64,37 +67,56 @@ public class TokensClient
 
   /**
    * Constructor that overrides the compiled-in basePath value in ApiClient.
-   * The path should include the URL prefix up to and including the service root.
+   * The path should be the URL prefix, e.g. <a href="https://admin.develop.tapis.io">...</a>
    * In production environments the protocol should be https and the host/port will
    * be specific to that environment.
    *
-   * @param path the base path URL prefix up to and including the service root
+   * @param basePath the base path URL prefix
    */
-  public TokensClient(String path)
+  public TokensClient(String basePath)
   {
     apiClient = new ApiClient();
-    if (!StringUtils.isBlank(path)) apiClient.setBasePath(path);
+    if (!StringUtils.isBlank(basePath)) apiClient.setBasePath(basePath);
     tokensApi = new TokensApi(apiClient);
   }
 
   /**
-   * Constructor that overrides the compiled-in basePath value in ApiClient and sets
-   * basic auth user and password (if provided)
-   * This constructor is typically used in production.
-   * <p>
-   * The path includes the URL prefix up to and including the service root.  By
-   * default this value is http://localhost:8080/security.  In production environments
-   * the protocol is https and the host/port will be specific to that environment.
+   * Constructor that overrides the compiled-in basePath value in ApiClient and sets basic auth
+   * user and password (if provided). This constructor is typically used in production.
+   * The path should be the URL prefix, e.g. <a href="https://admin.develop.tapis.io">...</a>
+   * In production environments the protocol is https and the host/port will be specific to that environment.
    *
-   * @param path the base path
+   * @param basePath the base path
    * @param userName basic auth username
    * @param password basic auth password
    */
-  public TokensClient(String path, String userName, String password) {
+  public TokensClient(String basePath, String userName, String password) {
     apiClient = new ApiClient();
-    if (!StringUtils.isBlank(path)) apiClient.setBasePath(path);
+    if (!StringUtils.isBlank(basePath)) apiClient.setBasePath(basePath);
     if (!StringUtils.isBlank(userName)) apiClient.setUsername(userName);
     if (!StringUtils.isBlank(password)) apiClient.setPassword(password);
+    tokensApi = new TokensApi(apiClient);
+  }
+
+  /**
+   * Constructor that overrides the compiled-in basePath value in ApiClient and allows caller to pass
+   * in svcJwt, oboUser and oboTenant.
+   * The path should include the URL prefix up to and including the service root.
+   * In production environments the protocol should be https and the host/port will be specific to that environment.
+   * The path should be the URL prefix, e.g. <a href="https://admin.develop.tapis.io">...</a>
+   *
+   * @param basePath base path URL prefix
+   * @param svcJwt the token to set in the HTTP header X-Tapis-Token
+   * @param oboTenant the tenant to set in the HTTP header X-Tapis-Tenant
+   * @param oboUser the user to set in the HTTP header X-Tapis-User
+   */
+  public TokensClient(String basePath, String svcJwt, String oboTenant, String oboUser)
+  {
+    apiClient = new ApiClient();
+    if (!StringUtils.isBlank(basePath)) apiClient.setBasePath(basePath);
+    if (!StringUtils.isBlank(svcJwt)) apiClient.addDefaultHeader(TAPIS_HEADER_SVCJWT, svcJwt);
+    if (!StringUtils.isBlank(oboTenant)) apiClient.addDefaultHeader(TAPIS_HEADER_OBO_TENANT, oboTenant);
+    if (!StringUtils.isBlank(oboUser)) apiClient.addDefaultHeader(TAPIS_HEADER_OBO_USER, oboUser);
     tokensApi = new TokensApi(apiClient);
   }
 
@@ -122,7 +144,7 @@ public class TokensClient
               var pool = okClient.connectionPool();
               if (pool != null) pool.evictAll();
           }
-      } catch (Exception e) {}      
+      } catch (Exception e) { /* Ignore errors */ }
   }
   
   /** The general token request handler that allows all possible token parameters.

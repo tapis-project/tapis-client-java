@@ -1,13 +1,15 @@
 package edu.utexas.tacc.tapis.auth.client;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.Claim;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+import java.util.Map;
 
 /**
  *  Test the auth client by retrieving a user token
@@ -46,31 +48,23 @@ public class AuthClientTest
     System.out.println("Token: " + usrToken);
     Assert.assertFalse(StringUtils.isBlank(usrToken), "User token should not be blank");
     // Decode token and print some info
-    // Code copied from tapis-shared-api JWTValidateRequestFilter
-    // Lop off the signature part of the encoding so that the
-    // jjwt library can parse it without attempting validation.
-    // We expect the jwt to contain exactly two periods in
-    // the following encoded format: header.body.signature
-    // We need to remove the signature but leave both periods.
-    String remnant = usrToken;
-    int lastDot = usrToken.lastIndexOf(".");
-    if (lastDot + 1 < usrToken.length()) remnant = usrToken.substring(0, lastDot + 1); // should always be true
+    // Decode the jwt
+    DecodedJWT unverifiedJwt = JWT.decode(usrToken);
+    // Get claims. If no claims then abort
+    Map<String, Claim> claims = unverifiedJwt.getClaims();
+    Assert.assertNotNull(claims);
+    Assert.assertFalse(claims.isEmpty());
 
-    // Parse the header and claims. If for some reason the remnant
-    // isn't of the form header.body. then parsing will fail.
-    var jwt = Jwts.parser().parse(remnant);
     // Check that tenant_id is dev, username is testuser1, account_type is user
-    // Get the claims.
-    Claims claims = (Claims) jwt.getBody();
-    String jwtTokenType = (String) claims.get("tapis/token_type");
-    System.out.println("tapis/account_type: " + jwtTokenType);
-    String jwtTenant = (String) claims.get("tapis/tenant_id");
+    String jwtTokenType = claims.get("tapis/token_type").asString();
+    System.out.println("tapis/token_type: " + jwtTokenType);
+    String jwtTenant = claims.get("tapis/tenant_id").asString();
     System.out.println("tapis/tenant_id: " + jwtTenant);
-    String jwtUser = (String) claims.get("tapis/username");
+    String jwtUser = claims.get("tapis/username").asString();
     System.out.println("tapis/username: " + jwtUser);
-    String jwtAccountType = (String) claims.get("tapis/account_type");
+    String jwtAccountType = claims.get("tapis/account_type").asString();
     System.out.println("tapis/account_type: " + jwtAccountType);
-    String jwtGrantType = (String) claims.get("tapis/grant_type");
+    String jwtGrantType = claims.get("tapis/grant_type").asString();
     System.out.println("tapis/grant_type: " + jwtGrantType);
     Assert.assertEquals(jwtTokenType, "access");
     Assert.assertEquals(jwtTenant, tenantName);
