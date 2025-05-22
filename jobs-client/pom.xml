@@ -11,6 +11,19 @@
     <name>Tapis Jobs Client</name>
     <description>Java client for Tapis Jobs Service</description>
 
+  <properties>
+    <!-- Location of openapi spec. Default is dev branch -->
+    <!-- NOTE: In order to try out openapi updates using a local file do something similar to the following:
+     mvn clean install
+     cd jobs-client
+     cp ../../openapi-jobs/JobsAPI.yaml target/
+     mvn install -DspecPath="/home/scblack/src_git/github/dev/tapis-client-java/jobs-client/target/JobsAPI.yaml"
+          or if yaml committed to local branch then do:
+     mvn install -DspecPath="https://raw.githubusercontent.com/tapis-project/openapi-jobs/local/JobsAPI.yaml"
+     -->
+    <specPath>https://raw.githubusercontent.com/tapis-project/openapi-jobs/dev/JobsAPI.yaml</specPath>
+  </properties>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -35,46 +48,47 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
-                <suiteXmlFiles>
-                    <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
-                </suiteXmlFiles>
+              <suiteXmlFiles>
+                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+              </suiteXmlFiles>
             </configuration>
         </plugin>
 
-        <!-- Build generated client code using openapi-generator -->
-        <plugin>
-            <groupId>org.openapitools</groupId>
-            <artifactId>openapi-generator-maven-plugin</artifactId>
-            <version>${openapi-generator-maven-plugin.version}</version>
-            <executions>
-                <execution>
-                    <goals>
-                        <goal>generate</goal>
-                    </goals>
-                    <configuration>
-                        <inputSpec>${project.basedir}/src/main/resources/JobsAPI.yaml</inputSpec>
-                        <enablePostProcessFile>true</enablePostProcessFile>
-                        <output>${project.build.directory}/generated-sources/openapi</output>
-                        <generatorName>java</generatorName>
-                        <groupId>edu.utexas.tacc.tapis</groupId>
-                        <invokerPackage>edu.utexas.tacc.tapis.jobs.client.gen</invokerPackage>
-                        <apiPackage>edu.utexas.tacc.tapis.jobs.client.gen.api</apiPackage>
-                        <modelPackage>edu.utexas.tacc.tapis.jobs.client.gen.model</modelPackage>
-                        <!-- Turn off generation of stuff we do not need -->
-                        <generateApiTests>false</generateApiTests>
-                        <generateApiDocumentation>false</generateApiDocumentation>
-                        <generateModelTests>false</generateModelTests>
-                        <generateModelDocumentation>false</generateModelDocumentation>
-                        <configOptions>
-                            <sourceFolder>src/gen/java/main</sourceFolder>
-                            <!-- Use java 8 libraries instead of 3rd party libraries -->
-                            <java8>true</java8>
-                            <dateLibrary>java8</dateLibrary>
-                        </configOptions>
-                    </configuration>
-                </execution>
-            </executions>
-        </plugin>
+      <!-- Build generated client code using openapi-generator -->
+      <plugin>
+        <groupId>org.openapitools</groupId>
+        <artifactId>openapi-generator-maven-plugin</artifactId>
+        <version>${openapi-generator-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <!-- Location of openapi spec -->
+              <inputSpec>${specPath}</inputSpec>
+              <enablePostProcessFile>true</enablePostProcessFile>
+              <output>${project.build.directory}/generated-sources/openapi</output>
+              <generatorName>java</generatorName>
+              <groupId>edu.utexas.tacc.tapis</groupId>
+              <invokerPackage>edu.utexas.tacc.tapis.jobs.client.gen</invokerPackage>
+              <apiPackage>edu.utexas.tacc.tapis.jobs.client.gen.api</apiPackage>
+              <modelPackage>edu.utexas.tacc.tapis.jobs.client.gen.model</modelPackage>
+              <!-- Turn off generation of stuff we do not need -->
+              <generateApiTests>false</generateApiTests>
+              <generateApiDocumentation>false</generateApiDocumentation>
+              <generateModelTests>false</generateModelTests>
+              <generateModelDocumentation>false</generateModelDocumentation>
+              <configOptions>
+                <sourceFolder>src/gen/java/main</sourceFolder>
+                <!-- Use java 8 libraries instead of 3rd party libraries -->
+                <java8>true</java8>
+                <dateLibrary>java8</dateLibrary>
+              </configOptions>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-shade-plugin</artifactId>
@@ -91,7 +105,7 @@
             </executions>
         </plugin>
     </plugins>
-        <finalName>jobs-client</finalName>
-    </build>
+<finalName>jobs-client</finalName>
+</build>
 
 </project>

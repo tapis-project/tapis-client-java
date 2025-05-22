@@ -13,7 +13,7 @@ import edu.utexas.tacc.tapis.jobs.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.jobs.client.gen.ApiException;
 import edu.utexas.tacc.tapis.jobs.client.gen.api.GeneralApi;
 import edu.utexas.tacc.tapis.jobs.client.gen.api.JobsApi;
-import edu.utexas.tacc.tapis.jobs.client.gen.api.ShareApi;
+import edu.utexas.tacc.tapis.jobs.client.gen.api.SharingApi;
 import edu.utexas.tacc.tapis.jobs.client.gen.api.SubscriptionsApi;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.FileInfo;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.Job;
@@ -507,8 +507,8 @@ public class JobsClient
     {
     	RespShareJob resp = new  RespShareJob();
     	try {
-    		var shareApi = new ShareApi(_apiClient);
-    		resp = shareApi.shareJob(jobUuid, req, false);
+    		var sharingApi = new SharingApi(_apiClient);
+    		resp = sharingApi.shareJob(jobUuid, req, false);
     	}catch (ApiException e) {Utils.throwTapisClientException(e.getCode(),e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
     	return resp == null ? null : resp.getResult();
@@ -522,8 +522,8 @@ public class JobsClient
     {
     	RespGetJobShareList resp = new  RespGetJobShareList();
     	try {
-    		var shareApi = new ShareApi(_apiClient);
-    		resp = shareApi.getJobShare(jobUuid, limit, skip, false);
+    		var sharingApi = new SharingApi(_apiClient);
+    		resp = sharingApi.getJobShare(jobUuid, limit, skip, false);
     	}catch (ApiException e) {Utils.throwTapisClientException(e.getCode(),e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
     	return resp == null ? null : resp.getResult();
@@ -537,8 +537,8 @@ public class JobsClient
     {
     	RespUnShareJob resp = new  RespUnShareJob() ;
     	try {
-    		var shareApi = new ShareApi(_apiClient);
-    		resp = shareApi.deleteJobShare(jobUuid, user, false);
+    		var sharingApi = new SharingApi(_apiClient);
+    		resp = sharingApi.deleteJobShare(jobUuid, user, false);
     	}catch (ApiException e) {Utils.throwTapisClientException(e.getCode(),e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
     	return resp == null ? null : resp.getResult();
