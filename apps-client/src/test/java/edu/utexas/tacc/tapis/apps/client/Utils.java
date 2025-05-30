@@ -132,7 +132,6 @@ public final class Utils
   public static final String runtimeVersion1 = "0.0.1";
   public static final String runtimeVersion2 = "0.0.2";
   public static final List<RuntimeOptionEnum> runtimeOptions1 = new ArrayList<>(List.of(RuntimeOptionEnum.SINGULARITY_RUN));
-  public static final List<RuntimeOptionEnum> runtimeOptions2 = new ArrayList<>(List.of(RuntimeOptionEnum.SINGULARITY_START));
   public static final List<RuntimeOptionEnum> runtimeOptionsNull = null;
   public static final String containerImage1 = "containerImage1";
   public static final String containerImage2 = "containerImage2";

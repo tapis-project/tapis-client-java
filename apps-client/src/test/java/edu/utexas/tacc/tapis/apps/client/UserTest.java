@@ -345,7 +345,7 @@ public class UserTest
     app0[16] = archiveSystemDir2;
 
     // Verify patched attributes
-    verifyAppAttributes(tmpApp, app0, isEnabledTrue, runtimeOptions2, maxJobs2, maxJobsPerUser2, strictFileInputsTrue,
+    verifyAppAttributes(tmpApp, app0, isEnabledTrue, runtimeOptions1, maxJobs2, maxJobsPerUser2, strictFileInputsTrue,
             dynamicExecSystemFalse, execSystemConstraints2, archiveOnAppErrorFalse, mpiCmd2, appArgs2, containerArgs2,
             schedulerOptions2, envVariables2, archiveFilter2, nodeCount2, coresPerNode2, memoryMb2, maxMinutes2,
             fileInputs2, fileInputArrays2, jobTags2, notifList2, tags2, notes2JO);
@@ -628,7 +628,7 @@ public class UserTest
     pApp.description(appDescription2);
     pApp.runtime(runtime2);
     pApp.runtimeVersion(runtimeVersion2);
-    pApp.runtimeOptions(runtimeOptions2);
+    pApp.runtimeOptions(runtimeOptions1);
     pApp.containerImage(containerImage2);
     pApp.maxJobs(maxJobs2);
     pApp.maxJobsPerUser(maxJobsPerUser2);
