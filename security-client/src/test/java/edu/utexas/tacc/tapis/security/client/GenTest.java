@@ -1,5 +1,6 @@
 package edu.utexas.tacc.tapis.security.client;
 
+import edu.utexas.tacc.tapis.security.client.gen.model.RoleTypeEnum;
 import org.testng.annotations.Test;
 
 import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
@@ -47,13 +48,12 @@ public class GenTest
         body.setRoleTenant("dev");
         body.setRoleName("peachy");
         body.setDescription("This is a peachy description.");
-        RespResourceUrl urlResp = roleApi.createRole(body,true);
+        RespResourceUrl urlResp = roleApi.createRole(body);
         System.out.println("createRole: " + urlResp + "\n");
         System.out.println("createRole: " + urlResp.getResult().getUrl() + "\n");
         
         final String user = "testuser2";
-        RespChangeCount countResp = roleApi.deleteRoleByName("peachy", body.getRoleTenant(),
-                                                             true);
+        RespChangeCount countResp = roleApi.deleteRoleByName("peachy", body.getRoleTenant(), RoleTypeEnum.USER);
         System.out.println("deleteRoleByName: " + countResp + "\n");
         
         System.out.println(ClientTapisGsonUtils.getGson(true).toJson(countResp));
