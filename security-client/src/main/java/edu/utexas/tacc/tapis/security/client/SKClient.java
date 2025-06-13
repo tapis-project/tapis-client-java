@@ -8,7 +8,6 @@ import edu.utexas.tacc.tapis.security.client.gen.model.ReqGrantRoleWithPermissio
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqRevokeRole;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqValidatePwd;
 import edu.utexas.tacc.tapis.security.client.gen.model.RoleTypeEnum;
-import edu.utexas.tacc.tapis.security.client.gen.model.SkProbe;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.utexas.tacc.tapis.client.shared.ITapisClient;
@@ -76,8 +75,7 @@ import edu.utexas.tacc.tapis.security.client.model.SKShareDeleteShareParms;
 import edu.utexas.tacc.tapis.security.client.model.SKShareGetSharesParms;
 import edu.utexas.tacc.tapis.security.client.model.SKShareHasPrivilegeParms;
 
-public class SKClient
- implements ITapisClient
+public class SKClient implements ITapisClient
 {
     /* **************************************************************************** */
     /*                                   Constants                                  */
@@ -1336,8 +1334,14 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* readSecret:                                                                  */
     /* ---------------------------------------------------------------------------- */
-    public SkSecret readSecret(SKSecretReadParms parms)
-     throws TapisClientException
+
+    /**
+     * readSecret
+     * @param parms parameters used to look up secret
+     * @return the secret, or null if not found (404)
+     * @throws TapisClientException on error
+     */
+    public SkSecret readSecret(SKSecretReadParms parms) throws TapisClientException
     {
         // Make the REST call.
         RespSecret resp = null;
@@ -1356,9 +1360,17 @@ public class SKClient
                                        parms.getDbName(),
                                        parms.getDbService());
         }
-        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (ApiException e)
+        {
+          // If 404 return null
+          if (e.getCode() == 404) return null;
+          Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);
+        }
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
-        
+
+        // Should never be null
+        if (resp == null || resp.getResult() == null) Utils.throwTapisClientException(-1, null, null);
+
         // Return result value.
         return resp.getResult();
     }
@@ -1505,8 +1517,13 @@ public class SKClient
     /* ---------------------------------------------------------------------------- */
     /* readSecretMeta:                                                              */
     /* ---------------------------------------------------------------------------- */
-    public SkSecretVersionMetadata readSecretMeta(SKSecretMetaParms parms)
-     throws TapisClientException
+    /**
+     * readSecretMeta
+     * @param parms parameters used to look up secret metadata
+     * @return the secret, or null if not found (404)
+     * @throws TapisClientException on error
+     */
+    public SkSecretVersionMetadata readSecretMeta(SKSecretMetaParms parms) throws TapisClientException
     {
         // Make the REST call.
         RespSecretVersionMetadata resp = null;
@@ -1524,9 +1541,17 @@ public class SKClient
                                            parms.getDbName(),
                                            parms.getDbService());
         }
-        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (ApiException e)
+        {
+            // If 404 return null
+            if (e.getCode() == 404) return null;
+          Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);
+        }
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
-        
+
+        // Should never be null
+        if (resp == null || resp.getResult() == null) Utils.throwTapisClientException(-1, null, null);
+
         // Return result value.
         return resp.getResult();
     }
