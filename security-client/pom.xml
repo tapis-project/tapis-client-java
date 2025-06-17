@@ -22,7 +22,7 @@
           or if yaml committed to local branch then do:
      mvn install -DspecPath="https://raw.githubusercontent.com/tapis-project/openapi-security/local/SkAPI.yaml"
      -->
-    <specPath>https://raw.githubusercontent.com/tapis-project/openapi-security/dev/SkAPI.yaml</specPath>
+    <specPath>https://raw.githubusercontent.com/tapis-project/openapi-security/1.8.5-hotfix/SkAPI.yaml</specPath>
   </properties>
 	<dependencies>
         <dependency>
