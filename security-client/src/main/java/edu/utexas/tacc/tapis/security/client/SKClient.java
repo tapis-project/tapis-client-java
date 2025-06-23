@@ -6,6 +6,7 @@ import java.util.List;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqGrantRole;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqGrantRoleWithPermission;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqRevokeRole;
+import edu.utexas.tacc.tapis.security.client.gen.model.ReqRolePermits;
 import edu.utexas.tacc.tapis.security.client.gen.model.ReqValidatePwd;
 import edu.utexas.tacc.tapis.security.client.gen.model.RoleTypeEnum;
 import org.apache.commons.lang3.StringUtils;
@@ -1513,7 +1514,31 @@ public class SKClient implements ITapisClient
         // Return result value.
         return resp.getResult();
     }
-    
+
+    public boolean rolePermits(String roleName, String roleTenant, RoleTypeEnum roleType, String permSpec, boolean immediate)
+            throws TapisClientException
+    {
+        // Assign input body.
+        var body = new ReqRolePermits();
+        body.setRoleTenant(roleTenant);
+        body.setRoleType(roleType);
+        body.setPermSpec(permSpec);
+
+        // Make the REST call.
+        RespAuthorized resp = null;
+        try {
+            // Get the API object using default networking.
+            var roleApi = new RoleApi(_apiClient);
+            resp = roleApi.rolePermits(roleName, body, immediate);
+        }
+        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
+        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
+
+        // Return result value.
+        Boolean b = resp.getResult().getIsAuthorized();
+        return b == null ? false : b;
+    }
+
     /* ---------------------------------------------------------------------------- */
     /* readSecretMeta:                                                              */
     /* ---------------------------------------------------------------------------- */
