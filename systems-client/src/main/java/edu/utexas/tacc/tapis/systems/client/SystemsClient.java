@@ -72,7 +72,7 @@ public class SystemsClient implements ITapisClient
   // ************************************************************************
   // Define AuthnMethod here to be used in place of the auto-generated model enum
   //   because the auto-generated enum is named DefaultAuthnMethodEnum which is misleading.
-  public enum AuthnMethod {PASSWORD, PKI_KEYS, ACCESS_KEY, CERT}
+  public enum AuthnMethod {PASSWORD, PKI_KEYS, ACCESS_KEY, TOKEN, TMS_KEYS, CERT}
 
   // ************************************************************************
   // *********************** Fields *****************************************
