@@ -3,7 +3,6 @@ package edu.utexas.tacc.tapis.jobs.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.HashMap;
 
 import org.apache.commons.lang3.StringUtils;
 
