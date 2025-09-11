@@ -493,7 +493,6 @@ public class JobsClient
     	RespHideJob resp = new RespHideJob();
     	try {
     		var jobsApi = new JobsApi(_apiClient);
-            jobsApi.getApiClient().addDefaultHeader("Content-Type", "application/json");
     		resp = jobsApi.unhideJob(jobUuid, null);
     	}catch (ApiException e) {Utils.throwTapisClientException(e.getCode(),e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
