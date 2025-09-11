@@ -21,7 +21,8 @@
           or if yaml committed to local branch then do:
      mvn install -DspecPath="https://raw.githubusercontent.com/tapis-project/openapi-jobs/local/JobsAPI.yaml"
      -->
-    <specPath>https://raw.githubusercontent.com/tapis-project/openapi-jobs/dev/JobsAPI.yaml</specPath>
+    <!-- <specPath>https://raw.githubusercontent.com/tapis-project/openapi-jobs/dev/JobsAPI.yaml</specPath> -->
+    <specPath>/Users/wei.zhang/Developer/git/TAPIS/non-java/Openapi/openapi-jobs/JobsAPI.yaml</specPath>
   </properties>
 
     <dependencies>
