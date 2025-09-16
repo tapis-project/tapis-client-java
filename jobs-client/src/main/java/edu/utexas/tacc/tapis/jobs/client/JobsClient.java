@@ -269,7 +269,7 @@ public class JobsClient
         try {
             // Get the API object using default networking.
             var jobsApi = new JobsApi(_apiClient);
-            resp = jobsApi.resubmitJob(jobUuid);
+            resp = jobsApi.resubmitJob(jobUuid, null);
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
@@ -343,7 +343,7 @@ public class JobsClient
         try {
             // Get the API object using default networking.
             var jobsApi = new JobsApi(_apiClient);
-            resp = jobsApi.cancelJob(jobUuid);
+            resp = jobsApi.cancelJob(jobUuid, null);
             		
         }
         catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
@@ -478,7 +478,7 @@ public class JobsClient
     	RespHideJob resp = new RespHideJob();
     	try {
     		var jobsApi = new JobsApi(_apiClient);
-    		resp=jobsApi.hideJob(jobUuid);
+    		resp=jobsApi.hideJob(jobUuid, null);
     	}catch (ApiException e) {Utils.throwTapisClientException(e.getCode(),e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
     	return resp == null ? null : resp.getResult();
@@ -493,7 +493,7 @@ public class JobsClient
     	RespHideJob resp = new RespHideJob();
     	try {
     		var jobsApi = new JobsApi(_apiClient);
-    		resp = jobsApi.unhideJob(jobUuid);
+    		resp = jobsApi.unhideJob(jobUuid, null);
     	}catch (ApiException e) {Utils.throwTapisClientException(e.getCode(),e.getResponseBody(), e);}
         catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
     	return resp == null ? null : resp.getResult();
