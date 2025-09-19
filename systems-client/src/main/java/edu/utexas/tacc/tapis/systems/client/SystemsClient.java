@@ -588,8 +588,10 @@ public class SystemsClient implements ITapisClient
     RespSystems resp = null;
     try
     {
+      // TODO hasCredentials
+      boolean hasCredentials = false;
       resp = sysApi.getSystems(searchStr, listTypeEnum, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL,
-                               selectStr1, showDeleted, impersonationId);
+                               selectStr1, showDeleted, impersonationId/*, hasCredentials*/);
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -1056,12 +1058,13 @@ public class SystemsClient implements ITapisClient
   /**
    * Utility method to build a batch LogicalQueue
    */
-  public static LogicalQueue buildLogicalQueue(String name, String hpcQueueName, int maxJobs, int maxJobsPerUser,
-                                               int minNodeCount, int maxNodeCount, int minCoresPerNode, int maxCoresPerNode,
-                                               int minMemoryMB, int maxMemoryMB, int minMinutes, int maxMinutes)
+  public static LogicalQueue buildLogicalQueue(String name, String description, String hpcQueueName, int maxJobs,
+                                               int maxJobsPerUser, int minNodeCount, int maxNodeCount, int minCoresPerNode,
+                                               int maxCoresPerNode, int minMemoryMB, int maxMemoryMB, int minMinutes, int maxMinutes)
   {
     var q = new LogicalQueue();
     q.setName(name);
+    q.setDescription(description);
     q.setHpcQueueName(hpcQueueName);
     q.setMaxJobs(maxJobs);
     q.setMaxJobsPerUser(maxJobsPerUser);
