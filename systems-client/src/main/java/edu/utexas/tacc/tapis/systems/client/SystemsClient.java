@@ -58,6 +58,7 @@ public class SystemsClient implements ITapisClient
   private static final String sharedCtxNull = null;
   private static final String resourceTenantNull = null;
   private static final boolean returnCredentialsTrue = true;
+  private static final Boolean hasCredentialsNull = null;
 
   // Default values
   private static final AuthnMethod DEFAULT_AUTHN_METHOD = authnMethodNull;
@@ -576,11 +577,12 @@ public class SystemsClient implements ITapisClient
    * @param selectStr - List of attributes to be included as part of each result item.
    * @param showDeleted - whether to included resources that have been marked as deleted.
    * @param impersonationId - use provided Tapis username instead of oboUser when checking auth and resolving effectiveUserId
+   * @param hasCredentials - flag indicating if filtering should be done based on registered credentials.
    * @return list of systems available to the caller and matching search conditions.
    * @throws TapisClientException - If api call throws an exception
    */
   public List<TapisSystem> getSystems(String searchStr, ListTypeEnum listTypeEnum, int limit, String orderBy, int skip, String startAfter,
-                                      String selectStr, boolean showDeleted, String impersonationId)
+                                      String selectStr, boolean showDeleted, String impersonationId, Boolean hasCredentials)
           throws TapisClientException
   {
     String selectStr1 = DEFAULT_SELECT_SUMMARY;
@@ -588,10 +590,8 @@ public class SystemsClient implements ITapisClient
     RespSystems resp = null;
     try
     {
-      // TODO hasCredentials
-      boolean hasCredentials = false;
       resp = sysApi.getSystems(searchStr, listTypeEnum, limit, orderBy, skip, startAfter, DEFAULT_COMPUTETOTAL,
-                               selectStr1, showDeleted, impersonationId/*, hasCredentials*/);
+                               selectStr1, showDeleted, impersonationId, hasCredentials);
     }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
@@ -599,6 +599,14 @@ public class SystemsClient implements ITapisClient
     // Postprocess TapisSystems in the result
     for (TapisSystem tSys : resp.getResult()) postProcessSystem(tSys);
     return resp.getResult();
+  }
+  // Simple wrapper for backward compatibility.
+  public List<TapisSystem> getSystems(String searchStr, ListTypeEnum listTypeEnum, int limit, String orderBy, int skip, String startAfter,
+                                      String selectStr, boolean showDeleted, String impersonationId)
+        throws TapisClientException
+  {
+    return getSystems(searchStr, listTypeEnum, limit, orderBy, skip, startAfter, selectStr, showDeleted,
+                      impersonationId, hasCredentialsNull);
   }
 
   /**
@@ -616,20 +624,27 @@ public class SystemsClient implements ITapisClient
    * @throws TapisClientException - If api call throws an exception
    */
   public List<TapisSystem> searchSystems(ReqSearchSystems req, ListTypeEnum listTypeEnum, int limit, String orderBy,
-                                         int skip, String startAfter,                                         String selectStr)
+                                         int skip, String startAfter, String selectStr, Boolean hasCredentials)
           throws TapisClientException
   {
     String selectStr1 = DEFAULT_SELECT_SUMMARY;
     if (!StringUtils.isBlank(selectStr)) selectStr1 = selectStr;
     RespSystems resp = null;
     try { resp = sysApi.searchSystemsRequestBody(req, listTypeEnum, limit, orderBy, skip, startAfter,
-                                                 DEFAULT_COMPUTETOTAL, selectStr1); }
+                                                 DEFAULT_COMPUTETOTAL, selectStr1, hasCredentials); }
     catch (ApiException e) { Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e); }
     catch (Exception e) { Utils.throwTapisClientException(-1, null, e); }
     if (resp == null || resp.getResult() == null || resp.getResult() == null) return Collections.emptyList();
     // Postprocess TapisSystems in the result
     for (TapisSystem tSys : resp.getResult()) postProcessSystem(tSys);
     return resp.getResult();
+  }
+  // Simple wrapper for backward compatibility.
+  public List<TapisSystem> searchSystems(ReqSearchSystems req, ListTypeEnum listTypeEnum, int limit, String orderBy,
+                                         int skip, String startAfter, String selectStr)
+        throws TapisClientException
+  {
+    return searchSystems(req, listTypeEnum, limit, orderBy, skip, startAfter, selectStr, hasCredentialsNull);
   }
 
   /**
