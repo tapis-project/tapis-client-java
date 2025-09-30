@@ -7,7 +7,9 @@ cd $PRG_RELPATH/.
 export PRG_PATH=`pwd`
 cd $RUN_DIR
 
+MODULE_NAME=${2}
 AUTH_SPEC_PATH=${1:-"https://raw.githubusercontent.com/tapis-project/authenticator/dev/service/resources/openapi_v3.yml"}	
+OUTPUT_FORMAT=${3:-"yaml"} # can be "yaml" or "json"
 
 # Create target dir in case not yet created by maven
 mkdir -p $PRG_PATH/target
