@@ -8,9 +8,16 @@ export PRG_PATH=`pwd`
 cd $RUN_DIR
 
 MODULE_NAME=${1}
-SPEC_PATH=${2:-"https://raw.githubusercontent.com/tapis-project/authenticator/dev/service/resources/openapi_v3.yml"} 
+SPEC_PATH=${2}
 OUTPUT_FORMAT=${3:-"yaml"} # can be "yaml" or "json"
 
+if [ -z "$MODULE_NAME" ] || [ -z "$SPEC_PATH" ]; then
+    echo "Usage: $PrgName <module_name> <spec_path> [output_format]"
+    echo "  <module_name>   Name of the module (required)"
+    echo "  <spec_path>     Path or URL to OpenAPI spec (required)"
+    echo "  [output_format] Output format: yaml or json (default: yaml)"
+    exit 1
+fi
 export OUTPUT_DIR=$PRG_PATH/${MODULE_NAME}-client/target
 mkdir -p $OUTPUT_DIR
 
