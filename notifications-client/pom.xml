@@ -15,12 +15,12 @@
     <!-- Location of openapi spec. Default is dev branch -->
     <!-- NOTE: In order to try out openapi updates using a local file do something similar to the following:
      mvn clean install
-     cd notificationss-client
+     cd notifications-client
      cp ../../openapi-notifications/NotificationsAPI.yaml target/
-     mvn install -DspecPath="/home/scblack/src_git/github/dev/tapis-client-java/notifications-client/target/NotificationssAPI.yaml"
+     mvn install -DnotificationsSpecPath="/home/scblack/src_git/github/dev/tapis-client-java/notifications-client/target/NotificationsAPI.yaml"
 
           or if yaml committed to local branch then do:
-     mvn install -DspecPath="https://raw.githubusercontent.com/tapis-project/openapi-notifications/local/NotificationsAPI.yaml"
+     mvn install -DnotificationsSpecPath="https://raw.githubusercontent.com/tapis-project/openapi-notifications/local/NotificationsAPI.yaml"
      -->
     <notificationsSpecPath>https://raw.githubusercontent.com/tapis-project/openapi-notifications/dev/NotificationsAPI.yaml</notificationsSpecPath>
     <target.spec.format>yml</target.spec.format>

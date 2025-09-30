@@ -15,10 +15,10 @@
     <!-- Location of openapi spec. Default is dev branch -->
     <!-- NOTE: In order to try out openapi updates using a local file do something similar to the following:
          mvn clean install
-         mvn install -DspecPath="file:///home/scblack/src_git/github/tapis/tokens/service/src/main/resources/openapi_v3.yml"
+         mvn install -DtokensSpecPath="file:///home/scblack/src_git/github/tapis/tokens/service/src/main/resources/openapi_v3.yml"
 
               or if yaml committed to local branch then do:
-         mvn install -DspecPath="https://raw.githubusercontent.com/tapis-project/tokens-api/dev/service/resources/openapi_v3.yml"
+         mvn install -DtokensSpecPath="https://raw.githubusercontent.com/tapis-project/tokens-api/dev/service/resources/openapi_v3.yml"
      -->
     <tokensSpecPath>https://raw.githubusercontent.com/tapis-project/tokens-api/dev/service/resources/openapi_v3.yml</tokensSpecPath>
     <target.spec.format>json</target.spec.format>

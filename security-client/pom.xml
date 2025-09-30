@@ -17,10 +17,10 @@
      mvn clean install
      cd security-client
      cp ../../openapi-security/SkAPI.yaml target/
-     mvn install -DspecPath="/home/scblack/src_git/github/dev/tapis-client-java/security-client/target/SkAPI.yaml"
+     mvn install -DsecuritySpecPath="/home/scblack/src_git/github/dev/tapis-client-java/security-client/target/SkAPI.yaml"
 
           or if yaml committed to local branch then do:
-     mvn install -DspecPath="https://raw.githubusercontent.com/tapis-project/openapi-security/local/SkAPI.yaml"
+     mvn install -DsecuritySpecPath="https://raw.githubusercontent.com/tapis-project/openapi-security/local/SkAPI.yaml"
      -->
     <securitySpecPath>https://raw.githubusercontent.com/tapis-project/openapi-security/dev/SkAPI.yaml</securitySpecPath>
     <target.spec.format>yml</target.spec.format>

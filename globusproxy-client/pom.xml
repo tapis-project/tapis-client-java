@@ -16,10 +16,10 @@
     <!-- Location of openapi spec. Default is dev branch -->
     <!-- NOTE: In order to try out openapi updates using a local file do something similar to the following:
      mvn clean install
-     mvn install -DspecPath="file:///home/scblack/src_git/github/globus/globus-proxy/service/resources/openapi_v3.yml"
+     mvn install -DglobusproxySpecPath="file:///home/scblack/src_git/github/globus/globus-proxy/service/resources/openapi_v3.yml"
 
           or if yaml committed to local branch then do:
-     mvn install -DspecPath="https://raw.githubusercontent.com/tapis-project/globus-proxy/dev/service/resources/openapi_v3.yml"
+     mvn install -DglobusproxySpecPath="https://raw.githubusercontent.com/tapis-project/globus-proxy/dev/service/resources/openapi_v3.yml"
      -->
     <globusproxySpecPath>https://raw.githubusercontent.com/tapis-project/globus-proxy/dev/service/resources/openapi_v3.yml</globusproxySpecPath>
     <target.spec.format>json</target.spec.format>

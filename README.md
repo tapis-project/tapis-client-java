@@ -21,6 +21,24 @@ The second parameter of `gen_spec.sh` takes the raw spec path specified by `-D{m
 The third parameter will take `"json"` or `"yaml"`, to determine the output spec format. 
 The output of `gen_spec.sh` will be under the `target` directory of the corresponding sub-project, according to the `module_name` we pass as the second parameter of `gen_spec.sh`. 
 
+
+To compile the whole Java SDK project with different spec path specified for each project, we can do the following: 
+
+```
+mvn clean package \
+-DappsSpecPath=https://raw.githubusercontent.com/tapis-project/openapi-apps/dev/AppsAPI.yaml \
+-DauthSpecPath=https://raw.githubusercontent.com/tapis-project/authenticator/dev/service/resources/openapi_v3.yml \
+-DfilesSpecPath=https://raw.githubusercontent.com/tapis-project/openapi-files/dev/FilesAPI.yaml \
+-DglobusproxySpecPath=https://raw.githubusercontent.com/tapis-project/globus-proxy/dev/service/resources/openapi_v3.yml \
+-DjobsSpecPath=https://raw.githubusercontent.com/tapis-project/openapi-jobs/dev/JobsAPI.yaml \
+-DmetaSpecPath='${project.basedir}/src/main/resources/metav3-openapi.yaml' \
+-DnotificationsSpecPath=https://raw.githubusercontent.com/tapis-project/openapi-notifications/dev/NotificationsAPI.yaml \
+-DsecuritySpecPath=https://raw.githubusercontent.com/tapis-project/openapi-security/dev/SkAPI.yaml \
+-DsystemsSpecPath=https://raw.githubusercontent.com/tapis-project/openapi-systems/dev/SystemsAPI.yaml \
+-DtenantsSpecPath=https://raw.githubusercontent.com/tapis-project/tenants-api/dev/service/resources/openapi_v3.yml \
+-DtokensSpecPath=https://raw.githubusercontent.com/tapis-project/tokens-api/dev/service/resources/openapi_v3.yml
+```
+
 ## Build and Push the Java SDK into Maven Repo
 
 After updating and pushing to github run the jenkins job  

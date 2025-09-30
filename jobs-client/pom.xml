@@ -17,9 +17,9 @@
      mvn clean install
      cd jobs-client
      cp ../../openapi-jobs/JobsAPI.yaml target/
-     mvn install -DspecPath="/home/scblack/src_git/github/dev/tapis-client-java/jobs-client/target/JobsAPI.yaml"
+     mvn install -DjobsSpecPath="/home/scblack/src_git/github/dev/tapis-client-java/jobs-client/target/JobsAPI.yaml"
           or if yaml committed to local branch then do:
-     mvn install -DspecPath="https://raw.githubusercontent.com/tapis-project/openapi-jobs/local/JobsAPI.yaml"
+     mvn install -DjobsSpecPath="https://raw.githubusercontent.com/tapis-project/openapi-jobs/local/JobsAPI.yaml"
      -->
     <!-- <jobsSpecPath>/Users/wei.zhang/Developer/git/TAPIS/non-java/Openapi/openapi-jobs/JobsAPI.yaml</jobsSpecPath> -->
     <jobsSpecPath>https://raw.githubusercontent.com/tapis-project/openapi-jobs/dev/JobsAPI.yaml</jobsSpecPath>
