@@ -11,6 +11,19 @@
   <name>Tapis Tokens Client</name>
   <description>Java client for Tokens Service</description>
 
+  <properties>
+    <!-- Location of openapi spec. Default is dev branch -->
+    <!-- NOTE: In order to try out openapi updates using a local file do something similar to the following:
+         mvn clean install
+         mvn install -DspecPath="file:///home/scblack/src_git/github/tapis/tokens/service/src/main/resources/openapi_v3.yml"
+
+              or if yaml committed to local branch then do:
+         mvn install -DspecPath="https://raw.githubusercontent.com/tapis-project/tokens-api/dev/service/resources/openapi_v3.yml"
+     -->
+    <tokensSpecPath>https://raw.githubusercontent.com/tapis-project/tokens-api/dev/service/resources/openapi_v3.yml</tokensSpecPath>
+    <target.spec.format>json</target.spec.format>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -31,7 +44,29 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>buildnumber-maven-plugin</artifactId>
       </plugin>
-      <!-- Run script to download latest tokens openapi_v3.yml and generate bundled json file  -->
+      <!-- Extract artifact prefix before '-client' -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.4.0</version>
+        <executions>
+          <execution>
+            <id>regex-property</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>regex-property</goal>
+            </goals>
+            <configuration>
+              <name>artifact.prefix</name>
+              <value>${project.artifactId}</value>
+              <regex>^([^-]+)-.*$</regex>
+              <replacement>$1</replacement>
+              <failIfNoMatch>false</failIfNoMatch>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Run script to download latest app openapi_v3.yml and generate bundled json file  -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
@@ -44,7 +79,12 @@
               <goal>exec</goal>
             </goals>
             <configuration>
-              <executable>${basedir}/gen_spec.sh</executable>
+              <executable>${basedir}/../gen_spec.sh</executable>
+              <arguments>
+                <argument>${artifact.prefix}</argument>
+                <argument>${tokensSpecPath}</argument>
+                <argument>${target.spec.format}</argument>
+              </arguments>
             </configuration>
           </execution>
         </executions>
@@ -60,7 +100,7 @@
               <goal>generate</goal>
             </goals>
             <configuration>
-              <inputSpec>${project.basedir}/target/tokens.json</inputSpec>
+              <inputSpec>${project.basedir}/target/openapi_v3.${target.spec.format}</inputSpec>
               <enablePostProcessFile>true</enablePostProcessFile>
               <generateAliasAsModel>true</generateAliasAsModel>
               <output>${project.build.directory}/generated-sources/openapi</output>

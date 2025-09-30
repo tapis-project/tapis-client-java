@@ -22,7 +22,8 @@
           or if yaml committed to local branch then do:
      mvn install -DspecPath="https://raw.githubusercontent.com/tapis-project/openapi-notifications/local/NotificationsAPI.yaml"
      -->
-    <specPath>https://raw.githubusercontent.com/tapis-project/openapi-notifications/dev/NotificationsAPI.yaml</specPath>
+    <notificationsSpecPath>https://raw.githubusercontent.com/tapis-project/openapi-notifications/dev/NotificationsAPI.yaml</notificationsSpecPath>
+    <target.spec.format>yml</target.spec.format>
 
     <!-- Skip integration tests by default -->
     <!-- To run tests TAPIS_FILES_SVC_PASSWORD must be set in the env -->
@@ -73,6 +74,52 @@
         </configuration>
       </plugin>
 
+      <!-- Extract artifact prefix before '-client' -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.4.0</version>
+        <executions>
+          <execution>
+            <id>regex-property</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>regex-property</goal>
+            </goals>
+            <configuration>
+              <name>artifact.prefix</name>
+              <value>${project.artifactId}</value>
+              <regex>^([^-]+)-.*$</regex>
+              <replacement>$1</replacement>
+              <failIfNoMatch>false</failIfNoMatch>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Run script to download latest app openapi_v3.yml and generate bundled json file  -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>${exec-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>Generate bundled openapi json file</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>${basedir}/../gen_spec.sh</executable>
+              <arguments>
+                <argument>${artifact.prefix}</argument>
+                <argument>${notificationsSpecPath}</argument>
+                <argument>${target.spec.format}</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <!-- Build generated client code using openapi-generator -->
       <plugin>
         <groupId>org.openapitools</groupId>
@@ -85,7 +132,7 @@
             </goals>
             <configuration>
               <!-- Location of openapi spec -->
-              <inputSpec>${specPath}</inputSpec>
+              <inputSpec>${project.basedir}/target/openapi_v3.${target.spec.format}</inputSpec>
               <enablePostProcessFile>true</enablePostProcessFile>
               <output>${project.build.directory}/generated-sources/openapi</output>
               <generatorName>java</generatorName>
