@@ -38,9 +38,9 @@ mvn clean package -DskipTest\
 -DtenantsSpecPath=https://raw.githubusercontent.com/tapis-project/tenants-api/dev/service/resources/openapi_v3.yml \
 -DtokensSpecPath=https://raw.githubusercontent.com/tapis-project/tokens-api/dev/service/resources/openapi_v3.yml
 ```
-
-Also, for quick reference, the above command contains all the actual specs we use for SDK generation. Feel free to change any of them. 
 If you omit any of the spec path here, the default one written in the sub-project `pom.xml` file will be used. 
+
+Also, for quick reference, the above command contains all the actual specs we use for SDK generation. Feel free to change any of them in the command line when you run the above command, but **DO NOT CHANGE THE DEFAULT ONES in the `pom.xml`**. 
 
 ## Build and Push the Java SDK into Maven Repo
 
