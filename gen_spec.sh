@@ -9,7 +9,7 @@ cd $RUN_DIR
 
 MODULE_NAME=${1}
 SPEC_PATH=${2}
-OUTPUT_FORMAT=${3:-"yaml"} # can be "yaml" or "json"
+OUTPUT_FORMAT=${3:-"yaml"} # default is "yaml"; can be "yaml" or "json"
 
 if [ -z "$MODULE_NAME" ] || [ -z "$SPEC_PATH" ]; then
     echo "Usage: $PrgName <module_name> <spec_path> [output_format]"
