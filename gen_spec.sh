@@ -21,13 +21,13 @@ INPUT_FORMAT=${SPEC_PATH##*.}
 TMP_SPEC_FILE=$TMP_DIR/${MODULE_NAME}/openapi_v3.${INPUT_FORMAT}
 OUTPUT_API_NAME=openapi_v3.${OUTPUT_FORMAT}
 
-# if specPath starts with 'http' then download it, if starts with 'file' then copy it, else exit with error
+# if specPath starts with 'http' then download it, if starts with 'file://' then copy it, else exit with error
 if [[ $SPEC_PATH == http* ]]; then
 	echo "Spec path is a URL, will download it: $SPEC_PATH"
 	# Download latest openapi spec from repo
 	# Dev yaml
 	curl -o $TMP_SPEC_FILE $SPEC_PATH
-elif [[ $SPEC_PATH == file* ]]; then
+elif [[ $SPEC_PATH == file://* ]]; then
 	echo "Spec path is a file URL, will copy it: $SPEC_PATH"
 	SPEC_PATH=$(echo $SPEC_PATH | sed -e 's|^file://||')
 	cp -f $SPEC_PATH $TMP_SPEC_FILE
