@@ -13,7 +13,7 @@
 
   <properties>
     <!-- Location of openapi spec. Default is dev branch -->
-    <specPath>https://raw.githubusercontent.com/tapis-project/openapi-files/dev/FilesAPI.yaml</specPath>
+    <fileSpecPath>https://raw.githubusercontent.com/tapis-project/openapi-files/dev/FilesAPI.yaml</fileSpecPath>
 
     <!-- Skip integration tests by default -->
     <!-- TODO/TBD To run tests TAPIS_FILES_SVC_PASSWORD must be set in the env -->
@@ -80,7 +80,7 @@
             </goals>
             <configuration>
               <!-- Location of openapi spec -->
-              <inputSpec>${specPath}</inputSpec>
+              <inputSpec>${fileSpecPath}</inputSpec>
               <enablePostProcessFile>true</enablePostProcessFile>
               <output>${project.build.directory}/generated-sources/openapi</output>
               <generatorName>java</generatorName>

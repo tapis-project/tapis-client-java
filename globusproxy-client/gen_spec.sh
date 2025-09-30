@@ -8,7 +8,7 @@ export PRG_PATH=`pwd`
 cd $RUN_DIR
 
 # Path to the openapi yaml file
-SPEC_PATH=https://raw.githubusercontent.com/tapis-project/globus-proxy/dev/service/resources/openapi_v3.yml
+GLOBUSPROXY_SPEC_PATH=${1:-"https://raw.githubusercontent.com/tapis-project/globus-proxy/dev/service/resources/openapi_v3.yml"}
 
 # Create target dir in case not yet created by maven
 mkdir -p $PRG_PATH/target
@@ -16,9 +16,22 @@ mkdir -p $PRG_PATH/target
 # Create unique directory in tmp for storing generated json file
 TMP_DIR=$(mktemp -d)
 
-# Download latest openapi spec from repo
-curl -o target/openapi_v3.yml $SPEC_PATH
-#
+# if specPath starts with 'http' then download it, if starts with 'file' then copy it, else exit with error
+if [[ $GLOBUSPROXY_SPEC_PATH == http* ]]; then
+	echo "Spec path is a URL, will download it: $GLOBUSPROXY_SPEC_PATH"
+	# Download latest openapi spec from repo
+	# Dev yaml
+	curl -o target/openapi_v3.yml $GLOBUSPROXY_SPEC_PATH
+elif [[ $GLOBUSPROXY_SPEC_PATH == file* ]]; then
+	echo "Spec path is a file URL, will copy it: $GLOBUSPROXY_SPEC_PATH"
+	GLOBUSPROXY_SPEC_PATH=$(echo $GLOBUSPROXY_SPEC_PATH | sed -e 's|^file://||')
+	cp $GLOBUSPROXY_SPEC_PATH target/openapi_v3.yml
+else
+	# exit with error
+	echo "Spec path is not a valid URL or file path: $GLOBUSPROXY_SPEC_PATH"
+	exit 1
+fi
+
 # NOTE Could also copy from local file for testing
 # cp ../../globus-proxy/service/resources/openapi_v3.yml target/openapi_v3.yml
 

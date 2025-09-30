@@ -11,6 +11,24 @@
   <name>Tapis Authenticator Client</name>
   <description>Java client for Authenticator Service</description>
 
+  <properties>
+    <!-- Location of openapi spec. Default is dev branch -->
+    <!-- NOTE: In order to try out openapi updates using a local file, just specify the file path like:
+      file:///home/scblack/src_git/github/dev/tapis-client-java/auth-client/target/openapi_v3.yml
+      mvn clean install
+      mvn install -DauthSpecPath="file:///home/scblack/src_git/github/dev/tapis-client-java/auth-client/target/auth_spec.yaml"
+          or if yaml committed to local branch then do:
+      mvn install -DauthSpecPath="https://raw.githubusercontent.com/tapis-project/authenticator/dev/service/resources/openapi_v3.yml"
+    -->
+    <authSpecPath>https://raw.githubusercontent.com/tapis-project/authenticator/dev/service/resources/openapi_v3.yml</authSpecPath>
+
+    <!-- Skip integration tests by default -->
+    <!-- To run tests TAPIS_FILES_SVC_PASSWORD must be set in the env -->
+    <!-- Use following command to run integration tests -->
+    <!--   TAPIS_FILES_SVC_PASSWORD=<files_service_password> mvn verify -DskipIntegrationTests=false  -->
+    <skipIntegrationTests>true</skipIntegrationTests>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -60,6 +78,9 @@
             </goals>
             <configuration>
               <executable>${basedir}/gen_spec.sh</executable>
+              <arguments>
+                <argument>${authSpecPath}</argument>
+              </arguments>
             </configuration>
           </execution>
         </executions>
