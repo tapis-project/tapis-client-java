@@ -27,7 +27,6 @@ import edu.utexas.tacc.tapis.jobs.client.gen.model.JobShareListDTO;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobStatusDisplay;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobUnShareDisplay;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqJobAnnotation;
-import edu.utexas.tacc.tapis.jobs.client.gen.model.JobUnShareDisplay;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqShareJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqSubmitJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqSubscribe;
