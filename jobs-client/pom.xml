@@ -17,11 +17,13 @@
      mvn clean install
      cd jobs-client
      cp ../../openapi-jobs/JobsAPI.yaml target/
-     mvn install -DspecPath="/home/scblack/src_git/github/dev/tapis-client-java/jobs-client/target/JobsAPI.yaml"
+     mvn install -DjobsSpecPath="/home/scblack/src_git/github/dev/tapis-client-java/jobs-client/target/JobsAPI.yaml"
           or if yaml committed to local branch then do:
-     mvn install -DspecPath="https://raw.githubusercontent.com/tapis-project/openapi-jobs/local/JobsAPI.yaml"
+     mvn install -DjobsSpecPath="https://raw.githubusercontent.com/tapis-project/openapi-jobs/local/JobsAPI.yaml"
      -->
-    <specPath>https://raw.githubusercontent.com/tapis-project/openapi-jobs/dev/JobsAPI.yaml</specPath>
+    <!-- <jobsSpecPath>/Users/wei.zhang/Developer/git/TAPIS/non-java/Openapi/openapi-jobs/JobsAPI.yaml</jobsSpecPath> -->
+    <jobsSpecPath>https://raw.githubusercontent.com/tapis-project/openapi-jobs/dev/JobsAPI.yaml</jobsSpecPath>
+    <target.spec.format>yml</target.spec.format>
   </properties>
 
     <dependencies>
@@ -53,6 +55,52 @@
               </suiteXmlFiles>
             </configuration>
         </plugin>
+      
+      <!-- Extract artifact prefix before '-client' -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.4.0</version>
+        <executions>
+          <execution>
+            <id>regex-property</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>regex-property</goal>
+            </goals>
+            <configuration>
+              <name>artifact.prefix</name>
+              <value>${project.artifactId}</value>
+              <regex>^([^-]+)-.*$</regex>
+              <replacement>$1</replacement>
+              <failIfNoMatch>false</failIfNoMatch>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Run script to download latest app openapi_v3.yml and generate bundled json file  -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>${exec-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>Generate bundled openapi json file</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>${basedir}/../gen_spec.sh</executable>
+              <arguments>
+                <argument>${artifact.prefix}</argument>
+                <argument>${jobsSpecPath}</argument>
+                <argument>${target.spec.format}</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
       <!-- Build generated client code using openapi-generator -->
       <plugin>
@@ -66,7 +114,7 @@
             </goals>
             <configuration>
               <!-- Location of openapi spec -->
-              <inputSpec>${specPath}</inputSpec>
+              <inputSpec>${project.basedir}/target/openapi_v3.${target.spec.format}</inputSpec>
               <enablePostProcessFile>true</enablePostProcessFile>
               <output>${project.build.directory}/generated-sources/openapi</output>
               <generatorName>java</generatorName>
