@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 PrgName=`basename $0`
 # Determine absolute path to location from which we are running.
 export RUN_DIR=`pwd`
