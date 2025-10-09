@@ -17,6 +17,7 @@ import edu.utexas.tacc.tapis.jobs.client.gen.api.SharingApi;
 import edu.utexas.tacc.tapis.jobs.client.gen.api.SubscriptionsApi;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.FileInfo;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.Job;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.JobAnnotationDisplay;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobCancelDisplay;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobHideDisplay;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobHistoryDisplayDTO;
@@ -25,6 +26,7 @@ import edu.utexas.tacc.tapis.jobs.client.gen.model.JobShareDisplay;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobShareListDTO;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobStatusDisplay;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.JobUnShareDisplay;
+import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqJobAnnotation;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqShareJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqSubmitJob;
 import edu.utexas.tacc.tapis.jobs.client.gen.model.ReqSubscribe;
@@ -601,6 +603,38 @@ public class JobsClient
                
         var changes = resp == null ? null : resp.getChanges();
         return changes == null ? 0 : changes;
+    }
+
+    /* ---------------------------------------------------------------------------- */
+    /* patchJobAnnotations:                                                         */
+    /* ---------------------------------------------------------------------------- */
+    public JobAnnotationDisplay patchJobAnnotations(String jobUuid, ReqJobAnnotation req) throws TapisClientException {
+        JobAnnotationDisplay resp = new JobAnnotationDisplay();
+        try {
+            var jobsApi = new JobsApi(_apiClient);
+            resp = jobsApi.patchJobAnnotations(jobUuid, req).getResult();
+        } catch (ApiException e) {
+            Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);
+        } catch (Exception e) {
+            Utils.throwTapisClientException(-1, null, e);
+        }
+        return resp;
+    }
+
+    /* ---------------------------------------------------------------------------- */
+    /* putJobAnnotations:                                                           */
+    /* ---------------------------------------------------------------------------- */
+    public JobAnnotationDisplay putJobAnnotations(String jobUuid, ReqJobAnnotation req) throws TapisClientException {
+        JobAnnotationDisplay resp = new JobAnnotationDisplay();
+        try {
+            var jobsApi = new JobsApi(_apiClient);
+            resp = jobsApi.putJobAnnotations(jobUuid, req).getResult();
+        } catch (ApiException e) {
+            Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);
+        } catch (Exception e) {
+            Utils.throwTapisClientException(-1, null, e);
+        }
+        return resp;
     }
     
     /* **************************************************************************** */

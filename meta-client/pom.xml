@@ -4,13 +4,18 @@
     <parent>
         <groupId>edu.utexas.tacc.tapis</groupId>
         <artifactId>tapis-client-java</artifactId>
-        <version>2.0.157-SNAPSHOT</version>
+        <version>2.0.158-SNAPSHOT</version>
     </parent>
 
 	<artifactId>meta-client</artifactId>
 
 	<name>Tapis Meta Client</name>
 	<description>Java client for tapis-metaapi web application</description>
+
+    <properties>
+        <metaSpecPath>${project.basedir}/src/main/resources/metav3-openapi.yaml</metaSpecPath>
+        <target.spec.format>yml</target.spec.format>
+    </properties>
 
 	<dependencies>
         <dependency>
@@ -42,6 +47,52 @@
 			</configuration>
 		</plugin>
 
+        <!-- Extract artifact prefix before '-client' -->
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>3.4.0</version>
+            <executions>
+            <execution>
+                <id>regex-property</id>
+                <phase>initialize</phase>
+                <goals>
+                <goal>regex-property</goal>
+                </goals>
+                <configuration>
+                <name>artifact.prefix</name>
+                <value>${project.artifactId}</value>
+                <regex>^([^-]+)-.*$</regex>
+                <replacement>$1</replacement>
+                <failIfNoMatch>false</failIfNoMatch>
+                </configuration>
+            </execution>
+            </executions>
+        </plugin>
+        <!-- Run script to download latest app openapi_v3.yml and generate bundled json file  -->
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>${exec-maven-plugin.version}</version>
+            <executions>
+            <execution>
+                <id>Generate bundled openapi json file</id>
+                <phase>generate-sources</phase>
+                <goals>
+                <goal>exec</goal>
+                </goals>
+                <configuration>
+                <executable>${basedir}/../gen_spec.sh</executable>
+                <arguments>
+                    <argument>${artifact.prefix}</argument>
+                    <argument>${metaSpecPath}</argument>
+                    <argument>${target.spec.format}</argument>
+                </arguments>
+                </configuration>
+            </execution>
+            </executions>
+        </plugin>
+
         <!-- Build generated client code using openapi-generator -->
         <plugin>
             <groupId>org.openapitools</groupId>
@@ -53,7 +104,7 @@
                         <goal>generate</goal>
                     </goals>
                     <configuration>
-                        <inputSpec>${project.basedir}/src/main/resources/metav3-openapi.yaml</inputSpec>
+                        <inputSpec>${project.basedir}/target/openapi_v3.${target.spec.format}</inputSpec>
                         <enablePostProcessFile>true</enablePostProcessFile>
                         <output>${project.build.directory}/generated-sources/openapi</output>
                         <generatorName>java</generatorName>

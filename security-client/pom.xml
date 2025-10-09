@@ -3,7 +3,7 @@
   <parent>
     <groupId>edu.utexas.tacc.tapis</groupId>
     <artifactId>tapis-client-java</artifactId>
-    <version>2.0.157-SNAPSHOT</version>
+    <version>2.0.158-SNAPSHOT</version>
   </parent>
 
 	<artifactId>security-client</artifactId>
@@ -17,12 +17,13 @@
      mvn clean install
      cd security-client
      cp ../../openapi-security/SkAPI.yaml target/
-     mvn install -DspecPath="/home/scblack/src_git/github/dev/tapis-client-java/security-client/target/SkAPI.yaml"
+     mvn install -DsecuritySpecPath="/home/scblack/src_git/github/dev/tapis-client-java/security-client/target/SkAPI.yaml"
 
           or if yaml committed to local branch then do:
-     mvn install -DspecPath="https://raw.githubusercontent.com/tapis-project/openapi-security/local/SkAPI.yaml"
+     mvn install -DsecuritySpecPath="https://raw.githubusercontent.com/tapis-project/openapi-security/local/SkAPI.yaml"
      -->
-    <specPath>https://raw.githubusercontent.com/tapis-project/openapi-security/dev/SkAPI.yaml</specPath>
+    <securitySpecPath>https://raw.githubusercontent.com/tapis-project/openapi-security/dev/SkAPI.yaml</securitySpecPath>
+    <target.spec.format>yml</target.spec.format>
   </properties>
 	<dependencies>
         <dependency>
@@ -54,6 +55,51 @@
             </configuration>
           </plugin>
 
+      <!-- Extract artifact prefix before '-client' -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.4.0</version>
+        <executions>
+          <execution>
+            <id>regex-property</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>regex-property</goal>
+            </goals>
+            <configuration>
+              <name>artifact.prefix</name>
+              <value>${project.artifactId}</value>
+              <regex>^([^-]+)-.*$</regex>
+              <replacement>$1</replacement>
+              <failIfNoMatch>false</failIfNoMatch>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Run script to download latest app openapi_v3.yml and generate bundled json file  -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>${exec-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>Generate bundled openapi json file</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>${basedir}/../gen_spec.sh</executable>
+              <arguments>
+                <argument>${artifact.prefix}</argument>
+                <argument>${securitySpecPath}</argument>
+                <argument>${target.spec.format}</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <!-- Build generated client code using openapi-generator -->
       <plugin>
         <groupId>org.openapitools</groupId>
@@ -66,7 +112,7 @@
             </goals>
             <configuration>
               <!-- Location of openapi spec -->
-              <inputSpec>${specPath}</inputSpec>
+              <inputSpec>${project.basedir}/target/openapi_v3.${target.spec.format}</inputSpec>
               <enablePostProcessFile>true</enablePostProcessFile>
               <output>${project.build.directory}/generated-sources/openapi</output>
               <generatorName>java</generatorName>
