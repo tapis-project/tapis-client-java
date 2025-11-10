@@ -1,0 +1,32 @@
+#!/bin/bash
+# Script to determine specific versions for a release.
+# Determine versions for: tapis-bom, tapis-client-java
+
+SVC_NAME=tapis-client-java
+
+PrgName=$(basename "$0")
+
+# Determine absolute path to location from which we are running
+#  and change to that directory.
+export RUN_DIR=$(pwd)
+export PRG_RELPATH=$(dirname "$0")
+cd "$PRG_RELPATH"/. || exit
+export PRG_PATH=$(pwd)
+
+MVN_CACHE=~/.m2/repository/edu/utexas/tacc/tapis
+VER_PREFIX="2.0."
+RELEASE_PROP_FILE="release.properties"
+BOM_NAME="tapis-bom"
+
+BOM_DIR=${MVN_CACHE}/${BOM_NAME}
+
+# Determine shared code versions
+FILES=$(echo "${BOM_DIR}/${VER_PREFIX}*")
+BOM_VER=$(ls -1 -d $FILES | tail -n 1 | xargs -n 1 basename)
+
+# Determine service version
+SVC_VER=$(cd ..;mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+
+# Update release.properties file
+echo "${SVC_NAME}=${SVC_VER}" > ${RELEASE_PROP_FILE}
+echo "${BOM_NAME}=${BOM_VER}" >> ${RELEASE_PROP_FILE}
