@@ -1,0 +1,2898 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Tapis Globus Proxy API",
+    "description": "The Tapis Globus Proxy API proxies calls to Globus coming from a Tapis service.",
+    "version": "1.3.0",
+    "termsOfService": "https://tapis-project.org",
+    "contact": {
+      "name": "Tapis Globux Proxy API - CICSupport",
+      "url": "https://tapis-project.org",
+      "email": "cicsupport@tacc.utexas.edu"
+    },
+    "license": {
+      "name": "3-Clause BSD License",
+      "url": "https://opensource.org/licenses/BSD-3-Clause"
+    }
+  },
+  "externalDocs": {
+    "description": "Tapis Project",
+    "url": "https://tapis-project.org"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/",
+      "description": "Local test environment",
+      "variables": {}
+    },
+    {
+      "url": "https://dev.develop.tapis.io/",
+      "description": "Development environment",
+      "variables": {}
+    }
+  ],
+  "security": [
+    {
+      "TapisJWT": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "General",
+      "description": "General service health"
+    },
+    {
+      "name": "Auth",
+      "description": "Manage Globus authorization related actions."
+    },
+    {
+      "name": "File Operations",
+      "description": "Manage file resources. Operations are list, mkdir, rename and delete"
+    },
+    {
+      "name": "Transfers",
+      "description": "Manage file transfers. Initiate, cancel and retrieve status."
+    }
+  ],
+  "paths": {
+    "/v3/globus-proxy/healthcheck": {
+      "get": {
+        "tags": [
+          "General"
+        ],
+        "description": "Health check.",
+        "operationId": "healthCheck",
+        "responses": {
+          "200": {
+            "description": "Message received.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      }
+    },
+    "/v3/globus-proxy/auth/url/{client_id}/{endpoint_id}": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Return authorization URL given client Id",
+        "description": "Given a Globus Client Id return the authorization URL that can be used by an end-user to\nauthenticate and obtain a *Native App Authorization Code*.\n",
+        "operationId": "getAuthInfo",
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "path",
+            "required": true,
+            "description": "Globus client associated with the request.",
+            "schema": {
+              "type": "string",
+              "example": "1784148a-8ae0-44b7-80b5-b5999e92de3a",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "endpoint_id",
+            "in": "path",
+            "required": true,
+            "description": "Globus endpoint associated with the request.",
+            "schema": {
+              "type": "string",
+              "example": "1784148a-8ae0-44b7-80b5-b5999e92de3a",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "url": {
+                          "type": "string"
+                        },
+                        "session_id": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Client not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/globus-proxy/auth/tokens/{client_id}/{session_id}/{auth_code}": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Exchange authorization code for access and refresh tokens",
+        "description": "Exchange a Globus *Native App Authorization Code* for a pair of access and refresh tokens.\n",
+        "operationId": "getTokens",
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "description": "Tapis session Id tracking the OAuth2 flow.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "auth_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "T0aymuUlUyLaOvvR58xxDCzycq5Cd3",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "required": [
+                        "access_token",
+                        "refresh_token"
+                      ],
+                      "type": "object",
+                      "properties": {
+                        "access_token": {
+                          "type": "string"
+                        },
+                        "refresh_token": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "407": {
+            "description": "Consent required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/globus-proxy/auth/check_tokens/{client_id}/{endpoint_id}": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Check token pair and refresh as needed",
+        "description": "Given an endpoint and a pair of tokens refresh the pair as needed. Return the refreshed token pair\nwhich may be the same as the provided pair.\nAccess and refresh tokens must be provided as query parameters.\n",
+        "operationId": "checkTokens",
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "path",
+            "required": true,
+            "description": "Globus client associated with the request.",
+            "schema": {
+              "type": "string",
+              "example": "1784148a-8ae0-44b7-80b5-b5999e92de3a",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "endpoint_id",
+            "in": "path",
+            "description": "Endpoint Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "1784148a-8ae0-44b7-80b5-b5999e92de3a"
+          },
+          {
+            "name": "access_token",
+            "in": "query",
+            "description": "Globus transfer access token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "refresh_token",
+            "in": "query",
+            "description": "Globus transfer refresh token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "required": [
+                        "access_token",
+                        "refresh_token"
+                      ],
+                      "type": "object",
+                      "properties": {
+                        "access_token": {
+                          "type": "string"
+                        },
+                        "refresh_token": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/globus-proxy/ops/{client_id}/{endpoint_id}/{path}": {
+      "get": {
+        "tags": [
+          "File Operations"
+        ],
+        "summary": "List files at path",
+        "description": "List files for an endpoint at given path relative to the default directory of the endpoint.\nAccess token and refresh token must be provided as a query parameters.\n",
+        "operationId": "listFiles",
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "path",
+            "required": true,
+            "description": "Globus client associated with the request.",
+            "schema": {
+              "type": "string",
+              "example": "1784148a-8ae0-44b7-80b5-b5999e92de3a",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "endpoint_id",
+            "in": "path",
+            "description": "Endpoint Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "1784148a-8ae0-44b7-80b5-b5999e92de3a"
+          },
+          {
+            "name": "path",
+            "in": "path",
+            "description": "Path relative to default directory of the endpoint",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "/dirA/dirB/"
+          },
+          {
+            "name": "access_token",
+            "in": "query",
+            "description": "Globus transfer access token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "refresh_token",
+            "in": "query",
+            "description": "Globus transfer refresh token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "pagination limit",
+            "schema": {
+              "type": "integer",
+              "default": 1000
+            },
+            "example": 100
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "pagination offset",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            },
+            "example": 50
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "select filter",
+            "schema": {
+              "type": "string"
+            },
+            "example": "name:=test1.txt"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of files",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "DATA": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string"
+                              },
+                              "user": {
+                                "type": "string"
+                              },
+                              "group": {
+                                "type": "string"
+                              },
+                              "permissions": {
+                                "type": "string"
+                              },
+                              "last_modified": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "path": {
+                                "type": "string"
+                              },
+                              "size": {
+                                "type": "integer",
+                                "format": "int64",
+                                "description": "size in bytes"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access token invalid. Please provide valid token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "407": {
+            "description": "Unable to activate one or more endpoints.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "names": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "File Operations"
+        ],
+        "summary": "Delete a path",
+        "description": "Delete a file or directory on an endpoint at path {path} relative to the default directory.\nAccess token and refresh token must be provided as a query parameters.\n",
+        "operationId": "deletePath",
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "path",
+            "required": true,
+            "description": "Globus client associated with the request.",
+            "schema": {
+              "type": "string",
+              "example": "1784148a-8ae0-44b7-80b5-b5999e92de3a",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "endpoint_id",
+            "in": "path",
+            "description": "Endpoint Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "1784148a-8ae0-44b7-80b5-b5999e92de3a"
+          },
+          {
+            "name": "path",
+            "in": "path",
+            "description": "Path relative to default directory of the endpoint",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "/dirA/dirB/"
+          },
+          {
+            "name": "access_token",
+            "in": "query",
+            "description": "Globus transfer access token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "refresh_token",
+            "in": "query",
+            "description": "Globus transfer refresh token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recurse",
+            "in": "query",
+            "description": "remove the directory and all subdirectories",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access token invalid. Please provide valid token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "407": {
+            "description": "Unable to activate one or more endpoints.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "names": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "File Operations"
+        ],
+        "summary": "Rename a path",
+        "description": "Rename a file or directory on the endpoint. Paths are relative to the endpoint default directory.\nSource and destination paths must be specified in the request body.\nWhen renaming to a different parent directory, the parent directory of the new path must already exist.\nAccess token and refresh token must be provided as a query parameters.\n",
+        "operationId": "renamePath",
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "path",
+            "required": true,
+            "description": "Globus client associated with the request.",
+            "schema": {
+              "type": "string",
+              "example": "1784148a-8ae0-44b7-80b5-b5999e92de3a",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "endpoint_id",
+            "in": "path",
+            "description": "Endpoint Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "1784148a-8ae0-44b7-80b5-b5999e92de3a"
+          },
+          {
+            "name": "path",
+            "in": "path",
+            "description": "Source path relative to default directory of the endpoint",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "/dirA/dirB/"
+          },
+          {
+            "name": "access_token",
+            "in": "query",
+            "description": "Globus transfer access token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "refresh_token",
+            "in": "query",
+            "description": "Globus transfer refresh token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "destination"
+                ],
+                "type": "object",
+                "properties": {
+                  "destination": {
+                    "pattern": "^(?!.*\\.\\.).*",
+                    "type": "string",
+                    "example": "dirA/file_new.txt"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Input error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access token invalid. Please provide valid token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Source path not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "407": {
+            "description": "Unable to activate one or more endpoints.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "names": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "File Operations"
+        ],
+        "summary": "Create a directory",
+        "description": "Create a directory on the endpoint. Path is relative to the endpoint default directory.\nAccess token and refresh token must be provided as a query parameters.\n",
+        "operationId": "makeDir",
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "path",
+            "required": true,
+            "description": "Globus client associated with the request.",
+            "schema": {
+              "type": "string",
+              "example": "1784148a-8ae0-44b7-80b5-b5999e92de3a",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "endpoint_id",
+            "in": "path",
+            "description": "Endpoint Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "1784148a-8ae0-44b7-80b5-b5999e92de3a"
+          },
+          {
+            "name": "path",
+            "in": "path",
+            "description": "Path relative to default directory of the endpoint",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "/dirA/dirB/"
+          },
+          {
+            "name": "access_token",
+            "in": "query",
+            "description": "Globus transfer access token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "refresh_token",
+            "in": "query",
+            "description": "Globus transfer refresh token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "not_used": {
+                    "description": "Not used but some request body is required",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access token invalid. Please provide valid token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "407": {
+            "description": "Unable to activate one or more endpoints.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "names": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Directory already exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/globus-proxy/transfers/{client_id}": {
+      "post": {
+        "tags": [
+          "Transfers"
+        ],
+        "summary": "Create task to transfer paths from one endpoint to another",
+        "description": "Create a task to transfer files from a source endpoint to a destination endpoint.\nFile paths are relative to the endpoint default directories.\nEndpoints are activated as needed.\nAccess token and refresh token must be provided as a query parameters.\n",
+        "operationId": "createTransferTask",
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "path",
+            "required": true,
+            "description": "Globus client associated with the request.",
+            "schema": {
+              "type": "string",
+              "example": "1784148a-8ae0-44b7-80b5-b5999e92de3a",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "access_token",
+            "in": "query",
+            "description": "Globus transfer access token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "refresh_token",
+            "in": "query",
+            "description": "Globus transfer refresh token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "source_endpoint",
+                  "destination_endpoint",
+                  "transfer_items"
+                ],
+                "type": "object",
+                "properties": {
+                  "source_endpoint": {
+                    "type": "string"
+                  },
+                  "destination_endpoint": {
+                    "type": "string"
+                  },
+                  "transfer_items": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "required": [
+                        "source_path",
+                        "destination_path",
+                        "recursive"
+                      ],
+                      "type": "object",
+                      "properties": {
+                        "source_path": {
+                          "type": "string"
+                        },
+                        "destination_path": {
+                          "type": "string"
+                        },
+                        "recursive": {
+                          "type": "boolean",
+                          "description": "Must be true for a directory path and false for a file."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "bytes_transferred": {
+                          "type": "integer"
+                        },
+                        "completion_time": {
+                          "type": "string"
+                        },
+                        "deadline": {
+                          "type": "string"
+                        },
+                        "destination_endpoint_display_name": {
+                          "type": "string",
+                          "example": "my-connect-personal-laptop"
+                        },
+                        "destination_endpoint_id": {
+                          "type": "string",
+                          "example": "4544fddc-7941-113c-9f32-ed182a728dff"
+                        },
+                        "directories": {
+                          "type": "integer"
+                        },
+                        "effective_bytes_per_second": {
+                          "type": "integer"
+                        },
+                        "encrypt_data": {
+                          "type": "boolean"
+                        },
+                        "fail_on_quota_errors": {
+                          "type": "boolean"
+                        },
+                        "fatal_error": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "description": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "faults": {
+                          "type": "integer"
+                        },
+                        "files": {
+                          "type": "integer"
+                        },
+                        "files_skipped": {
+                          "type": "integer"
+                        },
+                        "files_transferred": {
+                          "type": "integer"
+                        },
+                        "history_deleted": {
+                          "type": "boolean"
+                        },
+                        "is_ok": {
+                          "type": "boolean"
+                        },
+                        "is_paused": {
+                          "type": "boolean"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "owner_id": {
+                          "type": "string"
+                        },
+                        "request_time": {
+                          "type": "string"
+                        },
+                        "skip_source_errors": {
+                          "type": "boolean"
+                        },
+                        "source_endpoint_display_name": {
+                          "type": "string",
+                          "example": "Globus Tutorial Endpoint 1"
+                        },
+                        "source_endpoint_id": {
+                          "type": "string",
+                          "example": "ddb59aef-6d04-11e5-ba46-22000b92c6ec"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "symlinks": {
+                          "type": "integer"
+                        },
+                        "sync_level": {
+                          "type": "integer"
+                        },
+                        "task_id": {
+                          "type": "string",
+                          "example": "36ccfc18-8493-11ec-9008-3132d806a822"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "verify_checksum": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access token invalid. Please provide valid token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "407": {
+            "description": "Unable to activate one or more endpoints.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "names": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/globus-proxy/transfers/{client_id}/{task_id}": {
+      "get": {
+        "tags": [
+          "Transfers"
+        ],
+        "summary": "Retrieve transfer task",
+        "description": "Retrieve a transfer task given the task Id.\nAccess token and refresh token must be provided as a query parameters.\n",
+        "operationId": "getTransferTask",
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "path",
+            "required": true,
+            "description": "Globus client associated with the request.",
+            "schema": {
+              "type": "string",
+              "example": "1784148a-8ae0-44b7-80b5-b5999e92de3a",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "access_token",
+            "in": "query",
+            "description": "Globus transfer access token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "refresh_token",
+            "in": "query",
+            "description": "Globus transfer refresh token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "bytes_transferred": {
+                          "type": "integer"
+                        },
+                        "completion_time": {
+                          "type": "string"
+                        },
+                        "deadline": {
+                          "type": "string"
+                        },
+                        "destination_endpoint_display_name": {
+                          "type": "string",
+                          "example": "my-connect-personal-laptop"
+                        },
+                        "destination_endpoint_id": {
+                          "type": "string",
+                          "example": "4544fddc-7941-113c-9f32-ed182a728dff"
+                        },
+                        "directories": {
+                          "type": "integer"
+                        },
+                        "effective_bytes_per_second": {
+                          "type": "integer"
+                        },
+                        "encrypt_data": {
+                          "type": "boolean"
+                        },
+                        "fail_on_quota_errors": {
+                          "type": "boolean"
+                        },
+                        "fatal_error": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "description": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "faults": {
+                          "type": "integer"
+                        },
+                        "files": {
+                          "type": "integer"
+                        },
+                        "files_skipped": {
+                          "type": "integer"
+                        },
+                        "files_transferred": {
+                          "type": "integer"
+                        },
+                        "history_deleted": {
+                          "type": "boolean"
+                        },
+                        "is_ok": {
+                          "type": "boolean"
+                        },
+                        "is_paused": {
+                          "type": "boolean"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "owner_id": {
+                          "type": "string"
+                        },
+                        "request_time": {
+                          "type": "string"
+                        },
+                        "skip_source_errors": {
+                          "type": "boolean"
+                        },
+                        "source_endpoint_display_name": {
+                          "type": "string",
+                          "example": "Globus Tutorial Endpoint 1"
+                        },
+                        "source_endpoint_id": {
+                          "type": "string",
+                          "example": "ddb59aef-6d04-11e5-ba46-22000b92c6ec"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "symlinks": {
+                          "type": "integer"
+                        },
+                        "sync_level": {
+                          "type": "integer"
+                        },
+                        "task_id": {
+                          "type": "string",
+                          "example": "36ccfc18-8493-11ec-9008-3132d806a822"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "verify_checksum": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access token invalid. Please provide valid token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "407": {
+            "description": "Unable to activate one or more endpoints.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "names": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Transfers"
+        ],
+        "summary": "Cancel a transfer task",
+        "description": "Request that a transfer task be cancelled. Note that even if the response indicates that the task has been\ncancelled the task still may have succeeded. Task status must be checked. See Globus documentation.\n",
+        "operationId": "cancelTransferTask",
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "path",
+            "required": true,
+            "description": "Globus client associated with the request.",
+            "schema": {
+              "type": "string",
+              "example": "1784148a-8ae0-44b7-80b5-b5999e92de3a",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "access_token",
+            "in": "query",
+            "description": "Globus transfer access token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "refresh_token",
+            "in": "query",
+            "description": "Globus transfer refresh token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cancel request submitted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "COMPLETE",
+                            "CANCELLED",
+                            "ACCEPTED"
+                          ]
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access token invalid. Please provide valid token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "407": {
+            "description": "Unable to activate one or more endpoints.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "names": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object"
+                    },
+                    "metadata": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AuthTokens": {
+        "required": [
+          "access_token",
+          "refresh_token"
+        ],
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string"
+          },
+          "refresh_token": {
+            "type": "string"
+          }
+        }
+      },
+      "GlobusConsentInfo": {
+        "type": "object",
+        "properties": {
+          "scopes": {
+            "type": "string"
+          }
+        }
+      },
+      "GlobusFileInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "user": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "permissions": {
+            "type": "string"
+          },
+          "last_modified": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "size in bytes"
+          }
+        }
+      },
+      "GlobusTransferItem": {
+        "required": [
+          "source_path",
+          "destination_path",
+          "recursive"
+        ],
+        "type": "object",
+        "properties": {
+          "source_path": {
+            "type": "string"
+          },
+          "destination_path": {
+            "type": "string"
+          },
+          "recursive": {
+            "type": "boolean",
+            "description": "Must be true for a directory path and false for a file."
+          }
+        }
+      },
+      "GlobusTransferTask": {
+        "type": "object",
+        "properties": {
+          "bytes_transferred": {
+            "type": "integer"
+          },
+          "completion_time": {
+            "type": "string"
+          },
+          "deadline": {
+            "type": "string"
+          },
+          "destination_endpoint_display_name": {
+            "type": "string",
+            "example": "my-connect-personal-laptop"
+          },
+          "destination_endpoint_id": {
+            "type": "string",
+            "example": "4544fddc-7941-113c-9f32-ed182a728dff"
+          },
+          "directories": {
+            "type": "integer"
+          },
+          "effective_bytes_per_second": {
+            "type": "integer"
+          },
+          "encrypt_data": {
+            "type": "boolean"
+          },
+          "fail_on_quota_errors": {
+            "type": "boolean"
+          },
+          "fatal_error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          },
+          "faults": {
+            "type": "integer"
+          },
+          "files": {
+            "type": "integer"
+          },
+          "files_skipped": {
+            "type": "integer"
+          },
+          "files_transferred": {
+            "type": "integer"
+          },
+          "history_deleted": {
+            "type": "boolean"
+          },
+          "is_ok": {
+            "type": "boolean"
+          },
+          "is_paused": {
+            "type": "boolean"
+          },
+          "label": {
+            "type": "string"
+          },
+          "owner_id": {
+            "type": "string"
+          },
+          "request_time": {
+            "type": "string"
+          },
+          "skip_source_errors": {
+            "type": "boolean"
+          },
+          "source_endpoint_display_name": {
+            "type": "string",
+            "example": "Globus Tutorial Endpoint 1"
+          },
+          "source_endpoint_id": {
+            "type": "string",
+            "example": "ddb59aef-6d04-11e5-ba46-22000b92c6ec"
+          },
+          "status": {
+            "type": "string"
+          },
+          "symlinks": {
+            "type": "integer"
+          },
+          "sync_level": {
+            "type": "integer"
+          },
+          "task_id": {
+            "type": "string",
+            "example": "36ccfc18-8493-11ec-9008-3132d806a822"
+          },
+          "type": {
+            "type": "string"
+          },
+          "verify_checksum": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ClientIdString": {
+        "type": "string",
+        "example": "1784148a-8ae0-44b7-80b5-b5999e92de3a",
+        "minLength": 1
+      },
+      "EndpointIdString": {
+        "type": "string",
+        "example": "1784148a-8ae0-44b7-80b5-b5999e92de3a",
+        "minLength": 1
+      },
+      "AuthCodeString": {
+        "type": "string",
+        "example": "T0aymuUlUyLaOvvR58xxDCzycq5Cd3",
+        "minLength": 1
+      },
+      "TaskIdString": {
+        "type": "string",
+        "minLength": 1
+      },
+      "ReqMakeDir": {
+        "type": "object",
+        "properties": {
+          "not_used": {
+            "description": "Not used but some request body is required",
+            "type": "string"
+          }
+        }
+      },
+      "ReqRename": {
+        "required": [
+          "destination"
+        ],
+        "type": "object",
+        "properties": {
+          "destination": {
+            "pattern": "^(?!.*\\.\\.).*",
+            "type": "string",
+            "example": "dirA/file_new.txt"
+          }
+        }
+      },
+      "ReqCreateTransfer": {
+        "required": [
+          "source_endpoint",
+          "destination_endpoint",
+          "transfer_items"
+        ],
+        "type": "object",
+        "properties": {
+          "source_endpoint": {
+            "type": "string"
+          },
+          "destination_endpoint": {
+            "type": "string"
+          },
+          "transfer_items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "required": [
+                "source_path",
+                "destination_path",
+                "recursive"
+              ],
+              "type": "object",
+              "properties": {
+                "source_path": {
+                  "type": "string"
+                },
+                "destination_path": {
+                  "type": "string"
+                },
+                "recursive": {
+                  "type": "boolean",
+                  "description": "Must be true for a directory path and false for a file."
+                }
+              }
+            }
+          }
+        }
+      },
+      "RespBasic": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "result": {
+            "type": "object"
+          },
+          "metadata": {
+            "type": "object"
+          }
+        }
+      },
+      "RespUrl": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "result": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              }
+            }
+          },
+          "metadata": {
+            "type": "object"
+          }
+        }
+      },
+      "ResultUrl": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "RespGlobusAuthInfo": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "result": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "session_id": {
+                "type": "string"
+              }
+            }
+          },
+          "metadata": {
+            "type": "object"
+          }
+        }
+      },
+      "ResultGlobusAuthInfo": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "session_id": {
+            "type": "string"
+          }
+        }
+      },
+      "RespAuthTokens": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "result": {
+            "required": [
+              "access_token",
+              "refresh_token"
+            ],
+            "type": "object",
+            "properties": {
+              "access_token": {
+                "type": "string"
+              },
+              "refresh_token": {
+                "type": "string"
+              }
+            }
+          },
+          "metadata": {
+            "type": "object"
+          }
+        }
+      },
+      "RespConsentRequired": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "result": {
+            "type": "object",
+            "properties": {
+              "scopes": {
+                "type": "string"
+              }
+            }
+          },
+          "metadata": {
+            "type": "object"
+          }
+        }
+      },
+      "RespEndpointArray": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "result": {
+            "type": "object",
+            "properties": {
+              "names": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "metadata": {
+            "type": "object"
+          }
+        }
+      },
+      "ResultEndpointArray": {
+        "type": "object",
+        "properties": {
+          "names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "RespFileList": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "result": {
+            "type": "object",
+            "properties": {
+              "DATA": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "user": {
+                      "type": "string"
+                    },
+                    "group": {
+                      "type": "string"
+                    },
+                    "permissions": {
+                      "type": "string"
+                    },
+                    "last_modified": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "path": {
+                      "type": "string"
+                    },
+                    "size": {
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "size in bytes"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "version": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object"
+          }
+        }
+      },
+      "RespFileListData": {
+        "type": "object",
+        "properties": {
+          "DATA": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "user": {
+                  "type": "string"
+                },
+                "group": {
+                  "type": "string"
+                },
+                "permissions": {
+                  "type": "string"
+                },
+                "last_modified": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                },
+                "size": {
+                  "type": "integer",
+                  "format": "int64",
+                  "description": "size in bytes"
+                }
+              }
+            }
+          }
+        }
+      },
+      "RespTransferTask": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "result": {
+            "type": "object",
+            "properties": {
+              "bytes_transferred": {
+                "type": "integer"
+              },
+              "completion_time": {
+                "type": "string"
+              },
+              "deadline": {
+                "type": "string"
+              },
+              "destination_endpoint_display_name": {
+                "type": "string",
+                "example": "my-connect-personal-laptop"
+              },
+              "destination_endpoint_id": {
+                "type": "string",
+                "example": "4544fddc-7941-113c-9f32-ed182a728dff"
+              },
+              "directories": {
+                "type": "integer"
+              },
+              "effective_bytes_per_second": {
+                "type": "integer"
+              },
+              "encrypt_data": {
+                "type": "boolean"
+              },
+              "fail_on_quota_errors": {
+                "type": "boolean"
+              },
+              "fatal_error": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                }
+              },
+              "faults": {
+                "type": "integer"
+              },
+              "files": {
+                "type": "integer"
+              },
+              "files_skipped": {
+                "type": "integer"
+              },
+              "files_transferred": {
+                "type": "integer"
+              },
+              "history_deleted": {
+                "type": "boolean"
+              },
+              "is_ok": {
+                "type": "boolean"
+              },
+              "is_paused": {
+                "type": "boolean"
+              },
+              "label": {
+                "type": "string"
+              },
+              "owner_id": {
+                "type": "string"
+              },
+              "request_time": {
+                "type": "string"
+              },
+              "skip_source_errors": {
+                "type": "boolean"
+              },
+              "source_endpoint_display_name": {
+                "type": "string",
+                "example": "Globus Tutorial Endpoint 1"
+              },
+              "source_endpoint_id": {
+                "type": "string",
+                "example": "ddb59aef-6d04-11e5-ba46-22000b92c6ec"
+              },
+              "status": {
+                "type": "string"
+              },
+              "symlinks": {
+                "type": "integer"
+              },
+              "sync_level": {
+                "type": "integer"
+              },
+              "task_id": {
+                "type": "string",
+                "example": "36ccfc18-8493-11ec-9008-3132d806a822"
+              },
+              "type": {
+                "type": "string"
+              },
+              "verify_checksum": {
+                "type": "boolean"
+              }
+            }
+          },
+          "metadata": {
+            "type": "object"
+          }
+        }
+      },
+      "RespCancelTask": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "result": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "COMPLETE",
+                  "CANCELLED",
+                  "ACCEPTED"
+                ]
+              }
+            }
+          },
+          "metadata": {
+            "type": "object"
+          }
+        }
+      },
+      "ResultCancelTask": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "COMPLETE",
+              "CANCELLED",
+              "ACCEPTED"
+            ]
+          }
+        }
+      },
+      "GlobusTaskTypeEnum": {
+        "type": "string",
+        "enum": [
+          "TRANSFER",
+          "DELETE",
+          null,
+          "UNKNOWN"
+        ]
+      },
+      "GlobusTaskStatusEnum": {
+        "type": "string",
+        "enum": [
+          "ACTIVE",
+          "INACTIVE",
+          "SUCCEEDED",
+          "FAILED",
+          null,
+          "UNKNOWN"
+        ]
+      },
+      "GlobusTaskCancelEnum": {
+        "type": "string",
+        "enum": [
+          "COMPLETE",
+          "CANCELLED",
+          "ACCEPTED"
+        ]
+      }
+    }
+  }
+}
+
