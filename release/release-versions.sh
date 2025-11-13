@@ -31,7 +31,7 @@ SVC_VER=$(cd ..;mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
 echo "${SVC_NAME}=${SVC_VER}" > ${RELEASE_PROP_FILE}
 echo "${BOM_NAME}=${BOM_VER}" >> ${RELEASE_PROP_FILE}
 
-# TODO Make copies of openapi spec files used as part of the build.
+# Make copies of openapi spec files used as part of the build.
 # Create function to copy the openapi spec file into place.
 # Function takes source spec file path as first argument and destination spec file name as second argument
 # Logs warning if source file does not exist
