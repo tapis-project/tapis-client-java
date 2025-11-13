@@ -58,6 +58,8 @@ if [[ ($INPUT_FORMAT == "yaml" || $INPUT_FORMAT == "yml") && $OUTPUT_FORMAT == "
     docker run --rm -v "$TMP_SPEC_FILE:/swagger-api/input/openapi_v3.$INPUT_FORMAT" \
             tapis/swagger-cli bundle -r "/swagger-api/input/openapi_v3.$INPUT_FORMAT" > "$TMP_DIR/${MODULE_NAME}/$OUTPUT_API_NAME"
     cp "$TMP_DIR/${MODULE_NAME}/$OUTPUT_API_NAME" "$OUTPUT_DIR/$OUTPUT_API_NAME"
+    # Copy original yml file to release/openapi_specs
+    cp "$TMP_SPEC_FILE" ../release/openapi_specs/${MODULE_NAME}
     rm -rf "$TMP_DIR"
     exit 0
 elif [[ $INPUT_FORMAT == "json" && ($OUTPUT_FORMAT == "yaml" || $OUTPUT_FORMAT == "yml") ]]; then
@@ -79,4 +81,3 @@ fi
 echo "Error: Unsupported conversion from $INPUT_FORMAT to $OUTPUT_FORMAT"
 echo "Supported conversions: yaml<->json, yml<->json"
 exit 1
-
