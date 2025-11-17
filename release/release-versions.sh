@@ -42,7 +42,7 @@ BOM_VER=$(ls -1 -d $FILES | tail -n 1 | xargs -n 1 basename)
 
 # Update release.properties file
 echo "${SVC_NAME}=${SVC_VER}" > ${RELEASE_PROP_FILE}
-echo "-----------------------------------------------------------------"
+echo "-----------------------------------------------------------------" > ${RELEASE_PROP_FILE}
 echo "${BOM_NAME}=${BOM_VER}" >> ${RELEASE_PROP_FILE}
 
 # Make copies of openapi spec files used as part of the build.
