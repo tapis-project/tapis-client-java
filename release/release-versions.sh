@@ -1,11 +1,22 @@
 #!/bin/bash
 # Script to determine specific versions for a release.
 # Determine versions for: tapis-bom, tapis-client-java
+# The service version should be passed in as the one and only argument
 
 SVC_NAME=tapis-client-java
 
 PrgName=$(basename "$0")
 
+USAGE="Usage: $PrgName <svc_version>"
+
+# Check number of arguments
+if [ $# -ne 1 ]; then
+  echo "$USAGE"
+  exit 1
+fi
+
+SVC_VER=$1
+  
 # Determine absolute path to location from which we are running
 #  and change to that directory.
 export RUN_DIR=$(pwd)
@@ -24,11 +35,14 @@ BOM_DIR=${MVN_CACHE}/${BOM_NAME}
 FILES=$(echo "${BOM_DIR}/${VER_PREFIX}*")
 BOM_VER=$(ls -1 -d $FILES | tail -n 1 | xargs -n 1 basename)
 
+# NOTE When this script is run, the version in the pom has already been updated to the next SNAPSHOT.
+#      So instead we take it in as an argument 
 # Determine service version
-SVC_VER=$(cd ..;mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+# SVC_VER=$(cd ..;mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
 
 # Update release.properties file
 echo "${SVC_NAME}=${SVC_VER}" > ${RELEASE_PROP_FILE}
+echo "-----------------------------------------------------------------"
 echo "${BOM_NAME}=${BOM_VER}" >> ${RELEASE_PROP_FILE}
 
 # Make copies of openapi spec files used as part of the build.
