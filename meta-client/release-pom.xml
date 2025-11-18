@@ -209,10 +209,10 @@
     <maven-shade-plugin.version>3.5.1</maven-shade-plugin.version>
     <apache-sshd.version>2.14.0</apache-sshd.version>
     <javax.websocket-api.version>1.1</javax.websocket-api.version>
-    <build.timestamp>2025-11-18T19:46:12Z</build.timestamp>
+    <build.timestamp>2025-11-18T23:19:42Z</build.timestamp>
     <statefulj.version>3.0</statefulj.version>
     <java-source.version>1.21</java-source.version>
-    <metaSpecPath>/home/scblack/src_git/github/dev/tapis-client-java/meta-client/src/main/resources/metav3-openapi.yaml</metaSpecPath>
+    <metaSpecPath>/var/jenkins/workspace/TapisJava/2_Release/Shared/release-client-java-local-nexus/meta-client/src/main/resources/metav3-openapi.yaml</metaSpecPath>
     <swagger-maven-plugin.version>2.1.13</swagger-maven-plugin.version>
     <javax.xml.bind.jaxb-impl.version>2.3.2</javax.xml.bind.jaxb-impl.version>
     <javax.el-api.version>3.0.1-b06</javax.el-api.version>
