@@ -8,7 +8,7 @@
     <parent>
         <groupId>edu.utexas.tacc.tapis</groupId>
         <artifactId>tapis-bom</artifactId>
-        <version>[2.0.53,3.0)</version>
+        <version>[2.0.54,3.0)</version>
         <!-- Set empty relative path to avoid maven warning and -->
         <!--   ensure parent is found in local repository if that -->
         <!--   is the only place it exists. -->
@@ -50,6 +50,7 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
+            <!-- There are only test dependencies on testng -->
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <scope>test</scope>
@@ -144,6 +145,7 @@
             </plugin>
         </plugins>
 
+    <!-- buildnumber-maven-plugin updates properties in resources -->
     <resources>
       <!-- Write the project version number to the specified file. -->
       <!-- Setting the targetPath puts the file into the jar at the -->
