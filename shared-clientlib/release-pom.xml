@@ -1,14 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.utexas.tacc.tapis</groupId>
-  <artifactId>tapis-client-java</artifactId>
+  <artifactId>shared-clientlib</artifactId>
   <version>2.0.167</version>
-  <packaging>pom</packaging>
-  <name>Tapis Client</name>
-  <description>Top level java client</description>
-  <url>https://github.com/tapis-project/tapis-client-java</url>
+  <name>Tapis Client Shared</name>
+  <description>Shared code for Java clients</description>
+  <url>https://github.com/tapis-project/tapis-client-java/shared-clientlib</url>
   <organization>
     <name>TACC</name>
     <url>http://tacc.utexas.edu</url>
@@ -130,23 +129,9 @@
       </roles>
     </developer>
   </developers>
-  <modules>
-    <module>shared-clientlib</module>
-    <module>auth-client</module>
-    <module>security-client</module>
-    <module>tokens-client</module>
-    <module>tenants-client</module>
-    <module>systems-client</module>
-    <module>files-client</module>
-    <module>meta-client</module>
-    <module>apps-client</module>
-    <module>jobs-client</module>
-    <module>notifications-client</module>
-    <module>globusproxy-client</module>
-  </modules>
   <scm>
-    <developerConnection>scm:git:git@github.com:tapis-project/tapis-client-java.git</developerConnection>
-    <url>https://github.com/tapis-project/tapis-client-java</url>
+    <developerConnection>scm:git:git@github.com:tapis-project/tapis-client-java.git/shared-clientlib</developerConnection>
+    <url>https://github.com/tapis-project/tapis-client-java/shared-clientlib</url>
   </scm>
   <distributionManagement>
     <repository>
@@ -408,16 +393,12 @@
       </testResource>
     </testResources>
     <directory>${project.basedir}/target</directory>
-    <finalName>tapis-client-java-2.0.167</finalName>
+    <finalName>shared-clientlib</finalName>
     <plugins>
       <plugin>
-        <artifactId>maven-release-plugin</artifactId>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
         <version>3.2.0</version>
-      </plugin>
-      <plugin>
-        <groupId>com.amashchenko.maven.plugin</groupId>
-        <artifactId>gitflow-maven-plugin</artifactId>
-        <version>1.21.0</version>
       </plugin>
     </plugins>
   </build>
