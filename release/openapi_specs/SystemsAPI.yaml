@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Tapis Systems API
   description: The Tapis Systems API provides for management of Tapis Systems including permissions, credentials and Scheduler Profiles.
-  version: '25Q4.0'
+  version: '25Q4.2'
   termsOfService: "https://tapis-project.org"
   contact:
     name: "Systems API - CICSupport"
@@ -570,7 +570,8 @@ paths:
       tags:
         - Systems
       description: |
-        *WARNING Capability constraint matching is not yet supported.*
+        **WARNING** *Capability constraint matching is not yet supported.*
+        
         Retrieve details for systems. Use request body to specify constraint conditions as an SQL-like WHERE clause.
       operationId: matchConstraints
       security:
@@ -824,7 +825,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/RespBasic'
         '401':
-          description: Not authorized.
+          description: Not Authenticated
           content:
             application/json:
               schema:
@@ -1055,6 +1056,10 @@ paths:
         Change owner of a system.
         
         Please note that existing permission grants and shares will remain.
+        
+        **WARNING** Note also that no credentials are deleted during this process. So, for example, after the change
+        a system with a static *effectiveUserId* will retain the credentials and host access of the static
+        *effectiveUser*.
       operationId: changeSystemOwner
       security:
         - TapisJWT: []
@@ -1134,6 +1139,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespBasic'
+  '/v3/systems/{systemId}/hostEval/{envVarName}':
+    get:
+      tags:
+        - Systems
+      description: |
+        Resolve environment variable by connecting to host associated with system.
+        Note that this is done for the current *effectiveUserId*.
+        Appropriate valid credentials must have already been registered.
+        The system must be of type LINUX.
+        The provided *{envVarName}* must start with an alphabetic character or underscore followed by 0 or more
+        alphanumeric characters or underscores.
+      operationId: hostEval
+      security:
+        - TapisJWT: []
+      parameters:
+        - name: systemId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdString'
+        - name: envVarName
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/EnvVarNameString'
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespName'
+        '400':
+          description: Bad request. Possibly an invalid character in envVarName.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '401':
+          description: Not Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '403':
+          description: Permission denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '404':
+          description: System not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
+        '500':
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespBasic'
   '/v3/systems/{childSystemId}/unlinkFromParent':
     post:
       tags:
@@ -1183,7 +1250,8 @@ paths:
       description: |
         Make a child system a standalone system.  This will break the connection with it's parent, and from
         this point on, the child system will not be connected to the parent.  This is similar to unlinkFromParent,
-        but permissions are required for the parent system rather than the child system.  Warning, this cannot be undone.
+        but permissions are required for the parent system rather than the child system.
+        **WARNING** This cannot be undone.
       operationId: unlinkChildren
       security:
         - TapisJWT: []
@@ -1559,7 +1627,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/RespBasic'
         '401':
-          description: Not authorized.
+          description: Not Authenticated
           content:
             application/json:
               schema:
@@ -1637,7 +1705,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/RespBasic'
         '401':
-          description: Not authorized.
+          description: Not Authenticated
           content:
             application/json:
               schema:
@@ -2630,6 +2698,9 @@ components:
       type: string
       minLength: 1
       maxLength: 60
+    EnvVarNameString:
+      type: string
+      minLength: 1
     EffectiveUserId:
       type: string
       minLength: 1
@@ -3081,6 +3152,28 @@ components:
       properties:
         aBool:
           type: boolean
+    RespName:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        version:
+          type: string
+        commit:
+          type: string
+        build:
+          type: string
+        metadata:
+          type: object
+        result:
+          $ref: '#/components/schemas/ResultName'
+    ResultName:
+      type: object
+      properties:
+        name:
+          type: string
     RespNameArray:
       type: object
       properties:
