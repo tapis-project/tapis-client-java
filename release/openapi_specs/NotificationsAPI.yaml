@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Tapis Notifications API
   description: The Tapis Notifications API provides for management of subscriptions and event publication
-  version: '26Q1.0'
+  version: '26Q1.1'
   termsOfService: "https://tapis-project.org"
   contact:
     name: "Notifications API - CICSupport"
@@ -166,7 +166,7 @@ paths:
         Create a subscription using a request body. Only services may perform this operation.
 
         For each owner the *name* must be unique and can be composed of alphanumeric characters and the following
-        special characters [-._~]. If attribute *name* is not provided then the service will generate one.
+        five special characters [-._~@]. If attribute *name* is not provided then the service will generate one.
         The attributes *typeFilter*, *subjectFilter* and *deliveryTargets* are required.
         
         Subscription attributes:
