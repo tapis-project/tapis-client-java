@@ -77,7 +77,36 @@
             }
           },
           "500": {
-            "description": "Server error."
+            "description": "Server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "version": {
+                      "type": "string",
+                      "description": "Version of the API"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Brief description of the response"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Whether the request was a success or failure.",
+                      "enum": [
+                        "success",
+                        "failure"
+                      ]
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "description": "Metadata about the result object, including pagination information"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -123,7 +152,36 @@
             }
           },
           "500": {
-            "description": "Server error."
+            "description": "Server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "version": {
+                      "type": "string",
+                      "description": "Version of the API"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Brief description of the response"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "Whether the request was a success or failure.",
+                      "enum": [
+                        "success",
+                        "failure"
+                      ]
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "description": "Metadata about the result object, including pagination information"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -536,6 +594,14 @@
             "schema": {
               "type": "integer"
             }
+          },
+          {
+            "name": "show_inactive",
+            "in": "query",
+            "description": "if true, include inactive clients in the results.",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "security": [
@@ -590,6 +656,14 @@
                             "type": "string",
                             "description": "A secret key for authenticating the client."
                           },
+                          "owner": {
+                            "type": "string",
+                            "description": "The username of the user who owns this client."
+                          },
+                          "tenant_id": {
+                            "type": "string",
+                            "description": "The tenant this client belongs to."
+                          },
                           "callback_url": {
                             "type": "string",
                             "description": "URL for application to receive OAuth callbacks for executing flows such as authorization_code."
@@ -609,6 +683,10 @@
                           "description": {
                             "type": "string",
                             "description": "A description of this client."
+                          },
+                          "active": {
+                            "type": "boolean",
+                            "description": "Whether this client is active. Inactive clients cannot be used."
                           }
                         }
                       }
@@ -707,6 +785,14 @@
                           "type": "string",
                           "description": "A secret key for authenticating the client."
                         },
+                        "owner": {
+                          "type": "string",
+                          "description": "The username of the user who owns this client."
+                        },
+                        "tenant_id": {
+                          "type": "string",
+                          "description": "The tenant this client belongs to."
+                        },
                         "callback_url": {
                           "type": "string",
                           "description": "URL for application to receive OAuth callbacks for executing flows such as authorization_code."
@@ -726,6 +812,10 @@
                         "description": {
                           "type": "string",
                           "description": "A description of this client."
+                        },
+                        "active": {
+                          "type": "boolean",
+                          "description": "Whether this client is active. Inactive clients cannot be used."
                         }
                       }
                     }
@@ -806,6 +896,14 @@
                           "type": "string",
                           "description": "A secret key for authenticating the client."
                         },
+                        "owner": {
+                          "type": "string",
+                          "description": "The username of the user who owns this client."
+                        },
+                        "tenant_id": {
+                          "type": "string",
+                          "description": "The tenant this client belongs to."
+                        },
                         "callback_url": {
                           "type": "string",
                           "description": "URL for application to receive OAuth callbacks for executing flows such as authorization_code."
@@ -825,6 +923,10 @@
                         "description": {
                           "type": "string",
                           "description": "A description of this client."
+                        },
+                        "active": {
+                          "type": "boolean",
+                          "description": "Whether this client is active. Inactive clients cannot be used."
                         }
                       }
                     }
@@ -923,6 +1025,14 @@
                           "type": "string",
                           "description": "A secret key for authenticating the client."
                         },
+                        "owner": {
+                          "type": "string",
+                          "description": "The username of the user who owns this client."
+                        },
+                        "tenant_id": {
+                          "type": "string",
+                          "description": "The tenant this client belongs to."
+                        },
                         "callback_url": {
                           "type": "string",
                           "description": "URL for application to receive OAuth callbacks for executing flows such as authorization_code."
@@ -942,6 +1052,10 @@
                         "description": {
                           "type": "string",
                           "description": "A description of this client."
+                        },
+                        "active": {
+                          "type": "boolean",
+                          "description": "Whether this client is active. Inactive clients cannot be used."
                         }
                       }
                     }
@@ -1010,11 +1124,49 @@
                   ],
                   "properties": {
                     "result": {
-                      "type": "string",
-                      "nullable": true,
-                      "enum": [
-                        null
-                      ]
+                      "type": "object",
+                      "properties": {
+                        "client_id": {
+                          "type": "string",
+                          "description": "A unique identifier for the client. Must be unique for the tenant."
+                        },
+                        "client_key": {
+                          "type": "string",
+                          "description": "A secret key for authenticating the client."
+                        },
+                        "owner": {
+                          "type": "string",
+                          "description": "The username of the user who owns this client."
+                        },
+                        "tenant_id": {
+                          "type": "string",
+                          "description": "The tenant this client belongs to."
+                        },
+                        "callback_url": {
+                          "type": "string",
+                          "description": "URL for application to receive OAuth callbacks for executing flows such as authorization_code."
+                        },
+                        "create_time": {
+                          "type": "string",
+                          "description": "The time the client was created."
+                        },
+                        "last_update_time": {
+                          "type": "string",
+                          "description": "The time the client was last updated."
+                        },
+                        "display_name": {
+                          "type": "string",
+                          "description": "The display name that will represent this client."
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "A description of this client."
+                        },
+                        "active": {
+                          "type": "boolean",
+                          "description": "Whether this client is active. Inactive clients cannot be used."
+                        }
+                      }
                     }
                   }
                 }
@@ -1425,19 +1577,51 @@
                   "properties": {
                     "result": {
                       "type": "object",
-                      "description": "The profile associated with a Tapis identity. NOTE -the fields in the Profile object are populated on a best-effort basis and should not be relied upon. Only the username field is guaranteed to be populated.",
+                      "description": "The profile associated with a Tapis identity. NOTE - fields are populated on a best-effort basis from the underlying LDAP directory and should not be relied upon. Only the username field is guaranteed to be populated.",
                       "properties": {
                         "username": {
                           "type": "string",
-                          "description": "The username associated with the profile."
+                          "description": "The username (uid) associated with the profile."
+                        },
+                        "dn": {
+                          "type": "string",
+                          "description": "The LDAP distinguished name for the user entry.",
+                          "nullable": true
+                        },
+                        "given_name": {
+                          "type": "string",
+                          "description": "The user's first/given name.",
+                          "nullable": true
+                        },
+                        "last_name": {
+                          "type": "string",
+                          "description": "The user's last/family name.",
+                          "nullable": true
                         },
                         "email": {
                           "type": "string",
-                          "description": "The email address associated with the profile."
+                          "description": "The email address associated with the profile.",
+                          "nullable": true
                         },
-                        "name": {
+                        "phone": {
                           "type": "string",
-                          "description": "The full name of the user."
+                          "description": "The telephone number associated with the profile.",
+                          "nullable": true
+                        },
+                        "mobile_phone": {
+                          "type": "string",
+                          "description": "The mobile phone number associated with the profile.",
+                          "nullable": true
+                        },
+                        "create_time": {
+                          "type": "string",
+                          "description": "The timestamp when the LDAP entry was created.",
+                          "nullable": true
+                        },
+                        "uid": {
+                          "type": "string",
+                          "description": "The POSIX uid number associated with the user.",
+                          "nullable": true
                         }
                       }
                     }
@@ -1481,6 +1665,14 @@
         "responses": {
           "200": {
             "description": "OK",
+            "headers": {
+              "X-Tapis-Offset": {
+                "description": "The offset value used for the next page of results.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1516,19 +1708,51 @@
                       "type": "array",
                       "items": {
                         "type": "object",
-                        "description": "The profile associated with a Tapis identity. NOTE -the fields in the Profile object are populated on a best-effort basis and should not be relied upon. Only the username field is guaranteed to be populated.",
+                        "description": "The profile associated with a Tapis identity. NOTE - fields are populated on a best-effort basis from the underlying LDAP directory and should not be relied upon. Only the username field is guaranteed to be populated.",
                         "properties": {
                           "username": {
                             "type": "string",
-                            "description": "The username associated with the profile."
+                            "description": "The username (uid) associated with the profile."
+                          },
+                          "dn": {
+                            "type": "string",
+                            "description": "The LDAP distinguished name for the user entry.",
+                            "nullable": true
+                          },
+                          "given_name": {
+                            "type": "string",
+                            "description": "The user's first/given name.",
+                            "nullable": true
+                          },
+                          "last_name": {
+                            "type": "string",
+                            "description": "The user's last/family name.",
+                            "nullable": true
                           },
                           "email": {
                             "type": "string",
-                            "description": "The email address associated with the profile."
+                            "description": "The email address associated with the profile.",
+                            "nullable": true
                           },
-                          "name": {
+                          "phone": {
                             "type": "string",
-                            "description": "The full name of the user."
+                            "description": "The telephone number associated with the profile.",
+                            "nullable": true
+                          },
+                          "mobile_phone": {
+                            "type": "string",
+                            "description": "The mobile phone number associated with the profile.",
+                            "nullable": true
+                          },
+                          "create_time": {
+                            "type": "string",
+                            "description": "The timestamp when the LDAP entry was created.",
+                            "nullable": true
+                          },
+                          "uid": {
+                            "type": "string",
+                            "description": "The POSIX uid number associated with the user.",
+                            "nullable": true
                           }
                         }
                       }
@@ -1599,19 +1823,51 @@
                   "properties": {
                     "result": {
                       "type": "object",
-                      "description": "The profile associated with a Tapis identity. NOTE -the fields in the Profile object are populated on a best-effort basis and should not be relied upon. Only the username field is guaranteed to be populated.",
+                      "description": "The profile associated with a Tapis identity. NOTE - fields are populated on a best-effort basis from the underlying LDAP directory and should not be relied upon. Only the username field is guaranteed to be populated.",
                       "properties": {
                         "username": {
                           "type": "string",
-                          "description": "The username associated with the profile."
+                          "description": "The username (uid) associated with the profile."
+                        },
+                        "dn": {
+                          "type": "string",
+                          "description": "The LDAP distinguished name for the user entry.",
+                          "nullable": true
+                        },
+                        "given_name": {
+                          "type": "string",
+                          "description": "The user's first/given name.",
+                          "nullable": true
+                        },
+                        "last_name": {
+                          "type": "string",
+                          "description": "The user's last/family name.",
+                          "nullable": true
                         },
                         "email": {
                           "type": "string",
-                          "description": "The email address associated with the profile."
+                          "description": "The email address associated with the profile.",
+                          "nullable": true
                         },
-                        "name": {
+                        "phone": {
                           "type": "string",
-                          "description": "The full name of the user."
+                          "description": "The telephone number associated with the profile.",
+                          "nullable": true
+                        },
+                        "mobile_phone": {
+                          "type": "string",
+                          "description": "The mobile phone number associated with the profile.",
+                          "nullable": true
+                        },
+                        "create_time": {
+                          "type": "string",
+                          "description": "The timestamp when the LDAP entry was created.",
+                          "nullable": true
+                        },
+                        "uid": {
+                          "type": "string",
+                          "description": "The POSIX uid number associated with the user.",
+                          "nullable": true
                         }
                       }
                     }
@@ -1708,7 +1964,8 @@
                         },
                         "expires_in": {
                           "type": "string",
-                          "description": "The expiration for the user code"
+                          "format": "date-time",
+                          "description": "The datetime at which the device code expires"
                         },
                         "verification_uri": {
                           "type": "string",
@@ -2030,6 +2287,14 @@
             "type": "string",
             "description": "A secret key for authenticating the client."
           },
+          "owner": {
+            "type": "string",
+            "description": "The username of the user who owns this client."
+          },
+          "tenant_id": {
+            "type": "string",
+            "description": "The tenant this client belongs to."
+          },
           "callback_url": {
             "type": "string",
             "description": "URL for application to receive OAuth callbacks for executing flows such as authorization_code."
@@ -2049,6 +2314,10 @@
           "description": {
             "type": "string",
             "description": "A description of this client."
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Whether this client is active. Inactive clients cannot be used."
           }
         }
       },
@@ -2139,7 +2408,7 @@
           }
         }
       },
-      "DeviceCodeResposne": {
+      "DeviceCodeResponse": {
         "type": "object",
         "required": [
           "device_code",
@@ -2163,7 +2432,8 @@
           },
           "expires_in": {
             "type": "string",
-            "description": "The expiration for the user code"
+            "format": "date-time",
+            "description": "The datetime at which the device code expires"
           },
           "verification_uri": {
             "type": "string",
@@ -2184,6 +2454,14 @@
               "type": "string",
               "description": "A secret key for authenticating the client."
             },
+            "owner": {
+              "type": "string",
+              "description": "The username of the user who owns this client."
+            },
+            "tenant_id": {
+              "type": "string",
+              "description": "The tenant this client belongs to."
+            },
             "callback_url": {
               "type": "string",
               "description": "URL for application to receive OAuth callbacks for executing flows such as authorization_code."
@@ -2203,25 +2481,61 @@
             "description": {
               "type": "string",
               "description": "A description of this client."
+            },
+            "active": {
+              "type": "boolean",
+              "description": "Whether this client is active. Inactive clients cannot be used."
             }
           }
         }
       },
       "Profile": {
         "type": "object",
-        "description": "The profile associated with a Tapis identity. NOTE -the fields in the Profile object are populated on a best-effort basis and should not be relied upon. Only the username field is guaranteed to be populated.",
+        "description": "The profile associated with a Tapis identity. NOTE - fields are populated on a best-effort basis from the underlying LDAP directory and should not be relied upon. Only the username field is guaranteed to be populated.",
         "properties": {
           "username": {
             "type": "string",
-            "description": "The username associated with the profile."
+            "description": "The username (uid) associated with the profile."
+          },
+          "dn": {
+            "type": "string",
+            "description": "The LDAP distinguished name for the user entry.",
+            "nullable": true
+          },
+          "given_name": {
+            "type": "string",
+            "description": "The user's first/given name.",
+            "nullable": true
+          },
+          "last_name": {
+            "type": "string",
+            "description": "The user's last/family name.",
+            "nullable": true
           },
           "email": {
             "type": "string",
-            "description": "The email address associated with the profile."
+            "description": "The email address associated with the profile.",
+            "nullable": true
           },
-          "name": {
+          "phone": {
             "type": "string",
-            "description": "The full name of the user."
+            "description": "The telephone number associated with the profile.",
+            "nullable": true
+          },
+          "mobile_phone": {
+            "type": "string",
+            "description": "The mobile phone number associated with the profile.",
+            "nullable": true
+          },
+          "create_time": {
+            "type": "string",
+            "description": "The timestamp when the LDAP entry was created.",
+            "nullable": true
+          },
+          "uid": {
+            "type": "string",
+            "description": "The POSIX uid number associated with the user.",
+            "nullable": true
           }
         }
       },
@@ -2229,19 +2543,51 @@
         "type": "array",
         "items": {
           "type": "object",
-          "description": "The profile associated with a Tapis identity. NOTE -the fields in the Profile object are populated on a best-effort basis and should not be relied upon. Only the username field is guaranteed to be populated.",
+          "description": "The profile associated with a Tapis identity. NOTE - fields are populated on a best-effort basis from the underlying LDAP directory and should not be relied upon. Only the username field is guaranteed to be populated.",
           "properties": {
             "username": {
               "type": "string",
-              "description": "The username associated with the profile."
+              "description": "The username (uid) associated with the profile."
+            },
+            "dn": {
+              "type": "string",
+              "description": "The LDAP distinguished name for the user entry.",
+              "nullable": true
+            },
+            "given_name": {
+              "type": "string",
+              "description": "The user's first/given name.",
+              "nullable": true
+            },
+            "last_name": {
+              "type": "string",
+              "description": "The user's last/family name.",
+              "nullable": true
             },
             "email": {
               "type": "string",
-              "description": "The email address associated with the profile."
+              "description": "The email address associated with the profile.",
+              "nullable": true
             },
-            "name": {
+            "phone": {
               "type": "string",
-              "description": "The full name of the user."
+              "description": "The telephone number associated with the profile.",
+              "nullable": true
+            },
+            "mobile_phone": {
+              "type": "string",
+              "description": "The mobile phone number associated with the profile.",
+              "nullable": true
+            },
+            "create_time": {
+              "type": "string",
+              "description": "The timestamp when the LDAP entry was created.",
+              "nullable": true
+            },
+            "uid": {
+              "type": "string",
+              "description": "The POSIX uid number associated with the user.",
+              "nullable": true
             }
           }
         }
