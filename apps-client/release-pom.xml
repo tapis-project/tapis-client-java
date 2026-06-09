@@ -1,14 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.utexas.tacc.tapis</groupId>
-  <artifactId>tapis-client-java</artifactId>
+  <artifactId>apps-client</artifactId>
   <version>2.0.172</version>
-  <packaging>pom</packaging>
-  <name>Tapis Client</name>
-  <description>Top level java client</description>
-  <url>https://github.com/tapis-project/tapis-client-java</url>
+  <name>Tapis Apps Client</name>
+  <description>Java client for Apps Service</description>
+  <url>https://github.com/tapis-project/tapis-client-java/apps-client</url>
   <organization>
     <name>TACC</name>
     <url>http://tacc.utexas.edu</url>
@@ -130,23 +129,9 @@
       </roles>
     </developer>
   </developers>
-  <modules>
-    <module>shared-clientlib</module>
-    <module>auth-client</module>
-    <module>security-client</module>
-    <module>tokens-client</module>
-    <module>tenants-client</module>
-    <module>systems-client</module>
-    <module>files-client</module>
-    <module>meta-client</module>
-    <module>apps-client</module>
-    <module>jobs-client</module>
-    <module>notifications-client</module>
-    <module>globusproxy-client</module>
-  </modules>
   <scm>
-    <developerConnection>scm:git:git@github.com:tapis-project/tapis-client-java.git</developerConnection>
-    <url>https://github.com/tapis-project/tapis-client-java</url>
+    <developerConnection>scm:git:git@github.com:tapis-project/tapis-client-java.git/apps-client</developerConnection>
+    <url>https://github.com/tapis-project/tapis-client-java/apps-client</url>
   </scm>
   <distributionManagement>
     <repository>
@@ -195,6 +180,7 @@
     <mockito.version>5.14.2</mockito.version>
     <swagger-jaxrs2.version>2.1.13</swagger-jaxrs2.version>
     <commons-exec.version>1.4.0</commons-exec.version>
+    <target.spec.format>yml</target.spec.format>
     <commons-math3.version>3.6.1</commons-math3.version>
     <software.amazon.awssdk.version>2.17.295</software.amazon.awssdk.version>
     <testng.version>7.10.2</testng.version>
@@ -213,6 +199,7 @@
     <guava.version>33.0.0-jre</guava.version>
     <gson-fire.version>1.9.0</gson-fire.version>
     <flyway-maven-plugin.version>11.10.2</flyway-maven-plugin.version>
+    <appsSpecPath>https://raw.githubusercontent.com/tapis-project/openapi-apps/dev/AppsAPI.yaml</appsSpecPath>
     <jetbrains.annotations.version>20.1.0</jetbrains.annotations.version>
     <flywaydb-postgres.version>11.10.2</flywaydb-postgres.version>
     <auth0-java-jwt.version>4.5.0</auth0-java-jwt.version>
@@ -235,6 +222,7 @@
     <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
     <jersey-container-servlet.version>2.45</jersey-container-servlet.version>
     <javax.activation.activation.version>1.1.1</javax.activation.activation.version>
+    <skipIntegrationTests>true</skipIntegrationTests>
     <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
     <org.everit.json.schema.version>1.14.3</org.everit.json.schema.version>
     <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
@@ -275,6 +263,24 @@
       <artifactId>okhttp</artifactId>
       <version>4.12.0</version>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>edu.utexas.tacc.tapis</groupId>
+      <artifactId>auth-client</artifactId>
+      <version>2.0.172</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>edu.utexas.tacc.tapis</groupId>
+      <artifactId>shared-clientlib</artifactId>
+      <version>2.0.172</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>edu.utexas.tacc.tapis</groupId>
+      <artifactId>tokens-client</artifactId>
+      <version>2.0.172</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>io.gsonfire</groupId>
@@ -408,16 +414,120 @@
       </testResource>
     </testResources>
     <directory>${project.basedir}/target</directory>
-    <finalName>tapis-client-java-2.0.172</finalName>
+    <finalName>apps-client</finalName>
     <plugins>
       <plugin>
-        <artifactId>maven-release-plugin</artifactId>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
         <version>3.2.0</version>
       </plugin>
       <plugin>
-        <groupId>com.amashchenko.maven.plugin</groupId>
-        <artifactId>gitflow-maven-plugin</artifactId>
-        <version>1.21.0</version>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.2</version>
+        <configuration>
+          <suiteXmlFiles>
+            <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+          </suiteXmlFiles>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.4.0</version>
+        <executions>
+          <execution>
+            <id>regex-property</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>regex-property</goal>
+            </goals>
+            <configuration>
+              <name>artifact.prefix</name>
+              <value>${project.artifactId}</value>
+              <regex>^([^-]+)-.*$</regex>
+              <replacement>$1</replacement>
+              <failIfNoMatch>false</failIfNoMatch>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.1</version>
+        <executions>
+          <execution>
+            <id>Generate bundled openapi json file</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>${basedir}/../gen_spec.sh</executable>
+              <arguments>
+                <argument>${artifact.prefix}</argument>
+                <argument>${appsSpecPath}</argument>
+                <argument>${target.spec.format}</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.openapitools</groupId>
+        <artifactId>openapi-generator-maven-plugin</artifactId>
+        <version>5.4.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <inputSpec>${project.basedir}/target/openapi_v3.${target.spec.format}</inputSpec>
+              <enablePostProcessFile>true</enablePostProcessFile>
+              <output>${project.build.directory}/generated-sources/openapi</output>
+              <generatorName>java</generatorName>
+              <groupId>edu.utexas.tacc.tapis</groupId>
+              <invokerPackage>edu.utexas.tacc.tapis.apps.client.gen</invokerPackage>
+              <apiPackage>edu.utexas.tacc.tapis.apps.client.gen.api</apiPackage>
+              <modelPackage>edu.utexas.tacc.tapis.apps.client.gen.model</modelPackage>
+              <generateApiTests>false</generateApiTests>
+              <generateApiDocumentation>false</generateApiDocumentation>
+              <generateModelTests>false</generateModelTests>
+              <generateModelDocumentation>false</generateModelDocumentation>
+              <configOptions>
+                <sourceFolder>src/gen/java/main</sourceFolder>
+                <java8>true</java8>
+                <dateLibrary>java8</dateLibrary>
+              </configOptions>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <createDependencyReducedPom>false</createDependencyReducedPom>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>3.5.2</version>
+        <configuration>
+          <skip>${skipIntegrationTests}</skip>
+          <environmentVariables>
+            <APP_ENV>test</APP_ENV>
+          </environmentVariables>
+        </configuration>
       </plugin>
     </plugins>
   </build>
