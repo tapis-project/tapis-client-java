@@ -1,14 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.utexas.tacc.tapis</groupId>
-  <artifactId>tapis-client-java</artifactId>
+  <artifactId>tenants-client</artifactId>
   <version>2.0.173</version>
-  <packaging>pom</packaging>
-  <name>Tapis Client</name>
-  <description>Top level java client</description>
-  <url>https://github.com/tapis-project/tapis-client-java</url>
+  <name>Tapis Tenants Client</name>
+  <description>Java client for Tenants Service</description>
+  <url>https://github.com/tapis-project/tapis-client-java/tenants-client</url>
   <organization>
     <name>TACC</name>
     <url>http://tacc.utexas.edu</url>
@@ -130,23 +129,9 @@
       </roles>
     </developer>
   </developers>
-  <modules>
-    <module>shared-clientlib</module>
-    <module>auth-client</module>
-    <module>security-client</module>
-    <module>tokens-client</module>
-    <module>tenants-client</module>
-    <module>systems-client</module>
-    <module>files-client</module>
-    <module>meta-client</module>
-    <module>apps-client</module>
-    <module>jobs-client</module>
-    <module>notifications-client</module>
-    <module>globusproxy-client</module>
-  </modules>
   <scm>
-    <developerConnection>scm:git:git@github.com:tapis-project/tapis-client-java.git</developerConnection>
-    <url>https://github.com/tapis-project/tapis-client-java</url>
+    <developerConnection>scm:git:git@github.com:tapis-project/tapis-client-java.git/tenants-client</developerConnection>
+    <url>https://github.com/tapis-project/tapis-client-java/tenants-client</url>
   </scm>
   <distributionManagement>
     <repository>
@@ -195,6 +180,7 @@
     <mockito.version>5.14.2</mockito.version>
     <swagger-jaxrs2.version>2.1.13</swagger-jaxrs2.version>
     <commons-exec.version>1.4.0</commons-exec.version>
+    <target.spec.format>json</target.spec.format>
     <commons-math3.version>3.6.1</commons-math3.version>
     <software.amazon.awssdk.version>2.17.295</software.amazon.awssdk.version>
     <testng.version>7.10.2</testng.version>
@@ -221,6 +207,7 @@
     <tapis-client-java.version>[2.0.167,3.0)</tapis-client-java.version>
     <javax.xml.bind.jaxb-core.version>2.3.0.1</javax.xml.bind.jaxb-core.version>
     <maven-shade-plugin.version>3.5.1</maven-shade-plugin.version>
+    <tenantsSpecPath>https://raw.githubusercontent.com/tapis-project/tenants-api/dev/service/resources/openapi_v3.yml</tenantsSpecPath>
     <apache-sshd.version>2.14.0</apache-sshd.version>
     <javax.websocket-api.version>1.1</javax.websocket-api.version>
     <build.timestamp>2026-06-22T13:50:53Z</build.timestamp>
@@ -274,6 +261,12 @@
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>okhttp</artifactId>
       <version>4.12.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>edu.utexas.tacc.tapis</groupId>
+      <artifactId>shared-clientlib</artifactId>
+      <version>2.0.173</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -408,16 +401,86 @@
       </testResource>
     </testResources>
     <directory>${project.basedir}/target</directory>
-    <finalName>tapis-client-java-2.0.173</finalName>
+    <finalName>tenants-client</finalName>
     <plugins>
       <plugin>
-        <artifactId>maven-release-plugin</artifactId>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
         <version>3.2.0</version>
       </plugin>
       <plugin>
-        <groupId>com.amashchenko.maven.plugin</groupId>
-        <artifactId>gitflow-maven-plugin</artifactId>
-        <version>1.21.0</version>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.4.0</version>
+        <executions>
+          <execution>
+            <id>regex-property</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>regex-property</goal>
+            </goals>
+            <configuration>
+              <name>artifact.prefix</name>
+              <value>${project.artifactId}</value>
+              <regex>^([^-]+)-.*$</regex>
+              <replacement>$1</replacement>
+              <failIfNoMatch>false</failIfNoMatch>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.1</version>
+        <executions>
+          <execution>
+            <id>Generate bundled openapi json file</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>${basedir}/../gen_spec.sh</executable>
+              <arguments>
+                <argument>${artifact.prefix}</argument>
+                <argument>${tenantsSpecPath}</argument>
+                <argument>${target.spec.format}</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.openapitools</groupId>
+        <artifactId>openapi-generator-maven-plugin</artifactId>
+        <version>5.4.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <inputSpec>${project.basedir}/target/openapi_v3.${target.spec.format}</inputSpec>
+              <enablePostProcessFile>true</enablePostProcessFile>
+              <generateAliasAsModel>true</generateAliasAsModel>
+              <output>${project.build.directory}/generated-sources/openapi</output>
+              <generatorName>java</generatorName>
+              <groupId>edu.utexas.tacc.tapis</groupId>
+              <invokerPackage>edu.utexas.tacc.tapis.tenants.client.gen</invokerPackage>
+              <apiPackage>edu.utexas.tacc.tapis.tenants.client.gen.api</apiPackage>
+              <modelPackage>edu.utexas.tacc.tapis.tenants.client.gen.model</modelPackage>
+              <generateApiTests>false</generateApiTests>
+              <generateApiDocumentation>false</generateApiDocumentation>
+              <generateModelTests>false</generateModelTests>
+              <generateModelDocumentation>false</generateModelDocumentation>
+              <configOptions>
+                <sourceFolder>src/gen/java/main</sourceFolder>
+                <dateLibrary>java8</dateLibrary>
+              </configOptions>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
