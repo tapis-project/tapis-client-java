@@ -4,8 +4,6 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
 
-import edu.utexas.tacc.tapis.systems.client.gen.api.ChildSystemsApi;
-import edu.utexas.tacc.tapis.systems.client.gen.model.*;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.JsonObject;
@@ -15,6 +13,8 @@ import edu.utexas.tacc.tapis.client.shared.ClientTapisGsonUtils;
 import edu.utexas.tacc.tapis.client.shared.ITapisClient;
 import edu.utexas.tacc.tapis.client.shared.Utils;
 import edu.utexas.tacc.tapis.client.shared.exceptions.TapisClientException;
+import edu.utexas.tacc.tapis.systems.client.gen.api.ChildSystemsApi;
+import edu.utexas.tacc.tapis.systems.client.gen.model.*;
 import edu.utexas.tacc.tapis.systems.client.gen.ApiClient;
 import edu.utexas.tacc.tapis.systems.client.gen.ApiException;
 import edu.utexas.tacc.tapis.systems.client.gen.api.CredentialsApi;
@@ -67,6 +67,10 @@ public class SystemsClient implements ITapisClient
   private static final boolean DEFAULT_SHOW_DELETED = false;
   private static final ListTypeEnum DEFAULT_LIST_TYPE_ENUM = ListTypeEnum.ALL;
 
+  // Timeouts.
+  private final static int DEFAULT_CLIENT_CONNECTION_TIMEOUT=300000;
+  private final static int DEFAULT_CLIENT_READ_TIMEOUT=300000;
+  private final static int DEFAULT_CLIENT_WRITE_TIMEOUT=300000;
 
   // ************************************************************************
   // *********************** Enums ******************************************
@@ -98,6 +102,9 @@ public class SystemsClient implements ITapisClient
   public SystemsClient()
   {
     apiClient = new ApiClient();
+    apiClient.setConnectTimeout(DEFAULT_CLIENT_CONNECTION_TIMEOUT);
+    apiClient.setReadTimeout(DEFAULT_CLIENT_READ_TIMEOUT);
+    apiClient.setWriteTimeout(DEFAULT_CLIENT_WRITE_TIMEOUT);
     sysApi = new SystemsApi(apiClient);
     schedulerProfilesApi = new SchedulerProfilesApi(apiClient);
     permsApi = new PermissionsApi(apiClient);
