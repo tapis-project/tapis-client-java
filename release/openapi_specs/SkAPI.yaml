@@ -161,57 +161,58 @@ paths:
       deprecated: true
 
   # --- Paths for Roles ------------------------------------------
-  /security/role/addChild:
-    post:
-      tags:
-        - Role
-      description: |
-        Add a child role to another role using a request body. If the child already exists, then the request has no
-        effect and the change count returned is zero. Otherwise, the child is added and the change count is one.
-        Supported only for roles of type *USER*.
-
-        The user@tenant identity specified in JWT is authorized to make this request only if that user is an
-        administrator or if the user owns both the parent and child roles.
-      operationId: addChildRole
-      security:
-        - TapisJWT: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReqAddChildRole'
-        required: true
-      responses:
-        '200':
-          description: Child assigned to parent role.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespChangeCount'
-        '400':
-          description: Input error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '401':
-          description: Not authorized.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
-        '404':
-          description: Named role not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespName'
-        '500':
-          description: Server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RespBasic'
+#  /security/role/addChild:
+#    post:
+#      tags:
+#        - Role
+#      description: |
+#        Add a child role to another role using a request body. If the child already exists, then the request has no
+#        effect and the change count returned is zero. Otherwise, the child is added and the change count is one.
+#        Supported only for roles of type *USER*.
+#
+#        The user@tenant identity specified in JWT is authorized to make this request only if that user is an
+#        administrator or if the user owns both the parent and child roles.
+#      operationId: addChildRole
+#      security:
+#        - TapisJWT: []
+#      requestBody:
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/ReqAddChildRole'
+#        required: true
+#      responses:
+#        '200':
+#          description: Child assigned to parent role.
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/RespChangeCount'
+#        '400':
+#          description: Input error.
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/RespBasic'
+#        '401':
+#          description: Not authorized.
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/RespBasic'
+#        '404':
+#          description: Named role not found.
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/RespName'
+#        '500':
+#          description: Server error.
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/RespBasic'
+#      deprecated: true
   /security/role/addPerm:
     post:
       tags:
@@ -263,7 +264,7 @@ paths:
 
         In the previous examples, we assumed /home/bud was a directory. If /home/bud is a file (or more generally a leaf),
         then specifying the permission path /home/bud/ will not work as intended. Permissions with paths that have
-        trailing slashes should only be used for directories, and they require a trailing slash whenever refering to the
+        trailing slashes should only be used for directories, and they require a trailing slash whenever referring to the
         root directory. Permissions that don't have a trailing slash can represent directories or files, and thus are more general.
 
         Extended permission checking avoids *false capture*. Whether a path has a trailing slash or not, permission
@@ -334,8 +335,9 @@ paths:
         - name: roleType
           in: query
           schema:
-            $ref: '#/components/schemas/RoleTypeEnum'
-            default: 'USER'
+            allOf:
+              - $ref: '#/components/schemas/RoleTypeEnum'
+            default: USER
       responses:
         '200':
           description: List of role names returned.
@@ -366,8 +368,8 @@ paths:
         - Role
       description: |
         Create a role using a request body. Role names are case sensitive, alpha-numeric strings that can also contain
-        underscores. Role names must start with an alphbetic character and can be no more than 58 characters in length.
-        The desciption can be no more than 2048 characters long. If the role already exists, this request has no effect.
+        underscores. Role names must start with an alphabetic character and can be no more than 58 characters in length.
+        The description can be no more than 2048 characters long. If the role already exists, this request has no effect.
 
         For the request to be authorized, the requestor must be either an administrator or a service allowed to perform
         updates in the new role's tenant.
@@ -822,7 +824,7 @@ paths:
             files:mytenant:read:mysystem:/my/dir/subdir/myfile
             files:mytenant:read:mysystem:/my/dir33/yourfile
 
-        Note that a match to the second role permission might be a *false capture* if the intension was to remove all
+        Note that a match to the second role permission might be a *false capture* if the intention was to remove all
         permissions to resources in the /my/dir subtree, but not those in other directories. To avoid this potential
         problem, callers can make two calls, one to this endpoint with a permSpec that ends with a slash ("/") and one to
         the removePermissionFromeAllRoles endpoint with no trailing slash. The former removes all children from the
@@ -1050,7 +1052,7 @@ paths:
       tags:
         - Role
       description: |
-        Update an existing role's decription using a request body. The size limit on a description is 2048 characters.
+        Update an existing role's description using a request body. The size limit on a description is 2048 characters.
 
         This request is authorized if the requestor is the role owner or an administrator.
       operationId: updateRoleDescription
@@ -1400,7 +1402,7 @@ paths:
         *resourceId1* and *privilege* parameters are mandatory; *resourceId2* is optional and assumed to be NULL if not provided.
 
         The shared resource is deleted only if it's in the tenant specified in the required *tenant* query parameter.
-        The calling service must also be the same as the orginal service that granted the share.
+        The calling service must also be the same as the original service that granted the share.
 
         This call is idempotent. If no share satisfies the above constraints, a success response code is returned and the
         indicated number of changes is set to zero. When a share is deleted, the indicated number of changes is one.
@@ -1530,7 +1532,7 @@ paths:
         - Share
       description: |
         Delete a shared resource by ID. The shared resource is deleted only if it's in the tenant specified in the required
-        *tenant* query parameter. The calling service must also be the same as the orginal service that created the share.
+        *tenant* query parameter. The calling service must also be the same as the original service that created the share.
 
         This call is idempotent. If no share satisfies the above constraints, a success response code is returned and the
         indicated number of changes is set to zero. When a share is deleted, the indicated number of changes is one.
@@ -1803,7 +1805,7 @@ paths:
       tags:
         - User
       description: |
-        Get the permissions assigned to a user in a tenant, including those assigned transively. The result list can be
+        Get the permissions assigned to a user in a tenant, including those assigned transitively. The result list can be
         optionally filtered by the one or both of the query parameters: implies and impliedBy.
 
         When implies is set, the filter _implies_ each entry in the result set. When impliedBy is set, each entry in the
@@ -1888,7 +1890,7 @@ paths:
       tags:
         - User
       description: |
-        Get the roles assigned to a user in the specified tenant, including those assigned transively.
+        Get the roles assigned to a user in the specified tenant, including those assigned transitively.
 
         This request is authorized if the requestor is a service or a user that has access to the specified tenant.
       operationId: getUserRoles
@@ -3646,7 +3648,7 @@ paths:
         - Vault
       description: |
         Validate a service's password. The JSON payload contains the password that needs to be validated against the
-        password stored in the vault for the service specifie din the X-Tapis-User header. The secret name is the path
+        password stored in the vault for the service specified in the X-Tapis-User header. The secret name is the path
         under which the password was stored.
 
         A valid tenant and user must also be specified in the payload.
