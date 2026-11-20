@@ -549,33 +549,6 @@ public class SKClient implements ITapisClient
     }
     
     /* ---------------------------------------------------------------------------- */
-    /* addChildRole:                                                                */
-    /* ---------------------------------------------------------------------------- */
-    public int addChildRole(String roleTenant, String parentRoleName, String childRoleName)
-     throws TapisClientException
-    {
-        // Assign input body.
-        var body = new ReqAddChildRole();
-        body.setRoleTenant(roleTenant);
-        body.setParentRoleName(parentRoleName);
-        body.setChildRoleName(childRoleName);
-
-        // Make the REST call.
-        RespChangeCount resp = null;
-        try {
-            // Get the API object using default networking.
-            RoleApi roleApi = new RoleApi(_apiClient);
-            resp = roleApi.addChildRole(body);
-        }
-        catch (ApiException e) {Utils.throwTapisClientException(e.getCode(), e.getResponseBody(), e);}
-        catch (Exception e) {Utils.throwTapisClientException(-1, null, e);}
-        
-        // Return result value.
-        Integer x = resp.getResult().getChanges();
-        return x == null ? 0 : x;
-    }
-    
-    /* ---------------------------------------------------------------------------- */
     /* removeChildRole:                                                             */
     /* ---------------------------------------------------------------------------- */
     public int removeChildRole(String roleTenant, String parentRoleName, String childRoleName)
